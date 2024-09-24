@@ -114,7 +114,7 @@ $ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
 $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
 
 // Obtener y formatear la última actualización
-$lastUpdated = isset($data['lastUpdated']) ? $data['lastUpdated'] : 'N/A';
+$lastUpdated = $data['lastUpdated'];
 
 ?>
 
