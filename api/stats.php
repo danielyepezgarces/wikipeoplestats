@@ -17,7 +17,7 @@ if ($project === 'all') {
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
             SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') THEN 1 ELSE 0 END) AS otherGenders,
             (SELECT COUNT(DISTINCT creator_username) FROM articles) AS totalContributions
-            (SELECT MAX(last_updated) FROM site) AS lastUpdated
+            (SELECT MAX(last_updated) FROM wikipedia) AS lastUpdated
             FROM people p
     ";
 } else {
@@ -29,7 +29,7 @@ if ($project === 'all') {
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
             SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') THEN 1 ELSE 0 END) AS otherGenders,
             COUNT(DISTINCT a.creator_username) AS totalContributions
-           (SELECT last_updated FROM site WHERE site = '$project') AS lastUpdated
+           (SELECT last_updated FROM wikipedia WHERE site = '$project') AS lastUpdated
         FROM people p
         JOIN articles a ON p.wikidata_id = a.wikidata_id
         WHERE a.site = '$project'
