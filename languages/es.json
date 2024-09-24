@@ -1,0 +1,14 @@
+{
+    "sticky_header_title": "Encabezado fijo con Tailwind CSS e i18n",
+    "logo": "WikiPeopleStats",
+    "home": "Inicio",
+    "about": "Acerca de",
+    "services": "Servicios",
+    "contact": "Contacto",
+    "welcome_message": "Bienvenido a WikiPeopleStats",
+    "main_home_content": "La herramienta permite a los usuarios rastrear y analizar la representación de género en los artículos de Wikipedia. Nuestra herramienta almacena datos sobre individuos y sus contribuciones, ayudando a descubrir tendencias y fomentar un contenido más inclusivo a lo largo del tiempo.",
+    "header_description": "El encabezado permanece en la parte superior mientras se desplaza y es completamente responsivo.",
+    "current_date": "Fecha actual:",
+    "select_language": "Seleccionar idioma",
+    "homepage_stats_credits": "Estos datos estadísticos son de %s."
+  }

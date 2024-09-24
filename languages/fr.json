@@ -1,0 +1,13 @@
+{
+    "sticky_header_title": "En-tête collant avec Tailwind CSS et i18n",
+    "logo": "WikiPeopleStats",
+    "home": "Accueil",
+    "about": "À propos",
+    "services": "Services",
+    "contact": "Contact",
+    "welcome_message": "Bienvenue sur notre site web",
+    "sample_content": "Ceci est un exemple de zone de contenu pour démontrer l'en-tête collant avec Tailwind CSS et le support i18n.",
+    "header_description": "L'en-tête reste en haut lorsque vous faites défiler, et il est entièrement réactif.",
+    "current_date": "Date actuelle :",
+    "select_language": "Choisir la langue"
+  }

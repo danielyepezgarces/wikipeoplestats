@@ -1,0 +1,15 @@
+{
+    "sticky_header_title": "Sticky Header with Tailwind CSS and i18n",
+    "logo": "WikiPeopleStats",
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact",
+    "welcome_message": "Welcome to WikiPeopleStats",
+    "main_home_content": "The tool allows users to track and analyse gender representation in Wikipedia articles. Our tool stores data on individuals and their contributions, helping to uncover trends and encourage more inclusive content over time.",
+    "header_description": "The header stays at the top as you scroll, and it's fully responsive.",
+    "current_date": "Current date:",
+    "select_language": "Select Language",
+    "homepage_stats_credits": "These statistics are from %s.",
+    "homepage_global_stats_credits": "These statistics are from all wikipedias."
+  }
