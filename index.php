@@ -104,7 +104,7 @@ if ($currentWiki === 'globalwiki') {
     $errorMessage = sprintf(
         __('homepage_stats_credits'), 
         str_replace('wiki', '.wikipedia', $currentWiki)
-    ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($formattedLastUpdated);
+    ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
 }
 }
 
@@ -113,27 +113,9 @@ $ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
 $ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
 $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
 
-// Inicializar formato de fecha
-$dateFormat = 'l, F j, Y'; // Formato por defecto
-
-// Buscar el formato de fecha según el código del lenguaje
-foreach ($languages as $language) {
-    if ($language['code'] === $currentLangCode) {
-        $dateFormat = $language['date_format'];
-        break;
-    }
-}
-
 // Obtener y formatear la última actualización
 $lastUpdated = isset($data['last_updated']) ? $data['last_updated'] : 'N/A';
-if ($lastUpdated !== 'N/A') {
-    // Convertir la fecha en formato YYYY-MM-DD a timestamp
-    $timestamp = strtotime($lastUpdated);
-    // Formatear la fecha
-    $formattedLastUpdated = date($dateFormat, $timestamp);
-} else {
-    $formattedLastUpdated = 'N/A';
-}
+
 ?>
 
 <!DOCTYPE html>
