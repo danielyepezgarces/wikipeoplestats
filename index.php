@@ -114,18 +114,6 @@ $ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
 $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
 
 // Obtener y formatear la última actualización
-// Inicializar formato de fecha
-$dateFormat = 'l, F j, Y'; // Formato por defecto
-
-// Buscar el formato de fecha según el código del lenguaje
-foreach ($languages as $language) {
-    if ($language['code'] === $currentLangCode) {
-        $dateFormat = $language['date_format'];
-        break;
-    }
-}
-
-// Obtener y formatear la última actualización
 $lastUpdated = isset($data['lastUpdated']) ? $data['lastUpdated'] : 'N/A';
 
 ?>
