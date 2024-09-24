@@ -98,11 +98,16 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $otherGenders = $data['otherGenders'] ?? 0;
     $totalContributions = $data['totalContributions'] ?? 0;
 
-    if ($currentWiki === 'globalwiki') {
-        $errorMessage = __('homepage_global_stats_credits');
-    } else {
-        $errorMessage = sprintf(__('homepage_stats_credits'), str_replace('wiki', '.wikipedia', $currentWiki));
-    }
+// Mensaje de éxito según la wiki
+if ($currentWiki === 'globalwiki') {
+    $errorMessage = __('homepage_global_stats_credits');
+} else {
+    $lastUpdated = isset($data['last_updated']) ? $data['last_updated'] : 'N/A';
+    $errorMessage = sprintf(
+        __('homepage_stats_credits'), 
+        str_replace('wiki', '.wikipedia', $currentWiki)
+    ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
+}
 }
 
 // Calcular los ratios
