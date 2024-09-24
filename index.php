@@ -57,15 +57,28 @@ setlocale(LC_TIME, $currentLang['code'] . '_' . strtoupper($currentLang['code'])
 $currentWiki = $currentLang['wiki'];
 $wikiproject = $currentWiki === "globalwiki" ? "all" : $currentWiki;
 
-// Hacer la solicitud a la API (sin dominio)
-$options = [
-    "http" => [
-        "header" => "User-Agent: WikiStatsPeople/1.0\r\n"
-    ]
-];
+// Inicializar cURL
+$ch = curl_init();
 
-$context = stream_context_create($options);
-$response = file_get_contents("http://wikipeoplestats.toolforge.org/api/stats.php?project=all", false, $context);
+// Configurar la URL y las opciones de cURL
+curl_setopt($ch, CURLOPT_URL, "https://wikipeoplestats.toolforge.org/api/stats.php?project=all");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "User-Agent: WikiStatsPeople/1.0"
+]);
+
+// Ejecutar la solicitud
+$response = curl_exec($ch);
+
+// Verificar si hubo un error
+if (curl_errno($ch)) {
+    die("Error al acceder a la API: " . curl_error($ch));
+}
+
+// Cerrar cURL
+curl_close($ch);
+
+// Decodificar la respuesta JSON
 $data = json_decode($response, true);
 
 // Verificar si hay un error en la respuesta
