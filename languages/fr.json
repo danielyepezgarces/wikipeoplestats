@@ -1,6 +1,6 @@
 {
     "sticky_header_title": "En-tête collant avec Tailwind CSS et i18n",
-    "logo": "WikiPeopleStats",
+    "sitename": "WikiPeopleStats",
     "home": "Accueil",
     "about": "À propos",
     "services": "Services",

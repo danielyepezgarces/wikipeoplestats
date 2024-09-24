@@ -1,6 +1,6 @@
 {
     "sticky_header_title": "Sticky Header with Tailwind CSS and i18n",
-    "logo": "WikiPeopleStats",
+    "sitename": "WikiPeopleStats",
     "home": "Home",
     "about": "About",
     "services": "Services",
