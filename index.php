@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 // Available languages (expanded for demonstration)
 $languages = [
     ['code' => 'all', 'name' => 'All Wikipedias', 'flag' => '🌐', 'date_format' => 'l, F j, Y', 'wiki' => 'globalwiki'],
@@ -58,7 +55,7 @@ $currentWiki = $currentLang['wiki'];
 $wikiproject = $currentWiki === "globalwiki" ? "all" : $currentWiki;
 
 // Hacer la solicitud a la API (sin dominio)
-$response = file_get_contents("http://localhost/api/stats.php?project=$wikiproject");
+$response = file_get_contents("https://wikipeoplestats.toolforge.org/api/stats.php?project=$wikiproject");
 $data = json_decode($response, true);
 
 // Verificar si hay un error en la respuesta
