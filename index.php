@@ -104,7 +104,7 @@ if ($currentWiki === 'globalwiki') {
     $errorMessage = sprintf(
         __('homepage_stats_credits'), 
         str_replace('wiki', '.wikipedia', $currentWiki)
-    ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($formattedLastUpdated);
+    ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
 }
 }
 
@@ -127,14 +127,6 @@ foreach ($languages as $language) {
 
 // Obtener y formatear la última actualización
 $lastUpdated = isset($data['lastUpdated']) ? $data['lastUpdated'] : 'N/A';
-if ($lastUpdated !== 'N/A') {
-    // Convertir la fecha en formato YYYY-MM-DD a timestamp
-    $timestamp = strtotime($lastUpdated);
-    // Formatear la fecha
-    $formattedLastUpdated = date($dateFormat, $timestamp);
-} else {
-    $formattedLastUpdated = 'N/A';
-}
 
 ?>
 
