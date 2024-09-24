@@ -52,6 +52,7 @@ if ($result->num_rows > 0) {
             'totalMen' => (int)$data['totalMen'],
             'otherGenders' => (int)$data['otherGenders'],
             'totalContributions' => (int)$data['totalContributions'],
+            'lastUpdated' => $data['lastUpdated'] ? $data['lastUpdated'] : null,
         ];
 
         echo json_encode($response);
