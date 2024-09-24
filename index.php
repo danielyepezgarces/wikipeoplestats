@@ -58,7 +58,14 @@ $currentWiki = $currentLang['wiki'];
 $wikiproject = $currentWiki === "globalwiki" ? "all" : $currentWiki;
 
 // Hacer la solicitud a la API (sin dominio)
-$response = file_get_contents("http://wikipeoplestats.toolforge.org/api/stats.php?project=$wikiproject");
+$options = [
+    "http" => [
+        "header" => "User-Agent: WikiStatsPeople/1.0\r\n"
+    ]
+];
+
+$context = stream_context_create($options);
+$response = file_get_contents("http://wikipeoplestats.toolforge.org/api/stats.php?project=all", false, $context);
 $data = json_decode($response, true);
 
 // Verificar si hay un error en la respuesta
