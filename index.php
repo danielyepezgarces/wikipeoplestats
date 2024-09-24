@@ -127,7 +127,7 @@ foreach ($languages as $language) {
 // Obtener y formatear la última actualización
 $lastUpdated = isset($data['last_updated']) ? $data['last_updated'] : 'N/A';
 if ($lastUpdated !== 'N/A') {
-    // Convertir el formato ISO 8601 a timestamp
+    // Convertir la fecha en formato YYYY-MM-DD a timestamp
     $timestamp = strtotime($lastUpdated);
     // Formatear la fecha
     $formattedLastUpdated = date($dateFormat, $timestamp);
