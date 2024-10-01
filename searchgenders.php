@@ -34,13 +34,17 @@ include 'languages.php'; // Cargar idiomas y traducciones
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
         
         <form class="mt-6 space-y-4">
-        <div class="flex items-center">
-    <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
-    <span class="ml-2 cursor-pointer" title="Provide the name of the project.">
-        <i class="fas fa-question-circle text-gray-500"></i>
-    </span>
-    <input type="text" id="project" name="project" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required oninput="autocompleteWiki(this)">
-</div>
+            <div class="flex items-center relative">
+                <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
+                <span class="ml-2 cursor-pointer" title="Provide the name of the project.">
+                    <i class="fas fa-question-circle text-gray-500"></i>
+                </span>
+                <input type="text" id="project" name="project" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required oninput="autocompleteWiki(this)">
+                
+                <div id="suggestions" class="absolute bg-white shadow-md rounded-md mt-1 w-2/3 hidden">
+                    <ul id="suggestions-list" class="max-h-40 overflow-auto"></ul>
+                </div>
+            </div>
 
             <div class="flex items-center">
                 <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_start_date_label'); ?></label>
@@ -49,6 +53,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
                 </span>
                 <input type="date" id="start_date" name="start_date" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
             </div>
+
             <div class="flex items-center">
                 <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_end_date_label'); ?></label>
                 <span class="ml-2 cursor-pointer" title="Select the project end date.">
@@ -56,6 +61,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
                 </span>
                 <input type="date" id="end_date" name="end_date" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
             </div>
+
             <div class="flex items-center justify-center">
                 <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
                     <?php echo __('submit_button'); ?>
@@ -64,6 +70,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
         </form>
     </div>
 </main>
+
 
 
         <!-- Language Selector Popup -->
@@ -87,6 +94,41 @@ include 'languages.php'; // Cargar idiomas y traducciones
     </div>
     
     <script>
+const languages = <?php echo json_encode($languages); ?>; // Pasar el array PHP a JavaScript
+
+function autocompleteWiki(input) {
+    const value = input.value.toLowerCase();
+    const matches = languages.filter(lang => {
+        return lang.wiki.startsWith(value) || 
+               lang.wiki.includes(value) || 
+               lang.wiki + '.wikipedia.org' === value ||
+               lang.wiki + '.wikipedia' === value;
+    });
+
+    const suggestionsList = document.getElementById('suggestions-list');
+    suggestionsList.innerHTML = ''; // Limpiar las sugerencias
+    const suggestionsContainer = document.getElementById('suggestions');
+
+    if (matches.length > 0) {
+        matches.forEach(match => {
+            const li = document.createElement('li');
+            li.textContent = match.wiki + ' - ' + match.name; // Muestra el wiki y el nombre
+            li.className = "cursor-pointer hover:bg-gray-100";
+            li.onclick = () => {
+                input.value = match.wiki; // Completa el campo con el valor seleccionado
+                suggestionsContainer.classList.add('hidden'); // Ocultar sugerencias
+            };
+            suggestionsList.appendChild(li);
+        });
+        suggestionsContainer.classList.remove('hidden'); // Mostrar sugerencias
+    } else {
+        suggestionsContainer.classList.add('hidden'); // Ocultar si no hay coincidencias
+    }
+}
+
+
+
+
 function changeLanguage(lang) {
     const url = lang ? '/' + lang + '/search/genders' : '/search/genders';
     window.location.href = url;
