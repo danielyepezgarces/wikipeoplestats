@@ -34,8 +34,8 @@ include 'languages.php'; // Cargar idiomas y traducciones
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
         
         <form class="mt-6 space-y-4">
-            <div class="flex flex-col relative">
-                <div class="flex items-center">
+            <div class="relative">
+                <div class="flex items-center mb-1">
                     <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
                     <span class="ml-2 cursor-pointer" title="Provide the name of the project.">
                         <i class="fas fa-question-circle text-gray-500"></i>
@@ -44,7 +44,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
                 <input type="text" id="project" name="project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required oninput="autocompleteWiki(this)">
                 
                 <div id="suggestions" class="absolute bg-white dark:bg-gray-800 shadow-md rounded-md mt-1 w-full hidden z-10">
-                    <ul id="suggestions-list" class="max-h-40 overflow-auto border border-gray-300 dark:border-gray-600 rounded-md"></ul>
+                    <ul id="suggestions-list" class="max-h-40 overflow-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"></ul>
                 </div>
             </div>
 
@@ -72,7 +72,6 @@ include 'languages.php'; // Cargar idiomas y traducciones
         </form>
     </div>
 </main>
-
 
 
 
