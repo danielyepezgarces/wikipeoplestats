@@ -11,5 +11,6 @@
     "header_description": "L'en-tête reste en haut lorsque vous faites défiler, et il est entièrement réactif.",
     "current_date": "Date actuelle :",
     "select_language": "Choisir la langue",
-    "homepage_stats_last_update": "Dernière mise à jour" 
+    "homepage_stats_last_update": "Dernière mise à jour",
+    "submit_button": "Envoyer"
   }
