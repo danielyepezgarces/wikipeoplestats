@@ -12,7 +12,8 @@
     "current_date": "Fecha actual:",
     "select_language": "Seleccionar idioma",
     "homepage_stats_credits": "Estos datos estadísticos son de %s.",
-    "homepage_stats_last_update": "Última actualización"
+    "homepage_stats_last_update": "Última actualización",
+    "submit_button": "Enviar"
   }
 
   
