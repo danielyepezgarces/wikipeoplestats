@@ -33,7 +33,8 @@ include 'languages.php'; // Cargar idiomas y traducciones
         <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
         
-        <form class="mt-6 space-y-4" onsubmit="return validateDates()">
+        <form class="mt-6 space-y-4" onsubmit="return redirectToUrl()">
+            <!-- Project Input -->
             <div class="flex items-center mb-4">
                 <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
                 <span class="ml-1 cursor-pointer" title="Provide the name of the project.">
@@ -42,6 +43,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
                 <input type="text" id="project" name="project" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 h-10 ml-2" required oninput="autocompleteWiki(this)">
             </div>
 
+            <!-- Start Date Input -->
             <div class="flex items-center mb-4">
                 <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_start_date_label'); ?></label>
                 <span class="ml-1 cursor-pointer" title="Select the project start date.">
@@ -50,6 +52,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
                 <input type="date" id="start_date" name="start_date" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 ml-2" required>
             </div>
 
+            <!-- End Date Input -->
             <div class="flex items-center mb-4">
                 <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_end_date_label'); ?></label>
                 <span class="ml-1 cursor-pointer" title="Select the project end date.">
@@ -87,6 +90,25 @@ include 'languages.php'; // Cargar idiomas y traducciones
         </div>
     </div>
 
+    <script>
+function redirectToUrl() {
+    const project = document.getElementById('project').value;
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+
+    // Crear la URL base
+    let url = `/genders/${project}/${startDate}`;
+
+    // Agregar end_date solo si está presente
+    if (endDate) {
+        url += `/${endDate}`;
+    }
+
+    // Redirigir a la nueva URL
+    window.location.href = url;
+    return false; // Prevenir el envío del formulario
+}
+</script>
     <script>
     const wikiCreationDates = {
         "all": "2001-01-15", // Fecha de creación de All Wikipedias
