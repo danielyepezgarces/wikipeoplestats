@@ -29,24 +29,29 @@ include 'languages.php'; // Cargar idiomas y traducciones
     <main class="container mx-auto px-4 py-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
         <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
-        <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
-    </div>
-
-    <!-- Contenedor de Inputs -->
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-        <h2 class="text-2xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('input_section_title'); ?></h2>
-        <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_project_label'); ?></label>
-                <input type="text" id="project" name="project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
+        <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
+        
+        <form class="mt-6 space-y-4">
+            <div class="flex items-center">
+                <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
+                <span class="ml-2 cursor-pointer" title="Provide the name of the project.">
+                    <i class="fas fa-question-circle text-gray-500"></i>
+                </span>
+                <input type="text" id="project" name="project" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
             </div>
-            <div>
-                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_start_date_label'); ?></label>
-                <input type="date" id="start_date" name="start_date" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
+            <div class="flex items-center">
+                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_start_date_label'); ?></label>
+                <span class="ml-2 cursor-pointer" title="Select the project start date.">
+                    <i class="fas fa-question-circle text-gray-500"></i>
+                </span>
+                <input type="date" id="start_date" name="start_date" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
             </div>
-            <div>
-                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_end_date_label'); ?></label>
-                <input type="date" id="end_date" name="end_date" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
+            <div class="flex items-center">
+                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_end_date_label'); ?></label>
+                <span class="ml-2 cursor-pointer" title="Select the project end date.">
+                    <i class="fas fa-question-circle text-gray-500"></i>
+                </span>
+                <input type="date" id="end_date" name="end_date" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
             </div>
             <div class="flex items-center justify-center">
                 <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
@@ -55,41 +60,6 @@ include 'languages.php'; // Cargar idiomas y traducciones
             </div>
         </form>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-            <i class="fas fa-users text-3xl text-blue-500 mb-2"></i>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total People</h3>
-            <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalPeople)); ?>">0</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-            <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Women</h3>
-            <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">0</p>
-            <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-            <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Men</h3>
-            <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">0</p>
-            <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-            <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Other Genders</h3>
-            <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
-            <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
-        </div>
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-            <i class="fas fa-concierge-bell text-3xl text-green-500 mb-2"></i>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Users Contributions</h3>
-            <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
-        </div>
-    </div>
-
-    <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
-        <?php echo $errorMessage; ?>
-    </p>
 </main>
 
 
