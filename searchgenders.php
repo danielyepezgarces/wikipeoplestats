@@ -99,14 +99,15 @@ function redirectToUrl() {
     // Crear la URL base
     let url = `/genders/${project}`;
 
-    // Agregar start_date solo si está presente
-    if (startDate) {
-        url += `/${startDate}`;
-    }
-
-    // Agregar end_date solo si está presente
-    if (endDate) {
-        url += `/${endDate}`;
+    // Lógica para manejar las fechas
+    if (startDate && endDate) {
+        url += `/${startDate}/${endDate}`;
+    } else if (startDate) {
+        url += `/${startDate}/`;
+    } else if (endDate) {
+        url += `//${endDate}`; // Aquí pasamos la barra vacía
+    } else {
+        url += `//`; // Pasamos dos barras si no hay parámetros
     }
 
     // Redirigir a la nueva URL
@@ -114,7 +115,7 @@ function redirectToUrl() {
     return false; // Prevenir el envío del formulario
 }
 </script>
-    <script>
+  <script>
     const wikiCreationDates = {
         "all": "2001-01-15", // Fecha de creación de All Wikipedias
         "en": "2001-01-15",
@@ -175,6 +176,7 @@ function redirectToUrl() {
         endDateInput.max = today.toISOString().split('T')[0];
     }
 </script>
+
     <script>
 const languages = <?php echo json_encode($languages); ?>; // Pasar el array PHP a JavaScript
 
