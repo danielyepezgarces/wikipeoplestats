@@ -32,13 +32,14 @@ include 'languages.php'; // Cargar idiomas y traducciones
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
         
         <form class="mt-6 space-y-4">
-            <div class="flex items-center">
-                <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
-                <span class="ml-2 cursor-pointer" title="Provide the name of the project.">
-                    <i class="fas fa-question-circle text-gray-500"></i>
-                </span>
-                <input type="text" id="project" name="project" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required>
-            </div>
+        <div class="flex items-center">
+    <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
+    <span class="ml-2 cursor-pointer" title="Provide the name of the project.">
+        <i class="fas fa-question-circle text-gray-500"></i>
+    </span>
+    <input type="text" id="project" name="project" class="mt-1 block w-2/3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required oninput="autocompleteWiki(this)">
+</div>
+
             <div class="flex items-center">
                 <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_start_date_label'); ?></label>
                 <span class="ml-2 cursor-pointer" title="Select the project start date.">
