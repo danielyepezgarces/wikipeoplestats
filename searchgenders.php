@@ -45,20 +45,20 @@ include 'languages.php'; // Cargar idiomas y traducciones
 
             <!-- Start Date Input -->
             <div class="flex items-center mb-4">
-                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_start_date_label'); ?></label>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_start_date_label'); ?> (opcional)</label>
                 <span class="ml-1 cursor-pointer" title="Select the project start date.">
                     <i class="fas fa-question-circle text-gray-500"></i>
                 </span>
-                <input type="date" id="start_date" name="start_date" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 ml-2" required>
+                <input type="date" id="start_date" name="start_date" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 ml-2">
             </div>
 
             <!-- End Date Input -->
             <div class="flex items-center mb-4">
-                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_end_date_label'); ?></label>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_end_date_label'); ?> (opcional)</label>
                 <span class="ml-1 cursor-pointer" title="Select the project end date.">
                     <i class="fas fa-question-circle text-gray-500"></i>
                 </span>
-                <input type="date" id="end_date" name="end_date" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 ml-2" required max="">
+                <input type="date" id="end_date" name="end_date" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 ml-2">
             </div>
 
             <div class="flex items-center justify-center">
@@ -97,7 +97,12 @@ function redirectToUrl() {
     const endDate = document.getElementById('end_date').value;
 
     // Crear la URL base
-    let url = `/genders/${project}/${startDate}`;
+    let url = `/genders/${project}`;
+
+    // Agregar start_date solo si está presente
+    if (startDate) {
+        url += `/${startDate}`;
+    }
 
     // Agregar end_date solo si está presente
     if (endDate) {
