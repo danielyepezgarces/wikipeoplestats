@@ -264,7 +264,7 @@ $lastUpdated = $data['lastUpdated'];
 
     <script>
         function changeLanguage(lang) {
-            window.location.href = '?lang=' + lang;
+           window.location.href = '/' + lang + '/';
         }
 
         function toggleLanguagePopup() {
