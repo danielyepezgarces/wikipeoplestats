@@ -12,5 +12,6 @@
     "current_date": "Current date:",
     "select_language": "Select Language",
     "homepage_stats_credits": "These statistics are from %s.",
-    "homepage_global_stats_credits": "These statistics are from all wikipedias."
+    "homepage_global_stats_credits": "These statistics are from all wikipedias.",
+    "homepage_stats_last_update": "Last updated"
   }
