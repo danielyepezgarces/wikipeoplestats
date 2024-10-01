@@ -33,7 +33,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
         <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
         
-        <form class="mt-6 space-y-4">
+        <form class="mt-6 space-y-4" onsubmit="return validateDates()">
             <div class="relative">
                 <div class="flex items-center mb-1">
                     <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
@@ -41,7 +41,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
                         <i class="fas fa-question-circle text-gray-500"></i>
                     </span>
                 </div>
-                <input type="text" id="project" name="project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 h-10" required oninput="autocompleteWiki(this)">
+                <input type="text" id="project" name="project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required oninput="autocompleteWiki(this)">
                 
                 <div id="suggestions" class="absolute bg-white dark:bg-gray-800 shadow-md rounded-md mt-1 w-full hidden z-10">
                     <ul id="suggestions-list" class="max-h-40 overflow-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"></ul>
@@ -74,8 +74,6 @@ include 'languages.php'; // Cargar idiomas y traducciones
 </main>
 
 
-
-
         <!-- Language Selector Popup -->
         <div id="language-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col">
@@ -95,7 +93,58 @@ include 'languages.php'; // Cargar idiomas y traducciones
             </div>
         </div>
     </div>
-    
+
+    <script>
+    const wikiCreationDates = {
+        "all": "2001-01-15", // Fecha de creación de All Wikipedias
+        "en": "2001-01-15",
+        "fr": "2001-03-15",
+        "es": "2001-05-11",
+        "de": "2001-03-01",
+        "it": "2001-01-17",
+        "pt": "2002-01-22",
+        "nl": "2001-03-20",
+        "ru": "2001-05-27",
+        "ja": "2002-05-24",
+        "zh": "2002-05-18"
+    };
+
+    function validateDates() {
+        const projectInput = document.getElementById('project').value;
+        const startDateInput = document.getElementById('start_date');
+        const endDateInput = document.getElementById('end_date');
+
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0];
+
+        // Obtener la fecha de creación de la wiki seleccionada
+        let creationDate = wikiCreationDates['all']; // Valor por defecto
+        for (const code in wikiCreationDates) {
+            if (projectInput.toLowerCase().includes(code)) {
+                creationDate = wikiCreationDates[code];
+                break;
+            }
+        }
+
+        // Comprobación de fechas
+        if (startDateInput.value < creationDate) {
+            alert(`La fecha de inicio debe ser igual o mayor a la fecha de creación (${creationDate}).`);
+            return false;
+        }
+
+        if (startDateInput.value > todayString) {
+            alert("La fecha de inicio no puede ser mayor que la fecha de hoy.");
+            return false;
+        }
+
+        if (endDateInput.value < startDateInput.value) {
+            alert("La fecha de fin debe ser igual o mayor que la fecha de inicio.");
+            return false;
+        }
+
+        return true; // Validación correcta
+    }
+</script>
     <script>
 const languages = <?php echo json_encode($languages); ?>; // Pasar el array PHP a JavaScript
 
