@@ -41,7 +41,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
                         <i class="fas fa-question-circle text-gray-500"></i>
                     </span>
                 </div>
-                <input type="text" id="project" name="project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500" required oninput="autocompleteWiki(this)">
+                <input type="text" id="project" name="project" class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 h-10" required oninput="autocompleteWiki(this)">
                 
                 <div id="suggestions" class="absolute bg-white dark:bg-gray-800 shadow-md rounded-md mt-1 w-full hidden z-10">
                     <ul id="suggestions-list" class="max-h-40 overflow-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"></ul>
@@ -72,7 +72,6 @@ include 'languages.php'; // Cargar idiomas y traducciones
         </form>
     </div>
 </main>
-
 
         <!-- Language Selector Popup -->
         <div id="language-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
