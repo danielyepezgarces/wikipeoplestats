@@ -84,9 +84,11 @@ include 'languages.php'; // Cargar idiomas y traducciones
     </div>
     
     <script>
-        function changeLanguage(lang) {
-            window.location.href = '/' + lang + '/';
-        }
+function changeLanguage(lang) {
+    const url = lang ? '/' + lang + '/search/genders' : '/search/genders';
+    window.location.href = url;
+}
+
 
         function toggleLanguagePopup() {
             const popup = document.getElementById('language-popup');
