@@ -1,5 +1,37 @@
 <?php
 include 'languages.php'; // Cargar idiomas y traducciones
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $language = $currentLang['code'];
+    $project = $_POST['project'];
+    $username = $_POST['username'];
+    $startDate = $_POST['start_date'];
+    $endDate = $_POST['end_date'];
+
+    // Crear la URL base
+    $url = "/genders/$project/$username";
+
+    // Agregar el parámetro de idioma si no es "all"
+    if ($language !== 'all') {
+        $url = "/$language$url";
+    }
+
+    // Lógica para manejar las fechas
+    if ($startDate && $endDate) {
+        $url .= "/$startDate/$endDate";
+    } elseif ($startDate) {
+        $url .= "/$startDate/";
+    } elseif ($endDate) {
+        $url .= "//$endDate"; // Aquí pasamos la barra vacía
+    } else {
+        $url .= "/"; // Pasamos una barra si no hay parámetros de fecha
+    }
+
+    // Redirigir a la nueva URL
+    header("Location: $url");
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -11,9 +43,6 @@ include 'languages.php'; // Cargar idiomas y traducciones
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        const currentLanguage = "<?php echo \$currentLang['code']; ?>";
-    </script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -36,7 +65,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
         <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
 
-        <form class="mt-6 grid grid-cols-3 gap-4" onsubmit="return redirectToUrl()">
+        <form class="mt-6 grid grid-cols-3 gap-4" method="POST" action="">
             <!-- Project Input -->
             <div class="flex items-center col-span-1">
                 <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_project_label'); ?></label>
@@ -105,39 +134,6 @@ include 'languages.php'; // Cargar idiomas y traducciones
         </div>
     </div>
 
-    <script>
-        function redirectToUrl() {
-            const language = currentLanguage;
-            const project = document.getElementById('project').value;
-            const username = document.getElementById('username').value;
-            const startDate = document.getElementById('start_date').value;
-            const endDate = document.getElementById('end_date').value;
-
-            // Crear la URL base
-            let url = `/genders/${project}/${username}`;
-
-            // Agregar el parámetro de idioma si no es "all"
-            if (language !== 'all') {
-                url = `/${language}${url}`;
-            }
-
-            // Lógica para manejar las fechas
-            if (startDate && endDate) {
-                url += `/${startDate}/${endDate}`;
-            } else if (startDate) {
-                url += `/${startDate}/`;
-            } else if (endDate) {
-                url += `//${endDate}`; // Aquí pasamos la barra vacía
-            } else {
-                url += `/`; // Pasamos una barra si no hay parámetros de fecha
-            }
-
-            // Redirigir a la nueva URL
-            window.location.href = url;
-            return false; // Prevenir el envío del formulario
-        }
-
-</script>
   <script>
     const wikiCreationDates = {
         "all": "2001-01-15", // Fecha de creación de All Wikipedias
