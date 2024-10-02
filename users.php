@@ -84,6 +84,15 @@ $lastUpdated = $data['lastUpdated'];
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    #chartContainer {
+        width: 100%;
+    }
+
+    #myChart {
+        height: 400px;
+    }
+</style>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -141,9 +150,10 @@ $lastUpdated = $data['lastUpdated'];
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
     </div>
 
-    <div class="mt-8">
+    <div class="mt-8" id="chartContainer">
         <canvas id="myChart"></canvas>
     </div>
+
 </div>
 
 
@@ -184,21 +194,50 @@ $lastUpdated = $data['lastUpdated'];
     fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')
         .then(response => response.json())
         .then(data => {
-            // Calcular el ancho del contenedor de los cuatro boxes
-            const boxesContainer = document.querySelector('.grid-cols-4');
-            const boxWidth = boxesContainer.offsetWidth;
-            const boxGap = parseInt(getComputedStyle(boxesContainer).getPropertyValue('grid-gap'));
-            const chartWidth = boxWidth * 4 + boxGap * 3 - boxGap;
-
             // Crear el gráfico
             const ctx = document.getElementById('myChart').getContext('2d');
             const myChart = new Chart(ctx, {
-                // ...
+                type: 'line',
+                data: {
+                    labels: data.data.map(item => `${item.year}-${item.month}`),
+                    datasets: [
+                        {
+                            label: 'Total',
+                            data: data.data.map(item => item.total),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Women',
+                            data: data.data.map(item => item.totalWomen),
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Men',
+                            data: data.data.map(item => item.totalMen),
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Other Genders',
+                            data: data.data.map(item => item.otherGenders),
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
                 options: {
-                    responsive: false,
+                    responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        // ...
+                        y: {
+                            beginAtZero: true
+                        }
                     },
                     layout: {
                         padding: {
@@ -210,12 +249,9 @@ $lastUpdated = $data['lastUpdated'];
                     }
                 }
             });
-
-            // Establecer el ancho del gráfico
-            myChart.canvas.parentNode.style.width = chartWidth + 'px';
-            myChart.canvas.parentNode.style.height = '400px';
         });
 </script>
+
     <script>
 
 
