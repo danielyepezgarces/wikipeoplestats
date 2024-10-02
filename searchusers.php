@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $endDate = $_POST['end_date'];
 
     // Crear la URL base
-    $url = "/genders/$project/$username";
+    $url = "/users/$project/$username";
 
     // Agregar el parámetro de idioma si no es "all"
     if ($language !== 'all') {
