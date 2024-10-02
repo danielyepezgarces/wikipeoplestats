@@ -45,6 +45,7 @@ if ($language_code === false) {
     exit;
 }
 
+// Si no se proporcionan las fechas de inicio y fin, usar la fecha de creación de la wiki seleccionada y la fecha actual
 if (empty($start_date)) {
     $start_date = $languages[$language_code]['creation_date'];
 }
@@ -53,28 +54,21 @@ if (empty($end_date)) {
 }
 
 // Generar una tabla de calendario para el rango de fechas especificado
-$calendar_sql = "
-    SELECT
-        YEAR(date) AS year,
-        MONTH(date) AS month
-    FROM (
-        SELECT
-            DATE_ADD('$start_date', INTERVAL n MONTH) AS date
-        FROM (
-            SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11
-        ) AS numbers
-    ) AS dates
-    WHERE date <= '$end_date'
-";
-
-$calendar_result = $conn->query($calendar_sql);
+$start_year = (int)date('Y', strtotime($start_date));
+$start_month = (int)date('m', strtotime($start_date));
+$end_year = (int)date('Y', strtotime($end_date));
+$end_month = (int)date('m', strtotime($end_date));
 
 $calendar = [];
-while ($row = $calendar_result->fetch_assoc()) {
-    $calendar[] = [
-        'year' => (int)$row['year'],
-        'month' => (int)$row['month'],
-    ];
+for ($year = $start_year; $year <= $end_year; $year++) {
+    $start_month_in_year = ($year == $start_year) ? $start_month : 1;
+    $end_month_in_year = ($year == $end_year) ? $end_month : 12;
+    for ($month = $start_month_in_year; $month <= $end_month_in_year; $month++) {
+        $calendar[] = [
+            'year' => $year,
+            'month' => $month,
+        ];
+    }
 }
 
 // Definir la consulta dependiendo del proyecto, las fechas y el usuario
