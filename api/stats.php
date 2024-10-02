@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json");
 
-include '../../config.php';
+include '../config.php';
 
 // Obtener el proyecto de la URL
 $project = isset($_GET['project']) ? $_GET['project'] : '';
