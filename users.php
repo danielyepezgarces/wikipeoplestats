@@ -190,6 +190,7 @@ $lastUpdated = $data['lastUpdated'];
     </div>
     <script>
         let isCumulative = false; // Estado inicial
+        let chart; // Variable para almacenar la instancia del gráfico
 
         async function fetchData() {
             try {
@@ -220,6 +221,11 @@ $lastUpdated = $data['lastUpdated'];
         }
 
         function createChart(filteredData) {
+            // Destruir el gráfico anterior si existe
+            if (chart) {
+                chart.destroy();
+            }
+
             const options = {
                 chart: {
                     type: 'line',
@@ -266,7 +272,8 @@ $lastUpdated = $data['lastUpdated'];
                 }
             };
 
-            const chart = new ApexCharts(document.querySelector("#chartContainer"), options);
+            // Crear una nueva instancia del gráfico
+            chart = new ApexCharts(document.querySelector("#chartContainer"), options);
             chart.render();
         }
 
