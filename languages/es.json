@@ -13,7 +13,11 @@
     "select_language": "Seleccionar idioma",
     "homepage_stats_credits": "Estos datos estadísticos son de %s.",
     "homepage_stats_last_update": "Última actualización",
-    "submit_button": "Enviar"
+    "submit_button": "Enviar",
+    "input_project_label": "Proyecto",
+    "input_username_label": "Usuario",
+    "input_start_date_label": "Fecha de inicio <small>(opcional)</small>",
+    "input_end_date_label": "Fecha de fin <small>(opcional)</small>"
   }
 
   

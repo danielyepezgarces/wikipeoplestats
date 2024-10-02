@@ -12,5 +12,9 @@
     "current_date": "Date actuelle :",
     "select_language": "Choisir la langue",
     "homepage_stats_last_update": "Dernière mise à jour",
-    "submit_button": "Envoyer"
+    "submit_button": "Envoyer",
+    "input_project_label": "Projet",
+    "input_username_label": "Utilisateur",
+    "input_start_date_label": "Date de début <small>(optionnel)</small>",
+    "input_end_date_label": "Date de fin <small>(optionnel)</small>"
   }
