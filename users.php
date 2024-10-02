@@ -153,6 +153,9 @@ $lastUpdated = $data['lastUpdated'];
     </div>
 </div>
 
+<div>
+        <button id="toggleChart">Mostrar Acumulado</button>
+    </div>
 <div class="mt-8" id="chartContainer"></div> <!-- Cambiado a div -->
 
 
@@ -186,72 +189,92 @@ $lastUpdated = $data['lastUpdated'];
         </div>
     </div>
     <script>
+        let isStacked = false; // Estado inicial
+
         async function fetchData() {
             try {
                 const response = await fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
                 const data = await response.json();
 
-                // Filtrar datos para obtener solo los meses relevantes
                 const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);
                 const filteredData = data.data.slice(firstNonZeroIndex);
 
-                // Verificar que hay datos filtrados
                 if (filteredData.length === 0) {
                     console.error('No hay datos válidos para mostrar.');
                     return;
                 }
 
-                // Configuración del gráfico
-                const options = {
-                    chart: {
-                        type: 'line',
-                        height: 400,
-                    },
-                    series: [
-                        {
-                            name: 'Total',
-                            data: filteredData.map(item => item.total)
-                        },
-                        {
-                            name: 'Total Women',
-                            data: filteredData.map(item => item.totalWomen)
-                        },
-                        {
-                            name: 'Total Men',
-                            data: filteredData.map(item => item.totalMen)
-                        },
-                        {
-                            name: 'Other Genders',
-                            data: filteredData.map(item => item.otherGenders)
-                        }
-                    ],
-                    xaxis: {
-                        categories: filteredData.map(item => `${item.year}-${item.month}`),
-                        title: {
-                            text: 'Mes'
-                        }
-                    },
-                    yaxis: {
-                        title: {
-                            text: 'Cantidad'
-                        }
-                    },
-                    tooltip: {
-                        shared: true,
-                        intersect: false,
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                };
-
                 // Crear y renderizar el gráfico
-                const chart = new ApexCharts(document.querySelector("#chartContainer"), options);
-                chart.render();
+                createChart(filteredData);
             } catch (error) {
                 console.error('Error al obtener datos:', error);
             }
         }
+
+        function createChart(filteredData) {
+            const options = {
+                chart: {
+                    type: 'line',
+                    height: 400,
+                },
+                series: [
+                    {
+                        name: 'Total',
+                        data: filteredData.map(item => item.total)
+                    },
+                    {
+                        name: 'Total Women',
+                        data: filteredData.map(item => item.totalWomen)
+                    },
+                    {
+                        name: 'Total Men',
+                        data: filteredData.map(item => item.totalMen)
+                    },
+                    {
+                        name: 'Other Genders',
+                        data: filteredData.map(item => item.otherGenders)
+                    }
+                ],
+                xaxis: {
+                    categories: filteredData.map(item => `${item.year}-${item.month}`),
+                    title: {
+                        text: 'Mes'
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Cantidad'
+                    }
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                },
+                legend: {
+                    position: 'top'
+                },
+                stroke: {
+                    curve: 'smooth'
+                }
+            };
+
+            if (isStacked) {
+                options.plotOptions = {
+                    area: {
+                        stacked: true
+                    }
+                };
+            }
+
+            const chart = new ApexCharts(document.querySelector("#chartContainer"), options);
+            chart.render();
+        }
+
+        document.getElementById('toggleChart').addEventListener('click', () => {
+            isStacked = !isStacked; // Alternar estado
+            fetchData(); // Volver a obtener y renderizar el gráfico
+            document.getElementById('toggleChart').innerText = isStacked ? 'Mostrar Normal' : 'Mostrar Acumulado';
+        });
 
         // Llamar a la función para obtener datos
         fetchData();
