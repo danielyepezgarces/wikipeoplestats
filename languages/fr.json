@@ -16,5 +16,6 @@
     "input_project_label": "Projet",
     "input_username_label": "Utilisateur",
     "input_start_date_label": "Date de début <small>(optionnel)</small>",
-    "input_end_date_label": "Date de fin <small>(optionnel)</small>"
+    "input_end_date_label": "Date de fin <small>(optionnel)</small>",
+    "welcome_user_message": "%s • %s"
   }

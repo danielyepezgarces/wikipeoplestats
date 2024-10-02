@@ -115,9 +115,14 @@ $lastUpdated = $data['lastUpdated'];
     
     <main class="container mx-auto px-4 py-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-        <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
-        <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
-    </div>
+    <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100">
+        <?php 
+            echo sprintf(__('welcome_user_message'), $username, $project); 
+        ?>
+    </h1>
+    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
+</div>
+
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
@@ -153,7 +158,7 @@ $lastUpdated = $data['lastUpdated'];
     </div>
 </div>
 
-<div class="flex justify-end mb-4">
+<div class="flex justify-end mt-4 mb-2">
         <button id="toggleChart" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-200">Mostrar Acumulado</button>
     </div>
 <div class="mt-8" id="chartContainer"></div> <!-- Cambiado a div -->
