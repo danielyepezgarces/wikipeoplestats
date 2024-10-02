@@ -4,9 +4,7 @@ ini_set( 'display_errors', 1 );
 include 'languages.php'; // Cargar idiomas y traducciones
 
 $project = isset($_GET['project']) ? $_GET['project'] : '';
-$project = $conn->real_escape_string($project);
 $username = isset($_GET['username']) ? $_GET['username'] : '';
-$username = $conn->real_escape_string($username);
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
@@ -48,7 +46,6 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $totalWomen = 0;
     $totalMen = 0;
     $otherGenders = 0;
-    $totalContributions = 0;
     $errorMessage = __('coming_soon_tracking_wiki');
 } else {
     // Asignar los valores de la respuesta
@@ -56,8 +53,6 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $totalWomen = $data['totalWomen'] ?? 0;
     $totalMen = $data['totalMen'] ?? 0;
     $otherGenders = $data['otherGenders'] ?? 0;
-    $totalContributions = $data['totalContributions'] ?? 0;
-
     // Mensaje de éxito según la wiki
     if ($project === 'all') {
         $errorMessage = __('homepage_global_stats_credits');
@@ -135,11 +130,6 @@ $lastUpdated = $data['lastUpdated'];
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Other Genders</h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
-    </div>
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-        <i class="fas fa-concierge-bell text-3xl text-green-500 mb-2"></i>
-        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Users Contributions</h3>
-        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
     </div>
 </div>
 
