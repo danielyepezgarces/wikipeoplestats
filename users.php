@@ -184,52 +184,36 @@ $lastUpdated = $data['lastUpdated'];
     fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')
         .then(response => response.json())
         .then(data => {
+            // Calcular el ancho del contenedor de los cuatro boxes
+            const boxesContainer = document.querySelector('.grid-cols-4');
+            const boxWidth = boxesContainer.offsetWidth;
+            const boxGap = parseInt(getComputedStyle(boxesContainer).getPropertyValue('grid-gap'));
+            const chartWidth = boxWidth * 4 + boxGap * 3 - boxGap;
+
             // Crear el gráfico
             const ctx = document.getElementById('myChart').getContext('2d');
             const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.data.map(item => `${item.year}-${item.month}`),
-                    datasets: [
-                        {
-                            label: 'Total',
-                            data: data.data.map(item => item.total),
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Total Women',
-                            data: data.data.map(item => item.totalWomen),
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Total Men',
-                            data: data.data.map(item => item.totalMen),
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Other Genders',
-                            data: data.data.map(item => item.otherGenders),
-                            borderColor: 'rgba(153, 102, 255, 1)',
-                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
+                // ...
                 options: {
-                    responsive: true,
+                    responsive: false,
+                    maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true
+                        // ...
+                    },
+                    layout: {
+                        padding: {
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0
                         }
                     }
                 }
             });
+
+            // Establecer el ancho del gráfico
+            myChart.canvas.parentNode.style.width = chartWidth + 'px';
+            myChart.canvas.parentNode.style.height = '400px';
         });
 </script>
     <script>
