@@ -104,6 +104,8 @@ include 'languages.php'; // Cargar idiomas y traducciones
 
     <script>
 function redirectToUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const language = urlParams.get('lang');
     const project = document.getElementById('project').value;
     const username = document.getElementById('username').value;
     const startDate = document.getElementById('start_date').value;
@@ -111,6 +113,11 @@ function redirectToUrl() {
 
     // Crear la URL base
     let url = `/genders/${project}/${username}`;
+
+    // Agregar el parámetro de idioma si no es "all"
+    if (language && language !== 'all') {
+        url = `/${language}${url}`;
+    }
 
     // Lógica para manejar las fechas
     if (startDate && endDate) {
