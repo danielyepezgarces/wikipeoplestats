@@ -189,7 +189,7 @@ $lastUpdated = $data['lastUpdated'];
         </div>
     </div>
     <script>
-        let isStacked = false; // Estado inicial
+        let isCumulative = false; // Estado inicial
 
         async function fetchData() {
             try {
@@ -211,6 +211,13 @@ $lastUpdated = $data['lastUpdated'];
             }
         }
 
+        function calculateCumulative(data, key) {
+            return data.map((item, index) => {
+                const sum = data.slice(0, index + 1).reduce((acc, curr) => acc + curr[key], 0);
+                return sum;
+            });
+        }
+
         function createChart(filteredData) {
             const options = {
                 chart: {
@@ -220,19 +227,19 @@ $lastUpdated = $data['lastUpdated'];
                 series: [
                     {
                         name: 'Total',
-                        data: filteredData.map(item => item.total)
+                        data: isCumulative ? calculateCumulative(filteredData, 'total') : filteredData.map(item => item.total)
                     },
                     {
                         name: 'Total Women',
-                        data: filteredData.map(item => item.totalWomen)
+                        data: isCumulative ? calculateCumulative(filteredData, 'totalWomen') : filteredData.map(item => item.totalWomen)
                     },
                     {
                         name: 'Total Men',
-                        data: filteredData.map(item => item.totalMen)
+                        data: isCumulative ? calculateCumulative(filteredData, 'totalMen') : filteredData.map(item => item.totalMen)
                     },
                     {
                         name: 'Other Genders',
-                        data: filteredData.map(item => item.otherGenders)
+                        data: isCumulative ? calculateCumulative(filteredData, 'otherGenders') : filteredData.map(item => item.otherGenders)
                     }
                 ],
                 xaxis: {
@@ -258,22 +265,14 @@ $lastUpdated = $data['lastUpdated'];
                 }
             };
 
-            if (isStacked) {
-                options.plotOptions = {
-                    area: {
-                        stacked: true
-                    }
-                };
-            }
-
             const chart = new ApexCharts(document.querySelector("#chartContainer"), options);
             chart.render();
         }
 
         document.getElementById('toggleChart').addEventListener('click', () => {
-            isStacked = !isStacked; // Alternar estado
+            isCumulative = !isCumulative; // Alternar estado
             fetchData(); // Volver a obtener y renderizar el gráfico
-            document.getElementById('toggleChart').innerText = isStacked ? 'Mostrar Normal' : 'Mostrar Acumulado';
+            document.getElementById('toggleChart').innerText = isCumulative ? 'Mostrar Normal' : 'Mostrar Acumulado';
         });
 
         // Llamar a la función para obtener datos
