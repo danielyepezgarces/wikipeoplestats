@@ -42,7 +42,7 @@ curl_close($ch);
 $data = json_decode($response, true);
 
 var_dump($url);
-var_dump($datas);
+var_dump($data);
 // Verificar si hay un error en la respuesta
 if (isset($data['error']) && $data['error'] === 'No data found') {
     // Asignar cero a todas las estadísticas
