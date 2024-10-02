@@ -86,11 +86,12 @@ $lastUpdated = $data['lastUpdated'];
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
     #chartContainer {
-        width: 100%;
+        width: 100%; /* O cualquier ancho deseado */
+        height: 400px; /* Ajusta la altura según necesites */
     }
-
     #myChart {
-        height: 400px;
+        width: 100% !important; /* Asegúrate de que el canvas use todo el ancho */
+        height: 100% !important; /* Asegúrate de que el canvas use toda la altura */
     }
 </style>
     <script>
