@@ -11,14 +11,13 @@
             </div>
 
             <!-- Desktop Menu -->
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="block ..."><?php echo __('home'); ?></a>
+            <nav class="hidden md:flex space-x-4">
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="block ..."><?php echo __('home'); ?></a>
     <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="block ..."><?php echo __('genders'); ?></a>
     <a href="#" class="block ..."><?php echo __('countries'); ?></a>
     <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="block ..."><?php echo __('users'); ?></a>
     <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="block ..."><?php echo __('source_code'); ?></a>
-</div>
-
+</nav>
 
 
             <div class="flex items-center space-x-4">
