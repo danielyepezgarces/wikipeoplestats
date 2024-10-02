@@ -153,8 +153,8 @@ $lastUpdated = $data['lastUpdated'];
     </div>
 </div>
 
-<div>
-        <button id="toggleChart">Mostrar Acumulado</button>
+<div class="flex justify-end mb-4">
+        <button id="toggleChart" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-200">Mostrar Acumulado</button>
     </div>
 <div class="mt-8" id="chartContainer"></div> <!-- Cambiado a div -->
 
