@@ -45,6 +45,38 @@ if ($language_code === false) {
     exit;
 }
 
+if (empty($start_date)) {
+    $start_date = $languages[$language_code]['creation_date'];
+}
+if (empty($end_date)) {
+    $end_date = date('Y-m-d');
+}
+
+// Generar una tabla de calendario para el rango de fechas especificado
+$calendar_sql = "
+    SELECT
+        YEAR(date) AS year,
+        MONTH(date) AS month
+    FROM (
+        SELECT
+            DATE_ADD('$start_date', INTERVAL n MONTH) AS date
+        FROM (
+            SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11
+        ) AS numbers
+    ) AS dates
+    WHERE date <= '$end_date'
+";
+
+$calendar_result = $conn->query($calendar_sql);
+
+$calendar = [];
+while ($row = $calendar_result->fetch_assoc()) {
+    $calendar[] = [
+        'year' => (int)$row['year'],
+        'month' => (int)$row['month'],
+    ];
+}
+
 // Definir la consulta dependiendo del proyecto, las fechas y el usuario
 if ($language_code === 'all') {
     $sql = "
@@ -62,7 +94,6 @@ if ($language_code === 'all') {
             AND a.creation_date <= '$end_date'
             AND a.creator_username = '$username'
         GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
-        ORDER BY YEAR(a.creation_date), MONTH(a.creation_date)
     ";
 } else {
     $sql = "
@@ -81,34 +112,52 @@ if ($language_code === 'all') {
             AND a.creation_date <= '$end_date'
             AND a.creator_username = '$username'
         GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
-        ORDER BY YEAR(a.creation_date), MONTH(a.creation_date)
     ";
 }
 
 $result = $conn->query($sql);
 
-if ($result->num_rows > 0) {
-    $data = [];
-    while ($row = $result->fetch_assoc()) {
-        $data[] = [
-            'year' => (int)$row['year'],
-            'month' => (int)$row['month'],
-            'total' => (int)$row['total'],
-            'totalWomen' => (int)$row['totalWomen'],
-            'totalMen' => (int)$row['totalMen'],
-            'otherGenders' => (int)$row['otherGenders'],
+$data = [];
+while ($row = $result->fetch_assoc()) {
+    $data[] = [
+        'year' => (int)$row['year'],
+        'month' => (int)$row['month'],
+        'total' => (int)$row['total'],
+        'totalWomen' => (int)$row['totalWomen'],
+        'totalMen' => (int)$row['totalMen'],
+        'otherGenders' => (int)$row['otherGenders'],
+    ];
+}
+
+// Combinar los datos de la tabla de calendario con los datos de la consulta
+$combined_data = [];
+foreach ($calendar as $date) {
+    $match = false;
+    foreach ($data as $row) {
+        if ($row['year'] == $date['year'] && $row['month'] == $date['month']) {
+            $combined_data[] = $row;
+            $match = true;
+            break;
+        }
+    }
+    if (!$match) {
+        $combined_data[] = [
+            'year' => $date['year'],
+            'month' => $date['month'],
+            'total' => 0,
+            'totalWomen' => 0,
+            'totalMen' => 0,
+            'otherGenders' => 0,
         ];
     }
-
-    // Generar respuesta
-    $response = [
-        'data' => $data,
-    ];
-
-    echo json_encode($response);
-} else {
-    echo json_encode(['error' => 'No data found']);
 }
+
+// Generar respuesta
+$response = [
+    'data' => $combined_data,
+];
+
+echo json_encode($response);
 
 $conn->close();
 ?>
