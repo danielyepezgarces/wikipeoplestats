@@ -6,9 +6,10 @@ include '../../config.php';
 // Obtener los parámetros de la URL
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);
+$username = isset($_GET['username']) ? $_GET['username'] : '';
+$username = $conn->real_escape_string($username);
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
-$creator_username = isset($_GET['creator_username']) ? $_GET['creator_username'] : '';
 
 // Definir el array de idiomas
 $languages = [
@@ -58,7 +59,7 @@ if ($language_code === 'all') {
         JOIN wikipedia w ON a.site = w.site
         WHERE a.creation_date >= '$start_date'
             AND a.creation_date <= '$end_date'
-            AND a.creator_username = '$creator_username'
+            AND a.creator_username = '$username'
     ";
 } else {
     $sql = "
@@ -74,7 +75,7 @@ if ($language_code === 'all') {
         WHERE a.site = '{$languages[$language_code]['wiki']}'
             AND a.creation_date >= '$start_date'
             AND a.creation_date <= '$end_date'
-            AND a.creator_username = '$creator_username'
+            AND a.creator_username = '$username'
     ";
 }
 
