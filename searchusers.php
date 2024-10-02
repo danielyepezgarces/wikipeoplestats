@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <!-- Start Date Input -->
             <div class="flex items-center col-span-1">
-                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_start_date_label'); ?> (opcional)</label>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_start_date_label'); ?></label>
                 <span class="ml-1 cursor-pointer" title="Select the project start date.">
                     <i class="fas fa-question-circle text-gray-500"></i>
                 </span>
@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <!-- End Date Input -->
             <div class="flex items-center col-span-1">
-                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_end_date_label'); ?> (opcional)</label>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_end_date_label'); ?></label>
                 <span class="ml-1 cursor-pointer" title="Select the project end date.">
                     <i class="fas fa-question-circle text-gray-500"></i>
                 </span>
