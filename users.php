@@ -105,7 +105,13 @@ $lastUpdated = $data['lastUpdated'];
     <?php include 'header.php'; // Incluir el encabezado ?>
 
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+    <main class="container mx-auto px-4 py-8">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
+        <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
+        <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-users text-3xl text-blue-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total People</h3>
@@ -131,6 +137,7 @@ $lastUpdated = $data['lastUpdated'];
     </div>
 </div>
 
+</div>
 
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $errorMessage; ?>
