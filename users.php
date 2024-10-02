@@ -19,6 +19,9 @@ if (!empty($start_date)) {
         $url .= "/{$end_date}";
     }
 }
+
+echo url; 
+
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -39,7 +42,6 @@ curl_close($ch);
 // Decodificar la respuesta JSON
 $data = json_decode($response, true);
 
-echo data;
 
 // Verificar si hay un error en la respuesta
 if (isset($data['error']) && $data['error'] === 'No data found') {
