@@ -84,6 +84,7 @@ $lastUpdated = $data['lastUpdated'];
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
     #chartContainer {
         width: 100%; /* O cualquier ancho deseado */
@@ -152,9 +153,7 @@ $lastUpdated = $data['lastUpdated'];
     </div>
 </div>
 
-<div class="mt-8" id="chartContainer">
-        <canvas id="myChart"></canvas>
-    </div>
+<div class="mt-8" id="chartContainer"></div> <!-- Cambiado a div -->
 
 
 </div>
@@ -186,96 +185,77 @@ $lastUpdated = $data['lastUpdated'];
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Obtener los datos de la API
         async function fetchData() {
             try {
                 const response = await fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
                 const data = await response.json();
 
-                // Verifica que hay datos
-                if (data.data.length === 0) {
-                    console.error('No se encontraron datos.');
-                    return;
-                }
-
                 // Filtrar datos para obtener solo los meses relevantes
                 const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);
                 const filteredData = data.data.slice(firstNonZeroIndex);
 
-                // Verifica que hay datos filtrados
+                // Verificar que hay datos filtrados
                 if (filteredData.length === 0) {
                     console.error('No hay datos válidos para mostrar.');
                     return;
                 }
 
-                // Crear el gráfico
-                createChart(filteredData);
+                // Configuración del gráfico
+                const options = {
+                    chart: {
+                        type: 'line',
+                        height: 400,
+                    },
+                    series: [
+                        {
+                            name: 'Total',
+                            data: filteredData.map(item => item.total)
+                        },
+                        {
+                            name: 'Total Women',
+                            data: filteredData.map(item => item.totalWomen)
+                        },
+                        {
+                            name: 'Total Men',
+                            data: filteredData.map(item => item.totalMen)
+                        },
+                        {
+                            name: 'Other Genders',
+                            data: filteredData.map(item => item.otherGenders)
+                        }
+                    ],
+                    xaxis: {
+                        categories: filteredData.map(item => `${item.year}-${item.month}`),
+                        title: {
+                            text: 'Mes'
+                        }
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Cantidad'
+                        }
+                    },
+                    tooltip: {
+                        shared: true,
+                        intersect: false,
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                };
+
+                // Crear y renderizar el gráfico
+                const chart = new ApexCharts(document.querySelector("#chartContainer"), options);
+                chart.render();
             } catch (error) {
                 console.error('Error al obtener datos:', error);
             }
         }
 
-        // Función para crear el gráfico
-        function createChart(filteredData) {
-            const ctx = document.getElementById('myChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: filteredData.map(item => `${item.year}-${item.month}`),
-                    datasets: [
-                        {
-                            label: 'Total',
-                            data: filteredData.map(item => item.total),
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Total Women',
-                            data: filteredData.map(item => item.totalWomen),
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Total Men',
-                            data: filteredData.map(item => item.totalMen),
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Other Genders',
-                            data: filteredData.map(item => item.otherGenders),
-                            borderColor: 'rgba(153, 102, 255, 1)',
-                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        },
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'month'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
         // Llamar a la función para obtener datos
         fetchData();
     </script>
-
     <script>
 
 
