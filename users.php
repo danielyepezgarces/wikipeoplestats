@@ -187,7 +187,6 @@ $lastUpdated = $data['lastUpdated'];
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
 <script>
     // Obtener los datos de la API
     fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')
@@ -256,16 +255,6 @@ $lastUpdated = $data['lastUpdated'];
                             right: 0,
                             top: 0,
                             bottom: 0
-                        }
-                    },
-                    plugins: {
-                        zoom: {
-                            zoom: {
-                                wheel: {
-                                    enabled: true
-                                },
-                                mode: 'x'
-                            }
                         }
                     }
                 }
