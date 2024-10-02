@@ -115,13 +115,6 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 // Obtener y formatear la última actualización
 $lastUpdated = $data['lastUpdated'];
-
-// Imprimir los valores de las variables para depuración
-echo "Total People: " . $totalPeople . "<br>";
-echo "Total Women: " . $totalWomen . "<br>";
-echo "Total Men: " . $totalMen . "<br>";
-echo "Other Genders: " . $otherGenders . "<br>";
-
 ?>
 
 <!DOCTYPE html>
