@@ -185,7 +185,6 @@ $lastUpdated = $data['lastUpdated'];
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Obtener los datos de la API
@@ -261,7 +260,6 @@ $lastUpdated = $data['lastUpdated'];
             });
         });
 </script>
-
 
 
 
