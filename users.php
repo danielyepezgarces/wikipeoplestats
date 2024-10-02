@@ -6,6 +6,20 @@ $username = isset($_GET['username']) ? $_GET['username'] : '';
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
+// Obtener el creation_date de la wiki seleccionada
+$language = array_filter($languages, function($lang) use ($project) {
+    return strpos($project, $lang['code']) !== false; // Comprobar si el código está en el input
+});
+$creation_date = !empty($language) ? reset($language)['creation_date'] : '';
+
+// Establecer start_date y end_date
+if (empty($start_date)) {
+    $start_date = $creation_date; // Usar la fecha de creación si no se proporciona start_date
+}
+if (empty($end_date)) {
+    $end_date = date('Y-m-d'); // Usar la fecha actual si no se proporciona end_date
+}
+
 // Inicializar cURL
 $ch = curl_init();
 
