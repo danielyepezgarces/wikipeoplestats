@@ -212,9 +212,10 @@ $lastUpdated = $data['lastUpdated'];
         }
 
         function calculateCumulative(data, key) {
-            return data.map((item, index) => {
-                const sum = data.slice(0, index + 1).reduce((acc, curr) => acc + curr[key], 0);
-                return sum;
+            let cumulativeSum = 0;
+            return data.map(item => {
+                cumulativeSum += item[key];
+                return cumulativeSum;
             });
         }
 
