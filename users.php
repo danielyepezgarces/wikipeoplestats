@@ -140,6 +140,10 @@ $lastUpdated = $data['lastUpdated'];
         </p>
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
     </div>
+
+    <div class="mt-8">
+        <canvas id="myChart"></canvas>
+    </div>
 </div>
 
 
@@ -174,6 +178,60 @@ $lastUpdated = $data['lastUpdated'];
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    // Obtener los datos de la API
+    fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')
+        .then(response => response.json())
+        .then(data => {
+            // Crear el gráfico
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.data.map(item => `${item.year}-${item.month}`),
+                    datasets: [
+                        {
+                            label: 'Total',
+                            data: data.data.map(item => item.total),
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Women',
+                            data: data.data.map(item => item.totalWomen),
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Men',
+                            data: data.data.map(item => item.totalMen),
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Other Genders',
+                            data: data.data.map(item => item.otherGenders),
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+</script>
     <script>
 
 
