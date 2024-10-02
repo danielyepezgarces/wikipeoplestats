@@ -149,13 +149,11 @@ $lastUpdated = $data['lastUpdated'];
         </p>
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
     </div>
-
-    <div class="mt-8" id="chartContainer">
-        <canvas id="myChart"></canvas>
-    </div>
-
 </div>
 
+<div class="mt-8" id="chartContainer">
+        <canvas id="myChart"></canvas>
+    </div>
 
 
 </div>
