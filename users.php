@@ -188,7 +188,6 @@ $lastUpdated = $data['lastUpdated'];
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
-<script src="https://cdn.jsdelivr.net/npm/hammerjs"></script>
 <script>
     // Obtener los datos de la API
     fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')
@@ -235,10 +234,6 @@ $lastUpdated = $data['lastUpdated'];
                                 pinch: {
                                     enabled: true
                                 },
-                                mode: 'x'
-                            },
-                            pan: {
-                                enabled: true,
                                 mode: 'x'
                             }
                         }
