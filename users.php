@@ -20,7 +20,6 @@ if (!empty($start_date)) {
     }
 }
 
-echo url; 
 
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -42,7 +41,8 @@ curl_close($ch);
 // Decodificar la respuesta JSON
 $data = json_decode($response, true);
 
-
+var_dump($url);
+var_dump($data);
 // Verificar si hay un error en la respuesta
 if (isset($data['error']) && $data['error'] === 'No data found') {
     // Asignar cero a todas las estadísticas
