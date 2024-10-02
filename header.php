@@ -12,11 +12,11 @@
 
             <!-- Desktop Menu -->
             <nav class="hidden md:flex space-x-4">
-            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="block ..."><?php echo __('home'); ?></a>
-    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="block ..."><?php echo __('genders'); ?></a>
-    <a href="#" class="block ..."><?php echo __('countries'); ?></a>
-    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="block ..."><?php echo __('users'); ?></a>
-    <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="block ..."><?php echo __('source_code'); ?></a>
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('home'); ?></a>
+    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('genders'); ?></a>
+    <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('countries'); ?></a>
+    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('users'); ?></a>
+    <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('source_code'); ?></a>
 </nav>
 
 
