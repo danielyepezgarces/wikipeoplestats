@@ -120,7 +120,9 @@ $lastUpdated = $data['lastUpdated'];
             echo sprintf(__('welcome_user_message'), $username, $project); 
         ?>
     </h1>
-    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
+    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300">
+    <?php echo sprintf(__('main_user_content'), $username, $project); ?>
+    </p>
 </div>
 
 
