@@ -1,6 +1,80 @@
 <?php
 include 'languages.php'; // Cargar idiomas y traducciones
 
+$project = isset($_GET['project']) ? $_GET['project'] : '';
+$project = $conn->real_escape_string($project);
+$username = isset($_GET['username']) ? $_GET['username'] : '';
+$username = $conn->real_escape_string($username);
+$start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
+$end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
+
+// Inicializar cURL
+$ch = curl_init();
+
+// Configurar la URL y las opciones de cURL
+$url = "https://wikipeoplestats.toolforge.org/api/users/stats/{$project}/{$username}";
+if (!empty($start_date)) {
+    $url .= "/{$start_date}";
+    if (!empty($end_date)) {
+        $url .= "/{$end_date}";
+    }
+}
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "User-Agent: WikiStatsPeople/1.0"
+]);
+
+// Ejecutar la solicitud
+$response = curl_exec($ch);
+
+// Verificar si hubo un error
+if (curl_errno($ch)) {
+    die("Error al acceder a la API: " . curl_error($ch));
+}
+
+// Cerrar cURL
+curl_close($ch);
+
+// Decodificar la respuesta JSON
+$data = json_decode($response, true);
+
+// Verificar si hay un error en la respuesta
+if (isset($data['error']) && $data['error'] === 'No data found') {
+    // Asignar cero a todas las estadísticas
+    $totalPeople = 0;
+    $totalWomen = 0;
+    $totalMen = 0;
+    $otherGenders = 0;
+    $totalContributions = 0;
+    $errorMessage = __('coming_soon_tracking_wiki');
+} else {
+    // Asignar los valores de la respuesta
+    $totalPeople = $data['totalPeople'] ?? 0;
+    $totalWomen = $data['totalWomen'] ?? 0;
+    $totalMen = $data['totalMen'] ?? 0;
+    $otherGenders = $data['otherGenders'] ?? 0;
+    $totalContributions = $data['totalContributions'] ?? 0;
+
+    // Mensaje de éxito según la wiki
+    if ($project === 'all') {
+        $errorMessage = __('homepage_global_stats_credits');
+    } else {
+        $lastUpdated = isset($data['last_updated']) ? $data['last_updated'] : 'N/A';
+        $errorMessage = sprintf(
+            __('homepage_stats_credits'),
+            str_replace('wiki', '.wikipedia', $project)
+        ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
+    }
+}
+
+// Calcular los ratios
+$ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
+$ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
+$ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
+
+// Obtener y formatear la última actualización
+$lastUpdated = $data['lastUpdated'];
 ?>
 
 <!DOCTYPE html>
