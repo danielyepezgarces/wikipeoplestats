@@ -59,11 +59,21 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
         $errorMessage = __('homepage_global_stats_credits');
     } else {
         $lastUpdated = isset($data['last_updated']) ? $data['last_updated'] : 'N/A';
+    
+        // Reemplazar cualquier variación de wiki a .wikipedia.org
+        $formattedProject = preg_replace('/^(.*?)(\.wiki|wiki)$/', '$1.wikipedia.org', $project);
+    
+        // En caso de que el formato ya sea correcto (por ejemplo, ya contiene .wikipedia.org)
+        if (!preg_match('/\.wikipedia\.org$/', $formattedProject)) {
+            $formattedProject .= '.org'; // Añadir .org si no está presente
+        }
+    
         $errorMessage = sprintf(
             __('homepage_stats_credits'),
-            str_replace('wiki', '.wikipedia', $project)
+            $formattedProject
         ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
     }
+    
 }
 
 // Calcular los ratios
