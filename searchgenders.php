@@ -29,40 +29,40 @@ include 'languages.php'; // Cargar idiomas y traducciones
     <?php include 'header.php'; // Incluir el encabezado ?>
 
     <main class="container mx-auto px-4 py-8">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full max-w-2xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
         <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('input_section_intro'); ?></p>
-        
-        <form class="mt-6 space-y-4" onsubmit="return redirectToUrl()">
+
+        <form class="mt-6 grid grid-cols-3 gap-4" onsubmit="return redirectToUrl()">
             <!-- Project Input -->
-            <div class="flex items-center mb-4">
-                <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_project_label'); ?></label>
+            <div class="flex items-center col-span-1">
+                <label for="project" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_project_label'); ?></label>
                 <span class="ml-1 cursor-pointer" title="Provide the name of the project.">
                     <i class="fas fa-question-circle text-gray-500"></i>
                 </span>
-                <input type="text" id="project" name="project" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 h-10 ml-2" required oninput="autocompleteWiki(this)">
             </div>
+            <input type="text" id="project" name="project" class="mt-1 block w-full col-span-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 h-10 appearance-none" required oninput="autocompleteWiki(this)">
 
             <!-- Start Date Input -->
-            <div class="flex items-center mb-4">
-                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_start_date_label'); ?> (opcional)</label>
+            <div class="flex items-center col-span-1">
+                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_start_date_label'); ?> (opcional)</label>
                 <span class="ml-1 cursor-pointer" title="Select the project start date.">
                     <i class="fas fa-question-circle text-gray-500"></i>
                 </span>
-                <input type="date" id="start_date" name="start_date" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 ml-2">
             </div>
+            <input type="date" id="start_date" name="start_date" class="mt-1 block w-full col-span-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 appearance-none">
 
             <!-- End Date Input -->
-            <div class="flex items-center mb-4">
-                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 w-1/3"><?php echo __('input_end_date_label'); ?> (opcional)</label>
+            <div class="flex items-center col-span-1">
+                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300"><?php echo __('input_end_date_label'); ?> (opcional)</label>
                 <span class="ml-1 cursor-pointer" title="Select the project end date.">
                     <i class="fas fa-question-circle text-gray-500"></i>
                 </span>
-                <input type="date" id="end_date" name="end_date" class="mt-1 block w-1/2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 ml-2">
             </div>
+            <input type="date" id="end_date" name="end_date" class="mt-1 block w-full col-span-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring focus:ring-primary-500 appearance-none">
 
-            <div class="flex items-center justify-center">
-                <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
+            <div class="col-span-3 flex items-center justify-center">
+                <button type="submit" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300 shadow-md hover:shadow-lg">
                     <?php echo __('submit_button'); ?>
                 </button>
             </div>
