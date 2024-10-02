@@ -186,81 +186,75 @@ $lastUpdated = $data['lastUpdated'];
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Obtener los datos de la API
-    fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')
-        .then(response => response.json())
-        .then(data => {
-            // Encontrar el índice del primer data point con valores no nulos
-            let firstNonZeroIndex = data.data.findIndex(item => item.total !== 0 || item.totalWomen !== 0 || item.totalMen !== 0 || item.otherGenders !== 0);
+    <script>
+        // Obtener los datos de la API
+        fetch('https://wikipeoplestats.toolforge.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Verifica que los datos se están obteniendo
 
-            // Filtrar los datos para ocultar los meses antes del primer data point con valores no nulos
-            const filteredData = data.data.slice(firstNonZeroIndex);
+                // Encontrar el índice del primer data point con valores no nulos
+                let firstNonZeroIndex = data.data.findIndex(item => item.total !== 0 || item.totalWomen !== 0 || item.totalMen !== 0 || item.otherGenders !== 0);
 
-            // Crear el gráfico
-            const ctx = document.getElementById('myChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: filteredData.map(item => `${item.year}-${item.month}`),
-                    datasets: [
-                        {
-                            label: 'Total',
-                            data: filteredData.map(item => item.total),
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Total Women',
-                            data: filteredData.map(item => item.totalWomen),
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Total Men',
-                            data: filteredData.map(item => item.totalMen),
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Other Genders',
-                            data: filteredData.map(item => item.otherGenders),
-                            borderColor: 'rgba(153, 102, 255, 1)',
-                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        },
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'month'
+                // Filtrar los datos para ocultar los meses antes del primer data point con valores no nulos
+                const filteredData = data.data.slice(firstNonZeroIndex);
+                console.log(filteredData); // Verifica los datos filtrados
+
+                // Crear el gráfico
+                const ctx = document.getElementById('myChart').getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: filteredData.map(item => `${item.year}-${item.month}`),
+                        datasets: [
+                            {
+                                label: 'Total',
+                                data: filteredData.map(item => item.total),
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Total Women',
+                                data: filteredData.map(item => item.totalWomen),
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Total Men',
+                                data: filteredData.map(item => item.totalMen),
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Other Genders',
+                                data: filteredData.map(item => item.otherGenders),
+                                borderColor: 'rgba(153, 102, 255, 1)',
+                                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            },
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'month'
+                                }
                             }
                         }
-                    },
-                    layout: {
-                        padding: {
-                            left: 0,
-                            right: 0,
-                            top: 0,
-                            bottom: 0
-                        }
                     }
-                }
-            });
-        });
-</script>
-
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
 
 
     <script>
