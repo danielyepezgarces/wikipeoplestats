@@ -42,7 +42,7 @@ curl_close($ch);
 $data = json_decode($response, true);
 
 var_dump($url);
-var_dump($data);
+var_dump($datas);
 // Verificar si hay un error en la respuesta
 if (isset($data['error']) && $data['error'] === 'No data found') {
     // Asignar cero a todas las estadísticas
@@ -105,13 +105,7 @@ $lastUpdated = $data['lastUpdated'];
     <?php include 'header.php'; // Incluir el encabezado ?>
 
     
-    <main class="container mx-auto px-4 py-8">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-        <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
-        <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-users text-3xl text-blue-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total People</h3>
@@ -136,6 +130,7 @@ $lastUpdated = $data['lastUpdated'];
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
     </div>
 </div>
+
 
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $errorMessage; ?>
