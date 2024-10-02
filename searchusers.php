@@ -12,6 +12,9 @@ include 'languages.php'; // Cargar idiomas y traducciones
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        const currentLanguage = "<?php echo \$currentLang['code']; ?>";
+    </script>
+    <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -103,37 +106,36 @@ include 'languages.php'; // Cargar idiomas y traducciones
     </div>
 
     <script>
-function redirectToUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const language = urlParams.get('lang');
-    const project = document.getElementById('project').value;
-    const username = document.getElementById('username').value;
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
+        function redirectToUrl() {
+            const language = currentLanguage;
+            const project = document.getElementById('project').value;
+            const username = document.getElementById('username').value;
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
 
-    // Crear la URL base
-    let url = `/genders/${project}/${username}`;
+            // Crear la URL base
+            let url = `/genders/${project}/${username}`;
 
-    // Agregar el parámetro de idioma si no es "all"
-    if (language && language !== 'all') {
-        url = `/${language}${url}`;
-    }
+            // Agregar el parámetro de idioma si no es "all"
+            if (language !== 'all') {
+                url = `/${language}${url}`;
+            }
 
-    // Lógica para manejar las fechas
-    if (startDate && endDate) {
-        url += `/${startDate}/${endDate}`;
-    } else if (startDate) {
-        url += `/${startDate}/`;
-    } else if (endDate) {
-        url += `//${endDate}`; // Aquí pasamos la barra vacía
-    } else {
-        url += `/`; // Pasamos una barra si no hay parámetros de fecha
-    }
+            // Lógica para manejar las fechas
+            if (startDate && endDate) {
+                url += `/${startDate}/${endDate}`;
+            } else if (startDate) {
+                url += `/${startDate}/`;
+            } else if (endDate) {
+                url += `//${endDate}`; // Aquí pasamos la barra vacía
+            } else {
+                url += `/`; // Pasamos una barra si no hay parámetros de fecha
+            }
 
-    // Redirigir a la nueva URL
-    window.location.href = url;
-    return false; // Prevenir el envío del formulario
-}
+            // Redirigir a la nueva URL
+            window.location.href = url;
+            return false; // Prevenir el envío del formulario
+        }
 
 </script>
   <script>
