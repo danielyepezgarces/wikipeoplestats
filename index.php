@@ -95,6 +95,7 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $totalMen = $data['totalMen'] ?? 0;
     $otherGenders = $data['otherGenders'] ?? 0;
     $totalContributions = $data['totalContributions'] ?? 0;
+    $lastUpdated = $data['lastUpdated'] ?? "N/A";
 
 // Mensaje de éxito según la wiki
 if ($currentWiki === 'globalwiki') {
@@ -114,7 +115,6 @@ $ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
 $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
 
 // Obtener y formatear la última actualización
-$lastUpdated = $data['lastUpdated'];
 ?>
 
 <!DOCTYPE html>
