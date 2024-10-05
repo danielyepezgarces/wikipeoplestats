@@ -1,4 +1,6 @@
 <?php
+error_reporting( -1 );
+ini_set( 'display_errors', 1 );
 include 'languages.php'; // Cargar idiomas y traducciones
 
 $project = isset($_GET['project']) ? $_GET['project'] : '';
@@ -193,7 +195,7 @@ $lastUpdated = $data['lastUpdated'];
 
         async function fetchData() {
             try {
-                const response = await fetch('https://wikipeoplestats.toolforge.org/api/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
+                const response = await fetch('https://wikipeoplestats.toolforge.org/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
                 const data = await response.json();
 
                 const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);
