@@ -190,8 +190,19 @@ $lastUpdated = $data['lastUpdated'];
     </main>
 
     <script>
+        const currentLang = '<?php echo $currentLang['code']; ?>';
         let isCumulative = false; // Estado inicial
-        let chart; // Variable para almacenar la instancia del gráfico
+        let chart; // Variable para almacenar la instancia del 
+        let translations = {}; // Objeto para almacenar las traducciones
+
+async function loadTranslations(locale) {
+    try {
+        const response = await fetch(`languages/${locale}.json`);
+        translations = await response.json();
+    } catch (error) {
+        console.error('Error al cargar las traducciones:', error);
+    }
+}
 
         async function fetchData() {
             try {
@@ -232,22 +243,24 @@ $lastUpdated = $data['lastUpdated'];
                 chart: {
                     type: 'line',
                     height: 400,
+                    locales: [translations],
+                    defaultLocale: currentLang,
                 },
                 series: [
                     {
-                        name: 'Total',
+                        name: '<?php echo __('total_graph'); ?>',
                         data: isCumulative ? calculateCumulative(filteredData, 'total') : filteredData.map(item => item.total)
                     },
                     {
-                        name: 'Total Women',
+                        name: '<?php echo __('total_women'); ?>',
                         data: isCumulative ? calculateCumulative(filteredData, 'totalWomen') : filteredData.map(item => item.totalWomen)
                     },
                     {
-                        name: 'Total Men',
+                        name: '<?php echo __('total_men'); ?>',
                         data: isCumulative ? calculateCumulative(filteredData, 'totalMen') : filteredData.map(item => item.totalMen)
                     },
                     {
-                        name: 'Other Genders',
+                        name: '<?php echo __('other_genders'); ?>',
                         data: isCumulative ? calculateCumulative(filteredData, 'otherGenders') : filteredData.map(item => item.otherGenders)
                     }
                 ],
