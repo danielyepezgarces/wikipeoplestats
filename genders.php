@@ -243,7 +243,7 @@ async function loadTranslations(locale) {
                 chart: {
                     type: 'line',
                     height: 400,
-                    locales: [translations],
+                    locales: currentLang,
                     defaultLocale: currentLang,
                 },
                 series: [
