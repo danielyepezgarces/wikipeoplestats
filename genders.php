@@ -486,12 +486,12 @@ async function loadTranslations(locale) {
                 xaxis: {
                     categories: filteredData.map(item => `${item.year}-${item.month}`),
                     title: {
-                        text: 'Mes'
+                        text: '<?php echo __('timeline_graph'); ?>'
                     }
                 },
                 yaxis: {
                     title: {
-                        text: 'Cantidad'
+                        text: '<?php echo __('quantity_graph'); ?>'
                     }
                 },
                 tooltip: {
