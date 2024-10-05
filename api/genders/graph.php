@@ -1,5 +1,5 @@
 <?php
-header("Content-Type: text/plain"); // Cambiado a texto plano para ver la salida
+header("Content-Type: application/json");
 
 include '../../config.php';
 
@@ -27,21 +27,21 @@ $languages = [
 // Buscar el código de idioma correspondiente al proyecto
 $language_code = array_search($project, array_column($languages, 'wiki'));
 
+// Si no se encuentra el código de idioma, buscar por el formato "es.wikipedia"
 if ($language_code === false) {
     $language_code = array_search($project . 'wiki', array_column($languages, 'wiki'));
 }
 
+// Si no se encuentra el código de idioma, buscar por el formato "es.wikipedia.org"
 if ($language_code === false) {
     $language_code = array_search(str_replace('.wikipedia.org', 'wiki', $project), array_column($languages, 'wiki'));
 }
 
+// Si no se encuentra el código de idioma, devolver un error
 if ($language_code === false) {
-    echo "Error: Invalid project\n";
+    echo json_encode(['error' => 'Invalid project']);
     exit;
 }
-
-// Imprimir el código de idioma
-echo "Language Code: $language_code\n";
 
 // Si no se proporcionan las fechas de inicio y fin, usar la fecha de creación de la wiki seleccionada y la fecha actual
 if (empty($start_date)) {
@@ -50,10 +50,6 @@ if (empty($start_date)) {
 if (empty($end_date)) {
     $end_date = date('Y-m-d');
 }
-
-// Imprimir fechas
-echo "Start Date: $start_date\n";
-echo "End Date: $end_date\n";
 
 // Generar una tabla de calendario para el rango de fechas especificado
 $start_year = (int)date('Y', strtotime($start_date));
@@ -72,10 +68,6 @@ for ($year = $start_year; $year <= $end_year; $year++) {
         ];
     }
 }
-
-// Imprimir el calendario
-echo "Calendar:\n";
-print_r($calendar);
 
 // Definir la consulta dependiendo del proyecto y las fechas
 if ($language_code === 'all') {
@@ -113,19 +105,10 @@ if ($language_code === 'all') {
     ";
 }
 
-// Imprimir la consulta SQL
-echo "SQL Query:\n$sql\n";
-
 $result = $conn->query($sql);
-if (!$result) {
-    echo "Error in query: " . $conn->error . "\n";
-    exit;
-}
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
-    // Imprimir cada fila obtenida
-    print_r($row);
     $data[] = [
         'year' => (int)$row['year'],
         'month' => (int)$row['month'],
@@ -135,10 +118,6 @@ while ($row = $result->fetch_assoc()) {
         'otherGenders' => (int)$row['otherGenders'],
     ];
 }
-
-// Imprimir los datos obtenidos
-echo "Data from database:\n";
-print_r($data);
 
 // Combinar los datos de la tabla de calendario con los datos de la consulta
 $combined_data = [];
@@ -163,14 +142,12 @@ foreach ($calendar as $date) {
     }
 }
 
-// Imprimir la respuesta final
-echo "Combined Data:\n";
-print_r($combined_data);
+// Generar respuesta
+$response = [
+    'data' => $combined_data,
+];
 
-// Generar respuesta en texto plano
-foreach ($combined_data as $entry) {
-    echo "Year: {$entry['year']}, Month: {$entry['month']}, Total: {$entry['total']}, Women: {$entry['totalWomen']}, Men: {$entry['totalMen']}, Other Genders: {$entry['otherGenders']}\n";
-}
+echo json_encode($response);
 
 $conn->close();
 ?>
