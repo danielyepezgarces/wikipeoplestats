@@ -23,7 +23,7 @@ if (empty($end_date)) {
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-$url = "https://wikipeoplestats.toolforge.org/api/stats/{$project}";
+$url = "https://wikipeoplestats.toolforge.org/api/genders/stats/{$project}";
 if (!empty($start_date)) {
     $url .= "/{$start_date}";
     if (!empty($end_date)) {
