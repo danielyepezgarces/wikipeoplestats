@@ -18,5 +18,9 @@
     "input_username_label": "Username",
     "input_start_date_label": "Start date <small>(optional)</small>",
     "input_end_date_label": "End date <small>(optional)</small>",
-    "welcome_user_message": "%s • %s"
+    "welcome_user_message": "%s • %s",
+    "total_people": "Total People",
+    "total_women": "Total Women",
+    "total_men": "Total Men",
+    "other_genders": "Other Genders"
   }

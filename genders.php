@@ -148,14 +148,14 @@ $lastUpdated = $data['lastUpdated'];
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-8">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
                 <i class="fas fa-users text-3xl text-blue-500 mb-2"></i>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total People</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_people'); ?></h3>
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalPeople)); ?>">
                     <?php echo number_format($totalPeople, 0, '', ' '); ?>
                 </p>
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
                 <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Women</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_woman'); ?></h3>
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">
                     <?php echo number_format($totalWomen, 0, '', ' '); ?>
                 </p>
@@ -163,7 +163,7 @@ $lastUpdated = $data['lastUpdated'];
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
                 <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Men</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_men'); ?></h3>
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">
                     <?php echo number_format($totalMen, 0, '', ' '); ?>
                 </p>
@@ -171,7 +171,7 @@ $lastUpdated = $data['lastUpdated'];
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
                 <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Other Genders</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('other_genders'); ?></h3>
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">
                     <?php echo number_format($otherGenders, 0, '', ' '); ?>
                 </p>
