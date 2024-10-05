@@ -155,7 +155,7 @@ $lastUpdated = $data['lastUpdated'];
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
                 <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_woman'); ?></h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_women'); ?></h3>
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">
                     <?php echo number_format($totalWomen, 0, '', ' '); ?>
                 </p>
@@ -196,6 +196,7 @@ $lastUpdated = $data['lastUpdated'];
         async function fetchData() {
             try {
                 const response = await fetch('https://wikipeoplestats.toolforge.org/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
+                console.log(response)
                 const data = await response.json();
 
                 const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);
