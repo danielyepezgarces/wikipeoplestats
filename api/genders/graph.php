@@ -27,21 +27,21 @@ $languages = [
 // Buscar el código de idioma correspondiente al proyecto
 $language_code = array_search($project, array_column($languages, 'wiki'));
 
-// Si no se encuentra el código de idioma, buscar por el formato "es.wikipedia"
 if ($language_code === false) {
     $language_code = array_search($project . 'wiki', array_column($languages, 'wiki'));
 }
 
-// Si no se encuentra el código de idioma, buscar por el formato "es.wikipedia.org"
 if ($language_code === false) {
     $language_code = array_search(str_replace('.wikipedia.org', 'wiki', $project), array_column($languages, 'wiki'));
 }
 
-// Si no se encuentra el código de idioma, devolver un error
 if ($language_code === false) {
     echo json_encode(['error' => 'Invalid project']);
     exit;
 }
+
+// Imprimir el código de idioma
+echo "Language Code: $language_code\n";
 
 // Si no se proporcionan las fechas de inicio y fin, usar la fecha de creación de la wiki seleccionada y la fecha actual
 if (empty($start_date)) {
@@ -50,6 +50,10 @@ if (empty($start_date)) {
 if (empty($end_date)) {
     $end_date = date('Y-m-d');
 }
+
+// Imprimir fechas
+echo "Start Date: $start_date\n";
+echo "End Date: $end_date\n";
 
 // Generar una tabla de calendario para el rango de fechas especificado
 $start_year = (int)date('Y', strtotime($start_date));
@@ -68,6 +72,9 @@ for ($year = $start_year; $year <= $end_year; $year++) {
         ];
     }
 }
+
+// Imprimir el calendario
+var_dump($calendar);
 
 // Definir la consulta dependiendo del proyecto y las fechas
 if ($language_code === 'all') {
@@ -105,10 +112,19 @@ if ($language_code === 'all') {
     ";
 }
 
+// Imprimir la consulta SQL
+echo "SQL Query: $sql\n";
+
 $result = $conn->query($sql);
+if (!$result) {
+    echo json_encode(['error' => $conn->error]);
+    exit;
+}
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
+    // Imprimir cada fila obtenida
+    var_dump($row);
     $data[] = [
         'year' => (int)$row['year'],
         'month' => (int)$row['month'],
@@ -118,6 +134,9 @@ while ($row = $result->fetch_assoc()) {
         'otherGenders' => (int)$row['otherGenders'],
     ];
 }
+
+// Imprimir los datos obtenidos
+var_dump($data);
 
 // Combinar los datos de la tabla de calendario con los datos de la consulta
 $combined_data = [];
@@ -146,6 +165,9 @@ foreach ($calendar as $date) {
 $response = [
     'data' => $combined_data,
 ];
+
+// Imprimir la respuesta final
+var_dump($response);
 
 echo json_encode($response);
 
