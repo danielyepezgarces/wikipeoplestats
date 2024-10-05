@@ -1,5 +1,5 @@
 <?php
-//header("Content-Type: application/json");
+header("Content-Type: text/plain"); // Cambiado a texto plano para ver la salida
 
 include '../../config.php';
 
@@ -36,7 +36,7 @@ if ($language_code === false) {
 }
 
 if ($language_code === false) {
-    echo json_encode(['error' => 'Invalid project']);
+    echo "Error: Invalid project\n";
     exit;
 }
 
@@ -74,7 +74,8 @@ for ($year = $start_year; $year <= $end_year; $year++) {
 }
 
 // Imprimir el calendario
-var_dump($calendar);
+echo "Calendar:\n";
+print_r($calendar);
 
 // Definir la consulta dependiendo del proyecto y las fechas
 if ($language_code === 'all') {
@@ -113,18 +114,18 @@ if ($language_code === 'all') {
 }
 
 // Imprimir la consulta SQL
-echo "SQL Query: $sql\n";
+echo "SQL Query:\n$sql\n";
 
 $result = $conn->query($sql);
 if (!$result) {
-    echo json_encode(['error' => $conn->error]);
+    echo "Error in query: " . $conn->error . "\n";
     exit;
 }
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
     // Imprimir cada fila obtenida
-    var_dump($row);
+    print_r($row);
     $data[] = [
         'year' => (int)$row['year'],
         'month' => (int)$row['month'],
@@ -136,7 +137,8 @@ while ($row = $result->fetch_assoc()) {
 }
 
 // Imprimir los datos obtenidos
-var_dump($data);
+echo "Data from database:\n";
+print_r($data);
 
 // Combinar los datos de la tabla de calendario con los datos de la consulta
 $combined_data = [];
@@ -161,15 +163,14 @@ foreach ($calendar as $date) {
     }
 }
 
-// Generar respuesta
-$response = [
-    'data' => $combined_data,
-];
-
 // Imprimir la respuesta final
-var_dump($response);
+echo "Combined Data:\n";
+print_r($combined_data);
 
-echo json_encode($response);
+// Generar respuesta en texto plano
+foreach ($combined_data as $entry) {
+    echo "Year: {$entry['year']}, Month: {$entry['month']}, Total: {$entry['total']}, Women: {$entry['totalWomen']}, Men: {$entry['totalMen']}, Other Genders: {$entry['otherGenders']}\n";
+}
 
 $conn->close();
 ?>
