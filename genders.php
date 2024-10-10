@@ -25,7 +25,7 @@ if (empty($end_date)) {
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-$url = "https://wikipeoplestats.toolforge.org/api/genders/stats/{$project}";
+$url = "https://wikipeoplestats.danielyepezgarces.com.co/api/genders/stats/{$project}";
 if (!empty($start_date)) {
     $url .= "/{$start_date}";
     if (!empty($end_date)) {
@@ -204,7 +204,7 @@ async function loadTranslations(locale) {
 
         async function fetchData() {
             try {
-                const response = await fetch('https://wikipeoplestats.toolforge.org/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
+                const response = await fetch('https://wikipeoplestats.danielyepezgarces.com.co/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
                 console.log(response)
                 const data = await response.json();
 
