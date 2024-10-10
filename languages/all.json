@@ -13,6 +13,7 @@
   "current_date": "Current date:",
   "select_language": "Select Language",
   "homepage_stats_credits": "These statistics are from %s.",
+  "homepage_global_stats_credits": "These statistics are from all wikipedias.",
   "coming_soon_tracking_wiki": "This wiki has not yet been tracked by our system and the data will be available soon.",
   "homepage_stats_last_update": "Last updated",
   "submit_button": "Submit",
