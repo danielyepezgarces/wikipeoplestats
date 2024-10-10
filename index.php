@@ -1,5 +1,8 @@
 <?php
 
+error_reporting( -1 );
+ini_set( 'display_errors', 1 );
+
 // Available languages (expanded for demonstration)
 $languages = [
     ['code' => 'all', 'name' => 'All Wikipedias', 'flag' => '🌐', 'date_format' => 'l, F j, Y', 'wiki' => 'globalwiki'],
