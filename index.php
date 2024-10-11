@@ -114,6 +114,20 @@ $ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
 $ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
 $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
 
+// Suma los porcentajes
+$totalPercentage = $ratioWomen + $ratioMen + $ratioOtherGenders;
+
+// Si la suma no es 100, ajusta el último porcentaje
+if ($totalPercentage < 100) {
+    $ratioOtherGenders += (100 - $totalPercentage);
+}
+
+// Ahora puedes imprimir o usar los ratios
+echo "Porcentaje de Mujeres: $ratioWomen%\n";
+echo "Porcentaje de Hombres: $ratioMen%\n";
+echo "Porcentaje de Otros Géneros: $ratioOtherGenders%\n";
+
+
 // Obtener y formatear la última actualización
 ?>
 
