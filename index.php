@@ -121,13 +121,6 @@ $totalPercentage = $ratioWomen + $ratioMen + $ratioOtherGenders;
 if ($totalPercentage < 100) {
     $ratioOtherGenders += (100 - $totalPercentage);
 }
-
-// Ahora puedes imprimir o usar los ratios
-echo "Porcentaje de Mujeres: $ratioWomen%\n";
-echo "Porcentaje de Hombres: $ratioMen%\n";
-echo "Porcentaje de Otros Géneros: $ratioOtherGenders%\n";
-
-
 // Obtener y formatear la última actualización
 ?>
 
@@ -172,30 +165,45 @@ echo "Porcentaje de Otros Géneros: $ratioOtherGenders%\n";
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_people'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalPeople)); ?>">0</p>
     </div>
+    
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_women'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">0</p>
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-pink-500"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</span></p>
     </div>
+    
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_men'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">0</p>
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-blue-700"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</span></p>
     </div>
+    
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('other_genders'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-purple-500"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</span></p>
     </div>
+    
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-concierge-bell text-3xl text-green-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Users Contributions</h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
     </div>
+    
+    <div class="col-span-1 md:col-span-5 text-center mt-4">
+        <p class="text-lg font-bold">Total Percentages:</p>
+        <p class="text-lg">
+            <?php
+                $totalPercentage = number_format(($totalPeople > 0) ? (($totalWomen + $totalMen + $otherGenders) / $totalPeople) * 100 : 0, 2);
+                echo "Suma Total: <span class='font-bold'>$totalPercentage%</span>";
+            ?>
+        </p>
+    </div>
 </div>
+
 
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $errorMessage; ?>
