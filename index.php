@@ -149,7 +149,6 @@ if ($totalPercentage < 100) {
 </head>
 <body class="bg-gray-100 dark:bg-[#1a1a1a] text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-
 <?php include 'header.php'; // Incluir el encabezado ?>
 
     
@@ -191,16 +190,6 @@ if ($totalPercentage < 100) {
         <i class="fas fa-concierge-bell text-3xl text-green-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Users Contributions</h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
-    </div>
-    
-    <div class="col-span-1 md:col-span-5 text-center mt-4">
-        <p class="text-lg font-bold">Total Percentages:</p>
-        <p class="text-lg">
-            <?php
-                $totalPercentage = number_format(($totalPeople > 0) ? (($totalWomen + $totalMen + $otherGenders) / $totalPeople) * 100 : 0, 2);
-                echo "Suma Total: <span class='font-bold'>$totalPercentage%</span>";
-            ?>
-        </p>
     </div>
 </div>
 
