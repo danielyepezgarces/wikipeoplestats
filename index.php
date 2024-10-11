@@ -169,33 +169,21 @@ if ($totalPercentage < 100) {
         <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_women'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">0</p>
-<<<<<<< HEAD
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-pink-500"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</span></p>
-=======
         <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
->>>>>>> 079b990f797f2165ed86017db068a6d6ca908ce9
     </div>
     
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_men'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">0</p>
-<<<<<<< HEAD
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-blue-700"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</span></p>
-=======
         <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
->>>>>>> 079b990f797f2165ed86017db068a6d6ca908ce9
     </div>
     
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('other_genders'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
-<<<<<<< HEAD
-        <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-purple-500"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</span></p>
-=======
         <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
->>>>>>> 079b990f797f2165ed86017db068a6d6ca908ce9
     </div>
     
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
