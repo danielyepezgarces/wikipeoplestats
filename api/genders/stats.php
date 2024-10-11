@@ -46,13 +46,14 @@ if ($language_code === false) {
 // Definir la consulta dependiendo del proyecto y las fechas
 $sql = "
     SELECT
-        COUNT(DISTINCT p.wikidata_id) AS totalPeople,
+        COUNT(DISTINCT a.wikidata_id) AS totalPeople,
         SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
         SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-        SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') THEN 1 ELSE 0 END) AS otherGenders,
+        SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,
+        COUNT(DISTINCT a.creator_username) AS totalContributions,
         MAX(w.last_updated) AS lastUpdated
-    FROM people p
-    JOIN articles a ON p.wikidata_id = a.wikidata_id
+    FROM articles a
+    LEFT JOIN people p ON p.wikidata_id = a.wikidata_id
     JOIN wikipedia w ON a.site = w.site
     WHERE a.creation_date >= '$start_date'
         AND a.creation_date <= '$end_date'
@@ -61,6 +62,7 @@ $sql = "
 if ($language_code !== 'all') {
     $sql .= " AND a.site = '{$languages[$language_code]['wiki']}'";
 }
+
 
 $result = $conn->query($sql);
 
