@@ -130,9 +130,9 @@ if ($totalPercentage < 100) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('sitename'); ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/odometer/0.4.6/odometer.min.css">
+    <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/6.6.0/css/all.css">
+    <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -169,21 +169,33 @@ if ($totalPercentage < 100) {
         <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_women'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">0</p>
+<<<<<<< HEAD
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-pink-500"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</span></p>
+=======
+        <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
+>>>>>>> 079b990f797f2165ed86017db068a6d6ca908ce9
     </div>
     
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_men'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">0</p>
+<<<<<<< HEAD
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-blue-700"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</span></p>
+=======
+        <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
+>>>>>>> 079b990f797f2165ed86017db068a6d6ca908ce9
     </div>
     
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('other_genders'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
+<<<<<<< HEAD
         <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <span class="font-bold text-purple-500"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</span></p>
+=======
+        <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
+>>>>>>> 079b990f797f2165ed86017db068a6d6ca908ce9
     </div>
     
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
@@ -197,7 +209,58 @@ if ($totalPercentage < 100) {
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $errorMessage; ?>
 </p>
+
+
+<div class="py-6 sm:py-8 lg:py-12">
+    <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
+        <div class="mb-4 flex flex-col items-center md:mb-8 lg:flex-row lg:justify-between">
+            <h2 class="mb-2 text-center text-2xl font-bold text-gray-800 lg:mb-0 lg:text-3xl">Trusted by the Wikimedia chapters</h2>
+            <p class="max-w-md text-center text-gray-400 lg:text-right">Wikimedia chapters on this list trust and use the tool</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 rounded-lg md:grid-cols-3 lg:gap-6">
+            <!-- logo - start -->
+            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Imagotipo_Wikimedia_Colombia_Versi%C3%B3n_horizontal_%28negro%29_2023.svg" 
+                     alt="Wikimedia Colombia" 
+                     class="h-20 w-auto dark:invert" /> <!-- Cambié h-22 a h-16 -->
+            </div>
+            <!-- logo - end -->
+
+            <!-- logo - start -->
+            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
+                <!-- Vacío -->
+            </div>
+            <!-- logo - end -->
+
+            <!-- logo - start -->
+            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
+                <!-- Vacío -->
+            </div>
+            <!-- logo - end -->
+
+            <!-- logo - start -->
+            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
+                <!-- Vacío -->
+            </div>
+            <!-- logo - end -->
+
+            <!-- logo - start -->
+            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
+                <!-- Vacío -->
+            </div>
+            <!-- logo - end -->
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
 </main>
+
 
 
     <!-- Language Selector Popup -->

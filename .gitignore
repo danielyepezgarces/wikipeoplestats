@@ -1,1 +1,3 @@
 config.php
+.well-known/
+user.ini

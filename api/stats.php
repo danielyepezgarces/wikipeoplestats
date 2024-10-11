@@ -19,27 +19,29 @@ if ($project === 'all') {
             COUNT(DISTINCT p.wikidata_id) AS totalPeople,
             SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') THEN 1 ELSE 0 END) AS otherGenders,
+            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,  -- Incluye sin género
             (SELECT COUNT(DISTINCT creator_username) FROM articles) AS totalContributions,
             (SELECT MAX(last_updated) FROM wikipedia) AS lastUpdated
         FROM people p
     ";
 } else {
-    // Para proyectos específicos, contamos solo 'articles'
     $sql = "
         SELECT 
-            COUNT(DISTINCT p.wikidata_id) AS totalPeople,
+            COUNT(DISTINCT a.wikidata_id) AS totalPeople,  -- Total usando a.wikidata_id
             SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') THEN 1 ELSE 0 END) AS otherGenders,
+            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,  -- Incluye sin género
             COUNT(DISTINCT a.creator_username) AS totalContributions,
             MAX(w.last_updated) AS lastUpdated
-        FROM people p
-        JOIN articles a ON p.wikidata_id = a.wikidata_id
+        FROM articles a
+        LEFT JOIN people p ON p.wikidata_id = a.wikidata_id
         JOIN wikipedia w ON a.site = w.site
         WHERE a.site = '$project'
     ";
 }
+
+
+
 
 $result = $conn->query($sql);
 
