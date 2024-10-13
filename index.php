@@ -13,7 +13,6 @@ $languages = [
     ['code' => 'ru', 'name' => 'Русский', 'flag' => '🇷🇺', 'date_format' => 'l, j F Y', 'wiki' => 'ruwiki', 'creation_date' => '2001-05-20', 'text_direction' => 'ltr'],
     ['code' => 'ja', 'name' => '日本語', 'flag' => '🇯🇵', 'date_format' => 'Y年n月j日(l)', 'wiki' => 'jawiki', 'creation_date' => '2001-05-11', 'text_direction' => 'ltr'],
     ['code' => 'zh', 'name' => '中文', 'flag' => '🇨🇳', 'date_format' => 'Y年n月j日 l', 'wiki' => 'zhwiki', 'creation_date' => '2001-05-11', 'text_direction' => 'ltr'],
-    // Nuevas entradas
     ['code' => 'ko', 'name' => '한국어', 'flag' => '🇰🇷', 'date_format' => 'YYYY년 M월 D일 (ddd)', 'wiki' => 'kowiki', 'creation_date' => '2002-06-30', 'text_direction' => 'ltr'],
     ['code' => 'ar', 'name' => 'العربية', 'flag' => '🇸🇦', 'date_format' => 'D, j F Y', 'wiki' => 'arwiki', 'creation_date' => '2003-07-11', 'text_direction' => 'rtl'],
     ['code' => 'sv', 'name' => 'Svenska', 'flag' => '🇸🇪', 'date_format' => 'l, j F Y', 'wiki' => 'svwiki', 'creation_date' => '2001-06-17', 'text_direction' => 'ltr'],
@@ -122,8 +121,8 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 ?>
 
 <!DOCTYPE html>
-<html lang="<?php echo $currentLang['code']; ?>">
-<head>
+<html lang="<?php echo htmlspecialchars($currentLang['code']); ?>" dir="<?php echo htmlspecialchars($currentLang['text_direction']); ?>">
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('sitename'); ?></title>
