@@ -1,6 +1,4 @@
 <?php
-error_reporting( -1 );
-ini_set( 'display_errors', 1 );
 include 'languages.php'; // Cargar idiomas y traducciones
 
 $project = isset($_GET['project']) ? $_GET['project'] : '';
