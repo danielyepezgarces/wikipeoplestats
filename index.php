@@ -237,6 +237,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 
 
+<?php include 'footer.php'; ?>
 
 
 </main>
