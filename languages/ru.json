@@ -26,6 +26,10 @@
     "total_people": "Всего людей",
     "total_women": "Всего женщин",
     "total_men": "Всего мужчин",
-    "other_genders": "Другие гендеры"
-  }
-  
+    "other_genders": "Другие гендеры",
+    "homepage_global_stats_credits": "Эти статистические данные взяты из всех википедий.",
+    "coming_soon_tracking_wiki": "Эта вики еще не отслеживалась нашей системой, и данные скоро будут доступны.",
+    "total_editors": "Всего редакторов",
+    "trusted_by_wikimedia_chapters": "Нам доверяют главы Викимедиа",
+    "wikimedia_chapters_trust_tool": "Главы Викимедиа в этом списке доверяют и используют инструмент"
+}

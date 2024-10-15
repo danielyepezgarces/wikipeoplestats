@@ -27,6 +27,9 @@
     "total_people": "Yhteensä ihmisiä",
     "total_women": "Yhteensä naisia",
     "total_men": "Yhteensä miehiä",
-    "other_genders": "Muut sukupuolet"
-  }
-  
+    "other_genders": "Muut sukupuolet",
+    "homepage_global_stats_credits": "These statistics are from all wikipedias.",
+    "total_editors": "Muokkaajia yhteensä",
+    "trusted_by_wikimedia_chapters": "Wikimedian lukujen luottama",
+    "wikimedia_chapters_trust_tool": "Wikimedian luvut tässä luettelossa luota ja käytä työkalua"
+}

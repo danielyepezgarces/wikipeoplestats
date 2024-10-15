@@ -26,6 +26,10 @@
     "total_people": "Totaal aantal mensen",
     "total_women": "Totaal aantal vrouwen",
     "total_men": "Totaal aantal mannen",
-    "other_genders": "Andere geslachten"
-  }
-  
+    "other_genders": "Andere geslachten",
+    "homepage_global_stats_credits": "These statistics are from all wikipedias.",
+    "coming_soon_tracking_wiki": "This wiki has not yet been tracked by our system and the data will be available soon.",
+    "total_editors": "Totaal aantal editors",
+    "trusted_by_wikimedia_chapters": "Vertrouwd door de Wikimedia-hoofdstukken",
+    "wikimedia_chapters_trust_tool": "Wikimedia-hoofdstukken op deze lijst vertrouwen en gebruiken de tool"
+}

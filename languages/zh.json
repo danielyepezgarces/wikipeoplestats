@@ -26,6 +26,10 @@
     "total_people": "总人数",
     "total_women": "总女性",
     "total_men": "总男性",
-    "other_genders": "其他性别"
-  }
-  
+    "other_genders": "其他性别",
+    "homepage_global_stats_credits": "这些统计数据来自所有维基百科。",
+    "coming_soon_tracking_wiki": "我们的系统尚未跟踪此维基，数据将很快可用。",
+    "total_editors": "编辑总数",
+    "trusted_by_wikimedia_chapters": "深受维基媒体分会信赖",
+    "wikimedia_chapters_trust_tool": "此列表中的维基媒体章节信任并使用该工具"
+}

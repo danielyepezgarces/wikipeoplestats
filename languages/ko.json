@@ -26,6 +26,10 @@
     "total_people": "총 인원 수",
     "total_women": "총 여성 수",
     "total_men": "총 남성 수",
-    "other_genders": "기타 성별"
-  }
-  
+    "other_genders": "기타 성별",
+    "homepage_global_stats_credits": "These statistics are from all wikipedias.",
+    "coming_soon_tracking_wiki": "This wiki has not yet been tracked by our system and the data will be available soon.",
+    "total_editors": "총 편집자 수",
+    "trusted_by_wikimedia_chapters": "위키미디어 지부가 신뢰하는 사이트",
+    "wikimedia_chapters_trust_tool": "이 목록에 있는 위키미디어 장은 도구를 신뢰하고 사용합니다"
+}

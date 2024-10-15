@@ -28,5 +28,8 @@
   "total_people": "Total People",
   "total_women": "Total Women",
   "total_men": "Total Men",
-  "other_genders": "Other Genders"
+  "other_genders": "Other Genders",
+  "total_editors": "Total Editors",
+  "trusted_by_wikimedia_chapters": "Trusted by the Wikimedia chapters",
+  "wikimedia_chapters_trust_tool": "Wikimedia chapters on this list trust and use the tool"
 }

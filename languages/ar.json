@@ -27,6 +27,9 @@
     "total_people": "إجمالي الأشخاص",
     "total_women": "إجمالي النساء",
     "total_men": "إجمالي الرجال",
-    "other_genders": "جنسيات أخرى"
-  }
-  
+    "other_genders": "جنسيات أخرى",
+    "homepage_global_stats_credits": "These statistics are from all wikipedias.",
+    "total_editors": "إجمالي المحررين",
+    "trusted_by_wikimedia_chapters": "موثوق به من قبل فصول ويكيميديا",
+    "wikimedia_chapters_trust_tool": "تثق فصول ويكيميديا في هذه القائمة بالأداة وتستخدمها"
+}

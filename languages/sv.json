@@ -27,6 +27,9 @@
     "total_people": "Totalt antal personer",
     "total_women": "Totalt antal kvinnor",
     "total_men": "Totalt antal män",
-    "other_genders": "Övriga kön"
-  }
-  
+    "other_genders": "Övriga kön",
+    "homepage_global_stats_credits": "Denna statistik är från alla wikipedior.",
+    "total_editors": "Totalt antal redaktörer",
+    "trusted_by_wikimedia_chapters": "Betrodd av Wikimediakapitlen",
+    "wikimedia_chapters_trust_tool": "Wikimediakapitel på denna lista litar på och använder verktyget"
+}

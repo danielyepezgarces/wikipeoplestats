@@ -26,6 +26,10 @@
     "total_people": "Insgesamt Personen",
     "total_women": "Insgesamt Frauen",
     "total_men": "Insgesamt Männer",
-    "other_genders": "Andere Geschlechter"
-  }
-  
+    "other_genders": "Andere Geschlechter",
+    "homepage_global_stats_credits": "These statistics are from all wikipedias.",
+    "coming_soon_tracking_wiki": "This wiki has not yet been tracked by our system and the data will be available soon.",
+    "total_editors": "Redakteure insgesamt",
+    "trusted_by_wikimedia_chapters": "Von den Wikimedia-Kapiteln vertraut",
+    "wikimedia_chapters_trust_tool": "Wikimedia-Kapitel auf dieser Liste vertrauen und verwenden das Tool"
+}
