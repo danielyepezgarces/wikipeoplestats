@@ -1,30 +1,40 @@
 {
   "name": "es",
-  "sticky_header_title": "Encabezado fijo con Tailwind CSS e i18n",
-  "sitename": "WikiPeopleStats",
-  "home": "Inicio",
+  "sticky_header_title": "Encabezado fijo con Tailwind CSS y i18n",
+  "sitename": "Estadísticas de WikiPeople",
+  "home": "Hogar",
   "genders": "Géneros",
   "countries": "Países",
   "users": "Usuarios",
-  "source_code": "Código Fuente",
+  "source_code": "Código fuente",
   "welcome_message": "Bienvenido a WikiPeopleStats",
-  "main_home_content": "La herramienta permite a los usuarios rastrear y analizar la representación de género en los artículos de Wikipedia. Nuestra herramienta almacena datos sobre individuos y sus contribuciones, ayudando a descubrir tendencias y fomentar un contenido más inclusivo a lo largo del tiempo.",
-  "main_user_content": "Estás rastreando las contribuciones de %s en los artículos de Wikipedia del proyecto %s. Esta herramienta almacena datos sobre las contribuciones y ayuda a descubrir tendencias, fomentando contenido más inclusivo a lo largo del tiempo.",
+  "main_home_content": "La herramienta permite a los usuarios realizar un seguimiento y analizar la representación de género en los artículos de Wikipedia. Nuestra herramienta almacena datos sobre las personas y sus contribuciones, lo que ayuda a descubrir tendencias y a fomentar contenidos más inclusivos a lo largo del tiempo.",
+  "main_user_content": "Estás haciendo un seguimiento de las contribuciones de %s en los artículos de Wikipedia para el proyecto %s. Esta herramienta almacena datos sobre las contribuciones y ayuda a descubrir tendencias, fomentando así un contenido más inclusivo a lo largo del tiempo.",
   "current_date": "Fecha actual:",
-  "select_language": "Seleccionar idioma",
-  "homepage_stats_credits": "Estos datos estadísticos son de %s.",
+  "select_language": "Seleccione idioma",
+  "homepage_stats_credits": "Estas estadísticas son de %s.",
+  "coming_soon_tracking_wiki": "Este wiki aún no ha sido rastreado por nuestro sistema y los datos estarán disponibles pronto.",
   "homepage_stats_last_update": "Última actualización",
-  "submit_button": "Enviar",
+  "submit_button": "Entregar",
   "input_project_label": "Proyecto",
-  "input_username_label": "Usuario",
+  "input_username_label": "Nombre de usuario",
   "input_start_date_label": "Fecha de inicio <small>(opcional)</small>",
-  "input_end_date_label": "Fecha de fin <small>(opcional)</small>",
+  "input_end_date_label": "Fecha de finalización <small>(opcional)</small>",
   "welcome_user_message": "%s • %s",
-  "timeline_graph": "Linea del tiempo",
+  "timeline_graph": "Cronología",
   "quantity_graph": "Cantidad",
   "total_graph": "Total",
-  "total_people": "Total de Personas",
-  "total_women": "Total de Mujeres",
-  "total_men": "Total de Hombres",
-  "other_genders": "Otros Géneros"
+  "total_people": "Total de personas",
+  "total_women": "Total de mujeres",
+  "total_men": "Total de hombres",
+  "other_genders": "Otros géneros",
+  "Total Users Contributions": {
+    "total_users_contributions": "contribuciones_de_usuarios_totales"
+  },
+  "Trusted by the Wikimedia chapters": {
+    "trusted_chapters_section": "sección de capítulos de confianza"
+  },
+  "Wikimedia chapters on this list trust and use the tool": {
+    "trusted_chapters_description": "descripción de capítulos confiables"
+  }
 }
