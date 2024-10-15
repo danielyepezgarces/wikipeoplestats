@@ -1,40 +1,29 @@
 {
   "name": "fr",
   "sticky_header_title": "En-tête collant avec Tailwind CSS et i18n",
-  "sitename": "Statistiques sur WikiPeople",
-  "home": "Maison",
+  "sitename": "WikiPeopleStats",
+  "home": "Accueil",
   "genders": "Genres",
   "countries": "Pays",
   "users": "Utilisateurs",
-  "source_code": "Code source",
-  "welcome_message": "Bienvenue sur WikiPeopleStats",
-  "main_home_content": "Cet outil permet aux utilisateurs de suivre et d'analyser la représentation des sexes dans les articles de Wikipédia. Notre outil stocke des données sur les individus et leurs contributions, ce qui permet de découvrir des tendances et d'encourager un contenu plus inclusif au fil du temps.",
-  "main_user_content": "Vous suivez les contributions de %s dans les articles Wikipédia pour le projet %s. Cet outil stocke des données sur les contributions et permet de découvrir des tendances, favorisant ainsi un contenu plus inclusif au fil du temps.",
-  "current_date": "Date du jour:",
-  "select_language": "Sélectionner la langue",
-  "homepage_stats_credits": "Ces statistiques proviennent de %s.",
-  "coming_soon_tracking_wiki": "Ce wiki n'a pas encore été suivi par notre système et les données seront bientôt disponibles.",
+  "source_code": "Code Source",
+  "welcome_message": "Bienvenue sur notre site web",
+  "sample_content": "Ceci est un exemple de zone de contenu pour démontrer l'en-tête collant avec Tailwind CSS et le support i18n.",
+  "main_user_content": "Vous suivez les contributions de %s dans les articles Wikipédia du projet %s. Cet outil stocke des données sur les contributions et aide à découvrir des tendances, favorisant un contenu plus inclusif au fil du temps.",
+  "current_date": "Date actuelle :",
+  "select_language": "Choisir la langue",
   "homepage_stats_last_update": "Dernière mise à jour",
-  "submit_button": "Soumettre",
+  "submit_button": "Envoyer",
   "input_project_label": "Projet",
-  "input_username_label": "Nom d'utilisateur",
-  "input_start_date_label": "Date de début <small>(facultatif)</small>",
-  "input_end_date_label": "Date de fin <small>(facultatif)</small>",
+  "input_username_label": "Utilisateur",
+  "input_start_date_label": "Date de début <small>(optionnel)</small>",
+  "input_end_date_label": "Date de fin <small>(optionnel)</small>",
   "welcome_user_message": "%s • %s",
   "timeline_graph": "Chronologie",
   "quantity_graph": "Quantité",
   "total_graph": "Total",
-  "total_people": "Nombre total de personnes",
-  "total_women": "Total Femmes",
-  "total_men": "Total Hommes",
-  "other_genders": "Autres genres",
-  "Total Users Contributions": {
-    "total_users_contributions": "contributions_totales_des_utilisateurs"
-  },
-  "Trusted by the Wikimedia chapters": {
-    "trusted_chapters_section": "section_chapitres_de_confiance"
-  },
-  "Wikimedia chapters on this list trust and use the tool": {
-    "trusted_chapters_description": "description_des_chapitres_de_confiance"
-  }
+  "total_people": "Total de personnes",
+  "total_women": "Total des femmes",
+  "total_men": "Total des hommes",
+  "other_genders": "Autres genres"
 }
