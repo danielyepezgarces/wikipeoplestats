@@ -13,10 +13,7 @@
 
         <div class="flex flex-col items-center mt-5">
             <p class="text-center text-sm leading-6 text-slate-500">
-                © <?php echo date('Y'); ?> <?php echo __('sitename'); ?>.
-            </p>
-            <p class="text-center text-sm leading-6 text-slate-500">
-                <?php echo __('license_info'); ?>
+                © <?php echo date('Y'); ?> <?php echo __('license_info'); ?>.
             </p>
             
             <div class="flex items-center justify-center space-x-4 text-sm font-semibold leading-6 text-slate-700 mt-4">
