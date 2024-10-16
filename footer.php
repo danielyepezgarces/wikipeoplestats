@@ -11,7 +11,7 @@
             </span>
         </div>
 
-        <div class="flex flex-col items-center mt-5">
+        <div class="flex flex-col items-center">
             <p class="text-center text-sm leading-6 text-slate-500">
                 © <?php echo date('Y'); ?> - <?php echo __('license_info'); ?>.
             </p>
