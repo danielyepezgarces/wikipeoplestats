@@ -1,7 +1,35 @@
 <!-- Footer -->
-<footer class="bg-gray-100 dark:bg-gray-800 p-4">
-    <div class="container mx-auto flex items-center justify-between">
-        <div class="flex items-center space-x-4 md:hidden"> <!-- Show only on mobile -->
+<footer class="mx-auto w-full max-w-container px-4 sm:px-6 lg:px-8">
+    <div class="border-t border-slate-900/5 py-10">
+        <!-- Logo -->
+        <div class="flex items-center justify-center mb-6 transition-transform transform hover:scale-105">
+            <a href="/" class="text-2xl font-bold text-primary-600 dark:text-primary-400" style="font-family: 'Montserrat', sans-serif;">
+                <?php echo __('sitename'); ?>
+            </a>
+            <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded-md uppercase" style="line-height: 1;">
+                Beta
+            </span>
+        </div>
+
+        <div class="flex flex-col items-center mt-5">
+            <p class="text-center text-sm leading-6 text-slate-500">
+                © <?php echo date('Y'); ?> <?php echo __('sitename'); ?>.
+            </p>
+            <p class="text-center text-sm leading-6 text-slate-500">
+                <?php echo __('license_info'); ?>
+            </p>
+            
+            <div class="flex items-center justify-center space-x-4 text-sm font-semibold leading-6 text-slate-700 mt-4">
+                <a href="/privacy-policy"><?php echo __('privacy_policy'); ?></a>
+                <div class="h-4 w-px bg-slate-500/20"></div>
+                <a href="/terms-of-use"><?php echo __('terms_of_use'); ?></a>
+                <div class="h-4 w-px bg-slate-500/20"></div>
+                <a href="https://github.com/danielyepezgarces/wikipeoplestats"><?php echo __('source_code'); ?></a>
+            </div>
+        </div>
+
+        <!-- Mobile Footer Options -->
+        <div class="flex items-center justify-between md:hidden mt-6">
             <!-- Language Selector -->
             <button onclick="toggleLanguagePopup()" class="flex items-center space-x-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
                 <span><?php echo $currentLang['flag']; ?></span>
