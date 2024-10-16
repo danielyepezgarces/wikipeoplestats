@@ -139,52 +139,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 </p>
 
 
-<div class="py-6 sm:py-8 lg:py-12">
-    <div class="mx-auto max-w-screen-2xl px-4 md:px-8">
-        <div class="mb-4 flex flex-col items-center md:mb-8 lg:flex-row lg:justify-between">
-            <h2 class="mb-2 text-center text-2xl font-bold text-gray-800 lg:mb-0 lg:text-3xl">Trusted by the Wikimedia chapters</h2>
-            <p class="max-w-md text-center text-gray-400 lg:text-right">Wikimedia chapters on this list trust and use the tool</p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 rounded-lg md:grid-cols-3 lg:gap-6">
-            <!-- logo - start -->
-            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Imagotipo_Wikimedia_Colombia_Versi%C3%B3n_horizontal_%28negro%29_2023.svg" 
-                     alt="Wikimedia Colombia" 
-                     class="h-20 w-auto dark:invert" /> <!-- Cambié h-22 a h-16 -->
-            </div>
-            <!-- logo - end -->
-
-            <!-- logo - start -->
-            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
-                <!-- Vacío -->
-            </div>
-            <!-- logo - end -->
-
-            <!-- logo - start -->
-            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
-                <!-- Vacío -->
-            </div>
-            <!-- logo - end -->
-
-            <!-- logo - start -->
-            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
-                <!-- Vacío -->
-            </div>
-            <!-- logo - end -->
-
-            <!-- logo - start -->
-            <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
-                <!-- Vacío -->
-            </div>
-            <!-- logo - end -->
-        </div>
-    </div>
-</div>
-
-
-
-
+<?php include 'supporters.php'; ?>
 <?php include 'footer.php'; ?>
 
 
