@@ -32,7 +32,7 @@
     "trusted_by_wikimedia_chapters": "Trusted by the Wikimedia chapters",
     "wikimedia_chapters_trust_tool": "Wikimedia chapters on this list trust and use the tool",
     "homepage_global_stats_credits": "These statistics are from all wikipedias.",
-    "license_info": "PLEASE SELECT TWO DISTINCT LANGUAGES",
-    "privacy_policy": "PLEASE SELECT TWO DISTINCT LANGUAGES",
-    "terms_of_use": "PLEASE SELECT TWO DISTINCT LANGUAGES"
+    "license_info": "All content is under <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
+    "privacy_policy": "Privacy policy",
+    "terms_of_use": "Terms of use"
 }
