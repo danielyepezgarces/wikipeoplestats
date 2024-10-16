@@ -31,5 +31,8 @@
     "homepage_global_stats_credits": "These statistics are from all wikipedias.",
     "total_editors": "Muokkaajia yhteensä",
     "trusted_by_wikimedia_chapters": "Wikimedian lukujen luottama",
-    "wikimedia_chapters_trust_tool": "Wikimedian luvut tässä luettelossa luota ja käytä työkalua"
+    "wikimedia_chapters_trust_tool": "Wikimedian luvut tässä luettelossa luota ja käytä työkalua",
+    "license_info": "Kaikki sisältö on <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA: n</a> alaista.",
+    "privacy_policy": "Tietosuojakäytäntö",
+    "terms_of_use": "Käyttöehdot"
 }

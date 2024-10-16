@@ -31,5 +31,8 @@
     "coming_soon_tracking_wiki": "This wiki has not yet been tracked by our system and the data will be available soon.",
     "total_editors": "총 편집자 수",
     "trusted_by_wikimedia_chapters": "위키미디어 지부가 신뢰하는 사이트",
-    "wikimedia_chapters_trust_tool": "이 목록에 있는 위키미디어 장은 도구를 신뢰하고 사용합니다"
+    "wikimedia_chapters_trust_tool": "이 목록에 있는 위키미디어 장은 도구를 신뢰하고 사용합니다",
+    "license_info": "모든 콘텐츠는 <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a> 하에 있습니다.",
+    "privacy_policy": "개인 정보 보호 정책",
+    "terms_of_use": "사용 약관"
 }

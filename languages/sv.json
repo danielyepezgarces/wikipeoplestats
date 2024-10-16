@@ -31,5 +31,8 @@
     "homepage_global_stats_credits": "Denna statistik är från alla wikipedior.",
     "total_editors": "Totalt antal redaktörer",
     "trusted_by_wikimedia_chapters": "Betrodd av Wikimediakapitlen",
-    "wikimedia_chapters_trust_tool": "Wikimediakapitel på denna lista litar på och använder verktyget"
+    "wikimedia_chapters_trust_tool": "Wikimediakapitel på denna lista litar på och använder verktyget",
+    "license_info": "Allt innehåll är under <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
+    "privacy_policy": "Integritetspolicy",
+    "terms_of_use": "Användningsregler"
 }

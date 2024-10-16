@@ -31,5 +31,8 @@
     "total_editors": "Total Editors",
     "trusted_by_wikimedia_chapters": "Trusted by the Wikimedia chapters",
     "wikimedia_chapters_trust_tool": "Wikimedia chapters on this list trust and use the tool",
-    "homepage_global_stats_credits": "These statistics are from all wikipedias."
+    "homepage_global_stats_credits": "These statistics are from all wikipedias.",
+    "license_info": "PLEASE SELECT TWO DISTINCT LANGUAGES",
+    "privacy_policy": "PLEASE SELECT TWO DISTINCT LANGUAGES",
+    "terms_of_use": "PLEASE SELECT TWO DISTINCT LANGUAGES"
 }

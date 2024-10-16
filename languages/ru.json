@@ -31,5 +31,8 @@
     "coming_soon_tracking_wiki": "Эта вики еще не отслеживалась нашей системой, и данные скоро будут доступны.",
     "total_editors": "Всего редакторов",
     "trusted_by_wikimedia_chapters": "Нам доверяют главы Викимедиа",
-    "wikimedia_chapters_trust_tool": "Главы Викимедиа в этом списке доверяют и используют инструмент"
+    "wikimedia_chapters_trust_tool": "Главы Викимедиа в этом списке доверяют и используют инструмент",
+    "license_info": "Все содержимое находится под <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
+    "privacy_policy": "Политика конфиденциальности",
+    "terms_of_use": "Условия использования"
 }

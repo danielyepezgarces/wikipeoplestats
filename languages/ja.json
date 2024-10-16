@@ -31,5 +31,8 @@
     "coming_soon_tracking_wiki": "This wiki has not yet been tracked by our system and the data will be available soon.",
     "total_editors": "編集者合計",
     "trusted_by_wikimedia_chapters": "ウィキメディアの支部によって信頼されています",
-    "wikimedia_chapters_trust_tool": "このリストのウィキメディアの章は、このツールを信頼して使用します"
+    "wikimedia_chapters_trust_tool": "このリストのウィキメディアの章は、このツールを信頼して使用します",
+    "license_info": "すべてのコンテンツは<a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY - SA</a>の下にあります。",
+    "privacy_policy": "プライバシーポリシー",
+    "terms_of_use": "利用規約"
 }

@@ -32,5 +32,8 @@
     "coming_soon_tracking_wiki": "This wiki has not yet been tracked by our system and the data will be available soon.",
     "total_editors": "Total Éditeurs",
     "trusted_by_wikimedia_chapters": "Approuvé par les chapitres Wikimedia",
-    "wikimedia_chapters_trust_tool": "Les chapitres Wikimedia de cette liste font confiance et utilisent l'outil"
+    "wikimedia_chapters_trust_tool": "Les chapitres Wikimedia de cette liste font confiance et utilisent l'outil",
+    "license_info": "Tout le contenu est sous <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
+    "privacy_policy": "Politique de confidentialité",
+    "terms_of_use": "Conditions générales d’utilisation"
 }

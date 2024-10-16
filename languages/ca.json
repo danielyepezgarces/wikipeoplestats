@@ -31,5 +31,8 @@
     "other_genders": "Altres gèneres",
     "total_editors": "Total d'editors",
     "trusted_by_wikimedia_chapters": "Amb la confiança dels capítols de Wikimedia",
-    "wikimedia_chapters_trust_tool": "Els capítols de Wikimedia d'aquesta llista confien i utilitzen l'eina"
+    "wikimedia_chapters_trust_tool": "Els capítols de Wikimedia d'aquesta llista confien i utilitzen l'eina",
+    "license_info": "Tot el contingut està sota <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
+    "privacy_policy": "Política de privacitat",
+    "terms_of_use": "Condicions d'ús"
 }

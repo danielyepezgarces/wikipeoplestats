@@ -31,5 +31,8 @@
     "coming_soon_tracking_wiki": "我们的系统尚未跟踪此维基，数据将很快可用。",
     "total_editors": "编辑总数",
     "trusted_by_wikimedia_chapters": "深受维基媒体分会信赖",
-    "wikimedia_chapters_trust_tool": "此列表中的维基媒体章节信任并使用该工具"
+    "wikimedia_chapters_trust_tool": "此列表中的维基媒体章节信任并使用该工具",
+    "license_info": "所有内容均受<a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>约束。",
+    "privacy_policy": "隐私政策",
+    "terms_of_use": "使用條款"
 }
