@@ -107,9 +107,8 @@
         </a>
 
         <!-- Dropdown for Rankings -->
-        <details class="border-b">
-            <summary class="flex items-center justify-between cursor-pointer px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-trophy mr-2"></i>
+        <details class="cursor-pointer">
+            <summary class="flex items-center justify-between px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <span><?php echo __('rankings'); ?></span>
                 <i class="fas fa-chevron-down"></i>
             </summary>
@@ -133,9 +132,8 @@
         </details>
 
         <!-- Dropdown for Compare -->
-        <details class="border-b">
-            <summary class="flex items-center justify-between cursor-pointer px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                <i class="fas fa-exchange-alt mr-2"></i>
+        <details class="cursor-pointer">
+            <summary class="flex items-center justify-between px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <span><?php echo __('compare'); ?></span>
                 <i class="fas fa-chevron-down"></i>
             </summary>
