@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "このリストのウィキメディアの章は、このツールを信頼して使用します",
     "license_info": "すべてのコンテンツは<a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY - SA</a>の下にあります。",
     "privacy_policy": "プライバシーポリシー",
-    "terms_of_use": "利用規約"
+    "terms_of_use": "利用規約",
+    "rankings": "ランキング",
+    "ranking_wikis": "Wikiのランキング",
+    "ranking_users": "ユーザーのランキング",
+    "ranking_countries": "国のランキング",
+    "compare": "比較",
+    "compare_wikis": "Wikiの比較",
+    "compare_users": "ユーザーを比較",
+    "compare_countries": "国を比較"
 }

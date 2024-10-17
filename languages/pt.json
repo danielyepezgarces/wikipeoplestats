@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "Os capítulos da Wikimedia nesta lista confiam e usam a ferramenta",
     "license_info": "Todo o conteúdo está sob <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
     "privacy_policy": "Política de privacidade",
-    "terms_of_use": "Termos de utilização"
+    "terms_of_use": "Termos de utilização",
+    "rankings": "Classificações",
+    "ranking_wikis": "Classificação de Wikis",
+    "ranking_users": "Classificação dos Utilizadores",
+    "ranking_countries": "Ranking de Países",
+    "compare": "Comparar",
+    "compare_wikis": "Comparar Wikis",
+    "compare_users": "Comparar utilizadores",
+    "compare_countries": "Comparar países"
 }

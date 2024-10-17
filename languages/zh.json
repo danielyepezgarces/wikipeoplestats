@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "此列表中的维基媒体章节信任并使用该工具",
     "license_info": "所有内容均受<a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>约束。",
     "privacy_policy": "隐私政策",
-    "terms_of_use": "使用條款"
+    "terms_of_use": "使用條款",
+    "rankings": "排名",
+    "ranking_wikis": "维基排名",
+    "ranking_users": "用户排名",
+    "ranking_countries": "国家/地区排名",
+    "compare": "比较",
+    "compare_wikis": "比较Wiki",
+    "compare_users": "比较用户",
+    "compare_countries": "比较国家/地区"
 }

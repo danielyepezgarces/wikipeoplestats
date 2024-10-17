@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "Wikimediakapitel på denna lista litar på och använder verktyget",
     "license_info": "Allt innehåll är under <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
     "privacy_policy": "Integritetspolicy",
-    "terms_of_use": "Användningsregler"
+    "terms_of_use": "Användningsregler",
+    "rankings": "Rankings",
+    "ranking_wikis": "Rankning av Wikis",
+    "ranking_users": "Rangordning av användare",
+    "ranking_countries": "Rankning av länder",
+    "compare": "Jämför",
+    "compare_wikis": "Jämför Wikis",
+    "compare_users": "Jämför användare",
+    "compare_countries": "Jämför länder"
 }

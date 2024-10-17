@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "이 목록에 있는 위키미디어 장은 도구를 신뢰하고 사용합니다",
     "license_info": "모든 콘텐츠는 <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a> 하에 있습니다.",
     "privacy_policy": "개인 정보 보호 정책",
-    "terms_of_use": "사용 약관"
+    "terms_of_use": "사용 약관",
+    "rankings": "순위",
+    "ranking_wikis": "위키 순위",
+    "ranking_users": "사용자 순위",
+    "ranking_countries": "국가별 순위",
+    "compare": "비교",
+    "compare_wikis": "위키 비교",
+    "compare_users": "사용자 비교",
+    "compare_countries": "국가 비교"
 }

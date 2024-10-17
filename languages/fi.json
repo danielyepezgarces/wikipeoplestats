@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "Wikimedian luvut tässä luettelossa luota ja käytä työkalua",
     "license_info": "Kaikki sisältö on <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA: n</a> alaista.",
     "privacy_policy": "Tietosuojakäytäntö",
-    "terms_of_use": "Käyttöehdot"
+    "terms_of_use": "Käyttöehdot",
+    "rankings": "Sijoitukset",
+    "ranking_wikis": "Wikien järjestys",
+    "ranking_users": "Käyttäjien paremmuusjärjestys",
+    "ranking_countries": "Maiden paremmuusjärjestys",
+    "compare": "Vertaa",
+    "compare_wikis": "Vertaa wikejä",
+    "compare_users": "Vertaa käyttäjiä",
+    "compare_countries": "Vertaa maita"
 }

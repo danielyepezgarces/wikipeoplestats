@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "تثق فصول ويكيميديا في هذه القائمة بالأداة وتستخدمها",
     "license_info": "جميع المحتويات تحت <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>رخصة المشاع الإبداعي</a>.",
     "privacy_policy": "سياسة الخصوصية",
-    "terms_of_use": "‫شروط الاستخدام‬"
+    "terms_of_use": "‫شروط الاستخدام‬",
+    "rankings": "الترتيبات",
+    "ranking_wikis": "ترتيب الويكي",
+    "ranking_users": "ترتيب المستخدمين",
+    "ranking_countries": "ترتيب البلدان",
+    "compare": "مقارنة",
+    "compare_wikis": "قارن بين مواقع الويكي",
+    "compare_users": "مقارنة المستخدمين",
+    "compare_countries": "مقارنة البلدان"
 }

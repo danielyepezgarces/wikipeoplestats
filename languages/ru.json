@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "Главы Викимедиа в этом списке доверяют и используют инструмент",
     "license_info": "Все содержимое находится под <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
     "privacy_policy": "Политика конфиденциальности",
-    "terms_of_use": "Условия использования"
+    "terms_of_use": "Условия использования",
+    "rankings": "Рейтинг",
+    "ranking_wikis": "Рейтинг Вики",
+    "ranking_users": "Ранжирование пользователей",
+    "ranking_countries": "Ранжирование стран",
+    "compare": "Сравнение",
+    "compare_wikis": "Сравнить вики",
+    "compare_users": "Сравнить пользователей",
+    "compare_countries": "Сравнить страны"
 }

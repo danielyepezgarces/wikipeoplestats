@@ -34,5 +34,13 @@
     "wikimedia_chapters_trust_tool": "Wikimedia-hoofdstukken op deze lijst vertrouwen en gebruiken de tool",
     "license_info": "Alle inhoud valt onder <a href='https://creativecommons.org/licenses/by-sa/4.0/' target='_blank' rel='noopener noreferrer'>CC BY-SA</a>.",
     "privacy_policy": "Privacybeleid",
-    "terms_of_use": "Gebruiksvoorwaarden"
+    "terms_of_use": "Gebruiksvoorwaarden",
+    "rankings": "Classement",
+    "ranking_wikis": "Rangschikking van wiki's",
+    "ranking_users": "Rangschikking van gebruikers",
+    "ranking_countries": "Rangschikking van landen",
+    "compare": "Vergelijk",
+    "compare_wikis": "Vergelijk Wiki's",
+    "compare_users": "Gebruikers vergelijken",
+    "compare_countries": "Landen vergelijken"
 }
