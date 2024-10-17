@@ -107,55 +107,57 @@
         </a>
 
         <!-- Dropdown for Rankings -->
-        <div class="relative group">
-            <input type="checkbox" id="rankings-dropdown" class="hidden">
-            <label for="rankings-dropdown" class="flex items-center justify-between w-full px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+        <div>
+            <a href="#rankings-dropdown" class="flex items-center justify-between w-full px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                 <span><?php echo __('rankings'); ?></span>
                 <i class="fas fa-chevron-down"></i>
-            </label>
-            <ul class="hidden group-focus-within:block space-y-1 bg-white dark:bg-gray-800 shadow-lg rounded-md">
-                <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <?php echo __('ranking_wikis'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <?php echo __('ranking_users'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <?php echo __('ranking_countries'); ?>
-                    </a>
-                </li>
-            </ul>
+            </a>
+            <div id="rankings-dropdown" class="hidden">
+                <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md">
+                    <li>
+                        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <?php echo __('ranking_wikis'); ?>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <?php echo __('ranking_users'); ?>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <?php echo __('ranking_countries'); ?>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <!-- Dropdown for Compare -->
-        <div class="relative group">
-            <input type="checkbox" id="compare-dropdown" class="hidden">
-            <label for="compare-dropdown" class="flex items-center justify-between w-full px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+        <div>
+            <a href="#compare-dropdown" class="flex items-center justify-between w-full px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                 <span><?php echo __('compare'); ?></span>
                 <i class="fas fa-chevron-down"></i>
-            </label>
-            <ul class="hidden group-focus-within:block space-y-1 bg-white dark:bg-gray-800 shadow-lg rounded-md">
-                <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <?php echo __('compare_wikis'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <?php echo __('compare_users'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <?php echo __('compare_countries'); ?>
-                    </a>
-                </li>
-            </ul>
+            </a>
+            <div id="compare-dropdown" class="hidden">
+                <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md">
+                    <li>
+                        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <?php echo __('compare_wikis'); ?>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <?php echo __('compare_users'); ?>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <?php echo __('compare_countries'); ?>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
 
         <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
@@ -163,6 +165,7 @@
         </a>
     </div>
 </div>
+
 
     </div>
 </header>
