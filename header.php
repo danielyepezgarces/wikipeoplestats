@@ -21,19 +21,19 @@
         <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
             <?php echo __('rankings'); ?>
         </button>
-        <ul class="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
+        <ul class="absolute left-0 hidden group-hover:block bg-gray-50 dark:bg-gray-700 shadow-lg rounded-md mt-0">
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                     <?php echo __('ranking_wikis'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                     <?php echo __('ranking_users'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                     <?php echo __('ranking_countries'); ?>
                 </a>
             </li>
@@ -44,19 +44,19 @@
         <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
             <?php echo __('compare'); ?>
         </button>
-        <ul class="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
+        <ul class="absolute left-0 hidden group-hover:block bg-gray-50 dark:bg-gray-700 shadow-lg rounded-md mt-0">
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                     <?php echo __('compare_wikis'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                     <?php echo __('compare_users'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
                     <?php echo __('compare_countries'); ?>
                 </a>
             </li>
@@ -65,6 +65,7 @@
 
     <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('source_code'); ?></a>
 </nav>
+
 
 
 
