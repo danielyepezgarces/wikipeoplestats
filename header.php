@@ -16,11 +16,9 @@
     <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('genders'); ?></a>
     <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('countries'); ?></a>
     <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('users'); ?></a>
-    
-    <div class="relative">
-        <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
-            <?php echo __('rankings'); ?>
-        </button>
+
+    <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
+        <?php echo __('rankings'); ?>
         <ul class="absolute hidden bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
             <li>
                 <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -38,12 +36,10 @@
                 </a>
             </li>
         </ul>
-    </div>
+    </a>
 
-    <div class="relative">
-        <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
-            <?php echo __('compare'); ?>
-        </button>
+    <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
+        <?php echo __('compare'); ?>
         <ul class="absolute hidden bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
             <li>
                 <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -61,7 +57,7 @@
                 </a>
             </li>
         </ul>
-    </div>
+    </a>
 
     <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('source_code'); ?></a>
 </nav>
