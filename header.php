@@ -12,12 +12,48 @@
 
             <!-- Desktop Menu -->
             <nav class="hidden md:flex space-x-4">
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('home'); ?></a>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('genders'); ?></a>
-                <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('countries'); ?></a>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('users'); ?></a>
-                <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('source_code'); ?></a>
-            </nav>
+    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('home'); ?></a>
+    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('genders'); ?></a>
+    <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('countries'); ?></a>
+    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('users'); ?></a>
+    
+    <div class="relative">
+        <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
+            <?php echo __('rankings'); ?>
+        </button>
+        <div class="absolute hidden bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <?php echo __('ranking_wikis'); ?>
+            </a>
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <?php echo __('ranking_users'); ?>
+            </a>
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <?php echo __('ranking_countries'); ?>
+            </a>
+        </div>
+    </div>
+
+    <div class="relative">
+        <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
+            <?php echo __('compare'); ?>
+        </button>
+        <div class="absolute hidden bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <?php echo __('compare_wikis'); ?>
+            </a>
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <?php echo __('compare_users'); ?>
+            </a>
+            <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <?php echo __('compare_countries'); ?>
+            </a>
+        </div>
+    </div>
+
+    <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('source_code'); ?></a>
+</nav>
+
 
             <div class="flex items-center space-x-4">
                 <!-- Language Selector Button for Desktop -->
