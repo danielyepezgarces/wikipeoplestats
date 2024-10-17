@@ -17,9 +17,11 @@
     <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('countries'); ?></a>
     <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('users'); ?></a>
 
-    <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
-        <?php echo __('rankings'); ?>
-        <ul class="absolute hidden bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
+    <div class="relative group">
+        <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
+            <?php echo __('rankings'); ?>
+        </button>
+        <ul class="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
             <li>
                 <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                     <?php echo __('ranking_wikis'); ?>
@@ -36,11 +38,13 @@
                 </a>
             </li>
         </ul>
-    </a>
+    </div>
 
-    <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
-        <?php echo __('compare'); ?>
-        <ul class="absolute hidden bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
+    <div class="relative group">
+        <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10">
+            <?php echo __('compare'); ?>
+        </button>
+        <ul class="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-800 shadow-lg rounded-md mt-1">
             <li>
                 <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                     <?php echo __('compare_wikis'); ?>
@@ -57,10 +61,11 @@
                 </a>
             </li>
         </ul>
-    </a>
+    </div>
 
     <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-10"><?php echo __('source_code'); ?></a>
 </nav>
+
 
 
             <div class="flex items-center space-x-4">
