@@ -107,12 +107,12 @@
         </a>
 
         <!-- Dropdown for Rankings -->
-        <div class="relative">
-            <button class="flex items-center justify-between w-full px-3 py-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <details class="relative">
+            <summary class="flex items-center justify-between px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                 <span><?php echo __('rankings'); ?></span>
                 <i class="fas fa-chevron-down"></i>
-            </button>
-            <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md hidden">
+            </summary>
+            <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md">
                 <li>
                     <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-book mr-2"></i><?php echo __('ranking_wikis'); ?>
@@ -129,15 +129,15 @@
                     </a>
                 </li>
             </ul>
-        </div>
+        </details>
 
         <!-- Dropdown for Compare -->
-        <div class="relative">
-            <button class="flex items-center justify-between w-full px-3 py-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <details class="relative">
+            <summary class="flex items-center justify-between px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                 <span><?php echo __('compare'); ?></span>
                 <i class="fas fa-chevron-down"></i>
-            </button>
-            <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md hidden">
+            </summary>
+            <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md">
                 <li>
                     <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-book-open mr-2"></i><?php echo __('compare_wikis'); ?>
@@ -154,14 +154,13 @@
                     </a>
                 </li>
             </ul>
-        </div>
+        </details>
 
         <a href="https://github.com/danielyepezgarces/wikipeoplestats" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
             <i class="fas fa-code mr-2"></i><?php echo __('source_code'); ?>
         </a>
     </div>
 </div>
-
 
 
     </div>
