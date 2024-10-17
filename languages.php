@@ -4,6 +4,7 @@
 // Available languages
 $languages = [
     ['code' => 'all', 'name' => 'All Wikipedias', 'flag' => '🌐', 'date_format' => 'l, F j, Y', 'wiki' => 'globalwiki', 'creation_date' => '2001-01-15', 'text_direction' => 'ltr'],
+    ['code' => 'af', 'name' => 'Afrikaans', 'flag' => '🇿🇦', 'date_format' => 'l, j F Y', 'wiki' => 'afwiki', 'creation_date' => '2001-10-16', 'text_direction' => 'ltr'],
     ['code' => 'ar', 'name' => 'العربية', 'flag' => '🇸🇦', 'date_format' => 'D, j F Y', 'wiki' => 'arwiki', 'creation_date' => '2003-07-11', 'text_direction' => 'rtl'],
     ['code' => 'ca', 'name' => 'Català', 'flag' => '🇪🇸', 'date_format' => 'l, j \d\e F \d\e Y', 'wiki' => 'cawiki', 'creation_date' => '2001-03-28', 'text_direction' => 'ltr'],
     ['code' => 'de', 'name' => 'Deutsch', 'flag' => '🇩🇪', 'date_format' => 'l, j. F Y', 'wiki' => 'dewiki', 'creation_date' => '2001-03-16', 'text_direction' => 'ltr'],
@@ -20,7 +21,6 @@ $languages = [
     ['code' => 'sv', 'name' => 'Svenska', 'flag' => '🇸🇪', 'date_format' => 'l, j F Y', 'wiki' => 'svwiki', 'creation_date' => '2001-06-17', 'text_direction' => 'ltr'],
     ['code' => 'zh', 'name' => '中文', 'flag' => '🇨🇳', 'date_format' => 'Y年n月j日 l', 'wiki' => 'zhwiki', 'creation_date' => '2001-05-11', 'text_direction' => 'ltr'],
 ];
-
 
 // Set default language
 $currentLang = $languages[0];
