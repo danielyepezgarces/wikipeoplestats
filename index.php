@@ -129,7 +129,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     </div>
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-concierge-bell text-3xl text-green-500 mb-2"></i>
-        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">Total Users Contributions</h3>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_editors'); ?></h3>
         <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
     </div>
 </div>
