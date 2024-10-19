@@ -157,7 +157,7 @@ $lastUpdated = $data['lastUpdated'];
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">
                     <?php echo number_format($totalWomen, 0, '', ' '); ?>
                 </p>
-                <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
+                <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
                 <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
@@ -165,7 +165,7 @@ $lastUpdated = $data['lastUpdated'];
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">
                     <?php echo number_format($totalMen, 0, '', ' '); ?>
                 </p>
-                <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
+                <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
                 <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
@@ -173,7 +173,7 @@ $lastUpdated = $data['lastUpdated'];
                 <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">
                     <?php echo number_format($otherGenders, 0, '', ' '); ?>
                 </p>
-                <p class="mt-2 text-gray-500 dark:text-gray-400">Ratio: <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
+                <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
             </div>
         </div>
 
