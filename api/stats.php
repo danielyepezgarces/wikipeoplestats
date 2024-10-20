@@ -86,7 +86,7 @@ if ($result->num_rows > 0) {
         'otherGenders' => (int)$data['otherGenders'],
         'totalContributions' => (int)$data['totalContributions'],
         'lastUpdated' => $currentLastUpdated ? $currentLastUpdated : null,
-        'cachedUntil' => date('c', time() + $cacheDuration), // Expiración del caché
+        'cachedUntil' => gmdate('c', time() + $cacheDuration), // Expiración del caché en UTC
     ];
 
     // Almacenar en caché solo si se permite y no hay respuesta en caché
