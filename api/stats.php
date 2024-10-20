@@ -1,36 +1,68 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 header("Content-Type: application/json");
 
 include '../config.php';
 
-// Obtener el proyecto de la URL
+// Iniciar conexión a Memcached
+$memcache = new Memcached();
+$memcache->addServer('localhost', 11211); // Cambia según tu configuración
+
+// Obtener el proyecto de la URL y la acción
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);
+$action = isset($_GET['action']) ? $_GET['action'] : '';
 
-// Definir la consulta dependiendo del proyecto
+// Definir uso de caché
+$useCache = true; // Cambia esto a false si no quieres usar caché
+
+// Comprobar si el usuario ha solicitado usar caché
+if (isset($_GET['useCache'])) {
+    $useCache = filter_var($_GET['useCache'], FILTER_VALIDATE_BOOLEAN);
+}
+
+// Generar la clave de caché única
+$cacheKey = "api_response_" . md5("api_stats_" . $project);
+
+// Purgar caché si se solicita
+if ($action === 'purge') {
+    $memcache->delete($cacheKey);
+    echo json_encode(['message' => 'Cache purged successfully.']);
+    exit;
+}
+
+// Comprobar si hay datos en caché solo si se permite
+$cachedResponse = $useCache ? $memcache->get($cacheKey) : false;
+
+$currentLastUpdated = null;
+$cacheDuration = 21600; // 6 horas en segundos
+
+if ($cachedResponse) {
+    // Si hay respuesta en caché, devolverla
+    echo $cachedResponse;
+    exit;
+}
+
+// Definir la consulta SQL dependiendo del proyecto
 if ($project === 'all') {
-    // Para el caso 'all', contamos todas las personas en 'people'
+    // Consulta SQL para 'all'
     $sql = "
         SELECT 
             COUNT(DISTINCT p.wikidata_id) AS totalPeople,
             SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,  -- Incluye sin género
+            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,
             (SELECT COUNT(DISTINCT creator_username) FROM articles) AS totalContributions,
             (SELECT MAX(last_updated) FROM wikipedia) AS lastUpdated
         FROM people p
     ";
 } else {
+    // Consulta SQL para un proyecto específico
     $sql = "
         SELECT 
-            COUNT(DISTINCT a.wikidata_id) AS totalPeople,  -- Total usando a.wikidata_id
+            COUNT(DISTINCT a.wikidata_id) AS totalPeople,
             SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,  -- Incluye sin género
+            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,
             COUNT(DISTINCT a.creator_username) AS totalContributions,
             MAX(w.last_updated) AS lastUpdated
         FROM articles a
@@ -40,30 +72,29 @@ if ($project === 'all') {
     ";
 }
 
-
-
-
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     $data = $result->fetch_assoc();
+    $currentLastUpdated = $data['lastUpdated']; // Obtener el último actualizado
 
-    // Verificar si todos los conteos son cero
-    if ($data['totalPeople'] == 0 && $data['totalWomen'] == 0 && $data['totalMen'] == 0 && $data['otherGenders'] == 0 && $data['totalContributions'] == 0) {
-        echo json_encode(['error' => 'No data found']);
-    } else {
-        // Generar respuesta
-        $response = [
-            'totalPeople' => (int)$data['totalPeople'],
-            'totalWomen' => (int)$data['totalWomen'],
-            'totalMen' => (int)$data['totalMen'],
-            'otherGenders' => (int)$data['otherGenders'],
-            'totalContributions' => (int)$data['totalContributions'],
-            'lastUpdated' => $data['lastUpdated'] ? $data['lastUpdated'] : null,
-        ];
+    // Generar la respuesta
+    $response = [
+        'totalPeople' => (int)$data['totalPeople'],
+        'totalWomen' => (int)$data['totalWomen'],
+        'totalMen' => (int)$data['totalMen'],
+        'otherGenders' => (int)$data['otherGenders'],
+        'totalContributions' => (int)$data['totalContributions'],
+        'lastUpdated' => $currentLastUpdated ? $currentLastUpdated : null,
+        'cachedUntil' => date('c', time() + $cacheDuration), // Expiración del caché
+    ];
 
-        echo json_encode($response);
+    // Almacenar en caché solo si se permite y no hay respuesta en caché
+    if ($useCache && !$cachedResponse) {
+        $memcache->set($cacheKey, json_encode($response), $cacheDuration);
     }
+
+    echo json_encode($response);
 } else {
     echo json_encode(['error' => 'No data found']);
 }
