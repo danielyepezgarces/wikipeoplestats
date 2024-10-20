@@ -16,7 +16,7 @@ $languages = [
     ['code' => 'ko', 'name' => '한국어', 'flag' => '🇰🇷', 'date_format' => 'YYYY년 M월 D일 (ddd)', 'wiki' => 'kowiki', 'creation_date' => '2002-06-30', 'text_direction' => 'ltr'],
     ['code' => 'ja', 'name' => '日本語', 'flag' => '🇯🇵', 'date_format' => 'Y年n月j日(l)', 'wiki' => 'jawiki', 'creation_date' => '2001-05-11', 'text_direction' => 'ltr'],
     ['code' => 'nl', 'name' => 'Nederlands', 'flag' => '🇳🇱', 'date_format' => 'l j F Y', 'wiki' => 'nlwiki', 'creation_date' => '2001-06-19', 'text_direction' => 'ltr'],
-    ['code' => 'no', 'name' => 'Norsk', 'flag' => '🇳🇴', 'date_format' => 'l j. F Y', 'wiki' => 'nowiki', 'creation_date' => '2001-06-19', 'text_direction' => 'ltr'],
+    ['code' => 'no', 'name' => 'Norsk', 'flag' => '🇳🇴', 'date_format' => 'l j. F Y', 'wiki' => 'nowiki', 'creation_date' => '2001-10-26', 'text_direction' => 'ltr'],
     ['code' => 'pt', 'name' => 'Português', 'flag' => '🇵🇹', 'date_format' => 'l, j \d\e F \d\e Y', 'wiki' => 'ptwiki', 'creation_date' => '2001-05-11', 'text_direction' => 'ltr'],
     ['code' => 'ru', 'name' => 'Русский', 'flag' => '🇷🇺', 'date_format' => 'l, j F Y', 'wiki' => 'ruwiki', 'creation_date' => '2001-05-20', 'text_direction' => 'ltr'],
     ['code' => 'sv', 'name' => 'Svenska', 'flag' => '🇸🇪', 'date_format' => 'l, j F Y', 'wiki' => 'svwiki', 'creation_date' => '2001-06-17', 'text_direction' => 'ltr'],
