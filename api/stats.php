@@ -7,6 +7,9 @@ include '../config.php';
 $memcache = new Memcached();
 $memcache->addServer('localhost', 11211); // Cambia según tu configuración
 
+// Medir tiempo de inicio
+$startTime = microtime(true);
+
 // Obtener el proyecto de la URL y la acción
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);
@@ -94,10 +97,18 @@ if ($result->num_rows > 0) {
         $memcache->set($cacheKey, json_encode($response), $cacheDuration);
     }
 
+    // Medir el tiempo total de ejecución
+    $executionTime = microtime(true) - $startTime;
+    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
+
     echo json_encode($response);
 } else {
     echo json_encode(['error' => 'No data found']);
 }
+
+// Medir el tiempo total de ejecución
+$executionTime = microtime(true) - $startTime;
+$response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
 
 $conn->close();
 ?>
