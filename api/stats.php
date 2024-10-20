@@ -41,7 +41,11 @@ $cacheDuration = 21600; // 6 horas en segundos
 
 if ($cachedResponse) {
     // Si hay respuesta en caché, devolverla
-    echo $cachedResponse;
+    $response = json_decode($cachedResponse, true);
+    // Medir el tiempo total de ejecución
+    $executionTime = microtime(true) - $startTime;
+    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
+    echo json_encode($response);
     exit;
 }
 
@@ -105,10 +109,6 @@ if ($result->num_rows > 0) {
 } else {
     echo json_encode(['error' => 'No data found']);
 }
-
-// Medir el tiempo total de ejecución
-$executionTime = microtime(true) - $startTime;
-$response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
 
 $conn->close();
 ?>
