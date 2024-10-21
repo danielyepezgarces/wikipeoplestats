@@ -38,6 +38,7 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $totalMen = 0;
     $otherGenders = 0;
     $totalContributions = 0;
+    $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
     $errorMessage = __('coming_soon_tracking_wiki');
 } else {
     // Asignar los valores de la respuesta
@@ -47,6 +48,7 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $otherGenders = $data['otherGenders'] ?? 0;
     $totalContributions = $data['totalContributions'] ?? 0;
     $lastUpdated = $data['lastUpdated'] ?? "N/A";
+    $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
 
 // Mensaje de éxito según la wiki
 if ($currentWiki === 'globalwiki') {
@@ -139,13 +141,22 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 </p>
 
 <div class="mt-8 text-center">
-        <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            <?php echo __('cached_version_message', ['time' => $time]); ?>
-        </p>
-        <button id="purge-cache" onclick="purgeCache()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition">
-            <?php echo __('purge_cache_button'); ?>
+    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <?php echo __('cached_version_message', ['time' => $cachedUntil]); ?>
+    </p>
+    <div class="mt-4 inline-flex items-center justify-center">
+        <button 
+            id="purge-cache" 
+            onclick="purgeCache()" 
+            class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition flex items-center"
+        >
+            <span class="mr-2"><?php echo __('purge_cache_button'); ?></span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 12h18M3 21h18" />
+            </svg>
         </button>
     </div>
+</div>
 
 
 <?php include 'supporters.php'; ?>
