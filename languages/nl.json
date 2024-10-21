@@ -42,5 +42,9 @@
     "compare": "Vergelijk",
     "compare_wikis": "Vergelijk Wiki's",
     "compare_users": "Gebruikers vergelijken",
-    "compare_countries": "Landen vergelijken"
+    "compare_countries": "Landen vergelijken",
+    "cached_version_message": "Dit is een versie in de cache die geldig is tot :time",
+    "purge_cache_button": "Leeg de cache",
+    "cache_purged_successfully": "Pagina-cache legen is gelukt",
+    "cache_purge_failed": "Het leegmaken van de cache is mislukt. Probeer het opnieuw."
 }

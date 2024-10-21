@@ -42,5 +42,9 @@
     "other_genders": "Ostali rodovi",
     "total_editors": "Ukupno urednika",
     "trusted_by_wikimedia_chapters": "Pouzdano od strane Vikimedijinih poglavlja",
-    "wikimedia_chapters_trust_tool": "Poglavlja Vikimedije na ovoj listi veruju i koriste alat"
+    "wikimedia_chapters_trust_tool": "Poglavlja Vikimedije na ovoj listi veruju i koriste alat",
+    "cached_version_message": "Ovo je keširana verzija koja važi do :time",
+    "purge_cache_button": "Očisti keš",
+    "cache_purged_successfully": "Keš je uspešno očišćen.",
+    "cache_purge_failed": "Čišćenje keša nije uspelo. Probajte ponovo."
 }

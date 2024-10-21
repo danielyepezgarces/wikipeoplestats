@@ -42,5 +42,9 @@
     "other_genders": "Ostatní pohlaví",
     "total_editors": "Celkem editorů",
     "trusted_by_wikimedia_chapters": "Kapitoly nadace Wikimedia vám důvěřují",
-    "wikimedia_chapters_trust_tool": "Kapitoly Wikimedia na tomto seznamu důvěřují a používají nástroj"
+    "wikimedia_chapters_trust_tool": "Kapitoly Wikimedia na tomto seznamu důvěřují a používají nástroj",
+    "cached_version_message": "Toto je verze uložená v mezipaměti platná do :time",
+    "purge_cache_button": "Vyčistit mezipaměť",
+    "cache_purged_successfully": "Mezipaměť byla úspěšně vymazána.",
+    "cache_purge_failed": "Vymazání mezipaměti se nezdařilo. Zkuste to prosím znovu."
 }

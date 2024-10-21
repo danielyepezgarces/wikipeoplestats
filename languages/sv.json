@@ -42,5 +42,9 @@
     "compare": "Jämför",
     "compare_wikis": "Jämför Wikis",
     "compare_users": "Jämför användare",
-    "compare_countries": "Jämför länder"
+    "compare_countries": "Jämför länder",
+    "cached_version_message": "Detta är en version cachelagrad giltig till :time",
+    "purge_cache_button": "Rensa cache",
+    "cache_purged_successfully": "Cachen rensades framgångsrikt",
+    "cache_purge_failed": "Det gick inte att rensa cacheminnet. Vänligen försök igen."
 }

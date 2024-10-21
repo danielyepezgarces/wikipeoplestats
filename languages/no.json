@@ -42,5 +42,9 @@
     "other_genders": "Andre kjønn",
     "total_editors": "Totalt redaktører",
     "trusted_by_wikimedia_chapters": "Betrodd av Wikimedia-kapitlene",
-    "wikimedia_chapters_trust_tool": "Wikimedia kapitler på denne listen stoler på og bruker verktøyet"
+    "wikimedia_chapters_trust_tool": "Wikimedia kapitler på denne listen stoler på og bruker verktøyet",
+    "cached_version_message": "Dette er en bufret versjon som er gyldig til :time",
+    "purge_cache_button": "Tøm buffer",
+    "cache_purged_successfully": "Bufferen ble tømt.",
+    "cache_purge_failed": "Kunne ikke tømme bufferen. Vennligst prøv igjen."
 }

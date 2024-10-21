@@ -42,5 +42,9 @@
     "compare": "比较",
     "compare_wikis": "比较Wiki",
     "compare_users": "比较用户",
-    "compare_countries": "比较国家/地区"
+    "compare_countries": "比较国家/地区",
+    "cached_version_message": "这是缓存的版本，有效期至： time",
+    "purge_cache_button": "清除缓存",
+    "cache_purged_successfully": "缓存被成功清除",
+    "cache_purge_failed": "清除缓存失败。请重试。"
 }

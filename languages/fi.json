@@ -42,5 +42,9 @@
     "compare": "Vertaa",
     "compare_wikis": "Vertaa wikejä",
     "compare_users": "Vertaa käyttäjiä",
-    "compare_countries": "Vertaa maita"
+    "compare_countries": "Vertaa maita",
+    "cached_version_message": "Tämä versio on välimuistissa voimassa:time asti",
+    "purge_cache_button": "Tyhjännä välimuisti",
+    "cache_purged_successfully": "Välimuistin tyhjennys onnistui.",
+    "cache_purge_failed": "Välimuistin tyhjentäminen epäonnistui. Yritä uudelleen."
 }

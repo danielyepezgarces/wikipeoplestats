@@ -42,5 +42,9 @@
     "compare": "مقارنة",
     "compare_wikis": "قارن بين مواقع الويكي",
     "compare_users": "مقارنة المستخدمين",
-    "compare_countries": "مقارنة البلدان"
+    "compare_countries": "مقارنة البلدان",
+    "cached_version_message": "هذا الإصدار مخزن مؤقتًا وصالح حتى :time",
+    "purge_cache_button": "تطهير ذاكرة التخزين المؤقت",
+    "cache_purged_successfully": "تم حذف ذاكرة التخزين المؤقت بنجاح.",
+    "cache_purge_failed": "فشل إزالة ذاكرة التخزين المؤقت. يُرجى إعادة المحاولة."
 }

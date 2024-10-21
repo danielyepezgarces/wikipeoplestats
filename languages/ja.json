@@ -42,5 +42,9 @@
     "compare": "比較",
     "compare_wikis": "Wikiの比較",
     "compare_users": "ユーザーを比較",
-    "compare_countries": "国を比較"
+    "compare_countries": "国を比較",
+    "cached_version_message": "これは: timeまで有効なキャッシュされたバージョンです",
+    "purge_cache_button": "キャッシュを削除",
+    "cache_purged_successfully": "キャシュがクリアーされました",
+    "cache_purge_failed": "キャッシュの消去に失敗しました。もう一度お試しください。"
 }

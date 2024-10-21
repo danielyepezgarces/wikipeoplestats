@@ -138,6 +138,15 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     <?php echo $errorMessage; ?>
 </p>
 
+<div class="mt-8 text-center">
+        <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <?php echo __('cached_version_message', ['time' => $time]); ?>
+        </p>
+        <button id="purge-cache" onclick="purgeCache()" class="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition">
+            <?php echo __('purge_cache_button'); ?>
+        </button>
+    </div>
+
 
 <?php include 'supporters.php'; ?>
 <?php include 'footer.php'; ?>
@@ -145,7 +154,11 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 </main>
 
-
+<!-- Toast Container -->
+<div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg hidden dark:bg-green-600">
+    <span id="toast-message"></span>
+    <button onclick="hideToast()" class="ml-2 text-white font-bold">&times;</button>
+</div>
 
     <!-- Language Selector Popup -->
     <div id="language-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -205,5 +218,50 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         odometer.innerHTML = odometer.getAttribute('data-odometer-final');
     });
 </script>
+
+
+<script>
+function showToast(message, bgColor = 'bg-green-500') {
+    const toast = document.getElementById('toast');
+    const messageElement = document.getElementById('toast-message');
+    messageElement.innerText = message;
+    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white text-sm px-4 py-2 rounded shadow-lg dark:bg-green-600`;
+    toast.classList.remove('hidden');
+
+    // Oculta el toast después de 3 segundos
+    setTimeout(() => {
+        hideToast();
+    }, 6000);
+}
+
+function hideToast() {
+    const toast = document.getElementById('toast');
+    toast.classList.add('hidden');
+}
+
+function purgeCache() {
+    fetch("https://wikipeoplestats.danielyepezgarces.com.co/api/stats/<?php echo $wikiproject; ?>?action=purge", {
+        method: 'GET',
+        headers: {
+            "User-Agent": "WikiStatsPeople/1.0"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Muestra el toast de éxito
+        showToast("<?php echo __('cache_purged_successfully'); ?>");
+        
+        // Recarga la página después de 2 segundos
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast("<?php echo __('cache_purge_failed'); ?>", 'bg-red-500'); // Mensaje de error
+    });
+}
+</script>
+
 </body>
 </html>

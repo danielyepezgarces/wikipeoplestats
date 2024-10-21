@@ -42,5 +42,9 @@
     "compare": "Vergleichen Sie",
     "compare_wikis": "Wikis vergleichen",
     "compare_users": "Benutzer vergleichen",
-    "compare_countries": "Länder vergleichen"
+    "compare_countries": "Länder vergleichen",
+    "cached_version_message": "Dies ist eine zwischengespeicherte Version gültig bis :Zeit",
+    "purge_cache_button": "Cache säubern",
+    "cache_purged_successfully": "Seitencache erfolgreich bereinigt",
+    "cache_purge_failed": "Fehler beim Löschen des Cache. Bitte versuchen Sie es erneut."
 }

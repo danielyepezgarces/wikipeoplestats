@@ -43,5 +43,9 @@
     "compare": "Comparer",
     "compare_wikis": "Comparer les wikis",
     "compare_users": "Comparer les utilisateurs",
-    "compare_countries": "Comparer les pays"
+    "compare_countries": "Comparer les pays",
+    "cached_version_message": "Il s'agit d'une version mise en cache valide jusqu'au :heure",
+    "purge_cache_button": "Vider le cache",
+    "cache_purged_successfully": "Cache purgé avec succès",
+    "cache_purge_failed": "Impossible de purger le cache. Veuillez réessayer."
 }

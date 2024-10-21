@@ -42,5 +42,9 @@
     "other_genders": "Diğer Cinsiyetler",
     "total_editors": "Toplam Editörler",
     "trusted_by_wikimedia_chapters": "Wikimedia bölümlerinin güvendiği",
-    "wikimedia_chapters_trust_tool": "Bu listedeki Wikimedia bölümleri araca güvenir ve kullanır"
+    "wikimedia_chapters_trust_tool": "Bu listedeki Wikimedia bölümleri araca güvenir ve kullanır",
+    "cached_version_message": "Bu,:time tarihine kadar geçerli önbelleğe alınmış bir sürümdür",
+    "purge_cache_button": "Temizleme Önbelleği",
+    "cache_purged_successfully": "Önbellek başarıyla temizlendi.",
+    "cache_purge_failed": "Önbellek temizlenemedi. Lütfen tekrar deneyin."
 }

@@ -42,5 +42,9 @@
     "other_genders": "Ander geslagte",
     "total_editors": "Totaal Redigeerders",
     "trusted_by_wikimedia_chapters": "Vertrou deur die Wikimedia-hoofstukke",
-    "wikimedia_chapters_trust_tool": "Wikimedia hoofstukke op hierdie lys vertrou en gebruik die instrument"
+    "wikimedia_chapters_trust_tool": "Wikimedia hoofstukke op hierdie lys vertrou en gebruik die instrument",
+    "cached_version_message": "Dit is 'n weergawe wat geldig is tot :tyd",
+    "purge_cache_button": "Skoonmaak kas",
+    "cache_purged_successfully": "Kas is suksesvol skoongemaak.",
+    "cache_purge_failed": "Gevaal na reinig kas. Probeer asseblief weer."
 }

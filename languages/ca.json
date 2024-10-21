@@ -42,5 +42,9 @@
     "compare": "Compara",
     "compare_wikis": "Compara wikis",
     "compare_users": "Comparar usuaris",
-    "compare_countries": "Compara països"
+    "compare_countries": "Compara països",
+    "cached_version_message": "Es tracta d'una versió emmagatzemada a la memòria cau vàlida fins a :",
+    "purge_cache_button": "Purga la memòria cau",
+    "cache_purged_successfully": "La memòria cau s'ha purgat correctament.",
+    "cache_purge_failed": "No s'ha pogut purgar la memòria cau. Torna-ho a provar."
 }

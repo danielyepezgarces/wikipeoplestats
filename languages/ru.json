@@ -42,5 +42,9 @@
     "compare": "Сравнение",
     "compare_wikis": "Сравнить вики",
     "compare_users": "Сравнить пользователей",
-    "compare_countries": "Сравнить страны"
+    "compare_countries": "Сравнить страны",
+    "cached_version_message": "Это версия, кэшированная до :time",
+    "purge_cache_button": "Очистить кеш",
+    "cache_purged_successfully": "Изображение восстановлено успешно",
+    "cache_purge_failed": "Не удалось очистить кэш. Повторите попытку."
 }
