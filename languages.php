@@ -8,6 +8,7 @@ $languages = [
     ['code' => 'ar', 'name' => 'العربية', 'flag' => '🇸🇦', 'date_format' => 'D, j F Y', 'wiki' => 'arwiki', 'creation_date' => '2003-07-11', 'text_direction' => 'rtl'],
     ['code' => 'ca', 'name' => 'Català', 'flag' => '🇪🇸', 'date_format' => 'l, j \d\e F \d\e Y', 'wiki' => 'cawiki', 'creation_date' => '2001-03-28', 'text_direction' => 'ltr'],
     ['code' => 'ce', 'name' => 'Нохчийн', 'flag' => '🇦🇲', 'date_format' => 'd. MMMM Y', 'wiki' => 'cewiki', 'creation_date' => '2006-03-29', 'text_direction' => 'ltr'],
+    ['code' => 'cs', 'name' => 'Čeština', 'flag' => '🇨🇿', 'date_format' => 'd. m. Y', 'wiki' => 'cswiki', 'creation_date' => '2002-05-03', 'text_direction' => 'ltr'],
     ['code' => 'de', 'name' => 'Deutsch', 'flag' => '🇩🇪', 'date_format' => 'l, j. F Y', 'wiki' => 'dewiki', 'creation_date' => '2001-03-16', 'text_direction' => 'ltr'],
     ['code' => 'en', 'name' => 'English', 'flag' => '🇬🇧', 'date_format' => 'l, F j, Y', 'wiki' => 'enwiki', 'creation_date' => '2001-01-15', 'text_direction' => 'ltr'],
     ['code' => 'es', 'name' => 'Español', 'flag' => '🇪🇸', 'date_format' => 'l, j \d\e F \d\e Y', 'wiki' => 'eswiki', 'creation_date' => '2001-05-20', 'text_direction' => 'ltr'],
