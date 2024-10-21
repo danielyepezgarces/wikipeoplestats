@@ -93,7 +93,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         }
     </script>
 </head>
-<body class="bg-gray-100 dark:bg-darker text-gray-800 dark:text-gray-200 transition-colors duration-300">
+<body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
 
 <?php include 'header.php'; // Incluir el encabezado ?>
