@@ -22,6 +22,7 @@ $languages = [
     ['code' => 'sr', 'name' => 'Српски', 'flag' => '🇷🇸', 'date_format' => 'd. m. Y.', 'wiki' => 'srwiki', 'creation_date' => '2003-02-16', 'text_direction' => 'ltr'],
     ['code' => 'sv', 'name' => 'Svenska', 'flag' => '🇸🇪', 'date_format' => 'l, j F Y', 'wiki' => 'svwiki', 'creation_date' => '2001-06-17', 'text_direction' => 'ltr'],
     ['code' => 'uk', 'name' => 'Українська', 'flag' => '🇺🇦', 'date_format' => 'l, j F Y', 'wiki' => 'ukwiki', 'creation_date' => '2004-05-30', 'text_direction' => 'ltr'],
+    ['code' => 'vi', 'name' => 'Tiếng Việt', 'flag' => '🇻🇳', 'date_format' => 'd tháng m Y', 'wiki' => 'viwiki', 'creation_date' => '2002-11-01', 'text_direction' => 'ltr'],
     ['code' => 'zh', 'name' => '中文', 'flag' => '🇨🇳', 'date_format' => 'Y年n月j日 l', 'wiki' => 'zhwiki', 'creation_date' => '2001-05-11', 'text_direction' => 'ltr'],
 ];
 
