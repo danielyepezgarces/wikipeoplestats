@@ -43,7 +43,7 @@
     "total_editors": "Total Editor",
     "trusted_by_wikimedia_chapters": "Dipercaya oleh bab - bab Wikimedia",
     "wikimedia_chapters_trust_tool": "Bab - bab Wikimedia dalam daftar ini mempercayai dan menggunakan alat ini",
-    "cached_version_message": "Ini adalah versi cache yang valid hingga :time",
+    "cached_version_message": "Ini adalah versi cache yang valid hingga %s",
     "purge_cache_button": "Bersihkan Tembolok",
     "cache_purged_successfully": "Cache berhasil dihapus.",
     "cache_purge_failed": "Gagal membersihkan cache. Silakan coba lagi."

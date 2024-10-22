@@ -142,7 +142,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <div class="mt-8 text-center">
     <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        <?php echo __('cached_version_message', ['time' => $cachedUntil]); ?>
+        <?php echo sprintf(__('cached_version_message'), $cachedUntil); ?>
     </p>
     <div class="mt-4 inline-flex items-center justify-center">
         <button 
@@ -150,7 +150,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
             onclick="purgeCache()" 
             class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition flex items-center"
         >
-            <span class="mr-2"><?php echo $cachedUntil; ?></span>
+            <span class="mr-2"><?php echo __('purge_cache_button'); ?></span>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 12h18M3 21h18" />
             </svg>

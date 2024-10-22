@@ -43,7 +43,7 @@
     "total_editors": "Tổng số biên tập viên",
     "trusted_by_wikimedia_chapters": "Được các chương Wikimedia tin cậy",
     "wikimedia_chapters_trust_tool": "Các chương Wikimedia trong danh sách này tin tưởng và sử dụng công cụ",
-    "cached_version_message": "Đây là phiên bản được lưu trong bộ nhớ cache có hiệu lực đến :time",
+    "cached_version_message": "Đây là phiên bản được lưu trong bộ nhớ cache có hiệu lực đến %s",
     "purge_cache_button": "Xóa cache",
     "cache_purged_successfully": "Đã xóa bộ nhớ cache của trang thành công",
     "cache_purge_failed": "Không thể xóa bộ nhớ cache. Vui lòng thử lại."

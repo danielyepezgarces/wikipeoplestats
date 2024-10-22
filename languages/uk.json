@@ -43,7 +43,7 @@
     "total_editors": "Всього редакторів",
     "trusted_by_wikimedia_chapters": "Нам довіряють відділи Вікімедіа",
     "wikimedia_chapters_trust_tool": "Розділи Вікімедіа в цьому списку довіряють і використовують інструмент",
-    "cached_version_message": "Це версія, кешована дійсна до :time",
+    "cached_version_message": "Це версія, кешована дійсна до %s",
     "purge_cache_button": "Очистити кеш",
     "cache_purged_successfully": "Кеш успішно очищено.",
     "cache_purge_failed": "Не вдалося очистити кеш. Спробуйте ще раз."
