@@ -46,6 +46,9 @@
     "other_genders": "Другие гендеры",
     "total_editors": "Всего редакторов",
     "trusted_by_wikimedia_chapters": "Доверено главам Викимедиа",
-    "wikimedia_chapters_trust_tool": "Главы Викимедиа из этого списка доверяют и используют инструмент"
-  }
-  
+    "wikimedia_chapters_trust_tool": "Главы Викимедиа из этого списка доверяют и используют инструмент",
+    "hours": null,
+    "minutes": null,
+    "seconds": null,
+    "cache_update_message": null
+}

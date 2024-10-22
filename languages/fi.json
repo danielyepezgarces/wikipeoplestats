@@ -46,5 +46,9 @@
     "cached_version_message": "Tämä versio on välimuistissa voimassa%s asti",
     "purge_cache_button": "Tyhjännä välimuisti",
     "cache_purged_successfully": "Välimuistin tyhjennys onnistui.",
-    "cache_purge_failed": "Välimuistin tyhjentäminen epäonnistui. Yritä uudelleen."
+    "cache_purge_failed": "Välimuistin tyhjentäminen epäonnistui. Yritä uudelleen.",
+    "hours": "tuntia ",
+    "minutes": "minuuttia",
+    "seconds": "sekunttia",
+    "cache_update_message": "Välimuistissa oleva versio päivittyy sivun uudelleenlatauksen yhteydessä"
 }

@@ -46,5 +46,9 @@
     "cached_version_message": "Dette er en bufret versjon som er gyldig til %s",
     "purge_cache_button": "Tøm buffer",
     "cache_purged_successfully": "Bufferen ble tømt.",
-    "cache_purge_failed": "Kunne ikke tømme bufferen. Vennligst prøv igjen."
+    "cache_purge_failed": "Kunne ikke tømme bufferen. Vennligst prøv igjen.",
+    "hours": "timer",
+    "minutes": "minutter",
+    "seconds": "sekunder",
+    "cache_update_message": "Den hurtigbufrede versjonen vil oppdateres når siden lastes på nytt"
 }

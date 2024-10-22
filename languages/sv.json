@@ -46,5 +46,9 @@
     "cached_version_message": "Detta är en version cachelagrad giltig till %s",
     "purge_cache_button": "Rensa cache",
     "cache_purged_successfully": "Cachen rensades framgångsrikt",
-    "cache_purge_failed": "Det gick inte att rensa cacheminnet. Vänligen försök igen."
+    "cache_purge_failed": "Det gick inte att rensa cacheminnet. Vänligen försök igen.",
+    "hours": "timmar",
+    "minutes": "minuter",
+    "seconds": "sekunder",
+    "cache_update_message": "Den cachelagrade versionen uppdateras när sidan laddas om"
 }

@@ -46,5 +46,9 @@
     "cached_version_message": "Bu,%s tarihine kadar geçerli önbelleğe alınmış bir sürümdür",
     "purge_cache_button": "Temizleme Önbelleği",
     "cache_purged_successfully": "Önbellek başarıyla temizlendi.",
-    "cache_purge_failed": "Önbellek temizlenemedi. Lütfen tekrar deneyin."
+    "cache_purge_failed": "Önbellek temizlenemedi. Lütfen tekrar deneyin.",
+    "hours": "saat",
+    "minutes": "tutanak",
+    "seconds": "saniye",
+    "cache_update_message": "Önbelleğe alınmış sürüm, sayfa yeniden yüklendiğinde güncellenecektir"
 }

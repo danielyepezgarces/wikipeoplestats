@@ -46,5 +46,9 @@
     "cached_version_message": "Ovo je keširana verzija koja važi do %s",
     "purge_cache_button": "Očisti keš",
     "cache_purged_successfully": "Keš je uspešno očišćen.",
-    "cache_purge_failed": "Čišćenje keša nije uspelo. Probajte ponovo."
+    "cache_purge_failed": "Čišćenje keša nije uspelo. Probajte ponovo.",
+    "hours": "sati",
+    "minutes": "minute",
+    "seconds": "sekunde",
+    "cache_update_message": "Keširana verzija će se ažurirati nakon ponovnog učitavanja stranice"
 }

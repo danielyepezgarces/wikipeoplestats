@@ -46,5 +46,9 @@
     "cached_version_message": "Это версия, кэшированная до %s",
     "purge_cache_button": "Очистить кеш",
     "cache_purged_successfully": "Изображение восстановлено успешно",
-    "cache_purge_failed": "Не удалось очистить кэш. Повторите попытку."
+    "cache_purge_failed": "Не удалось очистить кэш. Повторите попытку.",
+    "hours": "часы",
+    "minutes": "мин.",
+    "seconds": "сек",
+    "cache_update_message": "Кэшированная версия обновится при перезагрузке страницы"
 }

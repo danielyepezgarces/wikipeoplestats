@@ -46,5 +46,9 @@
     "cached_version_message": "Ini adalah versi cache yang valid hingga %s",
     "purge_cache_button": "Bersihkan Tembolok",
     "cache_purged_successfully": "Cache berhasil dihapus.",
-    "cache_purge_failed": "Gagal membersihkan cache. Silakan coba lagi."
+    "cache_purge_failed": "Gagal membersihkan cache. Silakan coba lagi.",
+    "hours": "jam",
+    "minutes": "menit",
+    "seconds": "detik",
+    "cache_update_message": "Versi cache akan diperbarui saat halaman dimuat ulang"
 }

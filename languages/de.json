@@ -46,5 +46,9 @@
     "cached_version_message": "Dies ist eine zwischengespeicherte Version gültig bis :Zeit",
     "purge_cache_button": "Cache säubern",
     "cache_purged_successfully": "Seitencache erfolgreich bereinigt",
-    "cache_purge_failed": "Fehler beim Löschen des Cache. Bitte versuchen Sie es erneut."
+    "cache_purge_failed": "Fehler beim Löschen des Cache. Bitte versuchen Sie es erneut.",
+    "hours": "Stunden",
+    "minutes": "Minuten",
+    "seconds": "Sekunden",
+    "cache_update_message": "Die zwischengespeicherte Version wird beim Neuladen der Seite aktualisiert"
 }

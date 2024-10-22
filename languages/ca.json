@@ -46,5 +46,9 @@
     "cached_version_message": "Es tracta d'una versió emmagatzemada a la memòria cau vàlida fins a :",
     "purge_cache_button": "Purga la memòria cau",
     "cache_purged_successfully": "La memòria cau s'ha purgat correctament.",
-    "cache_purge_failed": "No s'ha pogut purgar la memòria cau. Torna-ho a provar."
+    "cache_purge_failed": "No s'ha pogut purgar la memòria cau. Torna-ho a provar.",
+    "hours": "hores",
+    "minutes": "minuts",
+    "seconds": "segons",
+    "cache_update_message": "La versió en memòria cau s'actualitzarà en tornar a carregar la pàgina"
 }

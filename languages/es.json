@@ -46,5 +46,9 @@
     "cached_version_message": "Esta es una versión almacenada en caché válida hasta %s",
     "purge_cache_button": "Purgar cache",
     "cache_purged_successfully": "La caché se ha purgado correctamente.",
-    "cache_purge_failed": "Error al purgar la caché. Inténtalo de nuevo."
+    "cache_purge_failed": "Error al purgar la caché. Inténtalo de nuevo.",
+    "hours": "horas",
+    "minutes": "minutos",
+    "seconds": "segundos",
+    "cache_update_message": "La versión en caché se actualizará al volver a cargar la página"
 }

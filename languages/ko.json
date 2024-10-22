@@ -46,5 +46,9 @@
     "cached_version_message": "이 버전은: time까지 유효한 캐시 버전입니다",
     "purge_cache_button": "캐싱",
     "cache_purged_successfully": "사전 로드 캐시가 성공적으로 제거되었습니다.",
-    "cache_purge_failed": "캐시를 제거하지 못했습니다. 다시 시도해주세요."
+    "cache_purge_failed": "캐시를 제거하지 못했습니다. 다시 시도해주세요.",
+    "hours": "시간",
+    "minutes": "분",
+    "seconds": "초",
+    "cache_update_message": "페이지를 다시 로드하면 캐시된 버전이 업데이트됩니다."
 }

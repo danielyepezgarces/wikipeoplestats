@@ -141,8 +141,8 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 </p>
 
 <div class="mt-8 text-center">
-    <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        <?php echo sprintf(__('cached_version_message'), $cachedUntil); ?>
+<p class="text-lg font-semibold text-gray-900 dark:text-gray-100" id="cacheMessage">
+        <?php echo sprintf(__('cached_version_message'), "<span id='cachecountdown'></span>"); ?>
     </p>
     <div class="mt-4 inline-flex items-center justify-center">
         <button 
@@ -274,5 +274,36 @@ function purgeCache() {
 }
 </script>
 
+<script>
+        // Establece la fecha objetivo desde la variable PHP
+        const targetDate = new Date("<?php echo $cachedUntil; ?>").getTime();
+
+        // Traducciones
+        const hoursLabel = "<?php echo __('hours'); ?>";
+        const minutesLabel = "<?php echo __('minutes'); ?>";
+        const secondsLabel = "<?php echo __('seconds'); ?>";
+        const cacheUpdateMessage = "<?php echo __('cache_update_message'); ?>";
+
+        // Actualiza el conteo regresivo cada segundo
+        const countdownFunction = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            // Calcula horas, minutos y segundos
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Muestra el resultado en el elemento HTML con id cachecountdown
+            document.getElementById("cachecountdown").innerHTML = `${hours} ${hoursLabel}, ${minutes} ${minutesLabel}, ${seconds} ${secondsLabel}`;
+
+            // Si la cuenta regresiva termina
+            if (distance < 0) {
+                clearInterval(countdownFunction);
+                document.getElementById("cacheMessage").innerHTML = cacheUpdateMessage;
+            }
+        }, 1000);
+    </script>
+    
 </body>
 </html>

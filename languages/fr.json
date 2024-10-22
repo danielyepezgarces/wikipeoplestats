@@ -47,5 +47,9 @@
     "cached_version_message": "Il s'agit d'une version mise en cache valide jusqu'au :heure",
     "purge_cache_button": "Vider le cache",
     "cache_purged_successfully": "Cache purgé avec succès",
-    "cache_purge_failed": "Impossible de purger le cache. Veuillez réessayer."
+    "cache_purge_failed": "Impossible de purger le cache. Veuillez réessayer.",
+    "hours": "de travail",
+    "minutes": "minutes",
+    "seconds": "secondes",
+    "cache_update_message": "La version mise en cache sera mise à jour lors du rechargement de la page"
 }

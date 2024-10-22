@@ -46,5 +46,9 @@
     "cached_version_message": "Dit is 'n weergawe wat geldig is tot :tyd",
     "purge_cache_button": "Skoonmaak kas",
     "cache_purged_successfully": "Kas is suksesvol skoongemaak.",
-    "cache_purge_failed": "Gevaal na reinig kas. Probeer asseblief weer."
+    "cache_purge_failed": "Gevaal na reinig kas. Probeer asseblief weer.",
+    "hours": "grappies",
+    "minutes": "minute",
+    "seconds": "sekondes",
+    "cache_update_message": "Die gekas weergawe sal werk op bladsy herlaai"
 }

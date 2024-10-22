@@ -46,5 +46,9 @@
     "cached_version_message": "Questa è una versione memorizzata nella cache valida fino al %s",
     "purge_cache_button": "Pulisci la cache",
     "cache_purged_successfully": "Cache svuotata con successo",
-    "cache_purge_failed": "Impossibile svuotare la cache. Riprova."
+    "cache_purge_failed": "Impossibile svuotare la cache. Riprova.",
+    "hours": "ore",
+    "minutes": "minuti",
+    "seconds": " secondi",
+    "cache_update_message": "La versione memorizzata nella cache verrà aggiornata al ricaricamento della pagina"
 }

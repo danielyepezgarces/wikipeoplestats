@@ -46,5 +46,9 @@
     "cached_version_message": "Toto je verze uložená v mezipaměti platná do %s",
     "purge_cache_button": "Vyčistit mezipaměť",
     "cache_purged_successfully": "Mezipaměť byla úspěšně vymazána.",
-    "cache_purge_failed": "Vymazání mezipaměti se nezdařilo. Zkuste to prosím znovu."
+    "cache_purge_failed": "Vymazání mezipaměti se nezdařilo. Zkuste to prosím znovu.",
+    "hours": "hodiny",
+    "minutes": "minuty",
+    "seconds": "sekundy",
+    "cache_update_message": "Verze uložená v mezipaměti se aktualizuje při opětovném načtení"
 }
