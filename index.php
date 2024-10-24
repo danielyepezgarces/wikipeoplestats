@@ -63,11 +63,14 @@ if ($currentWiki === 'globalwiki') {
 }
 }
 
-// Imprime el valor de lastUpdated
-if (isset($data['lastUpdated'])) {
-    echo $data['lastUpdated'];
+if (json_last_error() !== JSON_ERROR_NONE) {
+    echo "Error al decodificar JSON: " . json_last_error_msg();
 } else {
-    echo "La clave 'lastUpdated' no está definida.";
+    if (isset($data['lastUpdated'])) {
+        echo $data['lastUpdated'];
+    } else {
+        echo "La clave 'lastUpdated' no está definida.";
+    }
 }
 
 // Calcular los ratios
