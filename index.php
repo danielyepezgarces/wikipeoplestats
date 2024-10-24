@@ -39,7 +39,7 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $otherGenders = 0;
     $totalContributions = 0;
     $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
-    $lastUpdated = $data['lastUpdated'] ?? "N/A";
+    $lastUpdated = "N/A";
     $errorMessage = __('coming_soon_tracking_wiki');
 } else {
     // Asignar los valores de la respuesta
@@ -48,7 +48,7 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $totalMen = $data['totalMen'] ?? 0;
     $otherGenders = $data['otherGenders'] ?? 0;
     $totalContributions = $data['totalContributions'] ?? 0;
-    $lastUpdated = $data['lastUpdated'] ?? "N/A";
+    $lastUpdated = $data['lastUpdated'];
     $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
 
 // Mensaje de éxito según la wiki
@@ -63,15 +63,6 @@ if ($currentWiki === 'globalwiki') {
 }
 }
 
-if (json_last_error() !== JSON_ERROR_NONE) {
-    echo "Error al decodificar JSON: " . json_last_error_msg();
-} else {
-    if (isset($data['lastUpdated'])) {
-        echo $data['lastUpdated'];
-    } else {
-        echo "La clave 'lastUpdated' no está definida.";
-    }
-}
 
 // Calcular los ratios
 $ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
