@@ -12,11 +12,11 @@
         </div>
 
         <div class="flex flex-col items-center">
-            <p class="text-center text-sm leading-6 text-slate-500">
+            <p class="text-center text-sm leading-6 dark:text-white text-slate-500">
                 © <?php echo date('Y'); ?> - <?php echo __('license_info'); ?>
             </p>
             
-            <div class="flex items-center justify-center space-x-4 text-sm font-semibold leading-6 text-slate-700 mt-4">
+            <div class="flex items-center dark:text-white justify-center space-x-4 text-sm font-semibold leading-6 text-slate-700 mt-4">
                 <a href="/privacy-policy"><?php echo __('privacy_policy'); ?></a>
                 <div class="h-4 w-px bg-slate-500/20"></div>
                 <a href="/terms-of-use"><?php echo __('terms_of_use'); ?></a>
