@@ -39,6 +39,7 @@ if (isset($data['error']) && $data['error'] === 'No data found') {
     $otherGenders = 0;
     $totalContributions = 0;
     $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
+    $lastUpdated = $data['lastUpdated'] ?? "N/A";
     $errorMessage = __('coming_soon_tracking_wiki');
 } else {
     // Asignar los valores de la respuesta
