@@ -63,7 +63,12 @@ if ($currentWiki === 'globalwiki') {
 }
 }
 
-echo $data['lastUpdated'];
+// Imprime el valor de lastUpdated
+if (isset($data['lastUpdated'])) {
+    echo $data['lastUpdated'];
+} else {
+    echo "La clave 'lastUpdated' no está definida.";
+}
 
 // Calcular los ratios
 $ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
