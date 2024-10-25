@@ -1,6 +1,7 @@
 <?php
 header("Content-Type: application/json");
 
+include '../../config.php';
 include '../../languages.php';
 
 // Obtener los parámetros de la URL
