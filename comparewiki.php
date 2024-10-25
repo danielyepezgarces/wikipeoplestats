@@ -15,6 +15,18 @@ if ($project) {
     $teamAStats = [];
     $teamBStats = [];
 
+    // Función para formatear el nombre del proyecto
+    function formatProject($project) {
+        // Eliminar el prefijo 'www.' si existe
+        $project = preg_replace('/^www\./', '', $project);
+        
+        // Reemplazar '.wikipedia.org', '.wikipedia', y '.wiki' con ''
+        $project = preg_replace('/\.wikipedia\.org$|\.wikipedia$|\.wiki$/', '', $project);
+        
+        // Retornar el proyecto en el formato correcto
+        return $project . 'wiki';
+    }
+
     // Función para obtener datos del equipo
     function getTeamData($project, $start_date, $end_date) {
         // Inicializar cURL
@@ -59,9 +71,12 @@ if ($project) {
 
     // Asegurarse de que hay dos proyectos
     if (count($projects) == 2) {
-        // Obtener datos para cada equipo
-        $teamAStats = getTeamData(trim($projects[0]), $start_date, $end_date);
-        $teamBStats = getTeamData(trim($projects[1]), $start_date, $end_date);
+        // Formatear y obtener datos para cada equipo
+        $projectA = formatProject(trim($projects[0]));
+        $projectB = formatProject(trim($projects[1]));
+
+        $teamAStats = getTeamData($projectA, $start_date, $end_date);
+        $teamBStats = getTeamData($projectB, $start_date, $end_date);
     } else {
         die("Se requieren exactamente dos proyectos en el parámetro 'project'.");
     }
@@ -76,10 +91,6 @@ if ($project) {
     $totalWomenB = $teamBStats['totalWomen'];
     $totalMenB = $teamBStats['totalMen'];
     $otherGendersB = $teamBStats['otherGenders'];
-
-    // Asignar proyectos a variables
-    $projectA = trim($projects[0]);
-    $projectB = trim($projects[1]);
 } else {
     die("El parámetro 'project' no está definido.");
 }
@@ -141,7 +152,7 @@ $lastUpdated = $data['lastUpdated'];
         <div class="flex justify-between mt-8">
     <!-- Contenedor Izquierdo -->
     <div class="w-full md:w-1/2 p-4">
-        <h2 class="text-center font-bold text-2xl mb-4"><?php echo __('Team A'); ?></h2>
+        <h2 class="text-center font-bold text-2xl mb-4"><?php echo $projectA; ?></h2>
         <div class="flex justify-between">
             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex flex-col justify-center items-center text-center flex-1 mx-1">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100"><?php echo __('total_people'); ?></h3>
@@ -178,7 +189,7 @@ $lastUpdated = $data['lastUpdated'];
 
     <!-- Contenedor Derecho -->
     <div class="w-full md:w-1/2 p-4">
-        <h2 class="text-center font-bold text-2xl mb-4"><?php echo __('Team B'); ?></h2>
+        <h2 class="text-center font-bold text-2xl mb-4"><?php echo $projectB; ?></h2>
         <div class="flex justify-between">
             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex flex-col justify-center items-center text-center flex-1 mx-1">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100"><?php echo __('total_people'); ?></h3>
@@ -234,9 +245,9 @@ $lastUpdated = $data['lastUpdated'];
         try {
             // Crear las promesas para ambas solicitudes
             const responses = await Promise.all([
-                fetch(`https://wikipeoplestats.danielyepezgarces.com.co/api/genders/graph/<?php echo $projectA; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>`),
-                fetch(`https://wikipeoplestats.danielyepezgarces.com.co/api/genders/graph/<?php echo $projectB; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>`)
-            ]);
+    fetch(`https://corsproxy.io/?${encodeURIComponent('https://wikipeoplestats.danielyepezgarces.com.co/api/genders/graph/<?php echo $projectA; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')}`),
+    fetch(`https://corsproxy.io/?${encodeURIComponent('https://wikipeoplestats.danielyepezgarces.com.co/api/genders/graph/<?php echo $projectB; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')}`)
+]);
 
             const dataA = await responses[0].json();
             const dataB = await responses[1].json();
