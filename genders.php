@@ -128,7 +128,7 @@ $lastUpdated = $data['lastUpdated'];
         }
     </script>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
     <?php include 'header.php'; // Incluir el encabezado ?>
 
     <main class="container mx-auto px-4 py-8">
@@ -528,14 +528,14 @@ function changeLanguage(lang) {
 }
 
 
-        function toggleLanguagePopup() {
+function toggleLanguagePopup() {
             const popup = document.getElementById('language-popup');
             popup.classList.toggle('hidden');
         }
 
         function toggleTheme() {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+            document.documentElement.classList.toggle('dark'); // Cambiar a <html>
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         }
 
         function toggleMobileMenu() {
@@ -546,7 +546,7 @@ function changeLanguage(lang) {
         // Check for saved theme preference or default to dark mode
         const savedTheme = localStorage.getItem('theme') || 'dark';
         if (savedTheme === 'dark') {
-            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
         }
 
         // Close language popup when clicking outside
