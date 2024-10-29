@@ -331,8 +331,8 @@ function changeLanguage(lang) {
         }
 
         function toggleTheme() {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+            document.documentElement.classList.toggle('dark'); // Cambiar a <html>
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
         }
 
         function toggleMobileMenu() {
@@ -343,7 +343,7 @@ function changeLanguage(lang) {
         // Check for saved theme preference or default to dark mode
         const savedTheme = localStorage.getItem('theme') || 'dark';
         if (savedTheme === 'dark') {
-            document.body.classList.add('dark');
+            document.documentElement.classList.add('dark');
         }
 
         // Close language popup when clicking outside
