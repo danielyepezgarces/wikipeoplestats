@@ -129,7 +129,6 @@ html.dark .apexcharts-tooltip-title {
 
 html.dark .apexcharts-legend-text {
   color: #fff !important;
-  border: 1px solid #555 !important;
 }
 
 </style>
