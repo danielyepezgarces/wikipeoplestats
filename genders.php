@@ -114,6 +114,23 @@ $lastUpdated = $data['lastUpdated'];
         width: 100% !important; /* Asegúrate de que el canvas use todo el ancho */
         height: 100% !important; /* Asegúrate de que el canvas use toda la altura */
     }
+
+    /* Media query for dark mode */
+@media (prefers-color-scheme: dark) {
+  .dark-mode .apexcharts-text {
+    fill: #fff;
+  }
+  .dark-mode .apexcharts-tooltip,
+  .dark-mode .apexcharts-tooltip-title {
+    background-color: #333 !important;
+    color: #fff !important;
+    border: 1px solid #555 !important;
+  }
+  .dark-mode .apexcharts-legend-text {
+    color: #fff !important;
+    border: 1px solid #555 !important;
+  }
+}
 </style>
     <script>
         tailwind.config = {
