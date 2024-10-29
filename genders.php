@@ -114,23 +114,24 @@ $lastUpdated = $data['lastUpdated'];
         width: 100% !important; /* Asegúrate de que el canvas use todo el ancho */
         height: 100% !important; /* Asegúrate de que el canvas use toda la altura */
     }
-
-    /* Media query for dark mode */
-@media (prefers-color-scheme: dark) {
-  .dark-mode .apexcharts-text {
-    fill: #fff;
-  }
-  .dark-mode .apexcharts-tooltip,
-  .dark-mode .apexcharts-tooltip-title {
-    background-color: #333 !important;
-    color: #fff !important;
-    border: 1px solid #555 !important;
-  }
-  .dark-mode .apexcharts-legend-text {
-    color: #fff !important;
-    border: 1px solid #555 !important;
-  }
+    
+    /* Estilos para el modo oscuro */
+html.dark .apexcharts-text {
+  fill: #fff;
 }
+
+html.dark .apexcharts-tooltip,
+html.dark .apexcharts-tooltip-title {
+  background-color: #333 !important;
+  color: #fff !important;
+  border: 1px solid #555 !important;
+}
+
+html.dark .apexcharts-legend-text {
+  color: #fff !important;
+  border: 1px solid #555 !important;
+}
+
 </style>
     <script>
         tailwind.config = {
@@ -535,65 +536,44 @@ async function loadTranslations(locale) {
         // Llamar a la función para obtener datos
         fetchData();
     </script>
-<script>
+        <script>
+
+
+
 function changeLanguage(lang) {
     const url = lang ? '/' + lang + '/search/genders' : '/search/genders';
     window.location.href = url;
 }
 
+
 function toggleLanguagePopup() {
-    const popup = document.getElementById('language-popup');
-    popup.classList.toggle('hidden');
-}
-
-function updateChartTheme() {
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    const charts = document.querySelectorAll('.apexcharts-canvas');
-
-    charts.forEach(chart => {
-        if (isDarkMode) {
-            chart.classList.add('apexcharts-theme-dark');
-            chart.classList.remove('apexcharts-theme-light');
-        } else {
-            chart.classList.add('apexcharts-theme-light');
-            chart.classList.remove('apexcharts-theme-dark');
+            const popup = document.getElementById('language-popup');
+            popup.classList.toggle('hidden');
         }
-    });
-}
 
-function toggleTheme() {
-    document.documentElement.classList.toggle('dark'); // Cambiar a <html>
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    updateChartTheme(); // Actualizar el tema de la gráfica
-}
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark'); // Cambiar a <html>
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
 
-function toggleMobileMenu() {
-    const mobileMenu = document.getElementById('mobile-menu');
-    mobileMenu.classList.toggle('hidden');
-}
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        }
 
-// Check for saved theme preference or default to dark mode
-const savedTheme = localStorage.getItem('theme') || 'dark';
-if (savedTheme === 'dark') {
-    document.documentElement.classList.add('dark');
-}
+        // Check for saved theme preference or default to dark mode
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
 
-// Actualizar el tema de la gráfica al cargar la página
-document.addEventListener('DOMContentLoaded', updateChartTheme);
-
-// Observador para cambios en la clase del documento
-const observer = new MutationObserver(updateChartTheme);
-observer.observe(document.documentElement, { attributes: true });
-
-// Close language popup when clicking outside
-window.addEventListener('click', function(e) {
-    const popup = document.getElementById('language-popup');
-    if (!popup.contains(e.target) && !e.target.closest('button[onclick="toggleLanguagePopup()"]')) {
-        popup.classList.add('hidden');
-    }
-});
-</script>
-
+        // Close language popup when clicking outside
+        window.addEventListener('click', function(e) {
+            const popup = document.getElementById('language-popup');
+            if (!popup.contains(e.target) && !e.target.closest('button[onclick="toggleLanguagePopup()"]')) {
+                popup.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
