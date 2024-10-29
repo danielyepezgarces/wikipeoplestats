@@ -131,7 +131,7 @@ $lastUpdated = $data['lastUpdated'];
     </script>
     <!-- Otras cabeceras -->
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
     <?php include 'header.php'; // Incluir el encabezado ?>
 
     
