@@ -50,5 +50,7 @@
     "other_genders": "Other Genders",
     "total_editors": "Total Editors",
     "trusted_by_wikimedia_chapters": "Trusted by the Wikimedia chapters",
-    "wikimedia_chapters_trust_tool": "Wikimedia chapters on this list trust and use the tool"
+    "wikimedia_chapters_trust_tool": "Wikimedia chapters on this list trust and use the tool",
+    "comparison_wiki_main": "Gender Comparison: %s vs. %s",
+    "comparison_wiki_description": "Explore how men and women are represented in both wikis."
   }
