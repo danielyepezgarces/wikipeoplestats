@@ -14,6 +14,7 @@ $languages = [
     ['code' => 'es', 'name' => 'Español', 'flag' => '🇪🇸', 'date_format' => 'l, j \d\e F \d\e Y', 'wiki' => 'eswiki', 'creation_date' => '2001-05-20', 'text_direction' => 'ltr'],
     ['code' => 'fi', 'name' => 'Suomi', 'flag' => '🇫🇮', 'date_format' => 'l, j. F Y', 'wiki' => 'fiwiki', 'creation_date' => '2003-05-06', 'text_direction' => 'ltr'],
     ['code' => 'fr', 'name' => 'Français', 'flag' => '🇫🇷', 'date_format' => 'l j F Y', 'wiki' => 'frwiki', 'creation_date' => '2001-03-23', 'text_direction' => 'ltr'],
+    ['code' => 'hu', 'name' => 'Magyar', 'flag' => '🇭🇺', 'date_format' => 'YYYY. MMMM D.', 'wiki' => 'huwiki', 'creation_date' => '2003-07-08', 'text_direction' => 'ltr'],
     ['code' => 'id', 'name' => 'Bahasa Indonesia', 'flag' => '🇮🇩', 'date_format' => 'd F Y', 'wiki' => 'idwiki', 'creation_date' => '2003-05-30', 'text_direction' => 'ltr'],
     ['code' => 'it', 'name' => 'Italiano', 'flag' => '🇮🇹', 'date_format' => 'l j F Y', 'wiki' => 'itwiki', 'creation_date' => '2001-05-10', 'text_direction' => 'ltr'],
     ['code' => 'ko', 'name' => '한국어', 'flag' => '🇰🇷', 'date_format' => 'YYYY년 M월 D일 (ddd)', 'wiki' => 'kowiki', 'creation_date' => '2002-06-30', 'text_direction' => 'ltr'],
