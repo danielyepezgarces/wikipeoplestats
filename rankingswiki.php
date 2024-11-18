@@ -131,7 +131,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
   </aside>
 
   <!-- Main Content (5/6 del ancho en pantallas grandes) -->
-  <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] p-8 lg:p-16 border border-gray-200 dark:border-gray-700 rounded-lg">
+  <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Tabla full width -->
     <div class="overflow-x-auto">
       <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
