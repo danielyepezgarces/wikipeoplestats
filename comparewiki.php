@@ -365,9 +365,8 @@ html.dark .apexcharts-legend-text {
                 text: '<?php echo __('timeline_graph'); ?>'
             },
             labels: {
-                rotate: 45, // Rota las etiquetas si es necesario
                 style: {
-                    fontSize: '12px', // Estilo de fuente más pequeño para evitar el apilamiento
+                    fontSize: '10px', // Estilo de fuente más pequeño para evitar el apilamiento
                 },
                 autoRotate: true, // Rotación automática para evitar apilamiento
                 show: true, // Mostrar las etiquetas
