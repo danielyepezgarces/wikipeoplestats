@@ -4,6 +4,13 @@ header("Content-Type: application/json");
 include '../../config.php';
 include '../../languages.php';
 
+// Iniciar Memcached
+$memcache = new Memcached();
+$memcache->addServer('localhost', 11211); // Cambia según tu configuración
+
+// Medir tiempo de inicio
+$startTime = microtime(true);
+
 // Obtener los parámetros de la URL
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);
@@ -37,7 +44,28 @@ if (empty($end_date)) {
     $end_date = date('Y-m-d');
 }
 
-// Definir la consulta dependiendo del proyecto y las fechas
+// Definir la clave de caché (más limpia, sin redundancia)
+$cacheKey = "wikistats_{$project}_{$start_date}_{$end_date}";
+
+// Comprobar si el caché existe
+$cachedResponse = $memcache->get($cacheKey);
+
+// Duración del caché en segundos (6 horas)
+$cacheDuration = 21600; 
+
+// Si la respuesta está en caché, devolverla
+if ($cachedResponse) {
+    $response = json_decode($cachedResponse, true);
+    
+    // Medir el tiempo total de ejecución
+    $executionTime = microtime(true) - $startTime;
+    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
+    
+    echo json_encode($response);
+    exit;
+}
+
+// Definir la consulta SQL
 $sql = "
     SELECT
         COUNT(DISTINCT a.wikidata_id) AS totalPeople,
@@ -53,10 +81,10 @@ $sql = "
         AND a.creation_date <= '$end_date'
 ";
 
+// Filtro por idioma del proyecto
 if ($language_code !== 'all') {
     $sql .= " AND a.site = '{$languages[$language_code]['wiki']}'";
 }
-
 
 $result = $conn->query($sql);
 
@@ -67,7 +95,7 @@ if ($result->num_rows > 0) {
     if ($data['totalPeople'] == 0 && $data['totalWomen'] == 0 && $data['totalMen'] == 0 && $data['otherGenders'] == 0) {
         echo json_encode(['error' => 'No data found']);
     } else {
-        // Generar respuesta
+        // Generar la respuesta
         $response = [
             'totalPeople' => (int)$data['totalPeople'],
             'totalWomen' => (int)$data['totalWomen'],
@@ -75,6 +103,13 @@ if ($result->num_rows > 0) {
             'otherGenders' => (int)$data['otherGenders'],
             'lastUpdated' => $data['lastUpdated'] ? $data['lastUpdated'] : null,
         ];
+
+        // Almacenar la respuesta en caché
+        $memcache->set($cacheKey, json_encode($response), $cacheDuration);
+
+        // Medir el tiempo total de ejecución
+        $executionTime = microtime(true) - $startTime;
+        $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
 
         echo json_encode($response);
     }
