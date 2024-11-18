@@ -99,9 +99,10 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 
 <?php include 'header.php'; // Incluir el encabezado ?>
-<div class="flex h-screen overflow-hidden">
+
+<div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white dark:bg-[#1F2937] p-6 fixed h-full top-0 left-0 z-10 ml-6"> <!-- Agregado 'ml-6' para margen izquierdo -->
+    <aside class="w-64 bg-white dark:bg-[#1F2937] p-6 fixed h-full top-0 left-0 z-10 lg:block lg:w-64 lg:h-auto">
       <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
       <ul>
         <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">Last 7D</a></li>
@@ -113,8 +114,8 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
       </ul>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 ml-64 pl-8 pt-8 bg-gray-50 dark:bg-[#1D2939] overflow-auto">
+    <!-- Main Content (Área principal) -->
+    <main class="flex-1 ml-64 lg:ml-0 pl-8 pt-8 pb-16 bg-gray-50 dark:bg-[#1D2939] overflow-auto lg:ml-0">
       <h1 class="text-3xl font-bold mb-4">Contenido Principal</h1>
       <p>Seleccione un rango de tiempo en el Sidebar para filtrar los resultados.</p>
 
@@ -122,10 +123,10 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
       <div id="results" class="mt-8">
         <!-- Los resultados dinámicos se mostrarán aquí -->
       </div>
-
-
     </main>
   </div>
+
+
       <!-- Footer -->
       <?php include 'footer.php'; ?>
 
