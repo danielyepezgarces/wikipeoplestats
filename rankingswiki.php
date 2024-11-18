@@ -99,9 +99,9 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 
 <?php include 'header.php'; // Incluir el encabezado ?>
-<div class="flex">
+<div class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white dark:bg-[#1F2937] p-6">
+    <aside class="w-64 bg-white dark:bg-[#1F2937] p-6 fixed h-full top-0 left-0 z-10 ml-6"> <!-- Agregado 'ml-6' para margen izquierdo -->
       <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
       <ul>
         <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">Last 7D</a></li>
@@ -114,7 +114,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 container mx-auto px-4 py-8">
+    <main class="flex-1 ml-64 pl-8 pt-8 bg-gray-50 dark:bg-[#1D2939] overflow-auto">
       <h1 class="text-3xl font-bold mb-4">Contenido Principal</h1>
       <p>Seleccione un rango de tiempo en el Sidebar para filtrar los resultados.</p>
 
@@ -123,10 +123,12 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         <!-- Los resultados dinámicos se mostrarán aquí -->
       </div>
 
-      <!-- Footer -->
-      <?php include 'footer.php'; ?>
+
     </main>
   </div>
+      <!-- Footer -->
+      <?php include 'footer.php'; ?>
+
 
 <!-- Toast Container -->
 <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg hidden dark:bg-green-600">
