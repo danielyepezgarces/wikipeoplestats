@@ -100,9 +100,9 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <?php include 'header.php'; // Incluir el encabezado ?>
 
-<div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
-  <!-- Sidebar (1 parte) -->
-  <aside class="bg-white dark:bg-[#1F2937] p-6 h-full lg:block">
+<div class="w-4/5 mx-auto grid grid-cols-6 gap-4">
+  <!-- Sidebar (1/6 del ancho) -->
+  <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block">
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
     <ul>
       <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
@@ -114,11 +114,12 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     </ul>
   </aside>
 
-  <!-- Main Content (2 partes) -->
-  <main class="col-span-2 bg-gray-50 dark:bg-[#1D2939] p-8 lg:p-16">
+  <!-- Main Content (5/6 del ancho) -->
+  <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] p-8 lg:p-16">
     <!-- Aquí no hay contenido -->
   </main>
 </div>
+
 
 
       <!-- Footer -->
