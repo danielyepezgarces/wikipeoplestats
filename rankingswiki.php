@@ -100,7 +100,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <?php include 'header.php'; // Incluir el encabezado ?>
 
-<div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4">
+<div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
   <!-- Sidebar (1/6 del ancho en pantallas grandes) -->
   <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block">
     <!-- Título de la sección -->
