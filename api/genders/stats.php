@@ -29,6 +29,14 @@ if ($language_code === false) {
     exit;
 }
 
+// Si no se proporcionan las fechas de inicio y fin, usar la fecha de creación de la wiki seleccionada y la fecha actual
+if (empty($start_date)) {
+    $start_date = $languages[$language_code]['creation_date'];
+}
+if (empty($end_date)) {
+    $end_date = date('Y-m-d');
+}
+
 // Definir la consulta dependiendo del proyecto y las fechas
 $sql = "
     SELECT
