@@ -265,8 +265,8 @@ html.dark .apexcharts-legend-text {
         try {
             // Crear las promesas para ambas solicitudes
             const responses = await Promise.all([
-    fetch(`https://corsproxy.io/?${encodeURIComponent('https://wikipeoplestats.wmcloud.org/api/genders/graph/<?php echo $projectA; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')}`),
-    fetch(`https://corsproxy.io/?${encodeURIComponent('https://wikipeoplestats.wmcloud.org/api/genders/graph/<?php echo $projectB; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>')}`)
+    fetch(`https://wikipeoplestats.wmcloud.org/api/genders/graph/<?php echo $projectA; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>`),
+    fetch(`https://wikipeoplestats.wmcloud.org/api/genders/graph/<?php echo $projectB; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>`)
 ]);
 
             const dataA = await responses[0].json();
