@@ -1,6 +1,9 @@
 RewriteEngine On
 RewriteBase /
 
+php_flag display_errors On
+php_value error_reporting 32767
+
 RewriteRule ^([a-zA-Z0-9_-]+)/search/genders/?$ /searchgenders.php?lang=$1 [L,QSA]
 RewriteRule ^search/genders/?$ /searchgenders.php [L,QSA]
 RewriteRule ^([a-zA-Z0-9_-]+)/search/users/?$ /searchusers.php?lang=$1 [L,QSA]
