@@ -3,6 +3,10 @@ header("Content-Type: application/json");
 
 include '../../config.php';
 
+// Iniciar Memcached
+$memcache = new Memcached();
+$memcache->addServer('localhost', 11211); // Cambia según tu configuración
+
 // Obtener los parámetros de la URL
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);
@@ -45,7 +49,28 @@ if ($language_code === false) {
     exit;
 }
 
-// Definir la consulta dependiendo del proyecto, las fechas y el usuario
+// Generar clave de caché única
+$cacheKey = "stats_{$project}_{$username}_{$start_date}_{$end_date}";
+
+// Comprobar si ya tenemos la respuesta en caché
+$cachedResponse = $memcache->get($cacheKey);
+
+// Duración del caché en segundos (6 horas)
+$cacheDuration = 21600; 
+
+if ($cachedResponse) {
+    // Si encontramos el caché, devolver la respuesta
+    $response = json_decode($cachedResponse, true);
+    
+    // Medir el tiempo de ejecución
+    $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
+    
+    echo json_encode($response);
+    exit;
+}
+
+// Definir la consulta SQL dependiendo del proyecto, usuario y fechas
 if ($language_code === 'all') {
     $sql = "
         SELECT
@@ -96,6 +121,13 @@ if ($result->num_rows > 0) {
             'otherGenders' => (int)$data['otherGenders'],
             'lastUpdated' => $data['lastUpdated'] ? $data['lastUpdated'] : null,
         ];
+
+        // Almacenar la respuesta en caché
+        $memcache->set($cacheKey, json_encode($response), $cacheDuration);
+
+        // Medir el tiempo de ejecución
+        $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+        $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
 
         echo json_encode($response);
     }
