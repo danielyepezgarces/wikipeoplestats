@@ -4,6 +4,10 @@ header("Access-Control-Allow-Origin: *");
 
 include '../../config.php';
 
+// Iniciar Memcached
+$memcache = new Memcached();
+$memcache->addServer('localhost', 11211); // Cambiar según la configuración de tu servidor Memcached
+
 // Obtener los parámetros de la URL
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);
@@ -70,6 +74,27 @@ for ($year = $start_year; $year <= $end_year; $year++) {
             'month' => $month,
         ];
     }
+}
+
+// Generar clave de caché única para las gráficas
+$cacheKey = "graph_{$project}_{$username}_{$start_date}_{$end_date}";
+
+// Comprobar si ya tenemos la respuesta en caché
+$cachedResponse = $memcache->get($cacheKey);
+
+// Duración del caché en segundos (6 horas)
+$cacheDuration = 21600;
+
+if ($cachedResponse) {
+    // Si encontramos el caché, devolver la respuesta
+    $response = json_decode($cachedResponse, true);
+    
+    // Medir el tiempo de ejecución
+    $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
+    
+    echo json_encode($response);
+    exit;
 }
 
 // Definir la consulta dependiendo del proyecto, las fechas y el usuario
@@ -151,6 +176,13 @@ foreach ($calendar as $date) {
 $response = [
     'data' => $combined_data,
 ];
+
+// Almacenar la respuesta en caché
+$memcache->set($cacheKey, json_encode($response), $cacheDuration);
+
+// Medir el tiempo de ejecución
+$executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+$response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
 
 echo json_encode($response);
 

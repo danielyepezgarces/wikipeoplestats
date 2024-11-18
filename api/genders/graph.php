@@ -5,12 +5,15 @@ header("Access-Control-Allow-Origin: *");
 include '../../config.php';
 include '../../languages.php';
 
+// Iniciar Memcached
+$memcache = new Memcached();
+$memcache->addServer('localhost', 11211); // Cambia según tu configuración
+
 // Obtener los parámetros de la URL
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
-
 
 // Buscar el código de idioma correspondiente al proyecto
 $language_code = array_search($project, array_column($languages, 'wiki'));
@@ -55,6 +58,27 @@ for ($year = $start_year; $year <= $end_year; $year++) {
             'month' => $month,
         ];
     }
+}
+
+// Generar clave de caché única
+$cacheKey = "graph_{$project}_{$start_date}_{$end_date}";
+
+// Comprobar si ya tenemos la respuesta en caché
+$cachedResponse = $memcache->get($cacheKey);
+
+// Duración del caché en segundos (6 horas)
+$cacheDuration = 21600; 
+
+if ($cachedResponse) {
+    // Si encontramos el caché, devolver la respuesta
+    $response = json_decode($cachedResponse, true);
+    
+    // Medir el tiempo de ejecución
+    $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
+    
+    echo json_encode($response);
+    exit;
 }
 
 // Definir la consulta dependiendo del proyecto y las fechas
@@ -134,6 +158,13 @@ foreach ($calendar as $date) {
 $response = [
     'data' => $combined_data,
 ];
+
+// Almacenar la respuesta en caché
+$memcache->set($cacheKey, json_encode($response), $cacheDuration);
+
+// Medir el tiempo de ejecución
+$executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
+$response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
 
 echo json_encode($response);
 
