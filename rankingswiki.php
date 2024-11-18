@@ -102,28 +102,24 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white dark:bg-[#1F2937] p-6 fixed h-full top-0 left-0 z-10 lg:block lg:w-64 lg:h-auto">
-      <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
-      <ul>
-        <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">Last 7D</a></li>
-        <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">Last 1M</a></li>
-        <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">Last 3M</a></li>
-        <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">Last 6M</a></li>
-        <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">Last 1Y</a></li>
-        <li><a href="#" class="block py-2 px-4 rounded hover:bg-gray-200 dark:hover:bg-[#3a3f47]">All time</a></li>
-      </ul>
-    </aside>
+<!-- Sidebar -->
+<aside class="w-64 bg-white dark:bg-[#1F2937] p-6 fixed h-full top-0 left-0 z-10 lg:block lg:w-64 lg:h-auto">
+  <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
+  <ul>
+    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
+    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
+    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
+    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
+    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
+    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
+  </ul>
+</aside>
 
-    <!-- Main Content (Área principal) -->
-    <main class="flex-1 ml-64 lg:ml-0 pl-8 pt-8 pb-16 bg-gray-50 dark:bg-[#1D2939] overflow-auto lg:ml-0">
-      <h1 class="text-3xl font-bold mb-4">Contenido Principal</h1>
-      <p>Seleccione un rango de tiempo en el Sidebar para filtrar los resultados.</p>
+<!-- Main Content vacío (pero con la estructura de diseño intacta) -->
+<main class="flex-1 ml-64 lg:ml-0 pl-8 pt-8 pb-16 bg-gray-50 dark:bg-[#1D2939] overflow-auto lg:ml-0">
+  <!-- Aquí no hay contenido -->
+</main>
 
-      <!-- Área de Resultados Dinámicos -->
-      <div id="results" class="mt-8">
-        <!-- Los resultados dinámicos se mostrarán aquí -->
-      </div>
-    </main>
   </div>
 
 
@@ -196,80 +192,6 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     });
 </script>
 
-
-<script>
-function showToast(message, bgColor = 'bg-green-500') {
-    const toast = document.getElementById('toast');
-    const messageElement = document.getElementById('toast-message');
-    messageElement.innerText = message;
-    toast.className = `fixed bottom-4 right-4 ${bgColor} text-white text-sm px-4 py-2 rounded shadow-lg dark:bg-green-600`;
-    toast.classList.remove('hidden');
-
-    // Oculta el toast después de 3 segundos
-    setTimeout(() => {
-        hideToast();
-    }, 6000);
-}
-
-function hideToast() {
-    const toast = document.getElementById('toast');
-    toast.classList.add('hidden');
-}
-
-function purgeCache() {
-    fetch("https://wikipeoplestats.wmcloud.org/api/stats/<?php echo $wikiproject; ?>?action=purge", {
-        method: 'GET',
-        headers: {
-            "User-Agent": "WikiStatsPeople/1.0"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Muestra el toast de éxito
-        showToast("<?php echo __('cache_purged_successfully'); ?>");
-        
-        // Recarga la página después de 2 segundos
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast("<?php echo __('cache_purge_failed'); ?>", 'bg-red-500'); // Mensaje de error
-    });
-}
-</script>
-
-<script>
-        // Establece la fecha objetivo desde la variable PHP
-        const targetDate = new Date("<?php echo $cachedUntil; ?>").getTime();
-
-        // Traducciones
-        const hoursLabel = "<?php echo __('hours'); ?>";
-        const minutesLabel = "<?php echo __('minutes'); ?>";
-        const secondsLabel = "<?php echo __('seconds'); ?>";
-        const cacheUpdateMessage = "<?php echo __('cache_update_message'); ?>";
-
-        // Actualiza el conteo regresivo cada segundo
-        const countdownFunction = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-
-            // Calcula horas, minutos y segundos
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            // Muestra el resultado en el elemento HTML con id cachecountdown
-            document.getElementById("cachecountdown").innerHTML = `${hours} ${hoursLabel}, ${minutes} ${minutesLabel}, ${seconds} ${secondsLabel}`;
-
-            // Si la cuenta regresiva termina
-            if (distance < 0) {
-                clearInterval(countdownFunction);
-                document.getElementById("cacheMessage").innerHTML = cacheUpdateMessage;
-            }
-        }, 1000);
-    </script>
     
 </body>
 </html>
