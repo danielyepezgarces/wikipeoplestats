@@ -130,48 +130,88 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     </div>
   </aside>
 
+  <div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
+  <!-- Sidebar (1/6 del ancho en pantallas grandes) -->
+  <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
+    <!-- Título de la sección -->
+    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Filters</h2>
+    
+    <!-- Sección By Date -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Date</h3>
+      <ul>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
+      </ul>
+    </div>
+    
+    <!-- Sección By Project -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Project</h3>
+      <ul>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikipedia</a></li>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikiquote</a></li>
+        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikisource</a></li>
+      </ul>
+    </div>
+  </aside>
+
   <!-- Main Content (5/6 del ancho en pantallas grandes) -->
   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] p-8 lg:p-16 border border-gray-200 dark:border-gray-700 rounded-lg">
-    <!-- Simulación de tabla -->
+    <!-- Tabla full width -->
     <div class="overflow-x-auto">
       <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
         <!-- Cabecera de la tabla -->
-        <div class="grid grid-cols-5 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-          <div class="col-span-1">#</div>
-          <div class="col-span-1">Project</div>
-          <div class="col-span-1">Total People</div>
-          <div class="col-span-1">Total Women</div>
-          <div class="col-span-1">Total Men</div>
+        <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+          <div class="col-span-1 text-center">#</div>
+          <div class="col-span-1 text-center">Project</div>
+          <div class="col-span-1 text-center">Total People</div>
+          <div class="col-span-1 text-center">Total Women</div>
+          <div class="col-span-1 text-center">Total Men</div>
+          <div class="col-span-1 text-center">Other Genders</div>
+          <div class="col-span-1 text-center">Total Editors</div>
         </div>
         <!-- Fila de Datos -->
-        <div class="grid grid-cols-5 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1">1</div>
-          <div class="col-span-1">Wikipedia</div>
-          <div class="col-span-1">4,536,514</div>
-          <div class="col-span-1">814,077</div>
-          <div class="col-span-1">3,537,989</div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">1</div>
+          <div class="col-span-1 text-center">Wikipedia</div>
+          <div class="col-span-1 text-center">4,536,514</div>
+          <div class="col-span-1 text-center">814,077</div>
+          <div class="col-span-1 text-center">3,537,989</div>
+          <div class="col-span-1 text-center">184,448</div>
+          <div class="col-span-1 text-center">1,079,811</div>
         </div>
-        <div class="grid grid-cols-5 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1">2</div>
-          <div class="col-span-1">Wikiquote</div>
-          <div class="col-span-1">1,234,567</div>
-          <div class="col-span-1">200,123</div>
-          <div class="col-span-1">900,234</div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">2</div>
+          <div class="col-span-1 text-center">Wikiquote</div>
+          <div class="col-span-1 text-center">1,234,567</div>
+          <div class="col-span-1 text-center">200,123</div>
+          <div class="col-span-1 text-center">900,234</div>
+          <div class="col-span-1 text-center">56,789</div>
+          <div class="col-span-1 text-center">456,789</div>
         </div>
-        <div class="grid grid-cols-5 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1">3</div>
-          <div class="col-span-1">Wikisource</div>
-          <div class="col-span-1">987,654</div>
-          <div class="col-span-1">150,987</div>
-          <div class="col-span-1">500,321</div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">3</div>
+          <div class="col-span-1 text-center">Wikisource</div>
+          <div class="col-span-1 text-center">987,654</div>
+          <div class="col-span-1 text-center">150,987</div>
+          <div class="col-span-1 text-center">500,321</div>
+          <div class="col-span-1 text-center">34,567</div>
+          <div class="col-span-1 text-center">234,567</div>
         </div>
         <!-- Totales -->
-        <div class="grid grid-cols-5 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700 font-semibold bg-gray-100 dark:bg-gray-800">
-          <div class="col-span-1">Total</div>
-          <div class="col-span-1"></div>
-          <div class="col-span-1">4,536,514</div>
-          <div class="col-span-1">814,077</div>
-          <div class="col-span-1">3,537,989</div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700 font-semibold bg-gray-100 dark:bg-gray-800">
+          <div class="col-span-1 text-center">Total</div>
+          <div class="col-span-1 text-center"></div>
+          <div class="col-span-1 text-center">4,536,514</div>
+          <div class="col-span-1 text-center">814,077</div>
+          <div class="col-span-1 text-center">3,537,989</div>
+          <div class="col-span-1 text-center">184,448</div>
+          <div class="col-span-1 text-center">1,079,811</div>
         </div>
       </div>
     </div>
