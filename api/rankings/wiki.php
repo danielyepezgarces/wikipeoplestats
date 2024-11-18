@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json");
 
-include '../config.php'; // Archivo de configuración de la base de datos
+include '../../config.php'; // Archivo de configuración de la base de datos
 
 // Iniciar conexión a Memcached
 $memcache = new Memcached();
