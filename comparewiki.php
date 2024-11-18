@@ -313,77 +313,90 @@ html.dark .apexcharts-legend-text {
     }
 
     function createChart(filteredData, dataA, dataB) {
-        // Destruir el gráfico anterior si existe
-        if (chart) {
-            chart.destroy();
-        }
-
-        const options = {
-            chart: {
-                type: 'line',
-                height: 400,
-            },
-            series: [
-                {
-                    name: '<?php echo __('total_graph'); ?> (A)',
-                    data: isCumulative ? calculateCumulative(filteredData, 'total') : filteredData.map(item => item.total)
-                },
-                {
-                    name: '<?php echo __('total_women'); ?> (A)',
-                    data: isCumulative ? calculateCumulative(filteredData, 'totalWomen') : filteredData.map(item => item.totalWomen)
-                },
-                {
-                    name: '<?php echo __('total_men'); ?> (A)',
-                    data: isCumulative ? calculateCumulative(filteredData, 'totalMen') : filteredData.map(item => item.totalMen)
-                },
-                {
-                    name: '<?php echo __('other_genders'); ?> (A)',
-                    data: isCumulative ? calculateCumulative(filteredData, 'otherGenders') : filteredData.map(item => item.otherGenders)
-                },
-                {
-                    name: '<?php echo __('total_graph'); ?> (B)',
-                    data: isCumulative ? calculateCumulative(dataB, 'total') : dataB.map(item => item.total)
-                },
-                {
-                    name: '<?php echo __('total_women'); ?> (B)',
-                    data: isCumulative ? calculateCumulative(dataB, 'totalWomen') : dataB.map(item => item.totalWomen)
-                },
-                {
-                    name: '<?php echo __('total_men'); ?> (B)',
-                    data: isCumulative ? calculateCumulative(dataB, 'totalMen') : dataB.map(item => item.totalMen)
-                },
-                {
-                    name: '<?php echo __('other_genders'); ?> (B)',
-                    data: isCumulative ? calculateCumulative(dataB, 'otherGenders') : dataB.map(item => item.otherGenders)
-                }
-            ],
-            xaxis: {
-                categories: filteredData.map(item => `${item.year}-${item.month}`),
-                title: {
-                    text: '<?php echo __('timeline_graph'); ?>'
-                }
-            },
-            yaxis: {
-                title: {
-                    text: '<?php echo __('quantity_graph'); ?>'
-                }
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-            },
-            legend: {
-                position: 'top'
-            },
-            stroke: {
-                curve: 'smooth'
-            }
-        };
-
-        // Crear una nueva instancia del gráfico
-        chart = new ApexCharts(document.querySelector("#chartContainer"), options);
-        chart.render();
+    // Destruir el gráfico anterior si existe
+    if (chart) {
+        chart.destroy();
     }
+
+    const filteredDates = filteredData.map(item => `${item.year}-${item.month}`);
+
+    const options = {
+        chart: {
+            type: 'line',
+            height: 400,
+        },
+        series: [
+            {
+                name: '<?php echo __('total_graph'); ?> (A)',
+                data: isCumulative ? calculateCumulative(filteredData, 'total') : filteredData.map(item => item.total)
+            },
+            {
+                name: '<?php echo __('total_women'); ?> (A)',
+                data: isCumulative ? calculateCumulative(filteredData, 'totalWomen') : filteredData.map(item => item.totalWomen)
+            },
+            {
+                name: '<?php echo __('total_men'); ?> (A)',
+                data: isCumulative ? calculateCumulative(filteredData, 'totalMen') : filteredData.map(item => item.totalMen)
+            },
+            {
+                name: '<?php echo __('other_genders'); ?> (A)',
+                data: isCumulative ? calculateCumulative(filteredData, 'otherGenders') : filteredData.map(item => item.otherGenders)
+            },
+            {
+                name: '<?php echo __('total_graph'); ?> (B)',
+                data: isCumulative ? calculateCumulative(dataB, 'total') : dataB.map(item => item.total)
+            },
+            {
+                name: '<?php echo __('total_women'); ?> (B)',
+                data: isCumulative ? calculateCumulative(dataB, 'totalWomen') : dataB.map(item => item.totalWomen)
+            },
+            {
+                name: '<?php echo __('total_men'); ?> (B)',
+                data: isCumulative ? calculateCumulative(dataB, 'totalMen') : dataB.map(item => item.totalMen)
+            },
+            {
+                name: '<?php echo __('other_genders'); ?> (B)',
+                data: isCumulative ? calculateCumulative(dataB, 'otherGenders') : dataB.map(item => item.otherGenders)
+            }
+        ],
+        xaxis: {
+            categories: filteredDates,
+            title: {
+                text: '<?php echo __('timeline_graph'); ?>'
+            },
+            labels: {
+                rotate: 45, // Rota las etiquetas si es necesario
+                style: {
+                    fontSize: '12px', // Estilo de fuente más pequeño para evitar el apilamiento
+                },
+                autoRotate: true, // Rotación automática para evitar apilamiento
+                show: true, // Mostrar las etiquetas
+                hideOverlappingLabels: true, // Ocultar etiquetas superpuestas si es necesario
+            },
+            tickAmount: filteredDates.length > 10 ? 10 : undefined, // Ajuste automático de la cantidad de ticks (fechas) a mostrar
+        },
+        yaxis: {
+            title: {
+                text: '<?php echo __('quantity_graph'); ?>'
+            }
+        },
+        tooltip: {
+            shared: true,
+            intersect: false,
+        },
+        legend: {
+            position: 'top'
+        },
+        stroke: {
+            curve: 'smooth'
+        }
+    };
+
+    // Crear una nueva instancia del gráfico
+    chart = new ApexCharts(document.querySelector("#chartContainer"), options);
+    chart.render();
+}
+
 
     document.getElementById('toggleChart').addEventListener('click', () => {
         isCumulative = !isCumulative; // Alternar estado
