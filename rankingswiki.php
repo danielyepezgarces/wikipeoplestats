@@ -100,27 +100,26 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <?php include 'header.php'; // Incluir el encabezado ?>
 
-<div class="flex h-screen">
-    <!-- Sidebar -->
-<!-- Sidebar -->
-<aside class="w-64 bg-white dark:bg-[#1F2937] p-6 fixed h-full top-0 left-0 z-10 lg:block lg:w-64 lg:h-auto">
-  <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
-  <ul>
-    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
-    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
-    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
-    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
-    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
-    <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
-  </ul>
-</aside>
+<div class="grid grid-cols-3 gap-4">
+  <!-- Sidebar (1 parte) -->
+  <aside class="bg-white dark:bg-[#1F2937] p-6 h-full lg:block">
+    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
+    <ul>
+      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
+      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
+      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
+      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
+      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
+      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
+    </ul>
+  </aside>
 
-<!-- Main Content vacío (pero con la estructura de diseño intacta) -->
-<main class="flex-1 ml-64 lg:ml-0 pl-8 pt-8 pb-16 bg-gray-50 dark:bg-[#1D2939] overflow-auto lg:ml-0">
-  <!-- Aquí no hay contenido -->
-</main>
+  <!-- Main Content (2 partes) -->
+  <main class="col-span-2 bg-gray-50 dark:bg-[#1D2939] p-8 lg:p-16">
+    <!-- Contenido vacío, puedes agregar contenido aquí más tarde -->
+  </main>
+</div>
 
-  </div>
 
 
       <!-- Footer -->
