@@ -105,12 +105,12 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
   <aside class="bg-white dark:bg-[#1F2937] p-6 h-full lg:block">
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Opciones</h2>
     <ul>
-      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
-      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
-      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
-      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
-      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
-      <li><a href="#" class="block py-2 px-4 rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
+      <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
+      <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
+      <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
+      <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
+      <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
+      <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
     </ul>
   </aside>
 
@@ -119,6 +119,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     <!-- Aquí no hay contenido -->
   </main>
 </div>
+
 
       <!-- Footer -->
       <?php include 'footer.php'; ?>
