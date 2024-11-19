@@ -129,8 +129,6 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
       </ul>
     </div>
   </aside>
-
-  <!-- Main Content (5/6 del ancho en pantallas grandes) -->
   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Tabla full width -->
     <div class="overflow-x-auto">
@@ -227,18 +225,33 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
           <div class="col-span-1 text-center">50,000</div>
           <div class="col-span-1 text-center">620,000</div>
         </div>
+        <!-- Nueva Fila - Proyecto 10 -->
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">10</div>
+          <div class="col-span-1 text-center">ruwiki</div>
+          <div class="col-span-1 text-center">3,234,567</div>
+          <div class="col-span-1 text-center">600,123</div>
+          <div class="col-span-1 text-center">2,300,456</div>
+          <div class="col-span-1 text-center">45,000</div>
+          <div class="col-span-1 text-center">510,000</div>
+        </div>
+        <!-- Totales -->
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700 font-semibold bg-gray-100 dark:bg-gray-800">
           <div class="col-span-1 text-center">Total</div>
           <div class="col-span-1 text-center"></div>
-          <div class="col-span-1 text-center">15,876,060</div>
-          <div class="col-span-1 text-center">3,805,954</div>
-          <div class="col-span-1 text-center">13,028,348</div>
-          <div class="col-span-1 text-center">627,963</div>
-          <div class="col-span-1 text-center">4,287,904</div>
+          <div class="col-span-1 text-center">4,536,514</div>
+          <div class="col-span-1 text-center">814,077</div>
+          <div class="col-span-1 text-center">3,537,989</div>
+          <div class="col-span-1 text-center">184,448</div>
+          <div class="col-span-1 text-center">1,079,811</div>
         </div>
       </div>
     </div>
-</main>
+    <!-- Pie de página -->
+    <div class="bg-gray-800 dark:bg-gray-900 text-center text-white p-4 mt-4">
+      Feature in development
+    </div>
+  </main>
 </div>
 
 
