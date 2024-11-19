@@ -146,7 +146,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         <!-- Fila de Datos -->
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">1</div>
-          <div class="col-span-1 text-center">enwiki</div>
+          <div class="col-span-1 text-center">en.wikipedia</div>
           <div class="col-span-1 text-center">4,536,514</div>
           <div class="col-span-1 text-center">814,077</div>
           <div class="col-span-1 text-center">3,537,989</div>
@@ -155,7 +155,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">2</div>
-          <div class="col-span-1 text-center">eswiki</div>
+          <div class="col-span-1 text-center">es.wikipedia</div>
           <div class="col-span-1 text-center">2,234,567</div>
           <div class="col-span-1 text-center">456,123</div>
           <div class="col-span-1 text-center">1,789,456</div>
@@ -164,7 +164,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">3</div>
-          <div class="col-span-1 text-center">enwikiquote</div>
+          <div class="col-span-1 text-center">en.wikiquote</div>
           <div class="col-span-1 text-center">1,123,456</div>
           <div class="col-span-1 text-center">210,678</div>
           <div class="col-span-1 text-center">800,345</div>
@@ -173,7 +173,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">4</div>
-          <div class="col-span-1 text-center">eswikiquote</div>
+          <div class="col-span-1 text-center">es.wikiquote</div>
           <div class="col-span-1 text-center">500,000</div>
           <div class="col-span-1 text-center">100,000</div>
           <div class="col-span-1 text-center">350,000</div>
@@ -182,7 +182,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">5</div>
-          <div class="col-span-1 text-center">frwiki</div>
+          <div class="col-span-1 text-center">fr.wikipedia</div>
           <div class="col-span-1 text-center">1,876,234</div>
           <div class="col-span-1 text-center">350,654</div>
           <div class="col-span-1 text-center">1,200,123</div>
@@ -191,7 +191,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">6</div>
-          <div class="col-span-1 text-center">dewiki</div>
+          <div class="col-span-1 text-center">de.wikipedia</div>
           <div class="col-span-1 text-center">2,345,678</div>
           <div class="col-span-1 text-center">450,000</div>
           <div class="col-span-1 text-center">1,700,000</div>
@@ -200,7 +200,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">7</div>
-          <div class="col-span-1 text-center">itwiki</div>
+          <div class="col-span-1 text-center">it.wikipedia</div>
           <div class="col-span-1 text-center">1,234,567</div>
           <div class="col-span-1 text-center">320,000</div>
           <div class="col-span-1 text-center">900,000</div>
@@ -209,7 +209,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">8</div>
-          <div class="col-span-1 text-center">plwiki</div>
+          <div class="col-span-1 text-center">pl.wikipedia</div>
           <div class="col-span-1 text-center">800,000</div>
           <div class="col-span-1 text-center">150,000</div>
           <div class="col-span-1 text-center">600,000</div>
@@ -228,7 +228,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         <!-- Nueva Fila - Proyecto 10 -->
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">10</div>
-          <div class="col-span-1 text-center">ruwiki</div>
+          <div class="col-span-1 text-center">ru.wikipedia</div>
           <div class="col-span-1 text-center">3,234,567</div>
           <div class="col-span-1 text-center">600,123</div>
           <div class="col-span-1 text-center">2,300,456</div>
