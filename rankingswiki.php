@@ -148,7 +148,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         <!-- Fila de Datos -->
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">1</div>
-          <div class="col-span-1 text-center">Wikipedia</div>
+          <div class="col-span-1 text-center">enwiki</div>
           <div class="col-span-1 text-center">4,536,514</div>
           <div class="col-span-1 text-center">814,077</div>
           <div class="col-span-1 text-center">3,537,989</div>
@@ -157,35 +157,88 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">2</div>
-          <div class="col-span-1 text-center">Wikiquote</div>
-          <div class="col-span-1 text-center">1,234,567</div>
-          <div class="col-span-1 text-center">200,123</div>
-          <div class="col-span-1 text-center">900,234</div>
-          <div class="col-span-1 text-center">56,789</div>
-          <div class="col-span-1 text-center">456,789</div>
+          <div class="col-span-1 text-center">eswiki</div>
+          <div class="col-span-1 text-center">2,234,567</div>
+          <div class="col-span-1 text-center">456,123</div>
+          <div class="col-span-1 text-center">1,789,456</div>
+          <div class="col-span-1 text-center">99,123</div>
+          <div class="col-span-1 text-center">567,890</div>
         </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
           <div class="col-span-1 text-center">3</div>
-          <div class="col-span-1 text-center">Wikisource</div>
-          <div class="col-span-1 text-center">987,654</div>
-          <div class="col-span-1 text-center">150,987</div>
-          <div class="col-span-1 text-center">500,321</div>
-          <div class="col-span-1 text-center">34,567</div>
-          <div class="col-span-1 text-center">234,567</div>
+          <div class="col-span-1 text-center">enwikiquote</div>
+          <div class="col-span-1 text-center">1,123,456</div>
+          <div class="col-span-1 text-center">210,678</div>
+          <div class="col-span-1 text-center">800,345</div>
+          <div class="col-span-1 text-center">45,567</div>
+          <div class="col-span-1 text-center">123,456</div>
         </div>
-        <!-- Totales -->
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">4</div>
+          <div class="col-span-1 text-center">eswikiquote</div>
+          <div class="col-span-1 text-center">500,000</div>
+          <div class="col-span-1 text-center">100,000</div>
+          <div class="col-span-1 text-center">350,000</div>
+          <div class="col-span-1 text-center">10,000</div>
+          <div class="col-span-1 text-center">80,000</div>
+        </div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">5</div>
+          <div class="col-span-1 text-center">frwiki</div>
+          <div class="col-span-1 text-center">1,876,234</div>
+          <div class="col-span-1 text-center">350,654</div>
+          <div class="col-span-1 text-center">1,200,123</div>
+          <div class="col-span-1 text-center">35,000</div>
+          <div class="col-span-1 text-center">450,000</div>
+        </div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">6</div>
+          <div class="col-span-1 text-center">dewiki</div>
+          <div class="col-span-1 text-center">2,345,678</div>
+          <div class="col-span-1 text-center">450,000</div>
+          <div class="col-span-1 text-center">1,700,000</div>
+          <div class="col-span-1 text-center">35,000</div>
+          <div class="col-span-1 text-center">560,000</div>
+        </div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">7</div>
+          <div class="col-span-1 text-center">itwiki</div>
+          <div class="col-span-1 text-center">1,234,567</div>
+          <div class="col-span-1 text-center">320,000</div>
+          <div class="col-span-1 text-center">900,000</div>
+          <div class="col-span-1 text-center">25,000</div>
+          <div class="col-span-1 text-center">450,000</div>
+        </div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">8</div>
+          <div class="col-span-1 text-center">plwiki</div>
+          <div class="col-span-1 text-center">800,000</div>
+          <div class="col-span-1 text-center">150,000</div>
+          <div class="col-span-1 text-center">600,000</div>
+          <div class="col-span-1 text-center">20,000</div>
+          <div class="col-span-1 text-center">250,000</div>
+        </div>
+        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+          <div class="col-span-1 text-center">9</div>
+          <div class="col-span-1 text-center">ja.wikipedia</div>
+          <div class="col-span-1 text-center">2,500,000</div>
+          <div class="col-span-1 text-center">550,000</div>
+          <div class="col-span-1 text-center">1,900,000</div>
+          <div class="col-span-1 text-center">50,000</div>
+          <div class="col-span-1 text-center">620,000</div>
+        </div>
         <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700 font-semibold bg-gray-100 dark:bg-gray-800">
           <div class="col-span-1 text-center">Total</div>
           <div class="col-span-1 text-center"></div>
-          <div class="col-span-1 text-center">4,536,514</div>
-          <div class="col-span-1 text-center">814,077</div>
-          <div class="col-span-1 text-center">3,537,989</div>
-          <div class="col-span-1 text-center">184,448</div>
-          <div class="col-span-1 text-center">1,079,811</div>
+          <div class="col-span-1 text-center">15,876,060</div>
+          <div class="col-span-1 text-center">3,805,954</div>
+          <div class="col-span-1 text-center">13,028,348</div>
+          <div class="col-span-1 text-center">627,963</div>
+          <div class="col-span-1 text-center">4,287,904</div>
         </div>
       </div>
     </div>
-  </main>
+</main>
 </div>
 
 
