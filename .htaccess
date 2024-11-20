@@ -1,9 +1,6 @@
 RewriteEngine On
 RewriteBase /
 
-php_value display_errors on
-php_value error_reporting 32767
-
 RewriteRule ^([a-zA-Z0-9_-]+)/search/genders/?$ /searchgenders.php?lang=$1 [L,QSA]
 RewriteRule ^search/genders/?$ /searchgenders.php [L,QSA]
 RewriteRule ^([a-zA-Z0-9_-]+)/search/users/?$ /searchusers.php?lang=$1 [L,QSA]
@@ -24,8 +21,7 @@ RewriteRule ^compare/wiki/([a-zA-Z0-9_.-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([
 
 
 RewriteRule ^api/stats/([a-zA-Z0-9_-]+)$ /api/stats.php?project=$1 [L,QSA]
-RewriteRule ^api/genders/graph/([a-zA-Z0-9_.-]+)(?://?)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/genders/graph.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
-RewriteRule ^api/genders/stats/([a-zA-Z0-9_.-]+)(?://?)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/genders/stats.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
-RewriteRule ^api/users/stats/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?://?)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/stats.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
-RewriteRule ^api/users/graph/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?://?)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/graph.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
-
+RewriteRule ^api/genders/graph/([a-zA-Z0-9_.-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/genders/graph.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
+RewriteRule ^api/genders/stats/([a-zA-Z0-9_.-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/genders/stats.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
+RewriteRule ^api/users/stats/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/stats.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
+RewriteRule ^api/users/graph/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/graph.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
