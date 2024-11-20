@@ -92,7 +92,7 @@ if ($language_code === 'all') {
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
             SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
             FROM articles a
-        JOIN wikipedia w ON a.site = w.site
+        JOIN project w ON a.site = w.site
         LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
         WHERE a.creation_date >= '$start_date'
             AND a.creation_date <= '$end_date'
@@ -108,7 +108,7 @@ if ($language_code === 'all') {
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
             SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
             FROM articles a
-        JOIN wikipedia w ON a.site = w.site
+        JOIN project w ON a.site = w.site
         LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
         WHERE a.site = '{$languages[$language_code]['wiki']}'
             AND a.creation_date >= '$start_date'
