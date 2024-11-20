@@ -74,7 +74,7 @@ if ($project === 'all') {
             MAX(w.last_updated) AS lastUpdated
         FROM articles a
         LEFT JOIN people p ON p.wikidata_id = a.wikidata_id
-        JOIN wikipedia w ON a.site = w.site
+        JOIN project w ON a.site = w.site
         WHERE a.site = '$project'
     ";
 }
