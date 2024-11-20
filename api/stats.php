@@ -59,7 +59,7 @@ if ($project === 'all') {
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
             SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,
             (SELECT COUNT(DISTINCT creator_username) FROM articles) AS totalContributions,
-            (SELECT MAX(last_updated) FROM wikipedia) AS lastUpdated
+            (SELECT MAX(last_updated) FROM project) AS lastUpdated
         FROM people p
     ";
 } else {
