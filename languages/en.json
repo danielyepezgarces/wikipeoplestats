@@ -1,7 +1,8 @@
 {
     "name": "en",
-    "sticky_header_title": "Sticky Header with Tailwind CSS and i18n",
     "sitename": "WikiPeopleStats",
+    "site_keywords": "gender gap in Wikipedia, gender statistics in wikis, gender equality, female representation in Wikiquote, gender analysis, WikiPeopleStats, diversity statistics in Wikisource, women in collaborative platforms, gender analysis in Wikipedia, diversity in wiki projects",
+    "site_description": "WikiPeopleStats is a tool for measuring the gender gap in wikis such as Wikipedia, Wikiquote, and Wikisource. Discover statistics on gender representation and promote equality.",
     "home": "Home",
     "genders": "Genders",
     "countries": "Countries",
