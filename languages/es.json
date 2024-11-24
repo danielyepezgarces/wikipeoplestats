@@ -32,7 +32,7 @@
     "cached_version_message": "Esta es una versión en caché válida hasta %s",
     "hours": "horas",
     "minutes": "minutos",
-    "seconds": "artículos de segunda clase",
+    "seconds": "segundos",
     "cache_update_message": "La versión en caché se actualizará al recargar la página.",
     "purge_cache_button": "Purgar caché",
     "cache_purged_successfully": "La caché se purgó correctamente.",
