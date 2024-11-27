@@ -39,6 +39,18 @@ $startIndex = ($currentPage - 1) * $resultsPerPage;
 
 // Obtener los resultados para la página actual
 $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
+
+// Función para construir los enlaces de paginación con los parámetros de la URL
+function buildPaginationUrl($page) {
+    $url = $_SERVER['PHP_SELF'] . "?page=" . $page;
+    // Agregar otros parámetros de la URL
+    foreach ($_GET as $key => $value) {
+        if ($key !== 'page') {
+            $url .= "&$key=$value";
+        }
+    }
+    return $url;
+}
 ?>
 
 <!DOCTYPE html>
@@ -134,17 +146,21 @@ $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
     <div class="pagination flex justify-center items-center space-x-2 mt-4">
         <!-- Enlace a la página anterior -->
         <?php if ($currentPage > 1): ?>
-            <a href="?page=<?= $currentPage - 1 ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg">Previous</a>
+            <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
         <?php endif; ?>
 
-        <!-- Enlaces a las páginas -->
-        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="?page=<?= $i ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400' ?> rounded-lg"><?= $i ?></a>
+        <!-- Enlaces a las páginas (máximo 10 páginas) -->
+        <?php
+        $startPage = max(1, $currentPage - 5);
+        $endPage = min($totalPages, $currentPage + 4);
+        for ($i = $startPage; $i <= $endPage; $i++):
+        ?>
+            <a href="<?= buildPaginationUrl($i) ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
         <?php endfor; ?>
 
         <!-- Enlace a la siguiente página -->
         <?php if ($currentPage < $totalPages): ?>
-            <a href="?page=<?= $currentPage + 1 ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg">Next</a>
+            <a href="<?= buildPaginationUrl($currentPage + 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
         <?php endif; ?>
     </div>
   </main>
