@@ -1,30 +1,28 @@
 <?php
 include 'languages.php';
 
-// Función para obtener los datos de la API con parámetros dinámicos
 function fetchData($timeFrame, $projectGroup) {
-  // Construir la URL de la API con los parámetros dinámicos
-  $api_url = "https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=$timeFrame&projectGroup=$projectGroup";
+  $url = "https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=$timeFrame&projectGroup=$projectGroup";
   
-  // Usar cURL para obtener los datos de la API
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $api_url);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  $response = curl_exec($ch);
-  curl_close($ch);
+  // Usar file_get_contents o cURL para obtener los datos de la API
+  $response = file_get_contents($url);
+  
+  // Comprobar si la respuesta es válida
+  if ($response === false) {
+      return [];
+  }
 
-  // Decodificar la respuesta JSON
+  // Decodificar los datos JSON
   return json_decode($response, true);
 }
 
-// Si la solicitud es AJAX, enviar los datos en formato JSON
-if (isset($_GET['ajax'])) {
-  $timeFrame = isset($_GET['timeFrame']) ? $_GET['timeFrame'] : '1m'; // Default 1 month
-  $projectGroup = isset($_GET['projectGroup']) ? $_GET['projectGroup'] : 'wiki'; // Default wiki
-  $data = fetchData($timeFrame, $projectGroup);
-  echo json_encode($data);  // Enviar los datos como JSON
-  exit;
-}
+// Obtener los parámetros de la URL
+$timeFrame = isset($_GET['timeFrame']) ? $_GET['timeFrame'] : '1m';
+$projectGroup = isset($_GET['projectGroup']) ? $_GET['projectGroup'] : 'wiki';
+
+// Obtener los datos de la API
+$data = fetchData($timeFrame, $projectGroup);
+
 ?>
 
 <!DOCTYPE html>
@@ -57,97 +55,62 @@ if (isset($_GET['ajax'])) {
 
 <div class="container mx-auto py-8">
     <!-- Formulario para cambiar los parámetros -->
-    <form id="filterForm" class="mb-8">
+    <form action="" method="get" class="mb-8">
         <div class="flex space-x-4">
             <div>
                 <label for="timeFrame" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Time Frame</label>
                 <select name="timeFrame" id="timeFrame" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
-                    <option value="1m">1 Month</option>
-                    <option value="3m">3 Months</option>
-                    <option value="6m">6 Months</option>
-                    <option value="1y">1 Year</option>
+                    <option value="1m" <?= $timeFrame === '1m' ? 'selected' : '' ?>>1 Month</option>
+                    <option value="3m" <?= $timeFrame === '3m' ? 'selected' : '' ?>>3 Months</option>
+                    <option value="6m" <?= $timeFrame === '6m' ? 'selected' : '' ?>>6 Months</option>
+                    <option value="1y" <?= $timeFrame === '1y' ? 'selected' : '' ?>>1 Year</option>
                 </select>
             </div>
             <div>
                 <label for="projectGroup" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Project Group</label>
                 <select name="projectGroup" id="projectGroup" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
-                    <option value="wiki">Wiki</option>
-                    <option value="wikidata">Wikidata</option>
-                    <option value="wikimedia">Wikimedia</option>
+                    <option value="wiki" <?= $projectGroup === 'wiki' ? 'selected' : '' ?>>Wiki</option>
+                    <option value="wikidata" <?= $projectGroup === 'wikidata' ? 'selected' : '' ?>>Wikidata</option>
+                    <option value="wikimedia" <?= $projectGroup === 'wikimedia' ? 'selected' : '' ?>>Wikimedia</option>
                 </select>
+            </div>
+            <div class="flex items-center">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Actualizar</button>
             </div>
         </div>
     </form>
 
     <!-- Tabla donde se mostrarán los resultados -->
     <div class="overflow-x-auto">
-        <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm" id="table-container">
-            <!-- La tabla se actualizará dinámicamente aquí -->
+        <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                <div class="col-span-1 text-center">#</div>
+                <div class="col-span-1 text-center">Project</div>
+                <div class="col-span-1 text-center">Total People</div>
+                <div class="col-span-1 text-center">Total Women</div>
+                <div class="col-span-1 text-center">Total Men</div>
+                <div class="col-span-1 text-center">Other Genders</div>
+                <div class="col-span-1 text-center">Total Editors</div>
+            </div>
+
+            <?php if (!empty($data)) : ?>
+                <?php foreach ($data as $index => $item): ?>
+                    <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+                        <div class="col-span-1 text-center"><?= $index + 1 ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['project']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalEditors']) ?></div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-span-7 text-center text-gray-500">No data available</div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
-
-<script>
-$(document).ready(function() {
-    // Función para actualizar la tabla con los datos de la API
-    function updateTable(timeFrame, projectGroup) {
-        $.ajax({
-            url: 'tu_archivo_php.php',  // Ruta al archivo PHP que devuelve los datos en JSON
-            type: 'GET',
-            data: {
-                ajax: true,
-                timeFrame: timeFrame,
-                projectGroup: projectGroup
-            },
-            success: function(response) {
-                const data = JSON.parse(response);
-                let tableHtml = `
-                    <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                        <div class="col-span-1 text-center">#</div>
-                        <div class="col-span-1 text-center">Project</div>
-                        <div class="col-span-1 text-center">Total People</div>
-                        <div class="col-span-1 text-center">Total Women</div>
-                        <div class="col-span-1 text-center">Total Men</div>
-                        <div class="col-span-1 text-center">Other Genders</div>
-                        <div class="col-span-1 text-center">Total Editors</div>
-                    </div>`;
-
-                // Si hay datos, crear filas para cada uno
-                if (data && data.length > 0) {
-                    data.forEach((item, index) => {
-                        tableHtml += `
-                            <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                                <div class="col-span-1 text-center">${index + 1}</div>
-                                <div class="col-span-1 text-center">${item.project}</div>
-                                <div class="col-span-1 text-center">${item.totalPeople}</div>
-                                <div class="col-span-1 text-center">${item.totalWomen}</div>
-                                <div class="col-span-1 text-center">${item.totalMen}</div>
-                                <div class="col-span-1 text-center">${item.otherGenders}</div>
-                                <div class="col-span-1 text-center">${item.totalEditors}</div>
-                            </div>`;
-                    });
-                } else {
-                    tableHtml += `<div class="col-span-7 text-center text-gray-500">No data available</div>`;
-                }
-
-                // Actualizar el contenido de la tabla
-                $('#table-container').html(tableHtml);
-            }
-        });
-    }
-
-    // Escuchar los cambios en los selectores
-    $('#filterForm').change(function() {
-        const timeFrame = $('#timeFrame').val();
-        const projectGroup = $('#projectGroup').val();
-        updateTable(timeFrame, projectGroup); // Actualizar la tabla con los nuevos parámetros
-    });
-
-    // Cargar la tabla con los valores predeterminados al cargar la página
-    updateTable('1m', 'wiki'); // Valores predeterminados
-});
-</script>
-
 
       <!-- Footer -->
       <?php include 'footer.php'; ?>
@@ -216,63 +179,6 @@ $(document).ready(function() {
     document.querySelectorAll('.odometer').forEach(function (odometer) {
         odometer.innerHTML = odometer.getAttribute('data-odometer-final');
     });
-</script>
-
-<script>
-$(document).ready(function() {
-    // Función para actualizar la tabla con los datos de la API
-    function updateTable(timeFrame, projectGroup) {
-        const apiUrl = `https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=${timeFrame}&projectGroup=${projectGroup}`;
-
-        $.ajax({
-            url: apiUrl, // Usar la API directamente
-            type: 'GET',
-            success: function(response) {
-                let tableHtml = `
-                    <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                        <div class="col-span-1 text-center">#</div>
-                        <div class="col-span-1 text-center">Project</div>
-                        <div class="col-span-1 text-center">Total People</div>
-                        <div class="col-span-1 text-center">Total Women</div>
-                        <div class="col-span-1 text-center">Total Men</div>
-                        <div class="col-span-1 text-center">Other Genders</div>
-                        <div class="col-span-1 text-center">Total Editors</div>
-                    </div>`;
-
-                // Si hay datos, crear filas para cada uno
-                if (response && response.length > 0) {
-                    response.forEach((item, index) => {
-                        tableHtml += `
-                            <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                                <div class="col-span-1 text-center">${index + 1}</div>
-                                <div class="col-span-1 text-center">${item.project}</div>
-                                <div class="col-span-1 text-center">${item.totalPeople}</div>
-                                <div class="col-span-1 text-center">${item.totalWomen}</div>
-                                <div class="col-span-1 text-center">${item.totalMen}</div>
-                                <div class="col-span-1 text-center">${item.otherGenders}</div>
-                                <div class="col-span-1 text-center">${item.totalEditors}</div>
-                            </div>`;
-                    });
-                } else {
-                    tableHtml += `<div class="col-span-7 text-center text-gray-500">No data available</div>`;
-                }
-
-                // Actualizar el contenido de la tabla
-                $('#table-container').html(tableHtml);
-            }
-        });
-    }
-
-    // Escuchar los cambios en los selectores
-    $('#filterForm').change(function() {
-        const timeFrame = $('#timeFrame').val();
-        const projectGroup = $('#projectGroup').val();
-        updateTable(timeFrame, projectGroup); // Actualizar la tabla con los nuevos parámetros
-    });
-
-    // Cargar la tabla con los valores predeterminados al cargar la página
-    updateTable('1m', 'wiki'); // Valores predeterminados
-});
 </script>
 
 </body>
