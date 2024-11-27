@@ -86,19 +86,32 @@ function buildPaginationUrl($page) {
   <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Título de la sección -->
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6"><?php echo __('filters'); ?></h2>
-    
+
     <?php
-    // Obtener los parámetros actuales de la URL
+    // Obtener los parámetros actuales sin incluir 'lang'
     $currentParams = $_GET;
 
     // Función para generar enlaces con parámetros actualizados
     function buildUrl($newParams) {
         global $currentParams;
-        $params = array_merge($currentParams, $newParams);
+
+        // Excluir 'lang' de los parámetros
+        $filteredParams = array_filter(
+            $currentParams,
+            function ($key) {
+                return $key !== 'lang'; // Excluir 'lang'
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+
+        // Combinar los parámetros filtrados con los nuevos
+        $params = array_merge($filteredParams, $newParams);
+
+        // Construir la URL codificada
         return '?' . htmlspecialchars(http_build_query($params));
     }
     ?>
-    
+
     <!-- Sección By Date -->
     <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_bydate'); ?></h3>
