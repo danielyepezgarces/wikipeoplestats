@@ -300,6 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const paginationLinks = document.querySelectorAll('.pagination-link');
+    
     paginationLinks.forEach(link => {
         link.addEventListener('click', function(event) {
             event.preventDefault();
@@ -312,17 +313,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Mantener otros parámetros
             <?php foreach ($currentParams as $key => $value): ?>
-                url.searchParams.set('<?= $key ?>', '<?= $value ?>');
+                // Solo agregar parámetros existentes en la URL
+                if ('<?= $key ?>' !== 'page') {
+                    url.searchParams.set('<?= $key ?>', '<?= $value ?>');
+                }
             <?php endforeach; ?>
 
-            // Añadir el parámetro 'page' al final
-            url.searchParams.append('page', page);
+            // Añadir el parámetro 'page' con el nuevo valor
+            url.searchParams.set('page', page);
 
+            // Actualizar la URL sin recargar la página
             window.history.pushState({}, '', url);
-            window.location.search = url.search;
 
-            // Recargar la página para reflejar los cambios en el servidor
-            window.location.reload();
+            // Cambiar la URL visible y pasar los parámetros al backend
+            window.location.search = url.search;
         });
     });
 
@@ -338,6 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
 
 </body>
 </html>
