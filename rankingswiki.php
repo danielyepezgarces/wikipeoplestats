@@ -218,6 +218,62 @@ $(document).ready(function() {
     });
 </script>
 
+<script>
+$(document).ready(function() {
+    // Función para actualizar la tabla con los datos de la API
+    function updateTable(timeFrame, projectGroup) {
+        const apiUrl = `https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=${timeFrame}&projectGroup=${projectGroup}`;
+
+        $.ajax({
+            url: apiUrl, // Usar la API directamente
+            type: 'GET',
+            success: function(response) {
+                let tableHtml = `
+                    <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        <div class="col-span-1 text-center">#</div>
+                        <div class="col-span-1 text-center">Project</div>
+                        <div class="col-span-1 text-center">Total People</div>
+                        <div class="col-span-1 text-center">Total Women</div>
+                        <div class="col-span-1 text-center">Total Men</div>
+                        <div class="col-span-1 text-center">Other Genders</div>
+                        <div class="col-span-1 text-center">Total Editors</div>
+                    </div>`;
+
+                // Si hay datos, crear filas para cada uno
+                if (response && response.length > 0) {
+                    response.forEach((item, index) => {
+                        tableHtml += `
+                            <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+                                <div class="col-span-1 text-center">${index + 1}</div>
+                                <div class="col-span-1 text-center">${item.project}</div>
+                                <div class="col-span-1 text-center">${item.totalPeople}</div>
+                                <div class="col-span-1 text-center">${item.totalWomen}</div>
+                                <div class="col-span-1 text-center">${item.totalMen}</div>
+                                <div class="col-span-1 text-center">${item.otherGenders}</div>
+                                <div class="col-span-1 text-center">${item.totalEditors}</div>
+                            </div>`;
+                    });
+                } else {
+                    tableHtml += `<div class="col-span-7 text-center text-gray-500">No data available</div>`;
+                }
+
+                // Actualizar el contenido de la tabla
+                $('#table-container').html(tableHtml);
+            }
+        });
+    }
+
+    // Escuchar los cambios en los selectores
+    $('#filterForm').change(function() {
+        const timeFrame = $('#timeFrame').val();
+        const projectGroup = $('#projectGroup').val();
+        updateTable(timeFrame, projectGroup); // Actualizar la tabla con los nuevos parámetros
+    });
+
+    // Cargar la tabla con los valores predeterminados al cargar la página
+    updateTable('1m', 'wiki'); // Valores predeterminados
+});
+</script>
 
 </body>
 </html>
