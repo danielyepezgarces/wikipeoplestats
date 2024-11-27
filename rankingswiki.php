@@ -154,9 +154,9 @@ unset($currentParams['page']);
 <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
-        <a href="#" data-page="<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
+        <a href="?page=<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
     <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
+        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Previous</span>
     <?php endif; ?>
 
     <!-- Enlaces a las páginas (máximo 10 páginas) -->
@@ -165,7 +165,7 @@ unset($currentParams['page']);
     $startPage = max(1, $currentPage - floor($maxButtons / 2));  // Rango de inicio
     $endPage = min($totalPages, $startPage + $maxButtons - 1); // Rango de fin
 
-    // Si el rango de fin es menor que el total de páginas, ajustar el rango de inicio
+    // Ajustar el rango de inicio si el rango final es menor que el total de páginas
     if ($endPage - $startPage + 1 < $maxButtons) {
         $startPage = max(1, $endPage - $maxButtons + 1);
     }
@@ -173,14 +173,14 @@ unset($currentParams['page']);
     // Mostrar los botones de las páginas
     for ($i = $startPage; $i <= $endPage; $i++):
     ?>
-        <a href="#" data-page="<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
+        <a href="?page=<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
     <?php endfor; ?>
 
     <!-- Enlace a la siguiente página -->
     <?php if ($currentPage < $totalPages): ?>
-        <a href="#" data-page="<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
+        <a href="?page=<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
     <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
+        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Next</span>
     <?php endif; ?>
 </div>
 
@@ -328,17 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Cambiar la URL visible y pasar los parámetros al backend
             window.location.search = url.search;
         });
-    });
-
-    // Asegurarse de que la página actual esté resaltada al cargar la página
-    const currentPage = <?= $currentPage ?>;
-    paginationLinks.forEach(link => {
-        const page = parseInt(link.getAttribute('data-page'));
-        if (page === currentPage) {
-            link.classList.add('bg-blue-500', 'text-white');
-        } else {
-            link.classList.remove('bg-blue-500', 'text-white');
-        }
     });
 });
 </script>
