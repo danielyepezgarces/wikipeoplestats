@@ -150,7 +150,7 @@ unset($currentParams['page']);
 
 
     <!-- Paginación -->
-<div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
+    <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
         <a href="#" data-page="<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
@@ -182,7 +182,6 @@ unset($currentParams['page']);
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
     <?php endif; ?>
 </div>
-
 
   </main>
 </div>
@@ -282,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const paginationLinks = document.querySelectorAll('.pagination-link');
@@ -292,13 +292,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const page = this.getAttribute('data-page');
             const url = new URL(window.location);
 
-            // Actualizar el parámetro de página
-            url.searchParams.set('page', page);
+            // Eliminar el parámetro 'page' si existe
+            url.searchParams.delete('page');
 
             // Mantener otros parámetros
             <?php foreach ($currentParams as $key => $value): ?>
                 url.searchParams.set('<?= $key ?>', '<?= $value ?>');
             <?php endforeach; ?>
+
+            // Añadir el parámetro 'page' al final
+            url.searchParams.append('page', page);
 
             window.history.pushState({}, '', url);
             window.location.search = url.search;
