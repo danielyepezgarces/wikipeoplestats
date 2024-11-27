@@ -156,6 +156,28 @@ function buildPaginationUrl($page) {
         </div>
     </div>
 
+    <?php
+// Función para construir la URL de paginación
+function buildPaginationUrl($page) {
+    global $currentParams;
+
+    // Excluir 'lang' de los parámetros actuales
+    $filteredParams = array_filter(
+        $currentParams,
+        function ($key) {
+            return $key !== 'lang'; // Excluir 'lang'
+        },
+        ARRAY_FILTER_USE_KEY
+    );
+
+    // Añadir el parámetro de página
+    $filteredParams['page'] = $page;
+
+    // Construir la URL codificada
+    return '?' . htmlspecialchars(http_build_query($filteredParams));
+}
+?>
+
 <!-- Paginación -->
 <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
@@ -189,6 +211,7 @@ function buildPaginationUrl($page) {
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
     <?php endif; ?>
 </div>
+
 
   </main>
 </div>
