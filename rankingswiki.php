@@ -91,12 +91,12 @@ function buildPaginationUrl($page) {
     <div class="mb-6">
       <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Date</h3>
       <ul>
-        <li><a href="?timeFrame=7d&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
-        <li><a href="?timeFrame=1m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
-        <li><a href="?timeFrame=3m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
-        <li><a href="?timeFrame=6m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
-        <li><a href="?timeFrame=1y&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
-        <li><a href="?timeFrame=all&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
+        <li><a href="?timeFrame=7d&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '7d') ? 'bg-primary-500 text-white' : '' ?>">Last 7D</a></li>
+        <li><a href="?timeFrame=1m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '1m') ? 'bg-primary-500 text-white' : '' ?>">Last 1M</a></li>
+        <li><a href="?timeFrame=3m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '3m') ? 'bg-primary-500 text-white' : '' ?>">Last 3M</a></li>
+        <li><a href="?timeFrame=6m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '6m') ? 'bg-primary-500 text-white' : '' ?>">Last 6M</a></li>
+        <li><a href="?timeFrame=1y&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '1y') ? 'bg-primary-500 text-white' : '' ?>">Last 1Y</a></li>
+        <li><a href="?timeFrame=all&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == 'all') ? 'bg-primary-500 text-white' : '' ?>">All time</a></li>
       </ul>
     </div>
     
@@ -104,12 +104,13 @@ function buildPaginationUrl($page) {
     <div class="mb-6">
       <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Project</h3>
       <ul>
-        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wiki" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikipedia</a></li>
-        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wikiquote" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikiquote</a></li>
-        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wikimedia" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikisource</a></li>
+        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wiki" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] == 'wiki') ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
+        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wikiquote" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] == 'wikiquote') ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
+        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wikimedia" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] == 'wikimedia') ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
       </ul>
     </div>
 </aside>
+
 
 
   <!-- Main -->
