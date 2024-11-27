@@ -321,20 +321,22 @@ document.addEventListener('DOMContentLoaded', function() {
             window.history.pushState({}, '', url);
             window.location.search = url.search;
 
-            // Actualizar el estado de los enlaces
-            paginationLinks.forEach(paginationLink => {
-                if (paginationLink.getAttribute('data-page') == page) {
-                    paginationLink.classList.add('bg-blue-500', 'text-white');
-                } else {
-                    paginationLink.classList.remove('bg-blue-500', 'text-white');
-                }
-            });
-
             // Recargar la página para reflejar los cambios en el servidor
             window.location.reload();
         });
     });
-}); 
+
+    // Asegurarse de que la página actual esté resaltada al cargar la página
+    const currentPage = <?= $currentPage ?>;
+    paginationLinks.forEach(link => {
+        const page = parseInt(link.getAttribute('data-page'));
+        if (page === currentPage) {
+            link.classList.add('bg-blue-500', 'text-white');
+        } else {
+            link.classList.remove('bg-blue-500', 'text-white');
+        }
+    });
+});
 </script>
 
 </body>
