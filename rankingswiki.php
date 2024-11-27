@@ -23,7 +23,6 @@ $projectGroup = isset($_GET['projectGroup']) ? $_GET['projectGroup'] : 'wiki';
 // Obtener los datos de la API
 $data = fetchData($timeFrame, $projectGroup);
 
-// Configuración de la paginación
 $resultsPerPage = 10;  // Número de resultados por página
 $totalResults = count($data);  // Número total de resultados
 $totalPages = ceil($totalResults / $resultsPerPage);  // Número total de páginas
@@ -43,9 +42,9 @@ $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 // Función para construir los enlaces de paginación con los parámetros de la URL
 function buildPaginationUrl($page) {
     $url = $_SERVER['PHP_SELF'] . "?page=" . $page;
-    // Agregar otros parámetros de la URL
+    // Agregar otros parámetros de la URL, excluyendo 'lang'
     foreach ($_GET as $key => $value) {
-        if ($key !== 'page') {
+        if ($key !== 'page' && $key !== 'lang') {
             $url .= "&$key=$value";
         }
     }
@@ -156,8 +155,7 @@ function buildPaginationUrl($page) {
         </div>
     </div>
 
-    <!-- Paginación -->
-<div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
+    <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
         <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
