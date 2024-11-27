@@ -149,8 +149,8 @@ unset($currentParams['page']);
     </div>
 
 
-    <!-- Paginación -->
-    <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
+<!-- Paginación -->
+<div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
         <a href="#" data-page="<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
@@ -319,6 +319,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             window.history.pushState({}, '', url);
             window.location.search = url.search;
+
+            // Actualizar el estado de los enlaces
+            paginationLinks.forEach(paginationLink => {
+                paginationLink.classList.remove('bg-blue-500', 'text-white');
+            });
+            this.classList.add('bg-blue-500', 'text-white');
 
             // Recargar la página para reflejar los cambios en el servidor
             window.location.reload();
