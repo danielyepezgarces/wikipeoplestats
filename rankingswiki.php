@@ -1,75 +1,30 @@
 <?php
-
 include 'languages.php';
 
-// Now you can access the wiki parameter like this:
-$currentWiki = $currentLang['wiki'];
-$wikiproject = $currentWiki === "globalwiki" ? "all" : $currentWiki;
+// Función para obtener los datos de la API con parámetros dinámicos
+function fetchData($timeFrame, $projectGroup) {
+  // Construir la URL de la API con los parámetros dinámicos
+  $api_url = "https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=$timeFrame&projectGroup=$projectGroup";
+  
+  // Usar cURL para obtener los datos de la API
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $api_url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  $response = curl_exec($ch);
+  curl_close($ch);
 
-// Inicializar cURL
-$ch = curl_init();
-
-// Configurar la URL y las opciones de cURL
-curl_setopt($ch, CURLOPT_URL, "https://wikipeoplestats.wmcloud.org/api/stats/{$wikiproject}");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "User-Agent: WikiStatsPeople/1.0"
-]);
-
-// Ejecutar la solicitud
-$response = curl_exec($ch);
-
-// Verificar si hubo un error
-if (curl_errno($ch)) {
-    die("Error al acceder a la API: " . curl_error($ch));
+  // Decodificar la respuesta JSON
+  return json_decode($response, true);
 }
 
-// Cerrar cURL
-curl_close($ch);
-
-// Decodificar la respuesta JSON
-$data = json_decode($response, true);
-
-// Verificar si hay un error en la respuesta
-if (isset($data['error']) && $data['error'] === 'No data found') {
-    // Asignar cero a todas las estadísticas
-    $totalPeople = 0;
-    $totalWomen = 0;
-    $totalMen = 0;
-    $otherGenders = 0;
-    $totalContributions = 0;
-    $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
-    $lastUpdated = "N/A";
-    $errorMessage = __('coming_soon_tracking_wiki');
-} else {
-    // Asignar los valores de la respuesta
-    $totalPeople = $data['totalPeople'] ?? 0;
-    $totalWomen = $data['totalWomen'] ?? 0;
-    $totalMen = $data['totalMen'] ?? 0;
-    $otherGenders = $data['otherGenders'] ?? 0;
-    $totalContributions = $data['totalContributions'] ?? 0;
-    $lastUpdated = $data['lastUpdated'];
-    $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
-
-// Mensaje de éxito según la wiki
-if ($currentWiki === 'globalwiki') {
-    $errorMessage = __('homepage_global_stats_credits');
-} else {
-    $lastUpdated = isset($data['last_updated']) ? $data['last_updated'] : 'N/A';
-    $errorMessage = sprintf(
-        __('homepage_stats_credits'), 
-        str_replace('wiki', '.wikipedia', $currentWiki)
-    ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
+// Si la solicitud es AJAX, enviar los datos en formato JSON
+if (isset($_GET['ajax'])) {
+  $timeFrame = isset($_GET['timeFrame']) ? $_GET['timeFrame'] : '1m'; // Default 1 month
+  $projectGroup = isset($_GET['projectGroup']) ? $_GET['projectGroup'] : 'wiki'; // Default wiki
+  $data = fetchData($timeFrame, $projectGroup);
+  echo json_encode($data);  // Enviar los datos como JSON
+  exit;
 }
-}
-
-
-// Calcular los ratios
-$ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
-$ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
-$ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
-
-// Obtener y formatear la última actualización
 ?>
 
 <!DOCTYPE html>
@@ -100,160 +55,98 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <?php include 'header.php'; // Incluir el encabezado ?>
 
-<div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
-  <!-- Sidebar (1/6 del ancho en pantallas grandes) -->
-  <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
-    <!-- Título de la sección -->
-    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Filters</h2>
-    
-    <!-- Sección By Date -->
-    <div class="mb-6">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Date</h3>
-      <ul>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
-      </ul>
-    </div>
-    
-    <!-- Sección By Project -->
-    <div class="mb-6">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Project</h3>
-      <ul>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikipedia</a></li>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikiquote</a></li>
-        <li><a href="#" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikisource</a></li>
-      </ul>
-    </div>
-  </aside>
-  <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
-    <!-- Tabla full width -->
+<div class="container mx-auto py-8">
+    <!-- Formulario para cambiar los parámetros -->
+    <form id="filterForm" class="mb-8">
+        <div class="flex space-x-4">
+            <div>
+                <label for="timeFrame" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Time Frame</label>
+                <select name="timeFrame" id="timeFrame" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
+                    <option value="1m">1 Month</option>
+                    <option value="3m">3 Months</option>
+                    <option value="6m">6 Months</option>
+                    <option value="1y">1 Year</option>
+                </select>
+            </div>
+            <div>
+                <label for="projectGroup" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Project Group</label>
+                <select name="projectGroup" id="projectGroup" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
+                    <option value="wiki">Wiki</option>
+                    <option value="wikidata">Wikidata</option>
+                    <option value="wikimedia">Wikimedia</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabla donde se mostrarán los resultados -->
     <div class="overflow-x-auto">
-      <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-        <!-- Cabecera de la tabla -->
-        <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-          <div class="col-span-1 text-center">#</div>
-          <div class="col-span-1 text-center">Project</div>
-          <div class="col-span-1 text-center">Total People</div>
-          <div class="col-span-1 text-center">Total Women</div>
-          <div class="col-span-1 text-center">Total Men</div>
-          <div class="col-span-1 text-center">Other Genders</div>
-          <div class="col-span-1 text-center">Total Editors</div>
+        <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm" id="table-container">
+            <!-- La tabla se actualizará dinámicamente aquí -->
         </div>
-        <!-- Fila de Datos -->
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">1</div>
-          <div class="col-span-1 text-center">en.wikipedia</div>
-          <div class="col-span-1 text-center">4,536,514</div>
-          <div class="col-span-1 text-center">814,077</div>
-          <div class="col-span-1 text-center">3,537,989</div>
-          <div class="col-span-1 text-center">184,448</div>
-          <div class="col-span-1 text-center">1,079,811</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">2</div>
-          <div class="col-span-1 text-center">es.wikipedia</div>
-          <div class="col-span-1 text-center">2,234,567</div>
-          <div class="col-span-1 text-center">456,123</div>
-          <div class="col-span-1 text-center">1,789,456</div>
-          <div class="col-span-1 text-center">99,123</div>
-          <div class="col-span-1 text-center">567,890</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">3</div>
-          <div class="col-span-1 text-center">en.wikiquote</div>
-          <div class="col-span-1 text-center">1,123,456</div>
-          <div class="col-span-1 text-center">210,678</div>
-          <div class="col-span-1 text-center">800,345</div>
-          <div class="col-span-1 text-center">45,567</div>
-          <div class="col-span-1 text-center">123,456</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">4</div>
-          <div class="col-span-1 text-center">es.wikiquote</div>
-          <div class="col-span-1 text-center">500,000</div>
-          <div class="col-span-1 text-center">100,000</div>
-          <div class="col-span-1 text-center">350,000</div>
-          <div class="col-span-1 text-center">10,000</div>
-          <div class="col-span-1 text-center">80,000</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">5</div>
-          <div class="col-span-1 text-center">fr.wikipedia</div>
-          <div class="col-span-1 text-center">1,876,234</div>
-          <div class="col-span-1 text-center">350,654</div>
-          <div class="col-span-1 text-center">1,200,123</div>
-          <div class="col-span-1 text-center">35,000</div>
-          <div class="col-span-1 text-center">450,000</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">6</div>
-          <div class="col-span-1 text-center">de.wikipedia</div>
-          <div class="col-span-1 text-center">2,345,678</div>
-          <div class="col-span-1 text-center">450,000</div>
-          <div class="col-span-1 text-center">1,700,000</div>
-          <div class="col-span-1 text-center">35,000</div>
-          <div class="col-span-1 text-center">560,000</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">7</div>
-          <div class="col-span-1 text-center">it.wikipedia</div>
-          <div class="col-span-1 text-center">1,234,567</div>
-          <div class="col-span-1 text-center">320,000</div>
-          <div class="col-span-1 text-center">900,000</div>
-          <div class="col-span-1 text-center">25,000</div>
-          <div class="col-span-1 text-center">450,000</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">8</div>
-          <div class="col-span-1 text-center">pl.wikipedia</div>
-          <div class="col-span-1 text-center">800,000</div>
-          <div class="col-span-1 text-center">150,000</div>
-          <div class="col-span-1 text-center">600,000</div>
-          <div class="col-span-1 text-center">20,000</div>
-          <div class="col-span-1 text-center">250,000</div>
-        </div>
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">9</div>
-          <div class="col-span-1 text-center">ja.wikipedia</div>
-          <div class="col-span-1 text-center">2,500,000</div>
-          <div class="col-span-1 text-center">550,000</div>
-          <div class="col-span-1 text-center">1,900,000</div>
-          <div class="col-span-1 text-center">50,000</div>
-          <div class="col-span-1 text-center">620,000</div>
-        </div>
-        <!-- Nueva Fila - Proyecto 10 -->
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-          <div class="col-span-1 text-center">10</div>
-          <div class="col-span-1 text-center">ru.wikipedia</div>
-          <div class="col-span-1 text-center">3,234,567</div>
-          <div class="col-span-1 text-center">600,123</div>
-          <div class="col-span-1 text-center">2,300,456</div>
-          <div class="col-span-1 text-center">45,000</div>
-          <div class="col-span-1 text-center">510,000</div>
-        </div>
-        <!-- Totales -->
-        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700 font-semibold bg-gray-100 dark:bg-gray-800">
-          <div class="col-span-1 text-center">Total</div>
-          <div class="col-span-1 text-center"></div>
-          <div class="col-span-1 text-center">4,536,514</div>
-          <div class="col-span-1 text-center">814,077</div>
-          <div class="col-span-1 text-center">3,537,989</div>
-          <div class="col-span-1 text-center">184,448</div>
-          <div class="col-span-1 text-center">1,079,811</div>
-        </div>
-      </div>
     </div>
-    <!-- Pie de página -->
-    <div class="bg-gray-800 dark:bg-gray-900 text-center text-white p-4 mt-4">
-      Feature in development
-    </div>
-  </main>
 </div>
 
+<script>
+$(document).ready(function() {
+    // Función para actualizar la tabla con los datos de la API
+    function updateTable(timeFrame, projectGroup) {
+        $.ajax({
+            url: 'tu_archivo_php.php',  // Ruta al archivo PHP que devuelve los datos en JSON
+            type: 'GET',
+            data: {
+                ajax: true,
+                timeFrame: timeFrame,
+                projectGroup: projectGroup
+            },
+            success: function(response) {
+                const data = JSON.parse(response);
+                let tableHtml = `
+                    <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        <div class="col-span-1 text-center">#</div>
+                        <div class="col-span-1 text-center">Project</div>
+                        <div class="col-span-1 text-center">Total People</div>
+                        <div class="col-span-1 text-center">Total Women</div>
+                        <div class="col-span-1 text-center">Total Men</div>
+                        <div class="col-span-1 text-center">Other Genders</div>
+                        <div class="col-span-1 text-center">Total Editors</div>
+                    </div>`;
+
+                // Si hay datos, crear filas para cada uno
+                if (data && data.length > 0) {
+                    data.forEach((item, index) => {
+                        tableHtml += `
+                            <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+                                <div class="col-span-1 text-center">${index + 1}</div>
+                                <div class="col-span-1 text-center">${item.project}</div>
+                                <div class="col-span-1 text-center">${item.totalPeople}</div>
+                                <div class="col-span-1 text-center">${item.totalWomen}</div>
+                                <div class="col-span-1 text-center">${item.totalMen}</div>
+                                <div class="col-span-1 text-center">${item.otherGenders}</div>
+                                <div class="col-span-1 text-center">${item.totalEditors}</div>
+                            </div>`;
+                    });
+                } else {
+                    tableHtml += `<div class="col-span-7 text-center text-gray-500">No data available</div>`;
+                }
+
+                // Actualizar el contenido de la tabla
+                $('#table-container').html(tableHtml);
+            }
+        });
+    }
+
+    // Escuchar los cambios en los selectores
+    $('#filterForm').change(function() {
+        const timeFrame = $('#timeFrame').val();
+        const projectGroup = $('#projectGroup').val();
+        updateTable(timeFrame, projectGroup); // Actualizar la tabla con los nuevos parámetros
+    });
+
+    // Cargar la tabla con los valores predeterminados al cargar la página
+    updateTable('1m', 'wiki'); // Valores predeterminados
+});
+</script>
 
 
       <!-- Footer -->
@@ -325,6 +218,6 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     });
 </script>
 
-    
+
 </body>
 </html>
