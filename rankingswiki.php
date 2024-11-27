@@ -130,6 +130,7 @@ function buildPaginationUrl($page) {
 </aside>
 
 
+
   <!-- Main -->
   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Tabla -->
