@@ -84,29 +84,33 @@ function buildPaginationUrl($page) {
 <div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
   <!-- Sidebar -->
   <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
+    <!-- Título de la sección -->
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Filters</h2>
-    <form action="" method="get" class="mb-8">
-        <div class="flex space-x-4">
-            <div>
-                <label for="timeFrame" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Time Frame</label>
-                <select name="timeFrame" id="timeFrame" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
-                    <option value="1m" <?= $timeFrame === '1m' ? 'selected' : '' ?>>1 Month</option>
-                    <option value="3m" <?= $timeFrame === '3m' ? 'selected' : '' ?>>3 Months</option>
-                    <option value="6m" <?= $timeFrame === '6m' ? 'selected' : '' ?>>6 Months</option>
-                    <option value="1y" <?= $timeFrame === '1y' ? 'selected' : '' ?>>1 Year</option>
-                </select>
-            </div>
-            <div>
-                <label for="projectGroup" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Project Group</label>
-                <select name="projectGroup" id="projectGroup" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
-                    <option value="wiki" <?= $projectGroup === 'wiki' ? 'selected' : '' ?>>Wiki</option>
-                    <option value="wikidata" <?= $projectGroup === 'wikidata' ? 'selected' : '' ?>>Wikidata</option>
-                    <option value="wikimedia" <?= $projectGroup === 'wikimedia' ? 'selected' : '' ?>>Wikimedia</option>
-                </select>
-            </div>
-        </div>
-    </form>
-  </aside>
+    
+    <!-- Sección By Date -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Date</h3>
+      <ul>
+        <li><a href="?timeFrame=7d&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 7D</a></li>
+        <li><a href="?timeFrame=1m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1M</a></li>
+        <li><a href="?timeFrame=3m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 3M</a></li>
+        <li><a href="?timeFrame=6m&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 6M</a></li>
+        <li><a href="?timeFrame=1y&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Last 1Y</a></li>
+        <li><a href="?timeFrame=all&projectGroup=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">All time</a></li>
+      </ul>
+    </div>
+    
+    <!-- Sección By Project -->
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Project</h3>
+      <ul>
+        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wiki" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikipedia</a></li>
+        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wikiquote" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikiquote</a></li>
+        <li><a href="?timeFrame=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&projectGroup=wikimedia" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200">Wikisource</a></li>
+      </ul>
+    </div>
+</aside>
+
 
   <!-- Main -->
   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
