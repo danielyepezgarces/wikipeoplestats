@@ -43,6 +43,7 @@ $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 unset($currentParams['lang']);
 
 // Depuración
+echo "Page parameter from URL: " . htmlspecialchars($_GET['page']) . "<br>";
 echo "Current Page: $currentPage<br>";
 echo "Total Pages: $totalPages<br>";
 echo "Start Index: $startIndex<br>";
@@ -155,7 +156,7 @@ echo "Current Page Results: " . print_r($currentPageResults, true) . "<br>";
         <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
-        <a href="#" data-page="<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
+        <a href="?page=<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
     <?php endif; ?>
@@ -174,16 +175,17 @@ echo "Current Page Results: " . print_r($currentPageResults, true) . "<br>";
     // Mostrar los botones de las páginas
     for ($i = $startPage; $i <= $endPage; $i++):
     ?>
-        <a href="#" data-page="<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
+        <a href="?page=<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
     <?php endfor; ?>
 
     <!-- Enlace a la siguiente página -->
     <?php if ($currentPage < $totalPages): ?>
-        <a href="#" data-page="<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
+        <a href="?page=<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
     <?php endif; ?>
 </div>
+
 
     </main>
 </div>
