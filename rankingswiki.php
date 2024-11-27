@@ -23,42 +23,34 @@ $projectGroup = isset($_GET['group']) ? $_GET['group'] : 'wiki';
 // Obtener los datos de la API
 $data = fetchData($timeFrame, $projectGroup);
 
-// Obtener el parámetro 'page' desde la URL
+// Configuración de la paginación
+$resultsPerPage = 10;  // Número de resultados por página
+$totalResults = count($data);  // Número total de resultados
+$totalPages = ceil($totalResults / $resultsPerPage);  // Número total de páginas
+
+// Obtener la página actual desde la URL, por defecto es la página 1
 $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-// Definir el total de páginas
-$totalPages = 18; // Este valor debe ser calculado según el total de resultados
+// Asegurarse de que la página actual esté dentro del rango válido
+$currentPage = max(1, min($currentPage, $totalPages));
 
-// Número de resultados por página
-$resultsPerPage = 10;
-
-// Calcular el índice de inicio para la paginación
+// Calcular el índice de inicio de los resultados en la página actual
 $startIndex = ($currentPage - 1) * $resultsPerPage;
 
-// Asegurarse de que el índice de la página no sea mayor que el total de páginas
-if ($currentPage > $totalPages) {
-    $currentPage = $totalPages;
-    $startIndex = ($currentPage - 1) * $resultsPerPage;
+// Obtener los resultados para la página actual
+$currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
+
+// Función para construir los enlaces de paginación con los parámetros de la URL
+function buildPaginationUrl($page) {
+    $url = $_SERVER['PHP_SELF'] . "?page=" . $page;
+    // Agregar otros parámetros de la URL
+    foreach ($_GET as $key => $value) {
+        if ($key !== 'page') {
+            $url .= "&$key=$value";
+        }
+    }
+    return $url;
 }
-
-// Imprimir la página actual, total de páginas e índice de inicio
-echo "Page parameter from URL: <br>";
-echo "Current Page: $currentPage <br>";
-echo "Total Pages: $totalPages <br>";
-echo "Start Index: $startIndex <br>";
-
-// Función para generar los enlaces de paginación con los parámetros actuales
-function generatePaginationLink($page) {
-    // Obtener todos los parámetros actuales de la URL
-    $params = $_GET;
-
-    // Modificar el parámetro 'page' con la nueva página
-    $params['page'] = $page;
-
-    // Crear la URL con los parámetros actuales (incluyendo 'page')
-    return '?' . http_build_query($params);
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -129,44 +121,45 @@ function generatePaginationLink($page) {
         </div>
     </aside>
 
-    <!-- Main -->
-    <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
-        <!-- Tabla -->
-        <div class="overflow-x-auto">
-            <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                <!-- Cabecera de la tabla -->
-                <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                    <div class="col-span-1 text-center">#</div>
-                    <div class="col-span-1 text-center"><?php echo __('project'); ?></div>
-                    <div class="col-span-1 text-center"><?php echo __('total_people'); ?></div>
-                    <div class="col-span-1 text-center"><?php echo __('total_women'); ?></div>
-                    <div class="col-span-1 text-center"><?php echo __('total_men'); ?></div>
-                    <div class="col-span-1 text-center"><?php echo __('other_genders'); ?></div>
-                    <div class="col-span-1 text-center"><?php echo __('total_editors'); ?></div>
-                </div>
-
-                <?php if (!empty($currentPageResults)): ?>
-                    <?php foreach ($currentPageResults as $index => $item): ?>
-                        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                            <div class="col-span-1 text-center"><?= $startIndex + $index + 1 ?></div>
-                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
-                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
-                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
-                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
-                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
-                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalContributions']) ?></div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="col-span-7 text-center text-gray-500">No data available</div>
-                <?php endif; ?>
+   <!-- Main -->
+   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
+    <!-- Tabla -->
+    <div class="overflow-x-auto">
+        <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <!-- Cabecera de la tabla -->
+            <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                <div class="col-span-1 text-center">#</div>
+                <div class="col-span-1 text-center">Project</div>
+                <div class="col-span-1 text-center">Total People</div>
+                <div class="col-span-1 text-center">Total Women</div>
+                <div class="col-span-1 text-center">Total Men</div>
+                <div class="col-span-1 text-center">Other Genders</div>
+                <div class="col-span-1 text-center">Total Editors</div>
             </div>
-        </div>
 
-        <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
+            <?php if (!empty($currentPageResults)) : ?>
+                <?php foreach ($currentPageResults as $index => $item): ?>
+                    <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+                        <div class="col-span-1 text-center"><?= $startIndex + $index + 1 ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalContributions']) ?></div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-span-7 text-center text-gray-500">No data available</div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+<!-- Paginación -->
+<div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
-        <a href="<?= generatePaginationLink($currentPage - 1) ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
+        <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Previous</span>
     <?php endif; ?>
@@ -185,21 +178,18 @@ function generatePaginationLink($page) {
     // Mostrar los botones de las páginas
     for ($i = $startPage; $i <= $endPage; $i++):
     ?>
-        <a href="<?= generatePaginationLink($i) ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
+        <a href="<?= buildPaginationUrl($i) ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
     <?php endfor; ?>
 
     <!-- Enlace a la siguiente página -->
     <?php if ($currentPage < $totalPages): ?>
-        <a href="<?= generatePaginationLink($currentPage + 1) ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
+        <a href="<?= buildPaginationUrl($currentPage + 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Next</span>
     <?php endif; ?>
 </div>
 
-
-
-
-    </main>
+  </main>
 </div>
 
 <?php include 'footer.php'; ?>
