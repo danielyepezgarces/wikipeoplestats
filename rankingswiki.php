@@ -53,13 +53,17 @@ $data = fetchData($timeFrame, $projectGroup);
 
 <?php include 'header.php'; // Incluir el encabezado ?>
 
-<div class="container mx-auto py-8">
+<div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
+  <!-- Sidebar (1/6 del ancho en pantallas grandes) -->
+  <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
+    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Filters</h2>
+
     <!-- Formulario para cambiar los parámetros -->
     <form action="" method="get" class="mb-8">
         <div class="flex space-x-4">
             <div>
                 <label for="timeFrame" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Time Frame</label>
-                <select name="timeFrame" id="timeFrame" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
+                <select name="timeFrame" id="timeFrame" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
                     <option value="1m" <?= $timeFrame === '1m' ? 'selected' : '' ?>>1 Month</option>
                     <option value="3m" <?= $timeFrame === '3m' ? 'selected' : '' ?>>3 Months</option>
                     <option value="6m" <?= $timeFrame === '6m' ? 'selected' : '' ?>>6 Months</option>
@@ -68,21 +72,22 @@ $data = fetchData($timeFrame, $projectGroup);
             </div>
             <div>
                 <label for="projectGroup" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Project Group</label>
-                <select name="projectGroup" id="projectGroup" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
+                <select name="projectGroup" id="projectGroup" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
                     <option value="wiki" <?= $projectGroup === 'wiki' ? 'selected' : '' ?>>Wiki</option>
                     <option value="wikidata" <?= $projectGroup === 'wikidata' ? 'selected' : '' ?>>Wikidata</option>
                     <option value="wikimedia" <?= $projectGroup === 'wikimedia' ? 'selected' : '' ?>>Wikimedia</option>
                 </select>
             </div>
-            <div class="flex items-center">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Actualizar</button>
-            </div>
         </div>
     </form>
+  </aside>
 
+  <!-- Main (5/6 del ancho en pantallas grandes) -->
+  <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Tabla donde se mostrarán los resultados -->
     <div class="overflow-x-auto">
         <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <!-- Cabecera de la tabla -->
             <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
                 <div class="col-span-1 text-center">#</div>
                 <div class="col-span-1 text-center">Project</div>
@@ -110,7 +115,9 @@ $data = fetchData($timeFrame, $projectGroup);
             <?php endif; ?>
         </div>
     </div>
+  </main>
 </div>
+
 
       <!-- Footer -->
       <?php include 'footer.php'; ?>
