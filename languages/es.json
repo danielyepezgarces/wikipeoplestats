@@ -64,6 +64,6 @@
     "filters_last_6m": "Ultimos 6m",
     "filters_last_1y": "Ultimos 1y",
     "filters_alltime": "Todo el tiempo",
-    "pagination_previous": "Previous",
-    "pagination_next": "Next"
+    "pagination_previous": "Anterior",
+    "pagination_next": "Siguiente"
   }
