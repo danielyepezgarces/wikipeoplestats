@@ -300,43 +300,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const paginationLinks = document.querySelectorAll('.pagination-link');
-
-    paginationLinks.forEach(link => {
-        link.addEventListener('click', function(event) {
-            event.preventDefault();
-
-            const page = this.getAttribute('data-page');
-            const url = new URL(window.location);
-
-            // Eliminar el parámetro 'page' si existe
-            url.searchParams.delete('page');
-
-            // Mantener otros parámetros
-            <?php foreach ($currentParams as $key => $value): ?>
-                // Solo agregar parámetros existentes en la URL
-                if ('<?= $key ?>' !== 'page') {
-                    url.searchParams.set('<?= $key ?>', '<?= $value ?>');
-                }
-            <?php endforeach; ?>
-
-            // Añadir el parámetro 'page' con el nuevo valor
-            url.searchParams.set('page', page);
-
-            // Actualizar la URL sin recargar la página
-            window.history.pushState({}, '', url);
-
-            // Cambiar la URL visible y pasar los parámetros al backend
-            window.location.search = url.search;
-
-            // Recargar la página para reflejar los cambios en el servidor
-            window.location.reload();
-        });
-    });
-});
-</script>
 
 </body>
 </html>
