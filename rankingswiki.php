@@ -143,7 +143,7 @@ function buildPaginationUrl($page) {
     </div>
 
     <!-- Paginación -->
-    <div class="pagination flex justify-center items-center space-x-2 mt-4">
+    <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
         <!-- Enlace a la página anterior -->
         <?php if ($currentPage > 1): ?>
             <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
