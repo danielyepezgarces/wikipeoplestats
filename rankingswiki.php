@@ -23,6 +23,7 @@ $projectGroup = isset($_GET['projectGroup']) ? $_GET['projectGroup'] : 'wiki';
 // Obtener los datos de la API
 $data = fetchData($timeFrame, $projectGroup);
 
+// Configuración de la paginación
 $resultsPerPage = 10;  // Número de resultados por página
 $totalResults = count($data);  // Número total de resultados
 $totalPages = ceil($totalResults / $resultsPerPage);  // Número total de páginas
@@ -39,7 +40,7 @@ $startIndex = ($currentPage - 1) * $resultsPerPage;
 // Obtener los resultados para la página actual
 $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 
-// Obtener los parámetros actuales sin incluir 'lang'
+// Obtener los parámetros actuales sin incluir 'lang' y 'page'
 $currentParams = $_GET;
 unset($currentParams['lang']);
 unset($currentParams['page']);
@@ -322,9 +323,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Actualizar el estado de los enlaces
             paginationLinks.forEach(paginationLink => {
-                paginationLink.classList.remove('bg-blue-500', 'text-white');
+                if (paginationLink.getAttribute('data-page') == page) {
+                    paginationLink.classList.add('bg-blue-500', 'text-white');
+                } else {
+                    paginationLink.classList.remove('bg-blue-500', 'text-white');
+                }
             });
-            this.classList.add('bg-blue-500', 'text-white');
 
             // Recargar la página para reflejar los cambios en el servidor
             window.location.reload();
@@ -332,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
 
 </body>
 </html>
