@@ -70,35 +70,6 @@ $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 <?php include 'header.php'; // Incluir el encabezado ?>
 
 <div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
-  <!-- Sidebar (1/6 del ancho en pantallas grandes) -->
-  <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
-    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Filters</h2>
-
-    <!-- Formulario para cambiar los parámetros -->
-    <form action="" method="get" class="mb-8">
-        <div class="flex space-x-4">
-            <div>
-                <label for="timeFrame" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Time Frame</label>
-                <select name="timeFrame" id="timeFrame" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
-                    <option value="1m" <?= $timeFrame === '1m' ? 'selected' : '' ?>>1 Month</option>
-                    <option value="3m" <?= $timeFrame === '3m' ? 'selected' : '' ?>>3 Months</option>
-                    <option value="6m" <?= $timeFrame === '6m' ? 'selected' : '' ?>>6 Months</option>
-                    <option value="1y" <?= $timeFrame === '1y' ? 'selected' : '' ?>>1 Year</option>
-                </select>
-            </div>
-            <div>
-                <label for="projectGroup" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Project Group</label>
-                <select name="projectGroup" id="projectGroup" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
-                    <option value="wiki" <?= $projectGroup === 'wiki' ? 'selected' : '' ?>>Wiki</option>
-                    <option value="wikidata" <?= $projectGroup === 'wikidata' ? 'selected' : '' ?>>Wikidata</option>
-                    <option value="wikimedia" <?= $projectGroup === 'wikimedia' ? 'selected' : '' ?>>Wikimedia</option>
-                </select>
-            </div>
-        </div>
-    </form>
-  </aside>
-
-  <div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
   <!-- Sidebar -->
   <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Filters</h2>
@@ -160,15 +131,18 @@ $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
     </div>
 
     <!-- Paginación -->
-    <div class="pagination text-center mt-4">
+    <div class="pagination flex justify-center items-center space-x-2 mt-4">
+        <!-- Enlace a la página anterior -->
         <?php if ($currentPage > 1): ?>
             <a href="?page=<?= $currentPage - 1 ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg">Previous</a>
         <?php endif; ?>
 
+        <!-- Enlaces a las páginas -->
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
             <a href="?page=<?= $i ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400' ?> rounded-lg"><?= $i ?></a>
         <?php endfor; ?>
 
+        <!-- Enlace a la siguiente página -->
         <?php if ($currentPage < $totalPages): ?>
             <a href="?page=<?= $currentPage + 1 ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg">Next</a>
         <?php endif; ?>
