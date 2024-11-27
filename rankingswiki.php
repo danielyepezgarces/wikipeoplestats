@@ -23,6 +23,22 @@ $projectGroup = isset($_GET['projectGroup']) ? $_GET['projectGroup'] : 'wiki';
 // Obtener los datos de la API
 $data = fetchData($timeFrame, $projectGroup);
 
+// Configuración de la paginación
+$resultsPerPage = 10;  // Número de resultados por página
+$totalResults = count($data);  // Número total de resultados
+$totalPages = ceil($totalResults / $resultsPerPage);  // Número total de páginas
+
+// Obtener la página actual desde la URL, por defecto es la página 1
+$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+
+// Asegurarse de que la página actual esté dentro del rango válido
+$currentPage = max(1, min($currentPage, $totalPages));
+
+// Calcular el índice de inicio de los resultados en la página actual
+$startIndex = ($currentPage - 1) * $resultsPerPage;
+
+// Obtener los resultados para la página actual
+$currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 ?>
 
 <!DOCTYPE html>
@@ -82,9 +98,36 @@ $data = fetchData($timeFrame, $projectGroup);
     </form>
   </aside>
 
-  <!-- Main (5/6 del ancho en pantallas grandes) -->
+  <div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
+  <!-- Sidebar -->
+  <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
+    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">Filters</h2>
+    <form action="" method="get" class="mb-8">
+        <div class="flex space-x-4">
+            <div>
+                <label for="timeFrame" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Time Frame</label>
+                <select name="timeFrame" id="timeFrame" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
+                    <option value="1m" <?= $timeFrame === '1m' ? 'selected' : '' ?>>1 Month</option>
+                    <option value="3m" <?= $timeFrame === '3m' ? 'selected' : '' ?>>3 Months</option>
+                    <option value="6m" <?= $timeFrame === '6m' ? 'selected' : '' ?>>6 Months</option>
+                    <option value="1y" <?= $timeFrame === '1y' ? 'selected' : '' ?>>1 Year</option>
+                </select>
+            </div>
+            <div>
+                <label for="projectGroup" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Project Group</label>
+                <select name="projectGroup" id="projectGroup" onchange="this.form.submit()" class="mt-1 block w-full p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg">
+                    <option value="wiki" <?= $projectGroup === 'wiki' ? 'selected' : '' ?>>Wiki</option>
+                    <option value="wikidata" <?= $projectGroup === 'wikidata' ? 'selected' : '' ?>>Wikidata</option>
+                    <option value="wikimedia" <?= $projectGroup === 'wikimedia' ? 'selected' : '' ?>>Wikimedia</option>
+                </select>
+            </div>
+        </div>
+    </form>
+  </aside>
+
+  <!-- Main -->
   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
-    <!-- Tabla donde se mostrarán los resultados -->
+    <!-- Tabla -->
     <div class="overflow-x-auto">
         <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
             <!-- Cabecera de la tabla -->
@@ -98,10 +141,10 @@ $data = fetchData($timeFrame, $projectGroup);
                 <div class="col-span-1 text-center">Total Editors</div>
             </div>
 
-            <?php if (!empty($data)) : ?>
-                <?php foreach ($data as $index => $item): ?>
+            <?php if (!empty($currentPageResults)) : ?>
+                <?php foreach ($currentPageResults as $index => $item): ?>
                     <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                        <div class="col-span-1 text-center"><?= $index + 1 ?></div>
+                        <div class="col-span-1 text-center"><?= $startIndex + $index + 1 ?></div>
                         <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
                         <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
                         <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
@@ -115,9 +158,23 @@ $data = fetchData($timeFrame, $projectGroup);
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Paginación -->
+    <div class="pagination text-center mt-4">
+        <?php if ($currentPage > 1): ?>
+            <a href="?page=<?= $currentPage - 1 ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg">Previous</a>
+        <?php endif; ?>
+
+        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?page=<?= $i ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400' ?> rounded-lg"><?= $i ?></a>
+        <?php endfor; ?>
+
+        <?php if ($currentPage < $totalPages): ?>
+            <a href="?page=<?= $currentPage + 1 ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg">Next</a>
+        <?php endif; ?>
+    </div>
   </main>
 </div>
-
 
       <!-- Footer -->
       <?php include 'footer.php'; ?>
