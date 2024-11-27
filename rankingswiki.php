@@ -43,7 +43,6 @@ $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 // Obtener los parámetros actuales sin incluir 'lang' y 'page'
 $currentParams = $_GET;
 unset($currentParams['lang']);
-unset($currentParams['page']);
 ?>
 
 <!DOCTYPE html>
