@@ -266,9 +266,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const value = this.getAttribute('data-value');
             const url = new URL(window.location);
 
-            if (value === '') {
+            // Verificar si el filtro ya está seleccionado
+            if (url.searchParams.get(key) === value) {
+                // Si está seleccionado, eliminar el parámetro
                 url.searchParams.delete(key);
             } else {
+                // Si no está seleccionado, añadir o actualizar el parámetro
                 url.searchParams.set(key, value);
             }
 
