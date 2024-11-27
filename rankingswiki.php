@@ -270,21 +270,22 @@ document.addEventListener('DOMContentLoaded', function() {
             if (url.searchParams.get(key) === value) {
                 // Si está seleccionado, eliminar el parámetro
                 url.searchParams.delete(key);
+                this.classList.remove('bg-primary-500', 'text-white');
             } else {
                 // Si no está seleccionado, añadir o actualizar el parámetro
                 url.searchParams.set(key, value);
+                // Eliminar la clase activa de otros enlaces del mismo grupo
+                filterLinks.forEach(filterLink => {
+                    if (filterLink.getAttribute('data-key') === key && filterLink !== this) {
+                        filterLink.classList.remove('bg-primary-500', 'text-white');
+                    }
+                });
+                // Añadir la clase activa al enlace seleccionado
+                this.classList.add('bg-primary-500', 'text-white');
             }
 
             window.history.pushState({}, '', url);
             window.location.search = url.search;
-
-            // Actualizar el estado de los enlaces
-            filterLinks.forEach(filterLink => {
-                if (filterLink.getAttribute('data-key') === key) {
-                    filterLink.classList.remove('bg-primary-500', 'text-white');
-                }
-            });
-            this.classList.add('bg-primary-500', 'text-white');
 
             // Recargar la página para reflejar los cambios en el servidor
             window.location.reload();
