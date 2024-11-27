@@ -96,7 +96,7 @@ $sql = "
         SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,
         COUNT(DISTINCT a.creator_username) AS totalContributions,
         MAX(a.creation_date) AS lastUpdated, -- Ahora la fecha de creación del artículo
-        pr.code AS siteCode  -- Agregar el campo 'code' de la tabla 'project'
+        pr.group AS siteCode  -- Agregar el campo 'code' de la tabla 'project'
     FROM articles a
     LEFT JOIN people p ON p.wikidata_id = a.wikidata_id
     JOIN project pr ON a.site = pr.site  -- Cambiar alias de 'project' a 'pr'
