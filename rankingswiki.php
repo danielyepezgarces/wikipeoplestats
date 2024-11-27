@@ -278,6 +278,14 @@ document.addEventListener('DOMContentLoaded', function() {
             window.history.pushState({}, '', url);
             window.location.search = url.search;
 
+            // Actualizar el estado de los enlaces
+            filterLinks.forEach(filterLink => {
+                if (filterLink.getAttribute('data-key') === key) {
+                    filterLink.classList.remove('bg-primary-500', 'text-white');
+                }
+            });
+            this.classList.add('bg-primary-500', 'text-white');
+
             // Recargar la página para reflejar los cambios en el servidor
             window.location.reload();
         });
