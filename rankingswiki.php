@@ -124,7 +124,7 @@ function buildPaginationUrl($page) {
         <ul>
             <li><a href="<?= buildUrlWithParams('projectGroup', 'wiki') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wiki' ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
             <li><a href="<?= buildUrlWithParams('projectGroup', 'wikiquote') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikiquote' ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
-            <li><a href="<?= buildUrlWithParams('projectGroup', 'wikimedia') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikimedia' ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
+            <li><a href="<?= buildUrlWithParams('projectGroup', 'wikisource') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikisource' ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
         </ul>
     </div>
 </aside>
