@@ -10,8 +10,10 @@ $memcache->addServer('localhost', 11211); // Cambia según tu configuración
 // Medir tiempo de inicio
 $startTime = microtime(true);
 
-// Obtener la acción
+// Obtener la acción, el filtro de tiempo y el filtro de proyecto
 $action = isset($_GET['action']) ? $_GET['action'] : '';
+$timeFrame = isset($_GET['timeFrame']) ? $_GET['timeFrame'] : 'alltime'; // Valor por defecto es 'alltime'
+$projectGroup = isset($_GET['projectGroup']) ? $_GET['projectGroup'] : ''; // Filtro por proyecto
 
 // Definir uso de caché
 $useCache = true; // Cambia esto a false si no quieres usar caché
@@ -21,8 +23,8 @@ if (isset($_GET['useCache'])) {
     $useCache = filter_var($_GET['useCache'], FILTER_VALIDATE_BOOLEAN);
 }
 
-// Cambiar la clave de caché a 'rankingwiki'
-$cacheKey = "rankingwiki"; // Nueva clave de caché
+// Cambiar la clave de caché a 'rankingwiki' con filtros
+$cacheKey = "rankingwiki_" . $timeFrame . "_" . $projectGroup; // Nueva clave de caché con filtros de tiempo y proyecto
 
 // Purgar caché si se solicita
 if ($action === 'purge') {
@@ -47,7 +49,40 @@ if ($cachedResponse) {
     exit;
 }
 
-// Consulta SQL general (sin filtrar por proyecto específico)
+// Filtrar según el marco de tiempo
+$timeCondition = "";
+$currentDate = date('Y-m-d H:i:s'); // Fecha actual
+
+switch ($timeFrame) {
+    case '7d':
+        $timeCondition = "AND a.creation_date >= DATE_SUB('$currentDate', INTERVAL 7 DAY)";
+        break;
+    case '1m':
+        $timeCondition = "AND a.creation_date >= DATE_SUB('$currentDate', INTERVAL 1 MONTH)";
+        break;
+    case '3m':
+        $timeCondition = "AND a.creation_date >= DATE_SUB('$currentDate', INTERVAL 3 MONTH)";
+        break;
+    case '6m':
+        $timeCondition = "AND a.creation_date >= DATE_SUB('$currentDate', INTERVAL 6 MONTH)";
+        break;
+    case '1y':
+        $timeCondition = "AND a.creation_date >= DATE_SUB('$currentDate', INTERVAL 1 YEAR)";
+        break;
+    case 'alltime':
+    default:
+        // No filtro de tiempo para todo el tiempo
+        $timeCondition = "";
+        break;
+}
+
+// Filtrar por el grupo del proyecto (si se especifica)
+$projectCondition = "";
+if ($projectGroup) {
+    $projectCondition = "AND pr.group = '" . $conn->real_escape_string($projectGroup) . "'"; // Evitar inyecciones SQL
+}
+
+// Consulta SQL general (con filtro de tiempo y grupo de proyecto)
 $sql = "
     SELECT 
         a.site AS site,
@@ -56,11 +91,14 @@ $sql = "
         SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
         SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders,
         COUNT(DISTINCT a.creator_username) AS totalContributions,
-        MAX(pr.last_updated) AS lastUpdated,
+        MAX(a.creation_date) AS lastUpdated, -- Ahora la fecha de creación del artículo
         pr.code AS siteCode  -- Agregar el campo 'code' de la tabla 'project'
     FROM articles a
     LEFT JOIN people p ON p.wikidata_id = a.wikidata_id
     JOIN project pr ON a.site = pr.site  -- Cambiar alias de 'project' a 'pr'
+    WHERE 1=1
+    $timeCondition
+    $projectCondition
     GROUP BY a.site
     ORDER BY totalContributions DESC
 ";
@@ -70,7 +108,7 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     $response = [];
     while ($data = $result->fetch_assoc()) {
-        $currentLastUpdated = $data['lastUpdated']; // Obtener el último actualizado
+        $currentLastUpdated = $data['lastUpdated']; // Obtener el último creado
 
         // Agregar cada sitio al ranking
         $response[] = [
