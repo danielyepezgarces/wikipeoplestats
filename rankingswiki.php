@@ -97,12 +97,12 @@ $data = fetchData($timeFrame, $projectGroup);
                 <?php foreach ($data as $index => $item): ?>
                     <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
                         <div class="col-span-1 text-center"><?= $index + 1 ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['project']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
                         <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
                         <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
                         <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
                         <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalEditors']) ?></div>
+                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalContributions']) ?></div>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
