@@ -334,9 +334,8 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.reload();
         });
     });
-});
+}); 
 </script>
-
 
 </body>
 </html>
