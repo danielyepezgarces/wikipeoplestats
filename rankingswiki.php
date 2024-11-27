@@ -117,7 +117,6 @@ function buildPaginationUrl($page) {
     </div>
 </aside>
 
-
   <!-- Main -->
   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Tabla -->
@@ -277,11 +276,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             window.history.pushState({}, '', url);
             window.location.search = url.search;
+
+            // Actualizar el estado de los enlaces
+            filterLinks.forEach(filterLink => {
+                if (filterLink.getAttribute('data-key') === key) {
+                    filterLink.classList.remove('bg-primary-500', 'text-white');
+                }
+            });
+            this.classList.add('bg-primary-500', 'text-white');
         });
     });
 });
 </script>
-
 
 </body>
 </html>
