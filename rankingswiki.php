@@ -39,17 +39,10 @@ $startIndex = ($currentPage - 1) * $resultsPerPage;
 // Obtener los resultados para la página actual
 $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 
-// Función para construir los enlaces de paginación con los parámetros de la URL
-function buildPaginationUrl($page) {
-    $url = $_SERVER['PHP_SELF'] . "?page=" . $page;
-    // Agregar otros parámetros de la URL, excluyendo 'lang'
-    foreach ($_GET as $key => $value) {
-        if ($key !== 'page' && $key !== 'lang') {
-            $url .= "&$key=$value";
-        }
-    }
-    return $url;
-}
+// Obtener los parámetros actuales sin incluir 'lang'
+$currentParams = $_GET;
+unset($currentParams['lang']);
+unset($currentParams['page']);
 ?>
 
 <!DOCTYPE html>
@@ -155,10 +148,12 @@ function buildPaginationUrl($page) {
         </div>
     </div>
 
-    <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
+
+    <!-- Paginación -->
+<div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
-        <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
+        <a href="#" data-page="<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
     <?php endif; ?>
@@ -177,12 +172,12 @@ function buildPaginationUrl($page) {
     // Mostrar los botones de las páginas
     for ($i = $startPage; $i <= $endPage; $i++):
     ?>
-        <a href="<?= buildPaginationUrl($i) ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
+        <a href="#" data-page="<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
     <?php endfor; ?>
 
     <!-- Enlace a la siguiente página -->
     <?php if ($currentPage < $totalPages): ?>
-        <a href="<?= buildPaginationUrl($currentPage + 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
+        <a href="#" data-page="<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
     <?php endif; ?>
@@ -277,6 +272,33 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 url.searchParams.set(key, value);
             }
+
+            window.history.pushState({}, '', url);
+            window.location.search = url.search;
+
+            // Recargar la página para reflejar los cambios en el servidor
+            window.location.reload();
+        });
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paginationLinks = document.querySelectorAll('.pagination-link');
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const page = this.getAttribute('data-page');
+            const url = new URL(window.location);
+
+            // Actualizar el parámetro de página
+            url.searchParams.set('page', page);
+
+            // Mantener otros parámetros
+            <?php foreach ($currentParams as $key => $value): ?>
+                url.searchParams.set('<?= $key ?>', '<?= $value ?>');
+            <?php endforeach; ?>
 
             window.history.pushState({}, '', url);
             window.location.search = url.search;
