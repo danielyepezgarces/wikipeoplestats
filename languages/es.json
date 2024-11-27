@@ -53,5 +53,14 @@
     "trusted_by_wikimedia_chapters": "Con la confianza de los capítulos de Wikimedia",
     "wikimedia_chapters_trust_tool": "Los capítulos de Wikimedia en esta lista confían y utilizan la herramienta",
     "comparison_wiki_main": "Comparación de género: %s vs. %s",
-    "comparison_wiki_description": "Explore cómo están representados los hombres y las mujeres en ambas wikis."
+    "comparison_wiki_description": "Explore cómo están representados los hombres y las mujeres en ambas wikis.",
+    "filters": "Filtros",
+    "filters_bydate": "Por fecha",
+    "filters_byproject": "Por proyecto",
+    "filters_last_7d": "Ultimos 7d",
+    "filters_last_1m": "Ultimos 1m",
+    "filters_last_3m": "Ultimos 3m",
+    "filters_last_6m": "Ultimos 6m",
+    "filters_last_1y": "Ultimos 1y",
+    "filters_alltime": "Todo el tiempo"
   }
