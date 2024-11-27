@@ -88,28 +88,28 @@ function buildPaginationUrl($page) {
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6"><?php echo __('filters'); ?></h2>
 
     <?php
-    // Obtener los parámetros actuales sin incluir 'lang'
-    $currentParams = $_GET;
+// Obtener los parámetros actuales sin incluir 'lang'
+$currentParams = $_GET;
 
-    // Función para generar enlaces con parámetros actualizados
-    function buildUrl($newParams) {
-        global $currentParams;
+// Función para generar enlaces con parámetros actualizados
+function buildUrl($newParams) {
+    global $currentParams;
 
-        // Excluir 'lang' de los parámetros
-        $filteredParams = array_filter(
-            $currentParams,
-            function ($key) {
-                return $key !== 'lang'; // Excluir 'lang'
-            },
-            ARRAY_FILTER_USE_KEY
-        );
+    // Excluir 'lang' de los parámetros actuales
+    $filteredParams = array_filter(
+        $currentParams,
+        function ($key) {
+            return $key !== 'lang'; // Excluir 'lang'
+        },
+        ARRAY_FILTER_USE_KEY
+    );
 
-        // Combinar los parámetros filtrados con los nuevos
-        $params = array_merge($filteredParams, $newParams);
+    // Sobrescribir los parámetros actuales con los nuevos
+    $params = array_merge($filteredParams, $newParams);
 
-        // Construir la URL codificada
-        return '?' . htmlspecialchars(http_build_query($params));
-    }
+    // Construir la URL codificada
+    return '?' . htmlspecialchars(http_build_query($params));
+}
     ?>
 
     <!-- Sección By Date -->
