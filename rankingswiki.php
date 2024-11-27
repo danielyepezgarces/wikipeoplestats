@@ -23,26 +23,31 @@ $projectGroup = isset($_GET['group']) ? $_GET['group'] : 'wiki';
 // Obtener los datos de la API
 $data = fetchData($timeFrame, $projectGroup);
 
-// Configuración de la paginación
-$resultsPerPage = 10;  // Número de resultados por página
-$totalResults = count($data);  // Número total de resultados
-$totalPages = ceil($totalResults / $resultsPerPage);  // Número total de páginas
-
-// Obtener la página actual desde la URL, por defecto es la página 1
+// Obtener el parámetro 'page' desde la URL
 $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 
-// Asegurarse de que la página actual esté dentro del rango válido
-$currentPage = max(1, min($currentPage, $totalPages));
+// Definir el total de páginas
+$totalPages = 18; // Este valor debe ser calculado según el total de resultados
 
-// Calcular el índice de inicio de los resultados en la página actual
+// Número de resultados por página
+$resultsPerPage = 10;
+
+// Calcular el índice de inicio para la paginación
 $startIndex = ($currentPage - 1) * $resultsPerPage;
 
-// Obtener los resultados para la página actual
-$currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
+// Asegurarse de que el índice de la página no sea mayor que el total de páginas
+if ($currentPage > $totalPages) {
+    $currentPage = $totalPages;
+    $startIndex = ($currentPage - 1) * $resultsPerPage;
+}
 
-unset($currentParams['lang']);
+// Imprimir la página actual, total de páginas e índice de inicio
+echo "Page parameter from URL: <br>";
+echo "Current Page: $currentPage <br>";
+echo "Total Pages: $totalPages <br>";
+echo "Start Index: $startIndex <br>";
 
-// Función para generar el enlace de paginación manteniendo los parámetros actuales
+// Función para generar los enlaces de paginación con los parámetros actuales
 function generatePaginationLink($page) {
     // Obtener todos los parámetros actuales de la URL
     $params = $_GET;
@@ -53,14 +58,6 @@ function generatePaginationLink($page) {
     // Crear la URL con los parámetros actuales (incluyendo 'page')
     return '?' . http_build_query($params);
 }
-
-
-// Depuración
-echo "Page parameter from URL: " . htmlspecialchars($_GET['page']) . "<br>";
-echo "Current Page: $currentPage<br>";
-echo "Total Pages: $totalPages<br>";
-echo "Start Index: $startIndex<br>";
-echo "Current Page Results: " . print_r($currentPageResults, true) . "<br>";
 
 ?>
 
@@ -171,7 +168,7 @@ echo "Current Page Results: " . print_r($currentPageResults, true) . "<br>";
     <?php if ($currentPage > 1): ?>
         <a href="<?= generatePaginationLink($currentPage - 1) ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
     <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
+        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Previous</span>
     <?php endif; ?>
 
     <!-- Enlaces a las páginas (máximo 10 páginas) -->
@@ -195,7 +192,7 @@ echo "Current Page Results: " . print_r($currentPageResults, true) . "<br>";
     <?php if ($currentPage < $totalPages): ?>
         <a href="<?= generatePaginationLink($currentPage + 1) ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
     <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
+        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Next</span>
     <?php endif; ?>
 </div>
 
