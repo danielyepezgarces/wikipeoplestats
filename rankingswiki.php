@@ -267,7 +267,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const url = new URL(window.location);
 
             // Verificar si el filtro ya está seleccionado
-            if (url.searchParams.get(key) === value) {
+            const isSelected = url.searchParams.get(key) === value;
+
+            if (isSelected) {
                 // Si está seleccionado, eliminar el parámetro
                 url.searchParams.delete(key);
                 this.classList.remove('bg-primary-500', 'text-white');
@@ -276,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 url.searchParams.set(key, value);
                 // Eliminar la clase activa de otros enlaces del mismo grupo
                 filterLinks.forEach(filterLink => {
-                    if (filterLink.getAttribute('data-key') === key && filterLink !== this) {
+                    if (filterLink.getAttribute('data-key') === key) {
                         filterLink.classList.remove('bg-primary-500', 'text-white');
                     }
                 });
