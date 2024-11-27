@@ -91,30 +91,18 @@ function buildPaginationUrl($page) {
     // Obtener los parámetros actuales sin incluir 'lang'
     $currentParams = $_GET;
     unset($currentParams['lang']);
-
-    // Función para generar enlaces con parámetros actualizados
-    function updateQueryParams($params, $key, $value) {
-        $params[$key] = $value;
-        return '?' . http_build_query($params);
-    }
-
-    // Función para mantener los parámetros actuales y añadir o actualizar uno nuevo
-    function buildUrlWithParams($key, $value) {
-        global $currentParams;
-        return updateQueryParams($currentParams, $key, $value);
-    }
     ?>
 
     <!-- Sección By Date -->
     <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_bydate'); ?></h3>
         <ul>
-            <li><a href="<?= buildUrlWithParams('timeFrame', '7d') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '7d' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
-            <li><a href="<?= buildUrlWithParams('timeFrame', '1m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
-            <li><a href="<?= buildUrlWithParams('timeFrame', '3m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '3m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
-            <li><a href="<?= buildUrlWithParams('timeFrame', '6m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '6m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
-            <li><a href="<?= buildUrlWithParams('timeFrame', '1y') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1y' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
-            <li><a href="<?= buildUrlWithParams('timeFrame', 'all') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == 'all' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
+            <li><a href="#" data-key="timeFrame" data-value="7d" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '7d' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
+            <li><a href="#" data-key="timeFrame" data-value="1m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
+            <li><a href="#" data-key="timeFrame" data-value="3m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '3m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
+            <li><a href="#" data-key="timeFrame" data-value="6m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '6m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
+            <li><a href="#" data-key="timeFrame" data-value="1y" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1y' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
+            <li><a href="#" data-key="timeFrame" data-value="all" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == 'all' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
         </ul>
     </div>
 
@@ -122,13 +110,12 @@ function buildPaginationUrl($page) {
     <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_byproject'); ?></h3>
         <ul>
-            <li><a href="<?= buildUrlWithParams('projectGroup', 'wiki') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wiki' ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
-            <li><a href="<?= buildUrlWithParams('projectGroup', 'wikiquote') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikiquote' ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
-            <li><a href="<?= buildUrlWithParams('projectGroup', 'wikisource') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikisource' ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
+            <li><a href="#" data-key="projectGroup" data-value="wiki" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wiki' ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
+            <li><a href="#" data-key="projectGroup" data-value="wikiquote" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikiquote' ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
+            <li><a href="#" data-key="projectGroup" data-value="wikisource" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikisource' ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
         </ul>
     </div>
 </aside>
-
 
 
   <!-- Main -->
@@ -270,6 +257,27 @@ function buildPaginationUrl($page) {
         odometer.innerHTML = odometer.getAttribute('data-odometer-final');
     });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterLinks = document.querySelectorAll('.filter-link');
+    filterLinks.forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const key = this.getAttribute('data-key');
+            const value = this.getAttribute('data-value');
+            const url = new URL(window.location);
+
+            url.searchParams.set(key, value);
+
+            window.history.pushState({}, '', url);
+            window.location.search = url.search;
+        });
+    });
+});
+</script>
+
 
 </body>
 </html>
