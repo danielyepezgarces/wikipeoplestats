@@ -97,18 +97,24 @@ function buildPaginationUrl($page) {
         $params[$key] = $value;
         return '?' . http_build_query($params);
     }
+
+    // Función para mantener los parámetros actuales y añadir o actualizar uno nuevo
+    function buildUrlWithParams($key, $value) {
+        global $currentParams;
+        return updateQueryParams($currentParams, $key, $value);
+    }
     ?>
 
     <!-- Sección By Date -->
     <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_bydate'); ?></h3>
         <ul>
-            <li><a href="<?= updateQueryParams($currentParams, 'timeFrame', '7d') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '7d' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
-            <li><a href="<?= updateQueryParams($currentParams, 'timeFrame', '1m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
-            <li><a href="<?= updateQueryParams($currentParams, 'timeFrame', '3m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '3m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
-            <li><a href="<?= updateQueryParams($currentParams, 'timeFrame', '6m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '6m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
-            <li><a href="<?= updateQueryParams($currentParams, 'timeFrame', '1y') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1y' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
-            <li><a href="<?= updateQueryParams($currentParams, 'timeFrame', 'all') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == 'all' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
+            <li><a href="<?= buildUrlWithParams('timeFrame', '7d') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '7d' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
+            <li><a href="<?= buildUrlWithParams('timeFrame', '1m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
+            <li><a href="<?= buildUrlWithParams('timeFrame', '3m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '3m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
+            <li><a href="<?= buildUrlWithParams('timeFrame', '6m') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '6m' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
+            <li><a href="<?= buildUrlWithParams('timeFrame', '1y') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == '1y' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
+            <li><a href="<?= buildUrlWithParams('timeFrame', 'all') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] ?? '') == 'all' ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
         </ul>
     </div>
 
@@ -116,12 +122,13 @@ function buildPaginationUrl($page) {
     <div class="mb-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_byproject'); ?></h3>
         <ul>
-            <li><a href="<?= updateQueryParams($currentParams, 'projectGroup', 'wiki') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wiki' ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
-            <li><a href="<?= updateQueryParams($currentParams, 'projectGroup', 'wikiquote') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikiquote' ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
-            <li><a href="<?= updateQueryParams($currentParams, 'projectGroup', 'wikimedia') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikimedia' ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
+            <li><a href="<?= buildUrlWithParams('projectGroup', 'wiki') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wiki' ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
+            <li><a href="<?= buildUrlWithParams('projectGroup', 'wikiquote') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikiquote' ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
+            <li><a href="<?= buildUrlWithParams('projectGroup', 'wikimedia') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] ?? '') == 'wikimedia' ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
         </ul>
     </div>
 </aside>
+
 
   <!-- Main -->
   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
