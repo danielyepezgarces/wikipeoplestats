@@ -3,10 +3,10 @@ include 'languages.php';
 
 function fetchData($timeFrame, $projectGroup) {
   $url = "https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=$timeFrame&projectGroup=$projectGroup";
-  
+
   // Usar file_get_contents o cURL para obtener los datos de la API
   $response = file_get_contents($url);
-  
+
   // Comprobar si la respuesta es válida
   if ($response === false) {
       return [];
@@ -156,29 +156,7 @@ function buildPaginationUrl($page) {
         </div>
     </div>
 
-    <?php
-// Función para construir la URL de paginación
-function buildPaginationUrl($page) {
-    global $currentParams;
-
-    // Excluir 'lang' de los parámetros actuales
-    $filteredParams = array_filter(
-        $currentParams,
-        function ($key) {
-            return $key !== 'lang'; // Excluir 'lang'
-        },
-        ARRAY_FILTER_USE_KEY
-    );
-
-    // Añadir el parámetro de página
-    $filteredParams['page'] = $page;
-
-    // Construir la URL codificada
-    return '?' . htmlspecialchars(http_build_query($filteredParams));
-}
-?>
-
-<!-- Paginación -->
+    <!-- Paginación -->
 <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
