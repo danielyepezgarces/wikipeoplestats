@@ -42,6 +42,19 @@ $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 
 unset($currentParams['lang']);
 
+// Función para generar el enlace de paginación manteniendo los parámetros actuales
+function generatePaginationLink($page) {
+    // Obtener todos los parámetros actuales de la URL
+    $params = $_GET;
+
+    // Modificar el parámetro 'page' con la nueva página
+    $params['page'] = $page;
+
+    // Crear la URL con los parámetros actuales (incluyendo 'page')
+    return '?' . http_build_query($params);
+}
+
+
 // Depuración
 echo "Page parameter from URL: " . htmlspecialchars($_GET['page']) . "<br>";
 echo "Current Page: $currentPage<br>";
@@ -156,7 +169,7 @@ echo "Current Page Results: " . print_r($currentPageResults, true) . "<br>";
         <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
     <!-- Enlace a la página anterior -->
     <?php if ($currentPage > 1): ?>
-        <a href="?page=<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
+        <a href="<?= generatePaginationLink($currentPage - 1) ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
     <?php endif; ?>
@@ -175,16 +188,17 @@ echo "Current Page Results: " . print_r($currentPageResults, true) . "<br>";
     // Mostrar los botones de las páginas
     for ($i = $startPage; $i <= $endPage; $i++):
     ?>
-        <a href="?page=<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
+        <a href="<?= generatePaginationLink($i) ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
     <?php endfor; ?>
 
     <!-- Enlace a la siguiente página -->
     <?php if ($currentPage < $totalPages): ?>
-        <a href="?page=<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
+        <a href="<?= generatePaginationLink($currentPage + 1) ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
     <?php else: ?>
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
     <?php endif; ?>
 </div>
+
 
 
 
