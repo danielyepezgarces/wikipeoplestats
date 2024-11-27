@@ -147,12 +147,12 @@ function buildUrl($newParams) {
             <!-- Cabecera de la tabla -->
             <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
                 <div class="col-span-1 text-center">#</div>
-                <div class="col-span-1 text-center">Project</div>
-                <div class="col-span-1 text-center">Total People</div>
-                <div class="col-span-1 text-center">Total Women</div>
-                <div class="col-span-1 text-center">Total Men</div>
-                <div class="col-span-1 text-center">Other Genders</div>
-                <div class="col-span-1 text-center">Total Editors</div>
+                <div class="col-span-1 text-center"><?php echo __('project'); ?></div>
+                <div class="col-span-1 text-center"><?php echo __('total_people'); ?></div>
+                <div class="col-span-1 text-center"><?php echo __('total_women'); ?></div>
+                <div class="col-span-1 text-center"><?php echo __('total_men'); ?></div>
+                <div class="col-span-1 text-center"><?php echo __('other_genders'); ?></div>
+                <div class="col-span-1 text-center"><?php echo __('total_editors'); ?></div>
             </div>
 
             <?php if (!empty($currentPageResults)) : ?>
@@ -179,7 +179,7 @@ function buildUrl($newParams) {
     <?php if ($currentPage > 1): ?>
         <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
     <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Previous</span>
+        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
     <?php endif; ?>
 
     <!-- Enlaces a las páginas (máximo 10 páginas) -->
@@ -203,7 +203,7 @@ function buildUrl($newParams) {
     <?php if ($currentPage < $totalPages): ?>
         <a href="<?= buildPaginationUrl($currentPage + 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
     <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Next</span>
+        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
     <?php endif; ?>
 </div>
 

@@ -44,6 +44,7 @@
     "welcome_user_message": "%s • %s",
     "timeline_graph": "Timeline",
     "quantity_graph": "Quantity",
+    "project": "Project",
     "total_graph": "Total",
     "total_people": "Total People",
     "total_women": "Total Women",

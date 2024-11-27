@@ -44,6 +44,7 @@
     "welcome_user_message": "%s • %s",
     "timeline_graph": "Línea de tiempo",
     "quantity_graph": "Cantidad",
+    "project": "Proyecto",
     "total_graph": "Total",
     "total_people": "Total de personas",
     "total_women": "Total de mujeres",
@@ -62,5 +63,7 @@
     "filters_last_3m": "Ultimos 3m",
     "filters_last_6m": "Ultimos 6m",
     "filters_last_1y": "Ultimos 1y",
-    "filters_alltime": "Todo el tiempo"
+    "filters_alltime": "Todo el tiempo",
+    "pagination_previous": "Previous",
+    "pagination_next": "Next"
   }
