@@ -2,18 +2,18 @@
 include 'languages.php';
 
 function fetchData($timeFrame, $projectGroup) {
-  $url = "https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=$timeFrame&projectGroup=$projectGroup";
+    $url = "https://wikipeoplestats.wmcloud.org/api/rankings/wiki.php?timeFrame=$timeFrame&projectGroup=$projectGroup";
 
-  // Usar file_get_contents o cURL para obtener los datos de la API
-  $response = file_get_contents($url);
+    // Usar file_get_contents o cURL para obtener los datos de la API
+    $response = file_get_contents($url);
 
-  // Comprobar si la respuesta es válida
-  if ($response === false) {
-      return [];
-  }
+    // Comprobar si la respuesta es válida
+    if ($response === false) {
+        return [];
+    }
 
-  // Decodificar los datos JSON
-  return json_decode($response, true);
+    // Decodificar los datos JSON
+    return json_decode($response, true);
 }
 
 // Obtener los parámetros de la URL
@@ -48,7 +48,7 @@ unset($currentParams['page']);
 
 <!DOCTYPE html>
 <html lang="<?php echo htmlspecialchars($currentLang['code']); ?>" dir="<?php echo htmlspecialchars($currentLang['text_direction']); ?>">
-    <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('sitename'); ?></title>
@@ -71,124 +71,119 @@ unset($currentParams['page']);
 </head>
 <body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-
 <?php include 'header.php'; // Incluir el encabezado ?>
 
 <div class="w-4/5 mx-auto grid grid-cols-1 lg:grid-cols-6 gap-4 mt-8">
-  <!-- Sidebar -->
-  <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
-    <!-- Título de la sección -->
-    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6"><?php echo __('filters'); ?></h2>
+    <!-- Sidebar -->
+    <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
+        <!-- Título de la sección -->
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6"><?php echo __('filters'); ?></h2>
 
-    <?php
-    // Obtener los parámetros actuales sin incluir 'lang'
-    $currentParams = $_GET;
-    unset($currentParams['lang']);
+        <?php
+        // Obtener los parámetros actuales sin incluir 'lang'
+        $currentParams = $_GET;
+        unset($currentParams['lang']);
 
-    // Función para verificar si un parámetro está activo
-    function isActive($key, $value) {
-        return isset($_GET[$key]) && $_GET[$key] === $value;
-    }
-    ?>
+        // Función para verificar si un parámetro está activo
+        function isActive($key, $value) {
+            return isset($_GET[$key]) && $_GET[$key] === $value;
+        }
+        ?>
 
-    <!-- Sección By Date -->
-    <div class="mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_bydate'); ?></h3>
-        <ul>
-            <li><a href="#" data-key="interval" data-value="7d" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '7d') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
-            <li><a href="#" data-key="interval" data-value="1m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '1m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
-            <li><a href="#" data-key="interval" data-value="3m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '3m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
-            <li><a href="#" data-key="interval" data-value="6m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '6m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
-            <li><a href="#" data-key="interval" data-value="1y" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '1y') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
-            <li><a href="#" data-key="interval" data-value="" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= !isset($_GET['interval']) ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
-        </ul>
-    </div>
+        <!-- Sección By Date -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_bydate'); ?></h3>
+            <ul>
+                <li><a href="#" data-key="interval" data-value="7d" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '7d') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
+                <li><a href="#" data-key="interval" data-value="1m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '1m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
+                <li><a href="#" data-key="interval" data-value="3m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '3m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
+                <li><a href="#" data-key="interval" data-value="6m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '6m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
+                <li><a href="#" data-key="interval" data-value="1y" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '1y') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
+                <li><a href="#" data-key="interval" data-value="" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= !isset($_GET['interval']) ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
+            </ul>
+        </div>
 
-    <!-- Sección By Project -->
-    <div class="mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_byproject'); ?></h3>
-        <ul>
-            <li><a href="#" data-key="group" data-value="wiki" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wiki') ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
-            <li><a href="#" data-key="group" data-value="wikiquote" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wikiquote') ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
-            <li><a href="#" data-key="group" data-value="wikisource" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wikisource') ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
-        </ul>
-    </div>
-</aside>
+        <!-- Sección By Project -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_byproject'); ?></h3>
+            <ul>
+                <li><a href="#" data-key="group" data-value="wiki" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wiki') ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
+                <li><a href="#" data-key="group" data-value="wikiquote" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wikiquote') ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
+                <li><a href="#" data-key="group" data-value="wikisource" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wikisource') ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
+            </ul>
+        </div>
+    </aside>
 
-  <!-- Main -->
-  <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
-    <!-- Tabla -->
-    <div class="overflow-x-auto">
-        <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            <!-- Cabecera de la tabla -->
-            <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                <div class="col-span-1 text-center">#</div>
-                <div class="col-span-1 text-center"><?php echo __('project'); ?></div>
-                <div class="col-span-1 text-center"><?php echo __('total_people'); ?></div>
-                <div class="col-span-1 text-center"><?php echo __('total_women'); ?></div>
-                <div class="col-span-1 text-center"><?php echo __('total_men'); ?></div>
-                <div class="col-span-1 text-center"><?php echo __('other_genders'); ?></div>
-                <div class="col-span-1 text-center"><?php echo __('total_editors'); ?></div>
+    <!-- Main -->
+    <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
+        <!-- Tabla -->
+        <div class="overflow-x-auto">
+            <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <!-- Cabecera de la tabla -->
+                <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                    <div class="col-span-1 text-center">#</div>
+                    <div class="col-span-1 text-center"><?php echo __('project'); ?></div>
+                    <div class="col-span-1 text-center"><?php echo __('total_people'); ?></div>
+                    <div class="col-span-1 text-center"><?php echo __('total_women'); ?></div>
+                    <div class="col-span-1 text-center"><?php echo __('total_men'); ?></div>
+                    <div class="col-span-1 text-center"><?php echo __('other_genders'); ?></div>
+                    <div class="col-span-1 text-center"><?php echo __('total_editors'); ?></div>
+                </div>
+
+                <?php if (!empty($currentPageResults)): ?>
+                    <?php foreach ($currentPageResults as $index => $item): ?>
+                        <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+                            <div class="col-span-1 text-center"><?= $startIndex + $index + 1 ?></div>
+                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
+                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
+                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
+                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
+                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
+                            <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalContributions']) ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-span-7 text-center text-gray-500">No data available</div>
+                <?php endif; ?>
             </div>
+        </div>
 
-            <?php if (!empty($currentPageResults)) : ?>
-                <?php foreach ($currentPageResults as $index => $item): ?>
-                    <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                        <div class="col-span-1 text-center"><?= $startIndex + $index + 1 ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalContributions']) ?></div>
-                    </div>
-                <?php endforeach; ?>
+        <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
+            <!-- Enlace a la página anterior -->
+            <?php if ($currentPage > 1): ?>
+                <a href="#" data-page="<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
             <?php else: ?>
-                <div class="col-span-7 text-center text-gray-500">No data available</div>
+                <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
+            <?php endif; ?>
+
+            <!-- Enlaces a las páginas (máximo 10 páginas) -->
+            <?php
+            $maxButtons = 10;
+            $startPage = max(1, $currentPage - floor($maxButtons / 2));  // Rango de inicio
+            $endPage = min($totalPages, $startPage + $maxButtons - 1); // Rango de fin
+
+            // Si el rango de fin es menor que el total de páginas, ajustar el rango de inicio
+            if ($endPage - $startPage + 1 < $maxButtons) {
+                $startPage = max(1, $endPage - $maxButtons + 1);
+            }
+
+            // Mostrar los botones de las páginas
+            for ($i = $startPage; $i <= $endPage; $i++):
+            ?>
+                <a href="#" data-page="<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
+            <?php endfor; ?>
+
+            <!-- Enlace a la siguiente página -->
+            <?php if ($currentPage < $totalPages): ?>
+                <a href="#" data-page="<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
+            <?php else: ?>
+                <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
             <?php endif; ?>
         </div>
-    </div>
-
-
-    <div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
-    <!-- Enlace a la página anterior -->
-    <?php if ($currentPage > 1): ?>
-        <a href="#" data-page="<?= $currentPage - 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
-    <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_previous'); ?></span>
-    <?php endif; ?>
-
-    <!-- Enlaces a las páginas (máximo 10 páginas) -->
-    <?php
-    $maxButtons = 10;
-    $startPage = max(1, $currentPage - floor($maxButtons / 2));  // Rango de inicio
-    $endPage = min($totalPages, $startPage + $maxButtons - 1); // Rango de fin
-
-    // Si el rango de fin es menor que el total de páginas, ajustar el rango de inicio
-    if ($endPage - $startPage + 1 < $maxButtons) {
-        $startPage = max(1, $endPage - $maxButtons + 1);
-    }
-
-    // Mostrar los botones de las páginas
-    for ($i = $startPage; $i <= $endPage; $i++):
-    ?>
-        <a href="#" data-page="<?= $i ?>" class="pagination-link px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
-    <?php endfor; ?>
-
-    <!-- Enlace a la siguiente página -->
-    <?php if ($currentPage < $totalPages): ?>
-        <a href="#" data-page="<?= $currentPage + 1 ?>" class="pagination-link px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
-    <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed"><?php echo __('pagination_next'); ?></span>
-    <?php endif; ?>
+    </main>
 </div>
 
-  </main>
-</div>
-
-      <!-- Footer -->
-      <?php include 'footer.php'; ?>
-
+<?php include 'footer.php'; ?>
 
 <!-- Toast Container -->
 <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg hidden dark:bg-green-600">
@@ -196,60 +191,47 @@ unset($currentParams['page']);
     <button onclick="hideToast()" class="ml-2 text-white font-bold">&times;</button>
 </div>
 
-    <!-- Language Selector Popup -->
-    <div id="language-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col">
-            <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('select_language'); ?></h2>
-            <div class="overflow-y-auto flex-grow">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <?php foreach ($languages as $lang): ?>
-                        <button onclick="changeLanguage('<?php echo $lang['code']; ?>')" class="flex items-center space-x-2 px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-800 dark:text-gray-200">
-                            <span class="text-2xl"><?php echo $lang['flag']; ?></span>
-                            <span><?php echo $lang['name']; ?></span>
-                        </button>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Language Selector Popup -->
+<?php include 'languageselector.php'; ?>
 
-    <script>
-        function changeLanguage(lang) {
-           window.location.href = '/' + lang + '/';
-        }
 
-        function toggleLanguagePopup() {
-            const popup = document.getElementById('language-popup');
-            popup.classList.toggle('hidden');
-        }
-
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark'); // Cambiar a <html>
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
-
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        }
-
-        // Check for saved theme preference or default to dark mode
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        if (savedTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        }
-
-        // Close language popup when clicking outside
-        window.addEventListener('click', function(e) {
-            const popup = document.getElementById('language-popup');
-            if (!popup.contains(e.target) && !e.target.closest('button[onclick="toggleLanguagePopup()"]')) {
-                popup.classList.add('hidden');
-            }
-        });
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer/0.4.6/odometer.min.js"></script>
 <script>
-    // Inicializa los odómetros
+    function changeLanguage(lang) {
+        window.location.href = '/' + lang + '/';
+    }
+
+    function toggleLanguagePopup() {
+        const popup = document.getElementById('language-popup');
+        popup.classList.toggle('hidden');
+    }
+
+    function toggleTheme() {
+        document.documentElement.classList.toggle('dark'); // Cambiar a <html>
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    function toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenu.classList.toggle('hidden');
+    }
+
+    // Check for saved theme preference or default to dark mode
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+    }
+
+    // Close language popup when clicking outside
+    window.addEventListener('click', function(e) {
+        const popup = document.getElementById('language-popup');
+        if (!popup.contains(e.target) && !e.target.closest('button[onclick="toggleLanguagePopup()"]')) {
+            popup.classList.add('hidden');
+        }
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/odometer/0.4.6/odometer.min.js"></script>
+<script>
+    // Inicializar los odómetros
     document.querySelectorAll('.odometer').forEach(function (odometer) {
         odometer.innerHTML = odometer.getAttribute('data-odometer-final');
     });
@@ -299,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const paginationLinks = document.querySelectorAll('.pagination-link');
-    
+
     paginationLinks.forEach(link => {
         link.addEventListener('click', function(event) {
             event.preventDefault();
@@ -326,11 +308,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Cambiar la URL visible y pasar los parámetros al backend
             window.location.search = url.search;
+
+            // Recargar la página para reflejar los cambios en el servidor
+            window.location.reload();
         });
     });
 });
 </script>
-
 
 </body>
 </html>
