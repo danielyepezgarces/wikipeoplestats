@@ -68,30 +68,42 @@ $dataArray = array_values($data);
   <aside class="col-span-1 bg-white dark:bg-[#1F2937] p-6 h-full lg:block border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Título de la sección -->
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6"><?php echo __('filters'); ?></h2>
-    
+
+    <?php
+    // Obtener los parámetros actuales sin incluir 'lang'
+    $currentParams = $_GET;
+    unset($currentParams['lang']);
+
+    // Función para verificar si un parámetro está activo
+    function isActive($key, $value) {
+        return isset($_GET[$key]) && $_GET[$key] === $value;
+    }
+    ?>
+
     <!-- Sección By Date -->
     <div class="mb-6">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_bydate'); ?></h3>
-      <ul>
-        <li><a href="?interval=7d&group=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '7d') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
-        <li><a href="?interval=1m&group=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '1m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
-        <li><a href="?interval=3m&group=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '3m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
-        <li><a href="?interval=6m&group=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '6m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
-        <li><a href="?interval=1y&group=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == '1y') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
-        <li><a href="?interval=all&group=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == 'all') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
-      </ul>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_bydate'); ?></h3>
+        <ul>
+            <li><a href="#" data-key="interval" data-value="7d" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '7d') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_7d'); ?></a></li>
+            <li><a href="#" data-key="interval" data-value="1m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '1m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1m'); ?></a></li>
+            <li><a href="#" data-key="interval" data-value="3m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '3m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_3m'); ?></a></li>
+            <li><a href="#" data-key="interval" data-value="6m" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '6m') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_6m'); ?></a></li>
+            <li><a href="#" data-key="interval" data-value="1y" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('interval', '1y') ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_last_1y'); ?></a></li>
+            <li><a href="#" data-key="interval" data-value="" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= !isset($_GET['interval']) ? 'bg-primary-500 text-white' : '' ?>"><?php echo __('filters_alltime'); ?></a></li>
+        </ul>
     </div>
 
     <!-- Sección By Project -->
     <div class="mb-6">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_byproject'); ?></h3>
-      <ul>
-        <li><a href="?interval=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&group=wiki" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] == 'wiki') ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
-        <li><a href="?interval=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&group=wikiquote" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] == 'wikiquote') ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
-        <li><a href="?interval=<?= htmlspecialchars($_GET['timeFrame'] ?? '') ?>&group=wikisource" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['projectGroup'] == 'wikimedia') ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
-      </ul>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2"><?php echo __('filters_byproject'); ?></h3>
+        <ul>
+            <li><a href="#" data-key="group" data-value="wiki" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wiki') ? 'bg-primary-500 text-white' : '' ?>">Wikipedia</a></li>
+            <li><a href="#" data-key="group" data-value="wikiquote" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wikiquote') ? 'bg-primary-500 text-white' : '' ?>">Wikiquote</a></li>
+            <li><a href="#" data-key="group" data-value="wikisource" class="filter-link block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= isActive('group', 'wikisource') ? 'bg-primary-500 text-white' : '' ?>">Wikisource</a></li>
+        </ul>
     </div>
 </aside>
+
 
 
 
@@ -229,5 +241,36 @@ $(document).ready(function() {
 });
 
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterLinks = document.querySelectorAll('.filter-link');
+    filterLinks.forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const key = this.getAttribute('data-key');
+            const value = this.getAttribute('data-value');
+            const url = new URL(window.location);
+
+            // Verificar si el filtro ya está seleccionado
+            if (url.searchParams.get(key) === value) {
+                // Si está seleccionado, eliminar el parámetro
+                url.searchParams.delete(key);
+            } else {
+                // Si no está seleccionado, añadir o actualizar el parámetro
+                url.searchParams.set(key, value);
+            }
+
+            window.history.pushState({}, '', url);
+            window.location.search = url.search;
+
+            // Recargar la página para reflejar los cambios en el servidor
+            window.location.reload();
+        });
+    });
+});
+</script>
+
 </body>
 </html>
