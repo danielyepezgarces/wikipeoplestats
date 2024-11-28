@@ -1,5 +1,6 @@
 <?php
 // languages.php
+session_start(); // Inicia la sesión
 
 // Available languages
 $languages = [
@@ -338,18 +339,35 @@ $languages = [
     ['code' => 'zu', 'name' => 'Zulu', 'flag' => '🇿🇦', 'date_format' => 'l, j F Y', 'wiki' => 'zuwiki', 'creation_date' => '2007-01-01', 'text_direction' => 'ltr'],
 ];
 
-// Set default language
-$currentLang = $languages[0];
+// Idioma predeterminado
+$defaultLang = $languages[0]; // Por ejemplo, inglés
+$currentLang = $defaultLang;
 
-// Check if a language is selected
-if (isset($_GET['lang'])) {
-    $requestedLang = $_GET['lang'];
+// Manejo del idioma
+if (isset($_SESSION['lang'])) {
+    // Si hay un idioma en la sesión, usarlo
+    $requestedLang = $_SESSION['lang'];
     foreach ($languages as $lang) {
         if ($lang['code'] === $requestedLang) {
             $currentLang = $lang;
             break;
         }
     }
+} else {
+    // Si no hay idioma en la sesión, detectar automáticamente desde el navegador
+    $acceptedLanguages = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+    foreach ($acceptedLanguages as $acceptedLang) {
+        $langCode = substr($acceptedLang, 0, 2); // Obtener solo el código del idioma
+        foreach ($languages as $lang) {
+            if ($lang['code'] === $langCode) {
+                $currentLang = $lang;
+                break 2; // Salir de ambos bucles al encontrar el idioma
+            }
+        }
+    }
+
+    // Si no se encuentra un idioma compatible, usar el predeterminado
+    $_SESSION['lang'] = $currentLang['code'];
 }
 
 // Load translations

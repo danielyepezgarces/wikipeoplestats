@@ -43,19 +43,13 @@ $startIndex = ($currentPage - 1) * $resultsPerPage;
 $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 
 function buildPaginationUrl($page) {
-    // Obtener la URL base sin parámetros
-    $baseUrl = strtok($_SERVER['REQUEST_URI'], '?');
-
-    // Construir la nueva URL con el parámetro "page"
-    $url = $baseUrl . "?page=" . $page;
-
-    // Agregar otros parámetros, excluyendo "page" y "lang"
+    $url = $_SERVER['PHP_SELF'] . "?page=" . $page;
+    // Agregar otros parámetros de la URL
     foreach ($_GET as $key => $value) {
-        if ($key !== 'page' && $key !== 'lang') {
-            $url .= "&" . urlencode($key) . "=" . urlencode($value);
+        if ($key !== 'page') {
+            $url .= "&$key=$value";
         }
     }
-
     return $url;
 }
 ?>
