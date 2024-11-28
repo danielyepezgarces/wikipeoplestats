@@ -14,7 +14,6 @@
         </div>
     </div>
 </div>
-
 <script>
 function changeLanguage(langCode) {
     // Enviar una solicitud AJAX al servidor para cambiar el idioma en la sesión
@@ -23,9 +22,9 @@ function changeLanguage(langCode) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `lang=${langCode}`,
+        body: `lang=${langCode}`,  // Se pasa el código de idioma
     })
-    .then(response => response.json())
+    .then(response => response.json())  // Esperamos una respuesta JSON
     .then(data => {
         if (data.success) {
             // Si el cambio fue exitoso, recargar la página para reflejar el idioma cambiado
