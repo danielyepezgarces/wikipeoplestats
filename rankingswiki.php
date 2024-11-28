@@ -202,7 +202,7 @@ $(document).ready(function() {
             $('table.dataTable tbody td').addClass('p-3 text-sm text-gray-700 dark:text-gray-300');
             
             // Ajustar el contenedor de paginación
-            $('.dataTables_wrapper .dataTables_paginate').addClass('flex items-center justify-end space-x-2 mt-4');
+            $('.dataTables_wrapper .dataTables_paginate').addClass('pagination flex justify-center items-center space-x-2 mt-4 mb-4');
             
             // Mejorar la apariencia del input de búsqueda
             $('.dataTables_wrapper .dataTables_filter input').addClass('ml-2');
