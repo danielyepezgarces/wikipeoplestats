@@ -130,94 +130,50 @@ function buildPaginationUrl($page) {
         </div>
     </aside>
 
-   <!-- Main -->
-   <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
-    <!-- Tabla -->
-    <div class="overflow-x-auto">
-        <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            <!-- Cabecera de la tabla -->
-            <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                <div class="col-span-1 text-center">#</div>
-                <div class="col-span-1 text-center">Project</div>
-                <div class="col-span-1 text-center">Total People</div>
-                <div class="col-span-1 text-center">Total Women</div>
-                <div class="col-span-1 text-center">Total Men</div>
-                <div class="col-span-1 text-center">Other Genders</div>
-                <div class="col-span-1 text-center">Total Editors</div>
+    <!-- Main Content -->
+    <main class="col-span-5">
+        <div class="overflow-hidden bg-white dark:bg-[#1F2937] p-6 shadow-lg rounded-lg">
+            <h1 class="text-3xl font-semibold text-gray-800 dark:text-gray-200"><?php echo __('title'); ?></h1>
+
+            <!-- Tabla de resultados -->
+            <div class="overflow-x-auto mt-6">
+                <table class="min-w-full text-left text-sm">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2"><?php echo __('columns_rank'); ?></th>
+                            <th class="px-4 py-2"><?php echo __('columns_project'); ?></th>
+                            <th class="px-4 py-2"><?php echo __('columns_count'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($currentPageResults as $index => $item): ?>
+                            <tr class="border-b dark:border-gray-700">
+                                <td class="px-4 py-2"><?php echo $index + 1; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['project_name']; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['count']; ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
 
-            <?php if (!empty($currentPageResults)) : ?>
-                <?php foreach ($currentPageResults as $index => $item): ?>
-                    <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                        <div class="col-span-1 text-center"><?= $startIndex + $index + 1 ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalContributions']) ?></div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-span-7 text-center text-gray-500">No data available</div>
-            <?php endif; ?>
+            <!-- Paginación -->
+            <div class="mt-6">
+                <nav aria-label="Page navigation">
+                    <ul class="flex justify-center space-x-2">
+                        <?php for ($page = 1; $page <= $totalPages; $page++): ?>
+                            <li>
+                                <a href="<?php echo buildPaginationUrl($page); ?>" class="py-2 px-4 bg-primary-500 text-white rounded-md hover:bg-primary-600 <?php echo $currentPage === $page ? 'font-semibold' : ''; ?>">
+                                    <?php echo $page; ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </nav>
+            </div>
         </div>
-    </div>
-
-<!-- Paginación -->
-<div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
-    <!-- Enlace a la página anterior -->
-    <?php if ($currentPage > 1): ?>
-        <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
-    <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Previous</span>
-    <?php endif; ?>
-
-    <!-- Enlaces a las páginas (máximo 10 páginas) -->
-    <?php
-    $maxButtons = 10;
-    $startPage = max(1, $currentPage - floor($maxButtons / 2));  // Rango de inicio
-    $endPage = min($totalPages, $startPage + $maxButtons - 1); // Rango de fin
-
-    // Si el rango de fin es menor que el total de páginas, ajustar el rango de inicio
-    if ($endPage - $startPage + 1 < $maxButtons) {
-        $startPage = max(1, $endPage - $maxButtons + 1);
-    }
-
-    // Mostrar los botones de las páginas
-    for ($i = $startPage; $i <= $endPage; $i++):
-    ?>
-        <a href="<?= buildPaginationUrl($i) ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
-    <?php endfor; ?>
-
-    <!-- Enlace a la siguiente página -->
-    <?php if ($currentPage < $totalPages): ?>
-        <a href="<?= buildPaginationUrl($currentPage + 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
-    <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Next</span>
-    <?php endif; ?>
+    </main>
 </div>
 
-  </main>
-</div>
-
-<?php include 'footer.php'; ?>
-
-<!-- Toast Container -->
-<div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg hidden dark:bg-green-600">
-    <span id="toast-message"></span>
-    <button onclick="hideToast()" class="ml-2 text-white font-bold">&times;</button>
-</div>
-
-<!-- Language Selector Popup -->
-<?php include 'languageselector.php'; ?>
-<script src="/assets/js/main.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/odometer/0.4.6/odometer.min.js"></script>
-<script>
-    // Inicializar los odómetros
-    document.querySelectorAll('.odometer').forEach(function (odometer) {
-        odometer.innerHTML = odometer.getAttribute('data-odometer-final');
-    });
-</script>
 </body>
 </html>
