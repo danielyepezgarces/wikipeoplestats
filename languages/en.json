@@ -63,5 +63,8 @@
     "filters_last_3m": "Last 3m",
     "filters_last_6m": "Last 6m",
     "filters_last_1y": "Last 1y",
-    "filters_alltime": "All time"
+    "filters_alltime": "All time",
+    "pagination_previous": "Previous",
+    "pagination_next": "Next",
+    "datatables_info": "Showing _START_ to _END_ of _TOTAL_ entries"
   }

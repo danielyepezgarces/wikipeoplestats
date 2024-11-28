@@ -1,4 +1,5 @@
 config.php
 .well-known/
+assets/datatables
 .user.ini
 translator.py

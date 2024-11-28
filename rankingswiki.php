@@ -170,7 +170,7 @@ $(document).ready(function() {
         language: {
             search: "",
             searchPlaceholder: "Search...",
-            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            info: "<?php echo __('datatables_info'); ?>",
             paginate: {
                 first: '«',
                 previous: '‹',
@@ -194,26 +194,26 @@ $(document).ready(function() {
 
             // Aplicar clases de Tailwind a varios elementos
             $('.dataTables_wrapper select, .dataTables_wrapper input[type="search"]').addClass('block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
-            
+
             // Mejorar la apariencia de los botones de paginación
             $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 rounded-lg mx-1');
-            
+
             // Mejorar la apariencia del botón activo
             $('.dataTables_wrapper .dataTables_paginate .paginate_button.current').addClass('bg-blue-500 text-white px-4 py-2 dark:text-white rounded-lg');
             $('.dataTables_wrapper .dataTables_paginate .paginate_button.current').removeClass('bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500');
 
-            
+
             // Mejorar la apariencia del botón deshabilitado
             $('.dataTables_wrapper .dataTables_paginate .paginate_button.disabled').addClass('opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-800 text-gray-400 dark:text-gray-600');
 
             // Mejorar la apariencia del texto de información y selector de entradas
             $('.dataTables_wrapper .dataTables_info').addClass('text-sm text-gray-700 dark:text-gray-400 py-2 ml-4');
             $('.dataTables_wrapper .dataTables_length').addClass('text-sm text-gray-700 dark:text-gray-400 py-2');
-            
+
             // Mejorar la apariencia de las filas y celdas de la tabla
             $('table.dataTable tbody tr').addClass('hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200');
             $('table.dataTable tbody td').addClass('p-3 text-sm text-gray-700 dark:text-gray-300');
-            
+
             // Ajustar el contenedor de paginación
             $('.dataTables_wrapper .dataTables_paginate').addClass('pagination flex justify-center items-center space-x-2 mt-4 mb-4 mr-4');
             $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('mx-1'); // Esto aplica margen horizontal a cada botón

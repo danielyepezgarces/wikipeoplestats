@@ -65,5 +65,6 @@
     "filters_last_1y": "Ultimos 1y",
     "filters_alltime": "Todo el tiempo",
     "pagination_previous": "Anterior",
-    "pagination_next": "Siguiente"
+    "pagination_next": "Siguiente",
+    "datatables_info": "Mostrando _START_ a _END_ de _TOTAL_ registros"
   }
