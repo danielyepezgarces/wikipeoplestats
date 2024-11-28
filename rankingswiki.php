@@ -224,11 +224,6 @@ $(document).ready(function() {
 
             $('table.dataTable thead th').removeClass('sorting sorting_asc sorting_desc')
             .addClass('sorting bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm py-3 px-4 border-b border-gray-300 dark:border-gray-600');
-
-           //  Personalizar íconos de orden
-           $('table.dataTable thead th.sorting').append('<span class="ml-2">↕</span>'); // Ícono para ordenar
-           $('table.dataTable thead th.sorting_asc').append('<span class="ml-2">↑</span>'); // Orden ascendente
-           $('table.dataTable thead th.sorting_desc').append('<span class="ml-2">↓</span>'); // Orden descendente
         }
     });
 });
