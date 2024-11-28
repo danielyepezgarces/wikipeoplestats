@@ -172,7 +172,7 @@ function buildPaginationUrl($page) {
         odometer.innerHTML = odometer.getAttribute('data-odometer-final');
     });
 </script>
-<script>
+
 <script>
 $(document).ready(function() {
     // Los datos del PHP se pasan a JavaScript
@@ -197,6 +197,5 @@ $(document).ready(function() {
     });
 });
 </script>
-
 </body>
 </html>
