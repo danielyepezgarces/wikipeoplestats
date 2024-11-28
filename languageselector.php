@@ -17,7 +17,7 @@
 <script>
 function changeLanguage(langCode) {
     // Enviar una solicitud AJAX al servidor para cambiar el idioma en la sesión
-    fetch('languages.php', {
+    fetch('https://wikipeoplestats.wmcloud.org/languages.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
