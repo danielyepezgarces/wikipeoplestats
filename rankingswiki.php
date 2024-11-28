@@ -160,6 +160,60 @@ $dataArray = array_values($data);
 $(document).ready(function() {
     var tableData = <?php echo json_encode($dataArray[0]); ?>;
 
+        // Pasar el valor de interval desde PHP a JavaScript
+        var selectedInterval = '<?php echo $interval; ?>'; // Obtiene el valor de la variable PHP
+
+// Función para obtener el rango de fechas basado en el intervalo
+function getDateRange(interval) {
+    let startDate;
+    let endDate = new Date(); // Fecha de fin (hoy)
+
+    switch (interval) {
+        case '7d': // Últimos 7 días
+            startDate = new Date();
+            startDate.setDate(endDate.getDate() - 7);
+            break;
+        case '1m': // Último mes
+            startDate = new Date();
+            startDate.setMonth(endDate.getMonth() - 1);
+            break;
+        case '3m': // Últimos 3 meses
+            startDate = new Date();
+            startDate.setMonth(endDate.getMonth() - 3);
+            break;
+        case '6m': // Últimos 6 meses
+            startDate = new Date();
+            startDate.setMonth(endDate.getMonth() - 6);
+            break;
+        case '1y': // Último año
+            startDate = new Date();
+            startDate.setFullYear(endDate.getFullYear() - 1);
+            break;
+        default:
+            startDate = new Date();
+            break;
+    }
+
+    // Función para formatear las fechas en el formato adecuado
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return { day, month, year };
+    };
+
+    const start = formatDate(startDate);
+    const end = formatDate(endDate);
+
+    // Si el año de la fecha de inicio y la de fin son iguales, no mostrar el año
+    if (start.year === end.year) {
+        return `${start.day}-${start.month} - ${end.day}-${end.month}`;
+    } else {
+        return `${start.day}-${start.month}-${start.year} - ${end.day}-${end.month}-${end.year}`;
+    }
+}
+
+
     $('#rankingwiki').DataTable({
         data: tableData,
         columns: [
@@ -188,7 +242,7 @@ $(document).ready(function() {
                 last: '»'
             }
         },
-        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"table-title-text">l<"flex items-center"l><"flex items-center"f>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
+        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"table-title-text ml-4">l<"flex items-center"l><"flex items-center"f>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
         drawCallback: function() {
                 // Detectar si es escritorio (ancho mayor a 1024px)
             if (window.innerWidth > 1024) {
@@ -198,8 +252,7 @@ $(document).ready(function() {
                   $('.dataTables_wrapper').addClass('overflow-x-auto');
             }
 
-            $(".table-title-text").text("Ranking de Proyectos");
-
+            $(".table-title-text").text("Ranking de Proyectos (Rango: " + dateRange + ")");
 
             $('table.dataTable thead th').addClass(
              'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm py-3 px-4 border-b border-gray-300 dark:border-gray-600'
