@@ -66,5 +66,6 @@
     "filters_alltime": "Todo el tiempo",
     "pagination_previous": "Anterior",
     "pagination_next": "Siguiente",
-    "datatables_info": "Mostrando _START_ a _END_ de _TOTAL_ registros"
+    "datatables_info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+    "datatables_search": "Buscar"
   }

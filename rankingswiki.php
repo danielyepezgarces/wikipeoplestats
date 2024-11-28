@@ -169,7 +169,7 @@ $(document).ready(function() {
         lengthChange: false, // Desactiva el control de "Results per page"
         language: {
             search: "",
-            searchPlaceholder: "Search...",
+            searchPlaceholder: "<?php echo __('datatables_search'); ?>...",
             info: "<?php echo __('datatables_info'); ?>",
             paginate: {
                 first: '«',
