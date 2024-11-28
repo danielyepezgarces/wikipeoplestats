@@ -188,7 +188,9 @@ $(document).ready(function() {
                 last: '»'
             }
         },
-        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"flex items-center"l><"flex items-center"f>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
+        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"table-title-text">l<"flex items-center"f>>'
+              '<"overflow-x-auto"t>' +
+              '<"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
         drawCallback: function() {
                 // Detectar si es escritorio (ancho mayor a 1024px)
             if (window.innerWidth > 1024) {
