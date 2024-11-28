@@ -194,39 +194,54 @@ function buildPaginationUrl($page) {
 </script>
 <script>
 $(document).ready(function() {
+    // Obtener los datos de PHP
     var tableData = <?php echo json_encode($data); ?>;
     console.log(tableData);  // Esto te ayudará a ver qué datos se están pasando
+
     // Definir el idioma y la configuración
-    var currentLanguage = "<?php echo $currentLanguage; ?>";
-    var languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/English.json";  // Por defecto en inglés
+    var currentLanguage = "<?php echo $currentLanguage; ?>";  // Idioma de la sesión o preferencia del usuario
+    var languageUrl = "assets/datatables/i18n/" + currentLanguage + ".json";  // Intentar cargar el archivo del idioma
 
-    if (currentLanguage === "es") {
-        languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/Spanish.json"; // Cargar en español si el idioma es "es"
-    }
-
-    // Inicializar DataTables con todos los datos
-    $('#myTable').DataTable({
-        "paging": true,             // Activa la paginación
-        "searching": true,          // Activa la búsqueda
-        "ordering": true,           // Activa el ordenamiento por columnas
-        "pageLength": 10,           // Número de registros por página
-        "lengthMenu": [10, 25, 50], // Opciones de páginas
-        "language": {
-            "url": languageUrl      // Cargar archivo de traducción correspondiente
+    // Si no se encuentra el archivo, cargar el archivo por defecto (English.json)
+    $.ajax({
+        url: languageUrl,
+        dataType: "json",
+        success: function(data) {
+            // Si el archivo se carga correctamente, inicializa la tabla
+            initializeDataTable(data);
         },
-        "data": <?php echo json_encode($data); ?>, // Pasa todos los datos desde PHP
-        "columns": [
-            { "data": "id" },
-            { "data": "project" },
-            { "data": "totalPeople" },
-            { "data": "totalWomen" },
-            { "data": "totalMen" },
-            { "data": "otherGenders" },
-            { "data": "totalContributions" }
-        ]
+        error: function() {
+            // Si el archivo no se encuentra, cargar el archivo por defecto (English.json)
+            console.log("Idioma no encontrado, cargando idioma por defecto.");
+            languageUrl = "assets/datatables/i18n/English.json";
+            $.getJSON(languageUrl, function(data) {
+                initializeDataTable(data);
+            });
+        }
     });
-});
 
+    // Función para inicializar DataTables con los datos y el idioma
+    function initializeDataTable(languageData) {
+        $('#myTable').DataTable({
+            "paging": true,             // Activa la paginación
+            "searching": true,          // Activa la búsqueda
+            "ordering": true,           // Activa el ordenamiento por columnas
+            "pageLength": 10,           // Número de registros por página
+            "lengthMenu": [10, 25, 50], // Opciones de páginas
+            "language": languageData,   // Cargar archivo de traducción correspondiente
+            "data": tableData,          // Pasa todos los datos desde PHP
+            "columns": [
+                { "data": "id" },
+                { "data": "project" },
+                { "data": "totalPeople" },
+                { "data": "totalWomen" },
+                { "data": "totalMen" },
+                { "data": "otherGenders" },
+                { "data": "totalContributions" }
+            ]
+        });
+    }
+});
 </script>
 
 </body>
