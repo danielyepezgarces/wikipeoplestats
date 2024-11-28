@@ -24,6 +24,46 @@ $projectGroup = isset($_GET['group']) ? $_GET['group'] : 'wiki';
 $data = fetchData($timeFrame, $projectGroup);
 $dataArray = array_values($data);
 
+
+// Función para obtener el rango de fechas basado en el intervalo
+function getDateRange($timeFrame) {
+    $endDate = new DateTime(); // Fecha de fin (hoy)
+    $startDate = clone $endDate; // Copiar la fecha de fin para la fecha de inicio
+
+    switch ($timeFrame) {
+        case '7d': // Últimos 7 días
+            $startDate->modify('-7 days');
+            break;
+        case '1m': // Último mes
+            $startDate->modify('-1 month');
+            break;
+        case '3m': // Últimos 3 meses
+            $startDate->modify('-3 months');
+            break;
+        case '6m': // Últimos 6 meses
+            $startDate->modify('-6 months');
+            break;
+        case '1y': // Último año
+            $startDate->modify('-1 year');
+            break;
+    }
+
+    // Formatear las fechas
+    $startFormatted = $startDate->format('d-m-Y');
+    $endFormatted = $endDate->format('d-m-Y');
+
+    // Si el año de inicio y fin son iguales, no mostrar el año
+    if ($startDate->format('Y') === $endDate->format('Y')) {
+        $startFormatted = $startDate->format('d-m');
+        $endFormatted = $endDate->format('d-m');
+    }
+
+    return "$startFormatted - $endFormatted";
+}
+
+// Obtener el rango de fechas formateado
+$dateRange = getDateRange($timeFrame);
+
 ?>
 
 <!DOCTYPE html>
@@ -159,60 +199,7 @@ $dataArray = array_values($data);
 <script>
 $(document).ready(function() {
     var tableData = <?php echo json_encode($dataArray[0]); ?>;
-
-        // Pasar el valor de interval desde PHP a JavaScript
-        var selectedInterval = '<?php echo $interval; ?>'; // Obtiene el valor de la variable PHP
-
-// Función para obtener el rango de fechas basado en el intervalo
-function getDateRange(interval) {
-    let startDate;
-    let endDate = new Date(); // Fecha de fin (hoy)
-
-    switch (interval) {
-        case '7d': // Últimos 7 días
-            startDate = new Date();
-            startDate.setDate(endDate.getDate() - 7);
-            break;
-        case '1m': // Último mes
-            startDate = new Date();
-            startDate.setMonth(endDate.getMonth() - 1);
-            break;
-        case '3m': // Últimos 3 meses
-            startDate = new Date();
-            startDate.setMonth(endDate.getMonth() - 3);
-            break;
-        case '6m': // Últimos 6 meses
-            startDate = new Date();
-            startDate.setMonth(endDate.getMonth() - 6);
-            break;
-        case '1y': // Último año
-            startDate = new Date();
-            startDate.setFullYear(endDate.getFullYear() - 1);
-            break;
-        default:
-            startDate = new Date();
-            break;
-    }
-
-    // Función para formatear las fechas en el formato adecuado
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        return { day, month, year };
-    };
-
-    const start = formatDate(startDate);
-    const end = formatDate(endDate);
-
-    // Si el año de la fecha de inicio y la de fin son iguales, no mostrar el año
-    if (start.year === end.year) {
-        return `${start.day}-${start.month} - ${end.day}-${end.month}`;
-    } else {
-        return `${start.day}-${start.month}-${start.year} - ${end.day}-${end.month}-${end.year}`;
-    }
-}
-
+    var dateRange = "<?php echo $dateRange; ?>"; // El valor de la variable PHP
 
     $('#rankingwiki').DataTable({
         data: tableData,
