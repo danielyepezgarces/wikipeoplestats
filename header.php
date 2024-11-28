@@ -12,10 +12,9 @@
 
             <!-- Desktop Menu -->
             <nav class="hidden md:flex space-x-4">
-    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('home'); ?></a>
-    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('genders'); ?></a>
+    <a href="/search/genders" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('genders'); ?></a>
     <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('countries'); ?></a>
-    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('users'); ?></a>
+    <a href="/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('users'); ?></a>
 
     <div class="relative group">
         <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2">
@@ -23,17 +22,17 @@
         </button>
         <ul class="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-900 shadow-lg rounded-md border border-gray-200 dark:border-gray-700">
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <a href="/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <?php echo __('ranking_wikis'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <a href="/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <?php echo __('ranking_users'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <a href="/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <?php echo __('ranking_countries'); ?>
                 </a>
             </li>
@@ -46,17 +45,17 @@
         </button>
         <ul class="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-900 shadow-lg rounded-md border border-gray-200 dark:border-gray-700">
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <a href="/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <?php echo __('compare_wikis'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <a href="/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <?php echo __('compare_users'); ?>
                 </a>
             </li>
             <li>
-                <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <a href="/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                     <?php echo __('compare_countries'); ?>
                 </a>
             </li>
@@ -93,16 +92,16 @@
 <!-- Mobile Menu -->
 <div id="mobile-menu" class="md:hidden hidden transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 shadow-lg rounded-md">
     <div class="px-4 pt-4 pb-3 space-y-2">
-        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
+        <a href="/" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
             <i class="fas fa-home mr-2"></i><?php echo __('home'); ?>
         </a>
-        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/genders" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
+        <a href="/search/genders" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
             <i class="fas fa-genderless mr-2"></i><?php echo __('genders'); ?>
         </a>
         <a href="#" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
             <i class="fas fa-flag mr-2"></i><?php echo __('countries'); ?>
         </a>
-        <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/search/users" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
+        <a href="/search/users" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
             <i class="fas fa-users mr-2"></i><?php echo __('users'); ?>
         </a>
 
@@ -114,17 +113,17 @@
             </summary>
             <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md">
                 <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                    <a href="/rankings/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-book mr-2"></i><?php echo __('ranking_wikis'); ?>
                     </a>
                 </li>
                 <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                    <a href="/rankings/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-user mr-2"></i><?php echo __('ranking_users'); ?>
                     </a>
                 </li>
                 <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                    <a href="/rankings/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-flag-checkered mr-2"></i><?php echo __('ranking_countries'); ?>
                     </a>
                 </li>
@@ -139,17 +138,17 @@
             </summary>
             <ul class="bg-white dark:bg-gray-800 shadow-lg rounded-md">
                 <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                    <a href="/compare/wikis" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-book-open mr-2"></i><?php echo __('compare_wikis'); ?>
                     </a>
                 </li>
                 <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                    <a href="/compare/users" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-user-friends mr-2"></i><?php echo __('compare_users'); ?>
                     </a>
                 </li>
                 <li>
-                    <a href="/<?php echo htmlspecialchars($currentLang['code']); ?>/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                    <a href="/compare/countries" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
                         <i class="fas fa-globe mr-2"></i><?php echo __('compare_countries'); ?>
                     </a>
                 </li>
