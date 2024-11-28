@@ -166,19 +166,37 @@ function buildPaginationUrl($page) {
             </div>
 
             <!-- Paginación -->
-            <div class="mt-6">
-                <nav aria-label="Page navigation">
-                    <ul class="flex justify-center space-x-2">
-                        <?php for ($page = 1; $page <= $totalPages; $page++): ?>
-                            <li>
-                                <a href="<?php echo buildPaginationUrl($page); ?>" class="py-2 px-4 bg-primary-500 text-white rounded-md hover:bg-primary-600 <?php echo $currentPage === $page ? 'font-semibold' : ''; ?>">
-                                    <?php echo $page; ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-                    </ul>
-                </nav>
-            </div>
+            <div class="mt-4">
+    <nav class="flex justify-center items-center space-x-2">
+        <!-- Botón "Anterior" -->
+        <?php if ($currentPage > 1): ?>
+            <a href="<?php echo buildPaginationUrl($currentPage - 1); ?>" class="px-3 py-2 bg-primary-500 text-white rounded hover:bg-primary-600">
+                &laquo; <?php echo __('previous'); ?>
+            </a>
+        <?php else: ?>
+            <span class="px-3 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed">&laquo; <?php echo __('previous'); ?></span>
+        <?php endif; ?>
+
+        <!-- Números de página -->
+        <?php for ($page = 1; $page <= $totalPages; $page++): ?>
+            <?php if ($page == $currentPage): ?>
+                <span class="px-3 py-2 bg-primary-500 text-white rounded"><?php echo $page; ?></span>
+            <?php else: ?>
+                <a href="<?php echo buildPaginationUrl($page); ?>" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded"><?php echo $page; ?></a>
+            <?php endif; ?>
+        <?php endfor; ?>
+
+        <!-- Botón "Siguiente" -->
+        <?php if ($currentPage < $totalPages): ?>
+            <a href="<?php echo buildPaginationUrl($currentPage + 1); ?>" class="px-3 py-2 bg-primary-500 text-white rounded hover:bg-primary-600">
+                <?php echo __('next'); ?> &raquo;
+            </a>
+        <?php else: ?>
+            <span class="px-3 py-2 bg-gray-300 text-gray-500 rounded cursor-not-allowed"><?php echo __('next'); ?> &raquo;</span>
+        <?php endif; ?>
+    </nav>
+</div>
+
         </div>
     </main>
 </div>
