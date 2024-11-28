@@ -20,38 +20,8 @@ function fetchData($timeFrame, $projectGroup) {
 $timeFrame = isset($_GET['interval']) ? $_GET['interval'] : '1m';
 $projectGroup = isset($_GET['group']) ? $_GET['group'] : 'wiki';
 
-
-
 // Obtener los datos de la API
 $data = fetchData($timeFrame, $projectGroup);
-
-// Configuración de la paginación
-$resultsPerPage = 10;  // Número de resultados por página
-$totalResults = count($data);  // Número total de resultados
-$totalPages = ceil($totalResults / $resultsPerPage);  // Número total de páginas
-
-// Obtener la página actual desde la URL, por defecto es la página 1
-$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-
-// Asegurarse de que la página actual esté dentro del rango válido
-$currentPage = max(1, min($currentPage, $totalPages));
-
-// Calcular el índice de inicio de los resultados en la página actual
-$startIndex = ($currentPage - 1) * $resultsPerPage;
-
-// Obtener los resultados para la página actual
-$currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
-
-function buildPaginationUrl($page) {
-    $url = $_SERVER['PHP_SELF'] . "?page=" . $page;
-    // Agregar otros parámetros de la URL
-    foreach ($_GET as $key => $value) {
-        if ($key !== 'page') {
-            $url .= "&$key=$value";
-        }
-    }
-    return $url;
-}
 ?>
 
 <!DOCTYPE html>
