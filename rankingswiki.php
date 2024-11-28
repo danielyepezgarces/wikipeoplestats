@@ -180,6 +180,14 @@ $(document).ready(function() {
         },
         dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"flex items-center"l><"flex items-center"f>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
         drawCallback: function() {
+                // Detectar si es escritorio (ancho mayor a 1024px)
+            if (window.innerWidth > 1024) {
+                  $('.dataTables_wrapper .overflow-x-auto').removeClass('overflow-x-auto');
+            } else {
+                 // Asegurarse de que se aplique el scroll en pantallas pequeñas
+                  $('.dataTables_wrapper').addClass('overflow-x-auto');
+            }
+
             // Aplicar clases de Tailwind a varios elementos
             $('.dataTables_wrapper select, .dataTables_wrapper input[type="search"]').addClass('block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
             
