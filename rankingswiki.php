@@ -198,6 +198,8 @@ $(document).ready(function() {
                   $('.dataTables_wrapper').addClass('overflow-x-auto');
             }
 
+            $(".table-title-text").text("Ranking de Proyectos");
+
 
             $('table.dataTable thead th').addClass(
              'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm py-3 px-4 border-b border-gray-300 dark:border-gray-600'
