@@ -198,9 +198,9 @@ $(document).ready(function() {
                   $('.dataTables_wrapper').addClass('overflow-x-auto');
             }
 
+            var filterWrapper = $('#rankingwiki_filter');
             if (filterWrapper.length) {
-                // Agregar el texto a la izquierda del input de búsqueda
-                filterWrapper.prepend('<span class="text-sm text-gray-700 dark:text-gray-300 mr-2">Texto adicional</span>');
+                filterWrapper.prepend('<span class="text-sm text-gray-700 dark:text-gray-300 mr-4">Texto adicional</span>');
             }
 
             $('table.dataTable thead th').addClass(
