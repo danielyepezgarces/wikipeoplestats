@@ -198,14 +198,6 @@ $(document).ready(function() {
                   $('.dataTables_wrapper').addClass('overflow-x-auto');
             }
 
-            var filterWrapper = $('#rankingwiki_filter');
-            if (filterWrapper.length) {
-                // Crear un contenedor para el texto adicional y el campo de búsqueda
-                filterWrapper.prepend('<div class="flex items-center space-x-2"><span class="text-sm text-gray-700 dark:text-gray-300">Texto adicional</span></div>');
-                
-                // Aplicar clases adecuadas para el input de búsqueda y el texto
-                filterWrapper.find('input[type="search"]').addClass('block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
-            }
 
             $('table.dataTable thead th').addClass(
              'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm py-3 px-4 border-b border-gray-300 dark:border-gray-600'
