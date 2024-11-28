@@ -212,7 +212,7 @@ function buildPaginationUrl($page) {
         </div>
     </div>
 
-    <script src="/assets/js/main.js"></script>
+    <script src="/assets/js/main.js?v=1"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer/0.4.6/odometer.min.js"></script>
 <script>
     // Inicializa los odómetros
