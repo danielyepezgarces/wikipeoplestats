@@ -201,7 +201,7 @@ $(document).ready(function() {
             $('table.dataTable tbody td').addClass('p-3 text-sm text-gray-700 dark:text-gray-300');
             
             // Ajustar el contenedor de paginación
-            $('.dataTables_wrapper .dataTables_paginate').addClass('pagination flex justify-center items-center space-x-2 mt-4 mb-4');
+            $('.dataTables_wrapper .dataTables_paginate').addClass('pagination flex justify-center items-center space-x-2 mt-4 mb-4 mr-4');
             $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('mx-1'); // Esto aplica margen horizontal a cada botón
 
             // Mejorar la apariencia del input de búsqueda
