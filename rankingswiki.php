@@ -193,29 +193,38 @@ function buildPaginationUrl($page) {
     });
 </script>
 <script>
-    $(document).ready(function() {
-        // Definir las opciones de traducción
-        var languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/English.json";  // Por defecto en inglés
+$(document).ready(function() {
+    // Definir el idioma y la configuración
+    var currentLanguage = "<?php echo $currentLanguage; ?>";
+    var languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/English.json";  // Por defecto en inglés
 
-        if (currentLanguage === "es") {
-            languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/Spanish.json"; // Cargar en español si el idioma es "es"
-        } else if (currentLanguage === "fr") {
-            languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/French.json"; // Cargar en francés si el idioma es "fr"
-        }
-        // Agregar más idiomas según sea necesario...
+    if (currentLanguage === "es") {
+        languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/Spanish.json"; // Cargar en español si el idioma es "es"
+    }
 
-        // Inicializar la tabla con DataTables y cargar el idioma correspondiente
-        $('#myTable').DataTable({
-            "paging": true,             // Activa la paginación
-            "searching": true,          // Activa la búsqueda
-            "ordering": true,           // Activa el ordenamiento por columnas
-            "pageLength": 10,           // Número de registros por página
-            "lengthMenu": [10, 25, 50], // Opciones de páginas
-            "language": {
-                "url": languageUrl      // Cargar archivo de traducción correspondiente
-            }
-        });
+    // Inicializar DataTables con todos los datos
+    $('#myTable').DataTable({
+        "paging": true,             // Activa la paginación
+        "searching": true,          // Activa la búsqueda
+        "ordering": true,           // Activa el ordenamiento por columnas
+        "pageLength": 10,           // Número de registros por página
+        "lengthMenu": [10, 25, 50], // Opciones de páginas
+        "language": {
+            "url": languageUrl      // Cargar archivo de traducción correspondiente
+        },
+        "data": <?php echo json_encode($data); ?>, // Pasa todos los datos desde PHP
+        "columns": [
+            { "data": "id" },
+            { "data": "project" },
+            { "data": "totalPeople" },
+            { "data": "totalWomen" },
+            { "data": "totalMen" },
+            { "data": "otherGenders" },
+            { "data": "totalContributions" }
+        ]
     });
+});
+
 </script>
 
 </body>
