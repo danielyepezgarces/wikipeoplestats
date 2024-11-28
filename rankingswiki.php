@@ -197,10 +197,11 @@ $(document).ready(function() {
                  // Asegurarse de que se aplique el scroll en pantallas pequeñas
                   $('.dataTables_wrapper').addClass('overflow-x-auto');
             }
-
+            
             var filterWrapper = $('#rankingwiki_filter');
             if (filterWrapper.length) {
-                filterWrapper.prepend('<span class="text-sm text-gray-700 dark:text-gray-300 mr-4">Texto adicional</span>');
+                // Agregar el texto a la izquierda del input de búsqueda
+                filterWrapper.prepend('<span class="text-sm text-gray-700 dark:text-gray-300 mr-2 flex items-center">Texto adicional</span>');
             }
 
             $('table.dataTable thead th').addClass(
