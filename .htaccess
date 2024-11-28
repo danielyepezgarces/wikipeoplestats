@@ -1,26 +1,16 @@
 RewriteEngine On
 RewriteBase /
 
-RewriteRule ^([a-zA-Z0-9_-]+)/search/genders/?$ /searchgenders.php?lang=$1 [L,QSA]
 RewriteRule ^search/genders/?$ /searchgenders.php [L,QSA]
-RewriteRule ^([a-zA-Z0-9_-]+)/search/users/?$ /searchusers.php?lang=$1 [L,QSA]
 RewriteRule ^search/users/?$ /searchusers.php [L,QSA]
-RewriteRule ^([a-zA-Z0-9_-]+)/?$ /index.php?lang=$1 [L,QSA]
-RewriteRule ^([a-zA-Z0-9_-]+)/users/([a-zA-Z0-9_-]+)/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?lang=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
 RewriteRule ^users/([a-zA-Z0-9_-]+)/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?username=$1&start_date=$2&end_date=$3 [L,QSA]
 RewriteRule ^genders/?$ /searchgenders.php [L,QSA]
-RewriteRule ^([a-zA-Z]{2})/genders/([a-zA-Z0-9_.-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /genders.php?lang=$1&project=$2&start_date=$3&end_date=$4 [L,QSA]
 RewriteRule ^genders/([a-zA-Z0-9_.-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /genders.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
-RewriteRule ^([a-zA-Z0-9_-]+)/genders/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /genders.php?lang=$1&start_date=$2&end_date=$3 [L,QSA]
-RewriteRule ^([a-zA-Z0-9_-]+)/users/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?lang=$1&project=$2&username=$3&start_date=$4&end_date=$5 [L,QSA]
 RewriteRule ^users/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
 
-RewriteRule ^([a-z]{2})/rankings/wikis$ rankingswiki.php?lang=$1 [L]
 RewriteRule ^rankings/wikis$ rankingswiki.php [L]
 
-RewriteRule ^([a-zA-Z]{2})/compare/wiki/([a-zA-Z0-9_.-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /comparewiki.php?lang=$1&project=$2&start_date=$3&end_date=$4 [L,QSA]
 RewriteRule ^compare/wiki/([a-zA-Z0-9_.-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /comparewiki.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
-
 
 RewriteRule ^api/stats/([a-zA-Z0-9_-]+)$ /api/stats.php?project=$1 [L,QSA]
 RewriteRule ^api/genders/graph/([a-zA-Z0-9_.-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/genders/graph.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
