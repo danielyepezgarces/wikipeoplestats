@@ -146,7 +146,7 @@ $data = fetchData($timeFrame, $projectGroup);
 <script>
 $(document).ready(function() {
     // Los datos del PHP se pasan a JavaScript
-    var tableData = <?php echo json_encode($currentPageResults); ?>;
+    var tableData = <?php echo json_encode($data); ?>;
 
     // Inicialización de DataTables
     $('#myTable').DataTable({
