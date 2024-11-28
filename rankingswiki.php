@@ -185,7 +185,7 @@ $(document).ready(function() {
             $('.dataTables_wrapper select, .dataTables_wrapper input[type="search"]').addClass('block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
             
             // Mejorar la apariencia de los botones de paginación
-            $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md mx-1 transition-colors duration-200 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500');
+            $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('px-3 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500');
             
             // Mejorar la apariencia del botón activo
             $('.dataTables_wrapper .dataTables_paginate .paginate_button.current').addClass('bg-blue-500 text-white border-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-400');
