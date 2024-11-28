@@ -22,6 +22,8 @@ $projectGroup = isset($_GET['group']) ? $_GET['group'] : 'wiki';
 
 // Obtener los datos de la API
 $data = fetchData($timeFrame, $projectGroup);
+$dataArray = array_values($data);
+
 ?>
 
 <!DOCTYPE html>
@@ -146,7 +148,7 @@ $data = fetchData($timeFrame, $projectGroup);
 <script>
 $(document).ready(function() {
     // Los datos del PHP se pasan a JavaScript
-    var tableData = <?php echo json_encode($data); ?>;
+    var tableData = <?php echo json_encode($dataArray); ?>;
 
     // Inicialización de DataTables
     $('#myTable').DataTable({
