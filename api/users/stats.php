@@ -96,7 +96,7 @@ if ($language_code === 'all') {
             MAX(w.last_updated) AS lastUpdated
         FROM people p
         JOIN articles a ON p.wikidata_id = a.wikidata_id
-        JOIN wikipedia w ON a.site = w.site
+        JOIN project w ON a.site = w.site
         WHERE a.site = '{$languages[$language_code]['wiki']}'
             AND a.creation_date >= '$start_date'
             AND a.creation_date <= '$end_date'
