@@ -30,6 +30,7 @@ function getDateRange($timeFrame) {
     $endDate = new DateTime(); // Fecha de fin (hoy)
     $startDate = clone $endDate; // Copiar la fecha de fin para la fecha de inicio
 
+    // Ajustar el rango de fechas según el intervalo
     switch ($timeFrame) {
         case '7d': // Últimos 7 días
             $startDate->modify('-7 days');
@@ -48,21 +49,33 @@ function getDateRange($timeFrame) {
             break;
     }
 
-    // Formatear las fechas
-    $startFormatted = $startDate->format('d-m-Y');
-    $endFormatted = $endDate->format('d-m-Y');
+    // Obtener el idioma desde la variable de sesión
+    $language = isset($_SESSION['LANG']) ? $_SESSION['LANG'] : 'en'; // Si no se encuentra en sesión, por defecto 'es'
+
+    // Establecer la configuración regional y el idioma (es_ES para español, en_US para inglés, etc.)
+    $locale = $language . '_' . strtoupper($language); // Ej: es_ES, en_US
+    $formatter = new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'd MMM');
+
+    // Formatear las fechas según el idioma
+    $startFormatted = $formatter->format($startDate);
+    $endFormatted = $formatter->format($endDate);
 
     // Si el año de inicio y fin son iguales, no mostrar el año
     if ($startDate->format('Y') === $endDate->format('Y')) {
-        $startFormatted = $startDate->format('d-m');
-        $endFormatted = $endDate->format('d-m');
+        // Solo mostrar el mes y el día
+        $startFormatted = $startDate->format('d M');
+        $endFormatted = $endDate->format('d M');
     }
 
+    // Retornar el rango de fechas
     return "$startFormatted - $endFormatted";
 }
 
-// Obtener el rango de fechas formateado
 $dateRange = getDateRange($timeFrame);
+
+// Imprimir el rango de fechas
+echo $dateRange;
+
 
 ?>
 
