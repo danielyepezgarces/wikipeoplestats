@@ -34,7 +34,7 @@ $dataArray = array_values($data);
     <title><?php echo __('sitename'); ?></title>
     <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/6.6.0/css/all.css">
-<link href="https://cdn.datatables.net/v/bm/dt-2.1.8/b-3.2.0/b-html5-3.2.0/datatables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.1.8/b-3.2.0/b-html5-3.2.0/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
     <!-- Incluir CSS de DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
