@@ -46,9 +46,6 @@ $cacheDuration = 21600; // 6 horas en segundos
 if ($cachedResponse) {
     // Si hay respuesta en caché, devolverla
     $response = json_decode($cachedResponse, true);
-    // Medir el tiempo total de ejecución
-    $executionTime = microtime(true) - $startTime;
-    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
     echo json_encode($response);
     exit;
 }
@@ -109,37 +106,45 @@ $sql = "
 
 $result = $conn->query($sql);
 
+$data = []; // Array de datos
 if ($result->num_rows > 0) {
-    $response = [];
-    while ($data = $result->fetch_assoc()) {
-        $currentLastUpdated = $data['lastUpdated']; // Obtener el último creado
+    while ($dataRow = $result->fetch_assoc()) {
+        $currentLastUpdated = $dataRow['lastUpdated']; // Obtener el último creado
 
-        // Agregar cada sitio al ranking
-        $response[] = [
-            'site' => $data['site'],
-            'totalPeople' => (int)$data['totalPeople'],
-            'totalWomen' => (int)$data['totalWomen'],
-            'totalMen' => (int)$data['totalMen'],
-            'otherGenders' => (int)$data['otherGenders'],
-            'totalContributions' => (int)$data['totalContributions'],
+        // Agregar cada sitio al array de datos
+        $data[] = [
+            'site' => $dataRow['site'],
+            'totalPeople' => (int)$dataRow['totalPeople'],
+            'totalWomen' => (int)$dataRow['totalWomen'],
+            'totalMen' => (int)$dataRow['totalMen'],
+            'otherGenders' => (int)$dataRow['otherGenders'],
+            'totalContributions' => (int)$dataRow['totalContributions'],
             'lastUpdated' => $currentLastUpdated ? $currentLastUpdated : null,
-            'siteCode' => $data['siteCode'], // Incluir el campo 'code' en la respuesta
+            'siteCode' => $dataRow['siteCode'], // Incluir el campo 'code' en la respuesta
         ];
     }
 
     // Almacenar en caché solo si se permite y no hay respuesta en caché
     if ($useCache && !$cachedResponse) {
-        $memcache->set($cacheKey, json_encode($response), $cacheDuration);
+        $memcache->set($cacheKey, json_encode($data), $cacheDuration);
     }
 
     // Medir el tiempo total de ejecución
     $executionTime = microtime(true) - $startTime;
-    $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
-
-    echo json_encode($response);
+    $executionTime = round($executionTime * 1000, 2); // En milisegundos
 } else {
-    echo json_encode(['error' => 'No data found']);
+    $data = ['error' => 'No data found'];
+    $executionTime = 0; // Si no hay datos, el tiempo de ejecución es 0
 }
+
+// Crear la respuesta final con los datos y el tiempo de ejecución
+$response = [
+    'data' => $data,
+    'executionTime' => $executionTime // Tiempo de ejecución separado
+];
+
+// Imprimir la respuesta final
+echo json_encode($response);
 
 $conn->close();
 ?>
