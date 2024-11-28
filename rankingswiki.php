@@ -170,21 +170,39 @@ $(document).ready(function() {
         language: {
             search: "",
             searchPlaceholder: "Search...",
+            lengthMenu: "Show _MENU_ entries",
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
             paginate: {
-                next: '>',
-                previous: '<'
+                first: '«',
+                previous: '‹',
+                next: '›',
+                last: '»'
             }
         },
-        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"f<"flex items-center"l<"ml-2"i>>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"p>',
+        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"flex items-center"l><"flex items-center"f>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
         drawCallback: function() {
-            // Apply Tailwind classes to various elements
+            // Aplicar clases de Tailwind a varios elementos
             $('.dataTables_wrapper select, .dataTables_wrapper input[type="search"]').addClass('block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
-            $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('px-3 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700');
+
+            // Mejorar la apariencia de los botones de paginación
+            $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('px-3 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md mx-1 transition-colors duration-200');
             $('.dataTables_wrapper .dataTables_paginate .paginate_button.current').addClass('bg-blue-500 text-white border-blue-500 hover:bg-blue-600');
             $('.dataTables_wrapper .dataTables_paginate .paginate_button.disabled').addClass('opacity-50 cursor-not-allowed');
-            $('.dataTables_wrapper .dataTables_info').addClass('text-sm text-gray-700 dark:text-gray-400');
-            $('table.dataTable tbody tr').addClass('hover:bg-gray-50 dark:hover:bg-gray-600');
+
+            // Mejorar la apariencia del texto de información y selector de entradas
+            $('.dataTables_wrapper .dataTables_info').addClass('text-sm text-gray-700 dark:text-gray-400 py-2');
+            $('.dataTables_wrapper .dataTables_length').addClass('text-sm text-gray-700 dark:text-gray-400 py-2');
+
+            // Mejorar la apariencia de las filas y celdas de la tabla
+            $('table.dataTable tbody tr').addClass('hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200');
             $('table.dataTable tbody td').addClass('p-3 text-sm text-gray-700 dark:text-gray-300');
+
+            // Ajustar el contenedor de paginación
+            $('.dataTables_wrapper .dataTables_paginate').addClass('flex items-center justify-end space-x-2 mt-4');
+
+            // Mejorar la apariencia del input de búsqueda
+            $('.dataTables_wrapper .dataTables_filter input').addClass('ml-2');
+            $('.dataTables_wrapper .dataTables_filter label').addClass('flex items-center');
         }
     });
 });
