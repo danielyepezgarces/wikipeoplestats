@@ -199,7 +199,7 @@ $(document).ready(function() {
     console.log(tableData);  // Verifica los datos que se están pasando
 
     // Definir el idioma y la configuración
-    var currentLanguage = "<?php echo $currentLanguage; ?>";  // Idioma de la sesión o preferencia del usuario
+    var currentLanguage = "<?php echo $_SESSION['lang']; ?>";  // Obtener el idioma de la sesión
     var languageUrl = "assets/datatables/i18n/" + currentLanguage + ".json";  // Intentar cargar el archivo del idioma
 
     // Si no se encuentra el archivo, cargar el archivo por defecto (English.json)
