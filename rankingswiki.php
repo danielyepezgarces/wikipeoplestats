@@ -148,7 +148,7 @@ $dataArray = array_values($data);
 <script>
 $(document).ready(function() {
     // Los datos del PHP se pasan a JavaScript
-    var tableData = <?php echo json_encode($dataArray); ?>;
+    var tableData = <?php echo json_encode($dataArray[0][0]); ?>; // Accedemos al primer array dentro de la respuesta
 
     // Verificar si los datos son correctos en la consola
     console.log(tableData); // Verifica que los datos se estén pasando correctamente
@@ -177,6 +177,7 @@ $(document).ready(function() {
         ]
     });
 });
+
 
 </script>
 </body>
