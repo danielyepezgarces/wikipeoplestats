@@ -57,6 +57,14 @@ $dataArray = array_values($data);
             }
         }
     </script>
+    <style>
+        .dataTables_length {
+    display: flex;              /* Usamos flexbox para alinear los elementos */
+    align-items: center;        /* Centra verticalmente */
+    gap: 10px;                  /* Espacio entre el label y el select */
+    font-family: 'Arial', sans-serif; /* Fuente personalizada */
+}
+    </style>
 </head>
 <body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
