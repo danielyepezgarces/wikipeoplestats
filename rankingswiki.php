@@ -242,7 +242,7 @@ function getDateRange(interval) {
                 last: '»'
             }
         },
-        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"table-title-text ml-4">l<"flex items-center"l><"flex items-center"f>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
+        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"<"table-title-text">l<"flex items-center"l><"flex items-center"f>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"<"flex items-center"i><"flex items-center"p>>',
         drawCallback: function() {
                 // Detectar si es escritorio (ancho mayor a 1024px)
             if (window.innerWidth > 1024) {
@@ -252,7 +252,7 @@ function getDateRange(interval) {
                   $('.dataTables_wrapper').addClass('overflow-x-auto');
             }
 
-            $(".table-title-text ml-4").text("Ranking de Proyectos (Rango: " + dateRange + ")");
+            $(".table-title-text").text("Ranking de Proyectos (Rango: " + dateRange + ")");
 
             $('table.dataTable thead th').addClass(
              'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm py-3 px-4 border-b border-gray-300 dark:border-gray-600'
