@@ -169,7 +169,7 @@ $(document).ready(function() {
         language: {
             search: "",
             searchPlaceholder: "Search...",
-            lengthMenu: "Show _MENU_ entries",
+            lengthChange: false, // Desactiva el control de "Results per page"
             info: "Showing _START_ to _END_ of _TOTAL_ entries",
             paginate: {
                 first: '«',
