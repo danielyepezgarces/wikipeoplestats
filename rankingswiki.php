@@ -70,9 +70,7 @@ $dataArray = array_values($data);
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6"><?php echo __('filters'); ?></h2>
 
     <?php
-    // Obtener los parámetros actuales sin incluir 'lang'
     $currentParams = $_GET;
-    unset($currentParams['lang']);
 
     // Función para verificar si un parámetro está activo
     function isActive($key, $value) {
