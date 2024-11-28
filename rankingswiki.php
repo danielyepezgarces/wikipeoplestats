@@ -42,18 +42,22 @@ $startIndex = ($currentPage - 1) * $resultsPerPage;
 // Obtener los resultados para la página actual
 $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 
-// Función para construir los enlaces de paginación con los parámetros de la URL
 function buildPaginationUrl($page) {
-    $url = strtok($_SERVER['REQUEST_URI'], '?') . "?page=" . $page; // Remueve parámetros previos
-    // Agregar otros parámetros de la URL
+    // Obtener la URL base sin parámetros
+    $baseUrl = strtok($_SERVER['REQUEST_URI'], '?');
+
+    // Construir la nueva URL con el parámetro "page"
+    $url = $baseUrl . "?page=" . $page;
+
+    // Agregar otros parámetros, excluyendo "page" y "lang"
     foreach ($_GET as $key => $value) {
-        if ($key !== 'page' && $key !== 'lang') { // Excluir 'page' y 'lang'
-            $url .= "&$key=$value";
+        if ($key !== 'page' && $key !== 'lang') {
+            $url .= "&" . urlencode($key) . "=" . urlencode($value);
         }
     }
+
     return $url;
 }
-
 ?>
 
 <!DOCTYPE html>
