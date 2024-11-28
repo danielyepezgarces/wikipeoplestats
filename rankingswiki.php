@@ -163,7 +163,7 @@ function buildPaginationUrl($page) {
     $startPage = max(1, $currentPage - floor($maxButtons / 2));  // Rango de inicio
     $endPage = min($totalPages, $startPage + $maxButtons - 1); // Rango de fin
 
-    // Si el rango de fin es menor que el total de páginas, ajustar el rango de inicio
+    // Ajustar el rango de inicio si el rango de fin es menor que el total de páginas
     if ($endPage - $startPage + 1 < $maxButtons) {
         $startPage = max(1, $endPage - $maxButtons + 1);
     }
@@ -181,6 +181,7 @@ function buildPaginationUrl($page) {
         <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Next</span>
     <?php endif; ?>
 </div>
+
 
   </main>
 </div>
