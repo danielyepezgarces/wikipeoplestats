@@ -158,7 +158,6 @@ $(document).ready(function() {
         "data": tableData,          // Pasa todos los datos desde PHP
         "columns": [
             {
-                "data": null, 
                 "render": function (data, type, row, meta) {
                     return meta.row + 1;  // Esto muestra el índice de la fila
                 }
