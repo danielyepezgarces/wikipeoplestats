@@ -187,6 +187,12 @@ $(document).ready(function() {
         "lengthMenu": [10, 25, 50], // Opciones de páginas
         "data": tableData,          // Pasa todos los datos desde PHP
         "columns": [
+            {
+                "data": null, 
+                "render": function (data, type, row, meta) {
+                    return meta.row + 1;  // Esto muestra el índice de la fila
+                }
+            }, // Columna # (índice de fila)
             { "data": "site" },            // Columna "Project"
             { "data": "totalPeople" },     // Columna "Total People"
             { "data": "totalWomen" },      // Columna "Total Women"
