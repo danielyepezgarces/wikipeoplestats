@@ -41,12 +41,17 @@ $startIndex = ($currentPage - 1) * $resultsPerPage;
 $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 
 function buildPaginationUrl($page) {
-    // Obtén la URL base con el valor de lang que ya está presente en la ruta
-    $url = $_SERVER['PHP_SELF'] . "/{$_GET['lang']}/rankings/wikis?page=" . $page;
+    // Obtener el valor de 'lang' de la URL actual (por ejemplo, '/es/rankings/wikis')
+    $lang = $_GET['lang'] ?? 'en'; // Valor por defecto 'es' si no se encuentra 'lang'
 
-    // Agregar otros parámetros de la URL, excepto 'page' y 'lang'
+    // Construir la base de la URL, eliminando el parámetro 'page' y asegurándonos de que 'lang' esté presente
+    $baseUrl = rtrim(dirname($_SERVER['REQUEST_URI']), '/') . "/$lang/rankings/wikis"; 
+
+    // Agregar el parámetro 'page'
+    $url = $baseUrl . "?page=" . $page;
+
+    // Agregar otros parámetros como 'interval' y 'group', excluyendo 'page' y 'lang'
     foreach ($_GET as $key => $value) {
-        // Evitar duplicar 'page' y 'lang'
         if ($key !== 'page' && $key !== 'lang') {
             $url .= "&$key=$value";
         }
@@ -54,7 +59,6 @@ function buildPaginationUrl($page) {
 
     return $url;
 }
-
 ?>
 
 <!DOCTYPE html>
