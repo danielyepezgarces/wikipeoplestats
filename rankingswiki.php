@@ -220,7 +220,7 @@ $(document).ready(function() {
 
             // Mejorar la apariencia del input de búsqueda
             $('.dataTables_wrapper .dataTables_filter input').addClass('ml-2');
-            $('.dataTables_wrapper .dataTables_filter label').addClass('flex items-center');
+            $('.dataTables_wrapper .dataTables_filter label').addClass('flex items-center mb-4 mr-4');
 
             $('table.dataTable thead th').removeClass('sorting sorting_asc sorting_desc')
             .addClass('sorting bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm py-3 px-4 border-b border-gray-300 dark:border-gray-600');
