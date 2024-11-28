@@ -194,6 +194,8 @@ function buildPaginationUrl($page) {
 </script>
 <script>
 $(document).ready(function() {
+    var tableData = <?php echo json_encode($data); ?>;
+    console.log(tableData);  // Esto te ayudará a ver qué datos se están pasando
     // Definir el idioma y la configuración
     var currentLanguage = "<?php echo $currentLanguage; ?>";
     var languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/English.json";  // Por defecto en inglés
