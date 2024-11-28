@@ -196,7 +196,10 @@ function buildPaginationUrl($page) {
 $(document).ready(function() {
     // Obtener los datos desde PHP
     var tableData = <?php echo json_encode($data); ?>;
-    console.log(tableData);  // Verifica los datos que se están pasando
+
+    // Convertir la respuesta de la API en un array si es necesario
+    // Por ejemplo, si la API devuelve un objeto con claves numéricas, convierte eso en un array
+    var processedData = Object.values(tableData); // Si `tableData` es un objeto con claves numéricas
 
     // Definir el idioma y la configuración
     var currentLanguage = "<?php echo $_SESSION['lang']; ?>";  // Obtener el idioma de la sesión
@@ -206,23 +209,24 @@ $(document).ready(function() {
     $.ajax({
         url: languageUrl,
         dataType: "json",
-        success: function(data) {
+        success: function(languageData) {
             // Si el archivo se carga correctamente, inicializa la tabla
-            initializeDataTable(data);
+            initializeDataTable(languageData);
         },
         error: function() {
             // Si el archivo no se encuentra, cargar el archivo por defecto (English.json)
             console.log("Idioma no encontrado, cargando idioma por defecto.");
             languageUrl = "assets/datatables/i18n/English.json";
-            $.getJSON(languageUrl, function(data) {
-                initializeDataTable(data);
+            $.getJSON(languageUrl, function(languageData) {
+                initializeDataTable(languageData);
             });
         }
     });
 
     // Función para inicializar DataTables con los datos y el idioma
     function initializeDataTable(languageData) {
-        if (tableData.length > 0) {
+        if (processedData.length > 0) {
+            console.log("Datos para la tabla:", processedData);  // Verifica que los datos estén correctos
             $('#myTable').DataTable({
                 "paging": true,             // Activa la paginación
                 "searching": true,          // Activa la búsqueda
@@ -230,15 +234,15 @@ $(document).ready(function() {
                 "pageLength": 10,           // Número de registros por página
                 "lengthMenu": [10, 25, 50], // Opciones de páginas
                 "language": languageData,   // Cargar archivo de traducción correspondiente
-                "data": tableData,          // Pasa todos los datos desde PHP
+                "data": processedData,      // Pasa los datos procesados
                 "columns": [
-                    { "data": "id" },
-                    { "data": "project" },
-                    { "data": "totalPeople" },
-                    { "data": "totalWomen" },
-                    { "data": "totalMen" },
-                    { "data": "otherGenders" },
-                    { "data": "totalContributions" }
+                    { "data": "site" },                 // Columna de "site"
+                    { "data": "totalPeople" },          // Columna de "totalPeople"
+                    { "data": "totalWomen" },           // Columna de "totalWomen"
+                    { "data": "totalMen" },             // Columna de "totalMen"
+                    { "data": "otherGenders" },         // Columna de "otherGenders"
+                    { "data": "totalContributions" },   // Columna de "totalContributions"
+                    { "data": "lastUpdated" }           // Columna de "lastUpdated"
                 ]
             });
         } else {
