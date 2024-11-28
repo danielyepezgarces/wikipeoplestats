@@ -108,7 +108,7 @@ function buildPaginationUrl($page) {
         <li><a href="?interval=all&group=<?= htmlspecialchars($_GET['projectGroup'] ?? '') ?>" class="block py-4 px-2 text-base font-medium rounded hover:bg-primary-500 dark:hover:bg-primary-600 text-gray-800 dark:text-gray-200 <?= ($_GET['timeFrame'] == 'all') ? 'bg-primary-500 text-white' : '' ?>">All time</a></li>
       </ul>
     </div>
-    
+
     <!-- Sección By Project -->
     <div class="mb-6">
       <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">By Project</h3>
@@ -140,33 +140,13 @@ function buildPaginationUrl($page) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($currentPageResults)) : ?>
-                        <?php foreach ($currentPageResults as $index => $item): ?>
-                            <tr class="text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                                <td class="text-center"><?= $startIndex + $index + 1 ?></td>
-                                <td class="text-center"><?= htmlspecialchars($item['site']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($item['totalPeople']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($item['totalWomen']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($item['totalMen']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($item['otherGenders']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($item['totalContributions']) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="7" class="text-center text-gray-500">No data available</td>
-                        </tr>
-                    <?php endif; ?>
+                    <!-- Aquí no es necesario insertar manualmente los datos con PHP -->
                 </tbody>
             </table>
         </div>
     </div>
-
-    <!-- Paginación (opcional, ya manejada por DataTables) -->
-    <div id="pagination" class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
-        <!-- Esto será manejado automáticamente por DataTables -->
-    </div>
 </main>
+
 
 </div>
 
@@ -193,64 +173,29 @@ function buildPaginationUrl($page) {
     });
 </script>
 <script>
+<script>
 $(document).ready(function() {
-    // Obtener los datos desde PHP
-    var tableData = <?php echo json_encode($data); ?>;
+    // Los datos del PHP se pasan a JavaScript
+    var tableData = <?php echo json_encode($currentPageResults); ?>;
 
-    // Convertir la respuesta de la API en un array si es necesario
-    // Por ejemplo, si la API devuelve un objeto con claves numéricas, convierte eso en un array
-    var processedData = Object.values(tableData); // Si `tableData` es un objeto con claves numéricas
-
-    // Definir el idioma y la configuración
-    var currentLanguage = "<?php echo $_SESSION['lang']; ?>";  // Obtener el idioma de la sesión
-    var languageUrl = "assets/datatables/i18n/" + currentLanguage + ".json";  // Intentar cargar el archivo del idioma
-
-    // Si no se encuentra el archivo, cargar el archivo por defecto (English.json)
-    $.ajax({
-        url: languageUrl,
-        dataType: "json",
-        success: function(languageData) {
-            // Si el archivo se carga correctamente, inicializa la tabla
-            initializeDataTable(languageData);
-        },
-        error: function() {
-            // Si el archivo no se encuentra, cargar el archivo por defecto (English.json)
-            console.log("Idioma no encontrado, cargando idioma por defecto.");
-            languageUrl = "assets/datatables/i18n/English.json";
-            $.getJSON(languageUrl, function(languageData) {
-                initializeDataTable(languageData);
-            });
-        }
+    // Inicialización de DataTables
+    $('#myTable').DataTable({
+        "paging": true,             // Activa la paginación
+        "searching": true,          // Activa la búsqueda
+        "ordering": true,           // Activa el ordenamiento por columnas
+        "pageLength": 10,           // Número de registros por página
+        "lengthMenu": [10, 25, 50], // Opciones de páginas
+        "data": tableData,          // Pasa todos los datos desde PHP
+        "columns": [
+            { "data": "site" },            // Columna "Project"
+            { "data": "totalPeople" },     // Columna "Total People"
+            { "data": "totalWomen" },      // Columna "Total Women"
+            { "data": "totalMen" },        // Columna "Total Men"
+            { "data": "otherGenders" },    // Columna "Other Genders"
+            { "data": "totalContributions" } // Columna "Total Editors"
+        ]
     });
-
-    // Función para inicializar DataTables con los datos y el idioma
-    function initializeDataTable(languageData) {
-        if (processedData.length > 0) {
-            console.log("Datos para la tabla:", processedData);  // Verifica que los datos estén correctos
-            $('#myTable').DataTable({
-                "paging": true,             // Activa la paginación
-                "searching": true,          // Activa la búsqueda
-                "ordering": true,           // Activa el ordenamiento por columnas
-                "pageLength": 10,           // Número de registros por página
-                "lengthMenu": [10, 25, 50], // Opciones de páginas
-                "language": languageData,   // Cargar archivo de traducción correspondiente
-                "data": processedData,      // Pasa los datos procesados
-                "columns": [
-                    { "data": "site" },                 // Columna de "site"
-                    { "data": "totalPeople" },          // Columna de "totalPeople"
-                    { "data": "totalWomen" },           // Columna de "totalWomen"
-                    { "data": "totalMen" },             // Columna de "totalMen"
-                    { "data": "otherGenders" },         // Columna de "otherGenders"
-                    { "data": "totalContributions" },   // Columna de "totalContributions"
-                    { "data": "lastUpdated" }           // Columna de "lastUpdated"
-                ]
-            });
-        } else {
-            console.log("No hay datos disponibles para mostrar en la tabla.");
-        }
-    }
 });
-
 </script>
 
 </body>
