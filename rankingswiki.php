@@ -36,7 +36,7 @@ $dataArray = array_values($data);
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/6.6.0/css/all.css">
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
     <!-- Incluir CSS de DataTables -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.semanticui.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css">
 
     <!-- Incluir jQuery (DataTables depende de jQuery) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -57,12 +57,6 @@ $dataArray = array_values($data);
         }
     </script>
     <style>
-        .dataTables_length {
-    display: flex;              /* Usamos flexbox para alinear los elementos */
-    align-items: center;        /* Centra verticalmente */
-    gap: 10px;                  /* Espacio entre el label y el select */
-    font-family: 'Arial', sans-serif; /* Fuente personalizada */
-}
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
@@ -107,7 +101,7 @@ $dataArray = array_values($data);
     <div class="overflow-x-auto">
         <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
             <!-- Cabecera de la tabla -->
-            <table id="myTable" class="display min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <table id="rankingwiki" class="display min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                 <thead>
                     <tr class="bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
                         <th class="text-center">#</th>
@@ -155,38 +149,45 @@ $dataArray = array_values($data);
 
 <script>
 $(document).ready(function() {
-    // Los datos del PHP se pasan a JavaScript
-    var tableData = <?php echo json_encode($dataArray[0]); ?>; // Accedemos al primer array dentro de la respuesta
+    var tableData = <?php echo json_encode($dataArray[0]); ?>;
 
-    // Verificar si los datos son correctos en la consola
-    console.log(tableData); // Verifica que los datos se estén pasando correctamente
-
-    // Inicialización de DataTables
-    $('#myTable').DataTable({
-        "paging": true,             // Activa la paginación
-        "searching": true,          // Activa la búsqueda
-        "ordering": true,           // Activa el ordenamiento por columnas
-        "pageLength": 10,           // Número de registros por página
-        "lengthMenu": [10, 25, 50], // Opciones de páginas
-        "data": tableData,          // Pasa todos los datos desde PHP
-        "columns": [
+    $('#rankingwiki').DataTable({
+        data: tableData,
+        columns: [
             {
-                "data": null, 
-                "render": function (data, type, row, meta) {
-                    return meta.row + 1;  // Esto muestra el índice de la fila
+                data: null, 
+                render: function (data, type, row, meta) {
+                    return meta.row + 1;
                 }
             },
-            { "data": "site" },            // Columna "Project"
-            { "data": "totalPeople" },     // Columna "Total People"
-            { "data": "totalWomen" },      // Columna "Total Women"
-            { "data": "totalMen" },        // Columna "Total Men"
-            { "data": "otherGenders" },    // Columna "Other Genders"
-            { "data": "totalContributions" } // Columna "Total Editors"
-        ]
+            { data: "site" },
+            { data: "totalPeople" },
+            { data: "totalWomen" },
+            { data: "totalMen" },
+            { data: "otherGenders" },
+            { data: "totalContributions" }
+        ],
+        language: {
+            search: "",
+            searchPlaceholder: "Search...",
+            paginate: {
+                next: '>',
+                previous: '<'
+            }
+        },
+        dom: '<"flex flex-col sm:flex-row items-center justify-between mb-4"f<"flex items-center"l<"ml-2"i>>><"overflow-x-auto"t><"flex flex-col sm:flex-row items-center justify-between mt-4"p>',
+        drawCallback: function() {
+            // Apply Tailwind classes to various elements
+            $('.dataTables_wrapper select, .dataTables_wrapper input[type="search"]').addClass('block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500');
+            $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('px-3 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700');
+            $('.dataTables_wrapper .dataTables_paginate .paginate_button.current').addClass('bg-blue-500 text-white border-blue-500 hover:bg-blue-600');
+            $('.dataTables_wrapper .dataTables_paginate .paginate_button.disabled').addClass('opacity-50 cursor-not-allowed');
+            $('.dataTables_wrapper .dataTables_info').addClass('text-sm text-gray-700 dark:text-gray-400');
+            $('table.dataTable tbody tr').addClass('hover:bg-gray-50 dark:hover:bg-gray-600');
+            $('table.dataTable tbody td').addClass('p-3 text-sm text-gray-700 dark:text-gray-300');
+        }
     });
 });
-
-
 </script>
 </body>
 </html>
