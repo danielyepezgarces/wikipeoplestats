@@ -40,17 +40,21 @@ $startIndex = ($currentPage - 1) * $resultsPerPage;
 // Obtener los resultados para la página actual
 $currentPageResults = array_slice($data, $startIndex, $resultsPerPage);
 
-// Función para construir los enlaces de paginación con los parámetros de la URL
 function buildPaginationUrl($page) {
-    $url = $_SERVER['PHP_SELF'] . "?page=" . $page;
-    // Agregar otros parámetros de la URL
+    // Obtén la URL base con el valor de lang que ya está presente en la ruta
+    $url = $_SERVER['PHP_SELF'] . "/{$_GET['lang']}/rankings/wikis?page=" . $page;
+
+    // Agregar otros parámetros de la URL, excepto 'page' y 'lang'
     foreach ($_GET as $key => $value) {
-        if ($key !== 'page') {
+        // Evitar duplicar 'page' y 'lang'
+        if ($key !== 'page' && $key !== 'lang') {
             $url .= "&$key=$value";
         }
     }
+
     return $url;
 }
+
 ?>
 
 <!DOCTYPE html>
