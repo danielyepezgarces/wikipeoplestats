@@ -194,9 +194,9 @@ function buildPaginationUrl($page) {
 </script>
 <script>
 $(document).ready(function() {
-    // Obtener los datos de PHP
+    // Obtener los datos desde PHP
     var tableData = <?php echo json_encode($data); ?>;
-    console.log(tableData);  // Esto te ayudará a ver qué datos se están pasando
+    console.log(tableData);  // Verifica los datos que se están pasando
 
     // Definir el idioma y la configuración
     var currentLanguage = "<?php echo $currentLanguage; ?>";  // Idioma de la sesión o preferencia del usuario
@@ -222,26 +222,31 @@ $(document).ready(function() {
 
     // Función para inicializar DataTables con los datos y el idioma
     function initializeDataTable(languageData) {
-        $('#myTable').DataTable({
-            "paging": true,             // Activa la paginación
-            "searching": true,          // Activa la búsqueda
-            "ordering": true,           // Activa el ordenamiento por columnas
-            "pageLength": 10,           // Número de registros por página
-            "lengthMenu": [10, 25, 50], // Opciones de páginas
-            "language": languageData,   // Cargar archivo de traducción correspondiente
-            "data": tableData,          // Pasa todos los datos desde PHP
-            "columns": [
-                { "data": "id" },
-                { "data": "project" },
-                { "data": "totalPeople" },
-                { "data": "totalWomen" },
-                { "data": "totalMen" },
-                { "data": "otherGenders" },
-                { "data": "totalContributions" }
-            ]
-        });
+        if (tableData.length > 0) {
+            $('#myTable').DataTable({
+                "paging": true,             // Activa la paginación
+                "searching": true,          // Activa la búsqueda
+                "ordering": true,           // Activa el ordenamiento por columnas
+                "pageLength": 10,           // Número de registros por página
+                "lengthMenu": [10, 25, 50], // Opciones de páginas
+                "language": languageData,   // Cargar archivo de traducción correspondiente
+                "data": tableData,          // Pasa todos los datos desde PHP
+                "columns": [
+                    { "data": "id" },
+                    { "data": "project" },
+                    { "data": "totalPeople" },
+                    { "data": "totalWomen" },
+                    { "data": "totalMen" },
+                    { "data": "otherGenders" },
+                    { "data": "totalContributions" }
+                ]
+            });
+        } else {
+            console.log("No hay datos disponibles para mostrar en la tabla.");
+        }
     }
 });
+
 </script>
 
 </body>
