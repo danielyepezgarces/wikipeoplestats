@@ -63,6 +63,14 @@ function buildPaginationUrl($page) {
     <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/6.6.0/css/all.css">
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
+    <!-- Incluir CSS de DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+    <!-- Incluir jQuery (DataTables depende de jQuery) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Incluir JS de DataTables -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -114,89 +122,52 @@ function buildPaginationUrl($page) {
 
 
 
-  <!-- Main -->
-  <main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
+<main class="col-span-5 bg-gray-50 dark:bg-[#1D2939] border border-gray-200 dark:border-gray-700 rounded-lg">
     <!-- Tabla -->
     <div class="overflow-x-auto">
         <div class="min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
             <!-- Cabecera de la tabla -->
-            <div class="grid grid-cols-7 bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                <div class="col-span-1 text-center">#</div>
-                <div class="col-span-1 text-center">Project</div>
-                <div class="col-span-1 text-center">Total People</div>
-                <div class="col-span-1 text-center">Total Women</div>
-                <div class="col-span-1 text-center">Total Men</div>
-                <div class="col-span-1 text-center">Other Genders</div>
-                <div class="col-span-1 text-center">Total Editors</div>
-            </div>
-
-            <?php if (!empty($currentPageResults)) : ?>
-                <?php foreach ($currentPageResults as $index => $item): ?>
-                    <div class="grid grid-cols-7 p-4 text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
-                        <div class="col-span-1 text-center"><?= $startIndex + $index + 1 ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['site']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalPeople']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalWomen']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalMen']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['otherGenders']) ?></div>
-                        <div class="col-span-1 text-center"><?= htmlspecialchars($item['totalContributions']) ?></div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-span-7 text-center text-gray-500">No data available</div>
-            <?php endif; ?>
+            <table id="myTable" class="display min-w-full bg-white dark:bg-[#1F2937] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                <thead>
+                    <tr class="bg-gray-100 dark:bg-gray-700 p-4 text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        <th class="text-center">#</th>
+                        <th class="text-center">Project</th>
+                        <th class="text-center">Total People</th>
+                        <th class="text-center">Total Women</th>
+                        <th class="text-center">Total Men</th>
+                        <th class="text-center">Other Genders</th>
+                        <th class="text-center">Total Editors</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($currentPageResults)) : ?>
+                        <?php foreach ($currentPageResults as $index => $item): ?>
+                            <tr class="text-sm text-gray-700 dark:text-gray-200 border-t border-gray-200 dark:border-gray-700">
+                                <td class="text-center"><?= $startIndex + $index + 1 ?></td>
+                                <td class="text-center"><?= htmlspecialchars($item['site']) ?></td>
+                                <td class="text-center"><?= htmlspecialchars($item['totalPeople']) ?></td>
+                                <td class="text-center"><?= htmlspecialchars($item['totalWomen']) ?></td>
+                                <td class="text-center"><?= htmlspecialchars($item['totalMen']) ?></td>
+                                <td class="text-center"><?= htmlspecialchars($item['otherGenders']) ?></td>
+                                <td class="text-center"><?= htmlspecialchars($item['totalContributions']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" class="text-center text-gray-500">No data available</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
-<!-- Paginación -->
-<div class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
-    <!-- Enlace a la página anterior -->
-    <?php if ($currentPage > 1): ?>
-        <a href="<?= buildPaginationUrl($currentPage - 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Previous</a>
-    <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Previous</span>
-    <?php endif; ?>
+    <!-- Paginación (opcional, ya manejada por DataTables) -->
+    <div id="pagination" class="pagination flex justify-center items-center space-x-2 mt-4 mb-4">
+        <!-- Esto será manejado automáticamente por DataTables -->
+    </div>
+</main>
 
-    <!-- Enlace a la primera página -->
-    <?php if ($currentPage > 1): ?>
-        <a href="<?= buildPaginationUrl(1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">First</a>
-    <?php endif; ?>
-
-    <!-- Enlaces a las páginas -->
-    <?php
-    $maxButtons = 10;
-    $halfMaxButtons = floor($maxButtons / 2);
-
-    // Calcular el rango de páginas
-    $startPage = max(1, $currentPage - $halfMaxButtons);  // Rango de inicio
-    $endPage = min($totalPages, $currentPage + $halfMaxButtons); // Rango de fin
-
-    // Ajustar el rango de inicio si el rango de fin es menor que el total de páginas
-    if ($endPage - $startPage + 1 < $maxButtons) {
-        $startPage = max(1, $endPage - $maxButtons + 1);
-    }
-
-    // Mostrar los botones de las páginas
-    for ($i = $startPage; $i <= $endPage; $i++):
-    ?>
-        <a href="<?= buildPaginationUrl($i) ?>" class="px-4 py-2 <?= $i === $currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500' ?> rounded-lg"><?= $i ?></a>
-    <?php endfor; ?>
-
-    <!-- Enlace a la última página -->
-    <?php if ($currentPage < $totalPages): ?>
-        <a href="<?= buildPaginationUrl($totalPages) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Last</a>
-    <?php endif; ?>
-
-    <!-- Enlace a la siguiente página -->
-    <?php if ($currentPage < $totalPages): ?>
-        <a href="<?= buildPaginationUrl($currentPage + 1) ?>" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white rounded-lg">Next</a>
-    <?php else: ?>
-        <span class="px-4 py-2 bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-white rounded-lg cursor-not-allowed">Next</span>
-    <?php endif; ?>
-</div>
-
-
-  </main>
 </div>
 
       <!-- Footer -->
@@ -219,6 +190,31 @@ function buildPaginationUrl($page) {
     // Inicializa los odómetros
     document.querySelectorAll('.odometer').forEach(function (odometer) {
         odometer.innerHTML = odometer.getAttribute('data-odometer-final');
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        // Definir las opciones de traducción
+        var languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/English.json";  // Por defecto en inglés
+
+        if (currentLanguage === "es") {
+            languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/Spanish.json"; // Cargar en español si el idioma es "es"
+        } else if (currentLanguage === "fr") {
+            languageUrl = "https://cdn.datatables.net/plug-ins/1.11.5/i18n/French.json"; // Cargar en francés si el idioma es "fr"
+        }
+        // Agregar más idiomas según sea necesario...
+
+        // Inicializar la tabla con DataTables y cargar el idioma correspondiente
+        $('#myTable').DataTable({
+            "paging": true,             // Activa la paginación
+            "searching": true,          // Activa la búsqueda
+            "ordering": true,           // Activa el ordenamiento por columnas
+            "pageLength": 10,           // Número de registros por página
+            "lengthMenu": [10, 25, 50], // Opciones de páginas
+            "language": {
+                "url": languageUrl      // Cargar archivo de traducción correspondiente
+            }
+        });
     });
 </script>
 
