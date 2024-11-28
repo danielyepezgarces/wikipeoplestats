@@ -150,6 +150,9 @@ $(document).ready(function() {
     // Los datos del PHP se pasan a JavaScript
     var tableData = <?php echo json_encode($dataArray); ?>;
 
+    // Verificar si los datos son correctos en la consola
+    console.log(tableData); // Verifica que los datos se estén pasando correctamente
+
     // Inicialización de DataTables
     $('#myTable').DataTable({
         "paging": true,             // Activa la paginación
@@ -174,6 +177,7 @@ $(document).ready(function() {
         ]
     });
 });
+
 </script>
 </body>
 </html>
