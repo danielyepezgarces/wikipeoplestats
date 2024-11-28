@@ -140,17 +140,25 @@ function buildPaginationUrl($page) {
                 <table class="min-w-full text-left text-sm">
                     <thead>
                         <tr>
-                            <th class="px-4 py-2"><?php echo __('columns_rank'); ?></th>
-                            <th class="px-4 py-2"><?php echo __('columns_project'); ?></th>
-                            <th class="px-4 py-2"><?php echo __('columns_count'); ?></th>
+                            <th class="px-4 py-2">#</th>
+                            <th class="px-4 py-2"><?php echo __('project'); ?></th>
+                            <th class="px-4 py-2"><?php echo __('total_people'); ?></th>
+                            <th class="px-4 py-2"><?php echo __('total_woman'); ?></th>
+                            <th class="px-4 py-2"><?php echo __('total_men'); ?></th>
+                            <th class="px-4 py-2"><?php echo __('other_genders'); ?></th>
+                            <th class="px-4 py-2"><?php echo __('total_editors'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($currentPageResults as $index => $item): ?>
                             <tr class="border-b dark:border-gray-700">
                                 <td class="px-4 py-2"><?php echo $index + 1; ?></td>
-                                <td class="px-4 py-2"><?php echo $item['project_name']; ?></td>
-                                <td class="px-4 py-2"><?php echo $item['count']; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['site']; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['totalPeople']; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['totalWomen']; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['totalMen']; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['otherGenders']; ?></td>
+                                <td class="px-4 py-2"><?php echo $item['totalContributions']; ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
