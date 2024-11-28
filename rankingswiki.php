@@ -188,7 +188,7 @@ $(document).ready(function() {
             $('.dataTables_wrapper .dataTables_paginate .paginate_button').addClass('px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 rounded-lg');
             
             // Mejorar la apariencia del botón activo
-            $('.dataTables_wrapper .dataTables_paginate .paginate_button.current').addClass('bg-blue-500 text-white border-blue-500 hover:bg-blue-600 focus:ring-2 focus:ring-blue-400');
+            $('.dataTables_wrapper .dataTables_paginate .paginate_button.current').addClass('bg-blue-500 text-white px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 rounded-lg');
             
             // Mejorar la apariencia del botón deshabilitado
             $('.dataTables_wrapper .dataTables_paginate .paginate_button.disabled').addClass('opacity-50 cursor-not-allowed bg-gray-300 dark:bg-gray-800 text-gray-400 dark:text-gray-600');
