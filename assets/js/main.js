@@ -1,7 +1,3 @@
-function changeLanguage(lang) {
-    window.location.href = '/' + lang + '/';
-}
-
 function toggleLanguagePopup() {
     const popup = document.getElementById('language-popup');
     popup.classList.toggle('hidden');
