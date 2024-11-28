@@ -44,7 +44,7 @@ $dataArray = array_values($data);
     <!-- Incluir JS de DataTables -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.tailwindcss.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/4.0.0-beta.3/lib.min.js" integrity="sha512-pPVlzS1g/1qEH2BrHBtnesqmMA+3lRfyBPsy0N+8BLCUeOMyhGYSX2fJE3cK0CjhD8BsuA42b3NHMrJ47Q/bnA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
