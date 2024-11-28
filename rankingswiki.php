@@ -49,34 +49,29 @@ function getDateRange($timeFrame) {
             break;
     }
 
-    // Obtener el idioma desde la variable de sesión
-    $language = isset($_SESSION['LANG']) ? $_SESSION['LANG'] : 'en'; // Si no se encuentra en sesión, por defecto 'es'
+    // Obtener la traducción de los meses usando __()
+    $startMonth = __('' . $startDate->format('M'));
+    $endMonth = __('' . $endDate->format('M'));
 
-    // Establecer la configuración regional y el idioma (es_ES para español, en_US para inglés, etc.)
-    $locale = $language . '_' . strtoupper($language); // Ej: es_ES, en_US
-    $formatter = new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'd MMM');
-
-    // Formatear las fechas según el idioma
-    $startFormatted = $formatter->format($startDate);
-    $endFormatted = $formatter->format($endDate);
+    // Formatear las fechas
+    $startDay = $startDate->format('d');
+    $endDay = $endDate->format('d');
 
     // Si el año de inicio y fin son iguales, no mostrar el año
     if ($startDate->format('Y') === $endDate->format('Y')) {
-        // Solo mostrar el mes y el día
-        $startFormatted = $startDate->format('d M');
-        $endFormatted = $endDate->format('d M');
+        $startFormatted = "$startDay $startMonth";
+        $endFormatted = "$endDay $endMonth";
+    } else {
+        $startFormatted = "$startDay $startMonth {$startDate->format('Y')}";
+        $endFormatted = "$endDay $endMonth {$endDate->format('Y')}";
     }
 
     // Retornar el rango de fechas
     return "$startFormatted - $endFormatted";
 }
 
+// Obtener el rango de fechas formateado, pasando el parámetro timeFrame
 $dateRange = getDateRange($timeFrame);
-
-// Imprimir el rango de fechas
-echo $dateRange;
-
-
 ?>
 
 <!DOCTYPE html>

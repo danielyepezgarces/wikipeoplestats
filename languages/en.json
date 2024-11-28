@@ -67,5 +67,17 @@
     "pagination_previous": "Previous",
     "pagination_next": "Next",
     "datatables_info": "Showing _START_ to _END_ of _TOTAL_ entries",
-    "datatables_search": "Search"
+    "datatables_search": "Search",
+    "Jan": "Jan",
+    "Feb": "Feb",
+    "Mar": "Mar",
+    "Apr": "Apr",
+    "May": "May",
+    "Jun": "Jun",
+    "Jul": "Jul",
+    "Aug": "Aug",
+    "Sep": "Sep",
+    "Oct": "Oct",
+    "Nov": "Nov",
+    "Dec": "Dec"
   }
