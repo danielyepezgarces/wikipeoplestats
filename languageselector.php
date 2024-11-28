@@ -14,3 +14,26 @@
         </div>
     </div>
 </div>
+
+<script>
+function changeLanguage(langCode) {
+    // Enviar una solicitud AJAX al servidor para cambiar el idioma en la sesión
+    fetch('languages.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `lang=${langCode}`,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Si el cambio fue exitoso, recargar la página para reflejar el idioma cambiado
+            location.reload();
+        } else {
+            console.error('Error al cambiar el idioma:', data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>

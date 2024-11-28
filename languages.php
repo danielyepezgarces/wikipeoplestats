@@ -343,6 +343,24 @@ $languages = [
 $defaultLang = $languages[0]; // Por ejemplo, inglés
 $currentLang = $defaultLang;
 
+// Si el idioma se está cambiando
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lang'])) {
+    $requestedLang = $_POST['lang'];
+
+    // Validar que el idioma sea válido
+    foreach ($languages as $lang) {
+        if ($lang['code'] === $requestedLang) {
+            $_SESSION['lang'] = $requestedLang; // Guardar en la sesión
+            echo json_encode(['success' => true, 'lang' => $requestedLang]);
+            exit;
+        }
+    }
+
+    // Si el idioma no es válido, retornar un error
+    echo json_encode(['success' => false, 'message' => 'Idioma no válido']);
+    exit;
+}
+
 // Manejo del idioma
 if (isset($_SESSION['lang'])) {
     // Si hay un idioma en la sesión, usarlo
