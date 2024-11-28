@@ -45,7 +45,7 @@ function buildPaginationUrl($page) {
     $lang = $_GET['lang'] ?? 'en'; // Valor por defecto 'es' si no se encuentra 'lang'
 
     // Construir la base de la URL, eliminando el parámetro 'page' y asegurándonos de que 'lang' esté presente
-    $baseUrl = rtrim(dirname($_SERVER['REQUEST_URI']), '/') . "/$lang/rankings/wikis"; 
+    $baseUrl = rtrim(dirname($_SERVER['REQUEST_URI']), '/');
 
     // Agregar el parámetro 'page'
     $url = $baseUrl . "?page=" . $page;
