@@ -36,7 +36,7 @@ $dataArray = array_values($data);
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/6.6.0/css/all.css">
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
     <!-- Incluir CSS de DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.tailwindcss.css">
 
     <!-- Incluir jQuery (DataTables depende de jQuery) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
