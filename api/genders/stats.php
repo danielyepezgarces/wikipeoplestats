@@ -11,34 +11,51 @@ $memcache->addServer('localhost', 11211); // Cambia según tu configuración
 // Medir tiempo de inicio
 $startTime = microtime(true);
 
+// Obtener el valor de project
 $project = isset($_GET['project']) ? $_GET['project'] : '';
-$project = $conn->real_escape_string($project); // Escapar para seguridad
-$start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
-$end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
+$project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
-// Buscar la wiki correspondiente al proyecto en el array wikis
+// Normalizar el valor de project para que coincida con las claves de wikis
+// Primero, quitar dominios y sufijos no deseados
+$project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org'], '', $project);
+
+// Luego, asegurarse de que tenga el formato correcto (ejemplo: 'eswiki', 'enwikiquote')
+if (strpos($project, 'wikiquote') !== false) {
+    $project = str_replace('wikiquote', 'wikiquote', $project);
+} elseif (strpos($project, 'wikisource') !== false) {
+    $project = str_replace('wikisource', 'wikisource', $project);
+} else {
+    // Si no es ni wikiquote ni wikisource, se asume que es wikipedia
+    $project = str_replace('wikipedia', 'wikipedia', $project);
+}
+
+// Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
 
-// Manejar variantes del proyecto (ej.: "enwikiquote", "dewikisource", "eswiki")
+// Si no se encuentra, intentar variantes posibles
 if ($wiki_key === false) {
     $variants = [
-        $project,                                              // Buscar directamente (por si coincide exactamente)
-        $project . 'wiki',                                     // Ej.: "eswiki" o "enwiki"
-        $project . 'wikiquote',                                // Ej.: "enwikiquote"
-        $project . 'wikisource',                               // Ej.: "dewikisource"
-        str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org'], 'wiki', $project), // Sin dominios
+        $project,             // Buscar directamente
+        $project . 'wiki',    // Ej.: "eswiki", "enwiki"
+        $project . 'wikiquote', // Ej.: "enwikiquote"
+        $project . 'wikisource', // Ej.: "dewikisource"
     ];
+
     foreach ($variants as $variant) {
         $wiki_key = array_search($variant, array_column($wikis, 'wiki'));
         if ($wiki_key !== false) {
-            break;
+            break; // Salir si encontramos una coincidencia
         }
     }
 }
 
-// Si no se encuentra la wiki, devolver un error
-if ($wiki_key === false) {
-    echo json_encode(['error' => 'Invalid project']);
+// Verificar si encontramos el proyecto en wikis
+if ($wiki_key !== false) {
+    // Aquí puedes acceder a los datos de la wiki correspondiente
+    $wiki = $wikis[$wiki_key];
+} else {
+    // Si no se encuentra, enviar un error
+    echo json_encode(['error' => 'Project not found']);
     exit;
 }
 
@@ -87,10 +104,8 @@ $sql = "
         AND a.creation_date <= '$end_date'
 ";
 
-// Filtro por idioma del proyecto
-if ($language_code !== 'all') {
-    $sql .= " AND a.site = '{$languages[$language_code]['wiki']}'";
-}
+$sql .= " AND a.site = '{$wiki['wiki']}'";  // Usar el valor de wiki obtenido
+
 
 $result = $conn->query($sql);
 
