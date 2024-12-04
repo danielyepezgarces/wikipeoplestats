@@ -1,10 +1,6 @@
 <?php
 header("Content-Type: application/json");
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-
 include '../../config.php';
 include '../../languages.php';
 
@@ -63,8 +59,15 @@ if ($wiki_key === false) {
 if ($wiki_key === false) {
     echo json_encode(['error' => 'Project not found']);
     exit;
-} else {
+}
 
+// Asegúrate de que $wiki es un array válido
+$wiki = $wikis[$wiki_key];
+
+// Verifica si $wiki contiene la clave 'wiki'
+if (!isset($wiki['wiki'])) {
+    echo json_encode(['error' => 'Invalid wiki data']);
+    exit;
 }
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
@@ -122,9 +125,6 @@ $sql = "
 ";
 
 $sql .= " AND a.site = '{$wiki['wiki']}'";  // Usar el valor de wiki obtenido
-
-var_dump($wiki);  // Verifica el contenido de $wiki
-
 
 $result = $conn->query($sql);
 
