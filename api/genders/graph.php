@@ -124,10 +124,6 @@ var_dump($sql);
 
 $result = $conn->query($sql);
 
-// Depuración: Verificar si la consulta devolvió resultados
-if ($result === false) {
-    var_dump($conn->error); // Mostrar error si la consulta falló
-}
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
@@ -141,8 +137,6 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-// Depuración: Verificar los datos obtenidos de la base de datos
-var_dump($data);
 
 // Combinar los datos de la tabla de calendario con los datos de la consulta
 $combined_data = [];
@@ -167,8 +161,6 @@ foreach ($calendar as $date) {
     }
 }
 
-// Depuración: Verificar los datos combinados
-var_dump($combined_data);
 
 // Generar respuesta
 $response = [
