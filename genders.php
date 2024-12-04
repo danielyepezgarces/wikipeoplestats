@@ -207,105 +207,111 @@ html.dark .apexcharts-legend-text {
     </main>
 
     <script>
-        let isCumulative = false;
-        let chart;
+    let isCumulative = false;
+    let chart;
 
-        async function fetchData() {
-            try {
-                const response = await fetch('https://wikipeoplestats.wmcloud.org/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
-                const data = await response.json();
+    async function fetchData() {
+        try {
+            // Realiza la solicitud de datos a la API
+            const response = await fetch('https://wikipeoplestats.wmcloud.org/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
+            const data = await response.json();
 
-                const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);
-                const filteredData = data.data.slice(firstNonZeroIndex);
+            // Filtra los datos para asegurarse de que no estén vacíos
+            const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);
+            const filteredData = data.data.slice(firstNonZeroIndex);
 
-                console.log(filteredData);  // Asegúrate de que filteredData tenga elementos
+            console.log(filteredData);  // Asegúrate de que filteredData tenga elementos
 
-                if (filteredData.length === 0) {
-                    console.error('No hay datos válidos para mostrar.');
-                    return;
-                }
-
-                // Crear y renderizar el gráfico
-                createChart(filteredData);
-            } catch (error) {
-                console.error('Error al obtener datos:', error);
-            }
-        }
-
-        function calculateCumulative(data, key) {
-            let cumulativeSum = 0;
-            return data.map(item => {
-                cumulativeSum += item[key];
-                return cumulativeSum;
-            });
-        }
-
-        function createChart(filteredData) {
-            // Destruir el gráfico anterior si existe
-            if (chart) {
-                chart.destroy();
+            if (filteredData.length === 0) {
+                console.error('No hay datos válidos para mostrar.');
+                return;
             }
 
-            const options = {
-                chart: {
-                    type: 'line',
-                    height: 400,
-
-                series: [
-                    {
-                        name: '<?php echo __('total_graph'); ?>',
-                        data: isCumulative ? calculateCumulative(filteredData, 'total') : filteredData.map(item => item.total)
-                    },
-                    {
-                        name: '<?php echo __('total_women'); ?>',
-                        data: isCumulative ? calculateCumulative(filteredData, 'totalWomen') : filteredData.map(item => item.totalWomen)
-                    },
-                    {
-                        name: '<?php echo __('total_men'); ?>',
-                        data: isCumulative ? calculateCumulative(filteredData, 'totalMen') : filteredData.map(item => item.totalMen)
-                    },
-                    {
-                        name: '<?php echo __('other_genders'); ?>',
-                        data: isCumulative ? calculateCumulative(filteredData, 'otherGenders') : filteredData.map(item => item.otherGenders)
-                    }
-                ],
-                xaxis: {
-                    categories: filteredData.map(item => `${item.year}-${item.month}`),
-                    title: {
-                        text: '<?php echo __('timeline_graph'); ?>'
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: '<?php echo __('quantity_graph'); ?>'
-                    }
-                },
-                tooltip: {
-                    shared: true,
-                    intersect: false,
-                },
-                legend: {
-                    position: 'top'
-                },
-                stroke: {
-                    curve: 'smooth'
-                }
-            };
-
-            // Crear una nueva instancia del gráfico
-            chart = new ApexCharts(document.querySelector("#chartContainer"), options);
-            chart.render();
+            // Crear y renderizar el gráfico
+            createChart(filteredData);
+        } catch (error) {
+            console.error('Error al obtener datos:', error);
         }
+    }
 
-        document.getElementById('toggleChart').addEventListener('click', () => {
-            isCumulative = !isCumulative; // Alternar estado
-            fetchData(); // Volver a obtener y renderizar el gráfico
-            document.getElementById('toggleChart').innerText = isCumulative ? 'Mostrar Normal' : 'Mostrar Acumulado';
+    // Función para calcular la suma acumulada de un campo
+    function calculateCumulative(data, key) {
+        let cumulativeSum = 0;
+        return data.map(item => {
+            cumulativeSum += item[key];
+            return cumulativeSum;
         });
+    }
 
-        // Llamar a la función para obtener datos
-        fetchData();
-    </script>
+    // Función para crear el gráfico
+    function createChart(filteredData) {
+        // Destruir el gráfico anterior si existe
+        if (chart) {
+            chart.destroy();
+        }
+
+        const options = {
+            chart: {
+                type: 'line',
+                height: 400,
+            },
+            series: [
+                {
+                    name: '<?php echo __('total_graph'); ?>',
+                    data: isCumulative ? calculateCumulative(filteredData, 'total') : filteredData.map(item => item.total)
+                },
+                {
+                    name: '<?php echo __('total_women'); ?>',
+                    data: isCumulative ? calculateCumulative(filteredData, 'totalWomen') : filteredData.map(item => item.totalWomen)
+                },
+                {
+                    name: '<?php echo __('total_men'); ?>',
+                    data: isCumulative ? calculateCumulative(filteredData, 'totalMen') : filteredData.map(item => item.totalMen)
+                },
+                {
+                    name: '<?php echo __('other_genders'); ?>',
+                    data: isCumulative ? calculateCumulative(filteredData, 'otherGenders') : filteredData.map(item => item.otherGenders)
+                }
+            ],
+            xaxis: {
+                categories: filteredData.map(item => `${item.year}-${item.month}`),
+                title: {
+                    text: '<?php echo __('timeline_graph'); ?>'
+                }
+            },
+            yaxis: {
+                title: {
+                    text: '<?php echo __('quantity_graph'); ?>'
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+            },
+            legend: {
+                position: 'top'
+            },
+            stroke: {
+                curve: 'smooth'
+            }
+        };
+
+        // Crear una nueva instancia del gráfico
+        chart = new ApexCharts(document.querySelector("#chartContainer"), options);
+        chart.render();
+    }
+
+    // Cambiar entre gráfico acumulado o no acumulado
+    document.getElementById('toggleChart').addEventListener('click', () => {
+        isCumulative = !isCumulative; // Alternar estado
+        fetchData(); // Volver a obtener y renderizar el gráfico
+        document.getElementById('toggleChart').innerText = isCumulative ? 'Mostrar Normal' : 'Mostrar Acumulado';
+    });
+
+    // Llamar a la función para obtener datos
+    fetchData();
+</script>
+
         <script>
 
 
