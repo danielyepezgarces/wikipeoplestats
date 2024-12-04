@@ -11,26 +11,26 @@ $memcache->addServer('localhost', 11211); // Cambia según tu configuración
 // Medir tiempo de inicio
 $startTime = microtime(true);
 
-// Obtener el valor de project
+$domainMapping = [
+    'wikipedia.org' => 'wikipedia',
+    'wikiquote.org' => 'wikiquote',
+    'wikisource.org' => 'wikisource',
+    'wikipedia' => 'wikipedia',
+    'wikiquote' => 'wikiquote',
+    'wikisource' => 'wikisource',
+];
+
+// Obtener el valor de 'project' y normalizarlo
 $project = isset($_GET['project']) ? $_GET['project'] : '';
-$project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
-
-// Primero, eliminar los sufijos de dominio como '.org', '.com', etc.
-$project = preg_replace('/\.(wikipedia|wikiquote|wikisource)\.org$/', '', $project); // Eliminar dominios
-
-// Normalizar el valor de project para que coincida con las claves de wikis
-// Verificamos si el proyecto es un wikiquote, wikisource, o wikipedia
-if (strpos($project, 'wikiquote') !== false && strpos($project, 'wikiquote') === strlen($project) - 9) {
-    // Asegurarse de que no se agregue 'wikiquote' si ya está al final
-    $project = $project . 'wikiquote';
-} elseif (strpos($project, 'wikisource') !== false && strpos($project, 'wikisource') === strlen($project) - 10) {
-    // Asegurarse de que no se agregue 'wikisource' si ya está al final
-    $project = $project . 'wikisource';
-} else {
-    // Para otros casos, asumimos que es wikipedia y agregamos 'wiki' si no está ya al final
-    if (strpos($project, 'wiki') === false) {
-        $project = $project . 'wiki';  // Asegurarse de que sea 'wiki' para wikipedia
+// Verificar si el proyecto contiene un dominio y mapearlo
+foreach ($domainMapping as $domain => $wiki) {
+    if (strpos($project, $domain) !== false) {
+        // Remover el dominio y dejar solo la parte antes de él (ejemplo: 'es.wikiquote.org' => 'eswikiquote')
+        $project = preg_replace('/\.' . preg_quote($domain, '/') . '$/', '', $project);
+        // Agregar el sufijo adecuado (solo si es necesario)
+        $project .= $wiki; // Asumir que es el formato 'eswikiquote', 'eswiki', etc.
+        break;
     }
 }
 
@@ -69,9 +69,6 @@ if ($wiki_key === false) {
 } else {
     echo "Found wiki key: " . $wiki_key . "<br>";
 }
-
-// Continuar con la lógica de la respuesta...
-
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
