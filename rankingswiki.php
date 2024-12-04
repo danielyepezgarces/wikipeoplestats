@@ -196,7 +196,7 @@ $dateRange = getDateRange($timeFrame);
 
 
     <script src="/assets/js/main.js?v=1"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer/0.4.6/odometer.min.js"></script>
+    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/odometer.js"></script>
 <script>
     // Inicializa los odómetros
     document.querySelectorAll('.odometer').forEach(function (odometer) {

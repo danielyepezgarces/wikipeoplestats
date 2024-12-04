@@ -103,7 +103,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <?php include 'header.php'; // Incluir el encabezado ?>
 
-    
+
 <main class="container mx-auto px-4 py-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
         <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
@@ -180,7 +180,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
     <?php include 'languageselector.php'; ?>
 
     <script src="/assets/js/main.js?v=2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer/0.4.6/odometer.min.js"></script>
+    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/odometer.js"></script>
 <script>
     // Inicializa los odómetros
     document.querySelectorAll('.odometer').forEach(function (odometer) {
@@ -231,7 +231,6 @@ function purgeCache() {
     });
 }
 </script>
-
 <script>
         // Establece la fecha objetivo desde la variable PHP
         const targetDate = new Date("<?php echo $cachedUntil; ?>").getTime();
@@ -262,6 +261,6 @@ function purgeCache() {
             }
         }, 1000);
     </script>
-    
+
 </body>
 </html>
