@@ -12,10 +12,7 @@ $memcache->addServer('localhost', 11211); // Cambia según tu configuración
 $startTime = microtime(true);
 
 $domainMapping = [
-    'wikipedia.org' => 'wikipedia',
-    'wikiquote.org' => 'wikiquote',
-    'wikisource.org' => 'wikisource',
-    'wikipedia' => 'wikipedia',
+    'wikipedia' => 'wiki',
     'wikiquote' => 'wikiquote',
     'wikisource' => 'wikisource',
 ];
@@ -23,13 +20,17 @@ $domainMapping = [
 // Obtener el valor de 'project' y normalizarlo
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 
-// Verificar si el proyecto contiene un dominio y mapearlo
+// Eliminar el sufijo .org y cualquier punto en el subdominio
+$project = preg_replace('/\.(org|com|net|edu|gov)$/', '', $project);
+
+// Eliminar puntos (.) en el subdominio (ej. "es.wikiquote" => "eswikiquote")
+$project = str_replace('.', '', $project);
+
+// Mapeo específico de 'wikipedia' a 'wiki'
 foreach ($domainMapping as $domain => $wiki) {
     if (strpos($project, $domain) !== false) {
-        // Remover el dominio y dejar solo la parte antes de él (ejemplo: 'es.wikiquote.org' => 'eswikiquote')
-        $project = preg_replace('/\.' . preg_quote($domain, '/') . '$/', '', $project);
-        // Agregar el sufijo adecuado (solo si es necesario)
-        $project .= $wiki; // Asumir que es el formato 'eswikiquote', 'eswiki', etc.
+        // Si es 'wikipedia', lo convertimos a 'wiki'
+        $project = preg_replace('/^' . preg_quote($domain, '/') . '/', $wiki, $project);
         break;
     }
 }
