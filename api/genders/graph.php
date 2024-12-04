@@ -9,34 +9,40 @@ include '../../languages.php';
 $memcache = new Memcached();
 $memcache->addServer('localhost', 11211); // Cambia según tu configuración
 
-// Obtener los parámetros de la URL
 $project = isset($_GET['project']) ? $_GET['project'] : '';
-$project = $conn->real_escape_string($project);
+$project = $conn->real_escape_string($project); // Escapar para seguridad
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
-// Buscar el código de idioma correspondiente al proyecto
-$language_code = array_search($project, array_column($languages, 'wiki'));
+// Buscar la wiki correspondiente al proyecto en el array wikis
+$wiki_key = array_search($project, array_column($wikis, 'wiki'));
 
-// Si no se encuentra el código de idioma, buscar por el formato "es.wikipedia"
-if ($language_code === false) {
-    $language_code = array_search($project . 'wiki', array_column($languages, 'wiki'));
+// Manejar variantes del proyecto (ej.: "enwikiquote", "dewikisource", "eswiki")
+if ($wiki_key === false) {
+    $variants = [
+        $project,                                              // Buscar directamente (por si coincide exactamente)
+        $project . 'wiki',                                     // Ej.: "eswiki" o "enwiki"
+        $project . 'wikiquote',                                // Ej.: "enwikiquote"
+        $project . 'wikisource',                               // Ej.: "dewikisource"
+        str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org'], 'wiki', $project), // Sin dominios
+    ];
+    foreach ($variants as $variant) {
+        $wiki_key = array_search($variant, array_column($wikis, 'wiki'));
+        if ($wiki_key !== false) {
+            break;
+        }
+    }
 }
 
-// Si no se encuentra el código de idioma, buscar por el formato "es.wikipedia.org"
-if ($language_code === false) {
-    $language_code = array_search(str_replace('.wikipedia.org', 'wiki', $project), array_column($languages, 'wiki'));
-}
-
-// Si no se encuentra el código de idioma, devolver un error
-if ($language_code === false) {
+// Si no se encuentra la wiki, devolver un error
+if ($wiki_key === false) {
     echo json_encode(['error' => 'Invalid project']);
     exit;
 }
 
-// Si no se proporcionan las fechas de inicio y fin, usar la fecha de creación de la wiki seleccionada y la fecha actual
+// Si no se proporcionan fechas, usar valores predeterminados
 if (empty($start_date)) {
-    $start_date = $languages[$language_code]['creation_date'];
+    $start_date = $wikis[$wiki_key]['creation_date'];
 }
 if (empty($end_date)) {
     $end_date = date('Y-m-d');
@@ -72,11 +78,11 @@ $cacheDuration = 21600;
 if ($cachedResponse) {
     // Si encontramos el caché, devolver la respuesta
     $response = json_decode($cachedResponse, true);
-    
+
     // Medir el tiempo de ejecución
     $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
     $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
-    
+
     echo json_encode($response);
     exit;
 }
