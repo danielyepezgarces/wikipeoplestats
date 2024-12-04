@@ -68,7 +68,7 @@ if (empty($end_date)) {
 }
 
 // Definir la clave de caché (más limpia, sin redundancia)
-$cacheKey = "wikistats_{$project}_{$start_date}_{$end_date}";
+$cacheKey = "wikistats_{$wiki['wiki']}_{$start_date}_{$end_date}";
 
 // Comprobar si el caché existe
 $cachedResponse = $memcache->get($cacheKey);
