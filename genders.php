@@ -274,7 +274,7 @@ html.dark .apexcharts-legend-text {
                 }
             ],
             xaxis: {
-                categories: filteredData.map(item => `${item.year}-${item.month}`),
+                categories: filteredData.map(item => item.day ? `${item.year}-${item.month}-${item.day}` : `${item.year}-${item.month}`),
                 title: {
                     text: '<?php echo __('timeline_graph'); ?>'
                 }
@@ -311,6 +311,7 @@ html.dark .apexcharts-legend-text {
     // Llamar a la función para obtener datos
     fetchData();
 </script>
+
 
         <script>
 
