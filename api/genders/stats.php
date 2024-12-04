@@ -21,14 +21,14 @@ $project = preg_replace('/\.(wikipedia|wikiquote|wikisource)\.org$/', '', $proje
 
 // Normalizar el valor de project para que coincida con las claves de wikis
 // Verificamos si el proyecto es un wikiquote, wikisource, o wikipedia
-if (strpos($project, 'wikiquote') !== false) {
-    // Asegurarse de que sea 'wikiquote'
+if (strpos($project, 'wikiquote') !== false && strpos($project, 'wikiquote') === strlen($project) - 9) {
+    // Asegurarse de que no se agregue 'wikiquote' si ya está al final
     $project = $project . 'wikiquote';
-} elseif (strpos($project, 'wikisource') !== false) {
-    // Asegurarse de que sea 'wikisource'
+} elseif (strpos($project, 'wikisource') !== false && strpos($project, 'wikisource') === strlen($project) - 10) {
+    // Asegurarse de que no se agregue 'wikisource' si ya está al final
     $project = $project . 'wikisource';
 } else {
-    // Para otros casos, asumimos que es wikipedia
+    // Para otros casos, asumimos que es wikipedia y agregamos 'wiki' si no está ya al final
     if (strpos($project, 'wiki') === false) {
         $project = $project . 'wiki';  // Asegurarse de que sea 'wiki' para wikipedia
     }
@@ -70,6 +70,7 @@ if ($wiki_key === false) {
     echo "Found wiki key: " . $wiki_key . "<br>";
 }
 
+// Continuar con la lógica de la respuesta...
 
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
