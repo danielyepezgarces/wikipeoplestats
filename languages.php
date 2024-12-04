@@ -420,6 +420,7 @@ $wikis = [
     ['code' => 'en', 'wiki' => 'enwiki', 'creation_date' => '2001-10-16'],
     ['code' => 'eo', 'wiki' => 'eowiki', 'creation_date' => '2001-10-16'],
     ['code' => 'es', 'wiki' => 'eswiki', 'creation_date' => '2001-10-16'],
+    ['code' => 'es', 'wiki' => 'eswikiquote', 'creation_date' => '2004-07-17'],
     ['code' => 'et', 'wiki' => 'etwiki', 'creation_date' => '2001-10-16'],
     ['code' => 'eu', 'wiki' => 'euwiki', 'creation_date' => '2001-10-16'],
     ['code' => 'ext', 'wiki' => 'extwiki', 'creation_date' => '2005-02-21'],
