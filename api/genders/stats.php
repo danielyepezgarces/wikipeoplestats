@@ -27,12 +27,12 @@ error_log("Project value after removing domains and suffixes: " . $project);
 
 // Luego, asegurarse de que tenga el formato correcto (ejemplo: 'eswiki', 'enwikiquote')
 if (strpos($project, 'wikiquote') !== false) {
-    $project = str_replace('wikiquote', 'wikiquote', $project);
+    $project = 'wikiquote';
 } elseif (strpos($project, 'wikisource') !== false) {
-    $project = str_replace('wikisource', 'wikisource', $project);
+    $project = 'wikisource';
 } else {
     // Si no es ni wikiquote ni wikisource, se asume que es wikipedia
-    $project = str_replace('wikipedia', 'wikipedia', $project);
+    $project = 'wikipedia';
 }
 
 // Depurar el valor de project después de asegurar el formato correcto
