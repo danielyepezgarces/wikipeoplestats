@@ -15,8 +15,6 @@ $startTime = microtime(true);
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
-// Normalizar el valor de project para que coincida con las claves de wikis
-// Primero, quitar dominios y sufijos no deseados
 $project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
 // Luego, asegurar que el formato sea consistente (ejemplo: 'eswiki', 'enwikiquote')
@@ -31,9 +29,16 @@ if (strpos($project, 'wikiquote') !== false) {
     $project = $project . 'wikipedia';  // Para otros casos, se asume 'wikipedia'
 }
 
+// Depuración: Mostrar el valor final de 'project' después de la normalización
+echo "Normalized project: " . $project . "<br>";
 
 // Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
+
+// Depuración: Mostrar el contenido de '$wikis'
+echo "<pre>";
+print_r($wikis);
+echo "</pre>";
 
 // Si no se encuentra, intentar variantes posibles
 if ($wiki_key === false) {
@@ -50,17 +55,14 @@ if ($wiki_key === false) {
             break; // Salir si encontramos una coincidencia
         }
     }
-
 }
 
-// Verificar si encontramos el proyecto en wikis
-if ($wiki_key !== false) {
-    // Aquí puedes acceder a los datos de la wiki correspondiente
-    $wiki = $wikis[$wiki_key];
-} else {
-    // Si no se encuentra, enviar un error
+// Depuración: Verificar si se encontró el proyecto
+if ($wiki_key === false) {
     echo json_encode(['error' => 'Project not found']);
     exit;
+} else {
+    echo "Found wiki key: " . $wiki_key . "<br>";
 }
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
