@@ -15,19 +15,46 @@ $startTime = microtime(true);
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
-$project = preg_replace('/(\.wikipedia\.org|\.wikiquote\.org|\.wikisource\.org)$/', '', $project);
+// Normalizar el valor de project para que coincida con las claves de wikis
+// Primero, quitar dominios y sufijos no deseados
+$project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
-// Asegurarse de que 'project' esté en el formato correcto, por ejemplo 'eswiki' en vez de 'es.wikipedia'
-if (strpos($project, 'wiki') === false) {
-    // Si no tiene 'wiki', agregarlo (asumiendo que se trata de Wikipedia por defecto)
-    $project .= 'wiki';
+// Luego, asegurarse de que tenga el formato correcto (ejemplo: 'eswiki', 'enwikiquote')
+if (strpos($project, 'wikiquote') !== false) {
+    $project = str_replace('wikiquote', 'wikiquote', $project);
+} elseif (strpos($project, 'wikisource') !== false) {
+    $project = str_replace('wikisource', 'wikisource', $project);
+} else {
+    // Si no es ni wikiquote ni wikisource, se asume que es wikipedia
+    $project = str_replace('wikipedia', 'wikipedia', $project);
 }
 
-// Ahora intentamos buscar la wiki correspondiente en el array wikis
+// Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
 
-// Si no se encuentra la wiki, devolver un error
+// Si no se encuentra, intentar variantes posibles
 if ($wiki_key === false) {
+    $variants = [
+        $project,             // Buscar directamente
+        $project . 'wiki',    // Ej.: "eswiki", "enwiki"
+        $project . 'wikiquote', // Ej.: "enwikiquote"
+        $project . 'wikisource', // Ej.: "dewikisource"
+    ];
+
+    foreach ($variants as $variant) {
+        $wiki_key = array_search($variant, array_column($wikis, 'wiki'));
+        if ($wiki_key !== false) {
+            break; // Salir si encontramos una coincidencia
+        }
+    }
+}
+
+// Verificar si encontramos el proyecto en wikis
+if ($wiki_key !== false) {
+    // Aquí puedes acceder a los datos de la wiki correspondiente
+    $wiki = $wikis[$wiki_key];
+} else {
+    // Si no se encuentra, enviar un error
     echo json_encode(['error' => 'Project not found']);
     exit;
 }
