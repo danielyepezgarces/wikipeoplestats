@@ -210,15 +210,6 @@ html.dark .apexcharts-legend-text {
         let isCumulative = false;
         let chart; 
 
-async function loadTranslations(locale) {
-    try {
-        const response = await fetch(`languages/${locale}.json`);
-        translations = await response.json();
-    } catch (error) {
-        console.error('Error al cargar las traducciones:', error);
-    }
-}
-
         async function fetchData() {
             try {
                 const response = await fetch('https://wikipeoplestats.wmcloud.org/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
