@@ -93,24 +93,41 @@ if ($cachedResponse) {
 }
 
 // Consulta SQL
-$sql = "
-    SELECT
-        YEAR(a.creation_date) AS year,
-        MONTH(a.creation_date) AS month,
-        COUNT(*) AS total,
-        SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
-        SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-        SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
-    FROM articles a
-    JOIN project w ON a.site = w.site
-    LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
-    WHERE a.creation_date >= '$start_date'
-        AND a.creation_date <= '$end_date'
-    GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
-";
+if ($project === 'all') {
+    $sql = "
+        SELECT
+            YEAR(a.creation_date) AS year,
+            MONTH(a.creation_date) AS month,
+            COUNT(*) AS total,
+            SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
+            SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
+            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
+        FROM articles a
+        JOIN project w ON a.site = w.site
+        LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
+        WHERE a.creation_date >= '$start_date'
+            AND a.creation_date <= '$end_date'
+        GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
+    ";
+} else {
+    $sql = "
+        SELECT
+            YEAR(a.creation_date) AS year,
+            MONTH(a.creation_date) AS month,
+            COUNT(*) AS total,
+            SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
+            SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
+            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
+        FROM articles a
+        JOIN project w ON a.site = w.site
+        LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
+        WHERE a.site = '{$wiki['wiki']}'
+            AND a.creation_date >= '$start_date'
+            AND a.creation_date <= '$end_date'
+        GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
+    ";
+}
 
-// Depuración: Mostrar la consulta SQL
-var_dump($sql);
 
 $result = $conn->query($sql);
 
