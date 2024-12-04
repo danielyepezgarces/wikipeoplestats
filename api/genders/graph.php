@@ -65,6 +65,14 @@ if (empty($end_date)) {
     $end_date = date('Y-m-d');
 }
 
+// Si no se proporcionan fechas, usar valores predeterminados
+if (empty($start_date)) {
+    $start_date = $wikis[$wiki_key]['creation_date'];
+}
+if (empty($end_date)) {
+    $end_date = date('Y-m-d');
+}
+
 // Generar una tabla de calendario para el rango de fechas especificado
 $start_year = (int)date('Y', strtotime($start_date));
 $start_month = (int)date('m', strtotime($start_date));
