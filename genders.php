@@ -5,11 +5,13 @@ $project = isset($_GET['project']) ? $_GET['project'] : '';
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
-// Obtener el creation_date de la wiki seleccionada
-$language = array_filter($languages, function($lang) use ($project) {
-    return strpos($project, $lang['code']) !== false; // Comprobar si el código está en el input
+// Buscar la información del proyecto seleccionado en el array wikis
+$wiki = array_filter($wikis, function($w) use ($project) {
+  return $w['wiki'] === $project; // Comparar el valor de 'wiki' en el array con 'project' de la URL
 });
-$creation_date = !empty($language) ? reset($language)['creation_date'] : '';
+
+// Obtener la fecha de creación si existe el proyecto
+$creation_date = !empty($wiki) ? reset($wiki)['creation_date'] : '';
 
 // Establecer start_date y end_date
 if (empty($start_date)) {
