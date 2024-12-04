@@ -15,34 +15,25 @@ $startTime = microtime(true);
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
-// Depurar el valor original de project
-error_log("Original project value: " . $project);
-
 // Normalizar el valor de project para que coincida con las claves de wikis
 // Primero, quitar dominios y sufijos no deseados
 $project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
-// Depurar el valor de project después de quitar dominios y sufijos
-error_log("Project value after removing domains and suffixes: " . $project);
+// Luego, asegurar que el formato sea consistente (ejemplo: 'eswiki', 'enwikiquote')
+$project = str_replace(['.wikiquote', '.wikipedia', '.wikisource'], '', $project);
 
-// Luego, asegurarse de que tenga el formato correcto (ejemplo: 'eswiki', 'enwikiquote')
+// Si contiene 'wikiquote', 'wikipedia' o 'wikisource', mantener la correcta
 if (strpos($project, 'wikiquote') !== false) {
-    $project = 'wikiquote';
+    $project = $project . 'wikiquote';  // Asegurarse de que sea 'wikiquote'
 } elseif (strpos($project, 'wikisource') !== false) {
-    $project = 'wikisource';
+    $project = $project . 'wikisource';  // Asegurarse de que sea 'wikisource'
 } else {
-    // Si no es ni wikiquote ni wikisource, se asume que es wikipedia
-    $project = 'wikipedia';
+    $project = $project . 'wikipedia';  // Para otros casos, se asume 'wikipedia'
 }
 
-// Depurar el valor de project después de asegurar el formato correcto
-error_log("Project value after ensuring correct format: " . $project);
 
 // Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
-
-// Depurar el valor de wiki_key después de la búsqueda inicial
-error_log("Initial wiki_key value: " . ($wiki_key !== false ? $wiki_key : 'not found'));
 
 // Si no se encuentra, intentar variantes posibles
 if ($wiki_key === false) {
@@ -60,8 +51,6 @@ if ($wiki_key === false) {
         }
     }
 
-    // Depurar el valor de wiki_key después de intentar variantes
-    error_log("wiki_key value after trying variants: " . ($wiki_key !== false ? $wiki_key : 'not found'));
 }
 
 // Verificar si encontramos el proyecto en wikis
