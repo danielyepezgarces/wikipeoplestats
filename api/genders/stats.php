@@ -70,6 +70,12 @@ if (empty($end_date)) {
 // Definir la clave de caché (más limpia, sin redundancia)
 $cacheKey = "wikistats_{$wiki['wiki']}_{$start_date}_{$end_date}";
 
+if ($action === 'purge') {
+    $memcache->delete($cacheKey);
+    echo json_encode(['message' => 'Cache purged successfully.']);
+    exit;
+}
+
 // Comprobar si el caché existe
 $cachedResponse = $memcache->get($cacheKey);
 
@@ -79,11 +85,11 @@ $cacheDuration = 21600;
 // Si la respuesta está en caché, devolverla
 if ($cachedResponse) {
     $response = json_decode($cachedResponse, true);
-    
+
     // Medir el tiempo total de ejecución
     $executionTime = microtime(true) - $startTime;
     $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
-    
+
     echo json_encode($response);
     exit;
 }
