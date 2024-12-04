@@ -123,11 +123,7 @@ $sql = "
 
 $sql .= " AND a.site = '{$wiki['wiki']}'";  // Usar el valor de wiki obtenido
 
-
-echo "Wiki Key: " . $wiki_key . "<br>";
-
-// Verificar la consulta SQL
-echo "SQL: " . $sql . "<br>";
+var_dump($wiki);  // Verifica el contenido de $wiki
 
 
 $result = $conn->query($sql);
