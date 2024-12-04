@@ -33,6 +33,8 @@ if (!empty($start_date)) {
     }
 }
 
+echo "URL utilizada: " . $url;
+
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
