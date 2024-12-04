@@ -14,18 +14,10 @@ $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
 // Normalizar el valor de project para que coincida con las claves de wikis
-// Primero, quitar dominios y sufijos no deseados
 $project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
-// Luego, asegurarse de que tenga el formato correcto (ejemplo: 'eswiki', 'enwikiquote')
-if (strpos($project, 'wikiquote') !== false) {
-    $project = str_replace('wikiquote', 'wikiquote', $project);
-} elseif (strpos($project, 'wikisource') !== false) {
-    $project = str_replace('wikisource', 'wikisource', $project);
-} else {
-    // Si no es ni wikiquote ni wikisource, se asume que es wikipedia
-    $project = str_replace('wikipedia', 'wikipedia', $project);
-}
+// Depuración: Mostrar el valor de $project
+var_dump($project);
 
 // Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
@@ -47,6 +39,9 @@ if ($wiki_key === false) {
     }
 }
 
+// Depuración: Verificar si se encontró la wiki
+var_dump($wiki_key);
+
 // Verificar si encontramos el proyecto en wikis
 if ($wiki_key !== false) {
     // Aquí puedes acceder a los datos de la wiki correspondiente
@@ -58,20 +53,12 @@ if ($wiki_key !== false) {
 }
 
 // Si no se proporcionan fechas, usar valores predeterminados
-if (empty($start_date)) {
-    $start_date = $wikis[$wiki_key]['creation_date'];
-}
-if (empty($end_date)) {
-    $end_date = date('Y-m-d');
-}
+$start_date = isset($_GET['start_date']) ? $_GET['start_date'] : $wikis[$wiki_key]['creation_date'];
+$end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
 
-// Si no se proporcionan fechas, usar valores predeterminados
-if (empty($start_date)) {
-    $start_date = $wikis[$wiki_key]['creation_date'];
-}
-if (empty($end_date)) {
-    $end_date = date('Y-m-d');
-}
+// Depuración: Mostrar las fechas
+var_dump($start_date);
+var_dump($end_date);
 
 // Generar una tabla de calendario para el rango de fechas especificado
 $start_year = (int)date('Y', strtotime($start_date));
@@ -90,6 +77,9 @@ for ($year = $start_year; $year <= $end_year; $year++) {
         ];
     }
 }
+
+// Depuración: Verificar el calendario generado
+var_dump($calendar);
 
 // Generar clave de caché única
 $cacheKey = "graph_{$wiki['wiki']}_{$start_date}_{$end_date}";
@@ -112,54 +102,32 @@ if ($cachedResponse) {
     exit;
 }
 
-// Validar si se pasó un proyecto válido
-if ($project === 'all') {
-    // Consulta para todos los proyectos
-    $sql = "
-        SELECT
-            YEAR(a.creation_date) AS year,
-            MONTH(a.creation_date) AS month,
-            COUNT(*) AS total,
-            SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
-            SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
-        FROM articles a
-        JOIN project w ON a.site = w.site
-        LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
-        WHERE a.creation_date >= '$start_date'
-            AND a.creation_date <= '$end_date'
-        GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
-    ";
-} else {
-    // Buscar el proyecto en el array de wikis
-    $wiki_key = array_search($project, array_column($wikis, 'wiki'));
+// Consulta SQL
+$sql = "
+    SELECT
+        YEAR(a.creation_date) AS year,
+        MONTH(a.creation_date) AS month,
+        COUNT(*) AS total,
+        SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
+        SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
+        SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
+    FROM articles a
+    JOIN project w ON a.site = w.site
+    LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
+    WHERE a.creation_date >= '$start_date'
+        AND a.creation_date <= '$end_date'
+    GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
+";
 
-    // Si no se encuentra el proyecto, se genera un error
-    if ($wiki_key === false) {
-        echo json_encode(['error' => 'Invalid project']);
-        exit;
-    }
-
-    // Definir la consulta para un proyecto específico
-    $sql = "
-        SELECT
-            YEAR(a.creation_date) AS year,
-            MONTH(a.creation_date) AS month,
-            COUNT(*) AS total,
-            SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
-            SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
-            SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
-        FROM articles a
-        JOIN project w ON a.site = w.site
-        LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
-        WHERE a.site = '{$wikis[$wiki_key]['wiki']}'
-            AND a.creation_date >= '$start_date'
-            AND a.creation_date <= '$end_date'
-        GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
-    ";
-}
+// Depuración: Mostrar la consulta SQL
+var_dump($sql);
 
 $result = $conn->query($sql);
+
+// Depuración: Verificar si la consulta devolvió resultados
+if ($result === false) {
+    var_dump($conn->error); // Mostrar error si la consulta falló
+}
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
@@ -172,6 +140,9 @@ while ($row = $result->fetch_assoc()) {
         'otherGenders' => (int)$row['otherGenders'],
     ];
 }
+
+// Depuración: Verificar los datos obtenidos de la base de datos
+var_dump($data);
 
 // Combinar los datos de la tabla de calendario con los datos de la consulta
 $combined_data = [];
@@ -196,6 +167,9 @@ foreach ($calendar as $date) {
     }
 }
 
+// Depuración: Verificar los datos combinados
+var_dump($combined_data);
+
 // Generar respuesta
 $response = [
     'data' => $combined_data,
@@ -207,6 +181,9 @@ $memcache->set($cacheKey, json_encode($response), $cacheDuration);
 // Medir el tiempo de ejecución
 $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
 $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
+
+// Depuración: Verificar la respuesta final antes de enviarla
+var_dump($response);
 
 echo json_encode($response);
 
