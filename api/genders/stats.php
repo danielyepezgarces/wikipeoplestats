@@ -59,6 +59,9 @@ if ($wiki_key !== false) {
     exit;
 }
 
+$start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
+$end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
+
 // Si no se proporcionan fechas, usar valores predeterminados
 if (empty($start_date)) {
     $start_date = $wikis[$wiki_key]['creation_date'];
