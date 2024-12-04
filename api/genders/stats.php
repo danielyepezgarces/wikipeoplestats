@@ -15,18 +15,27 @@ $startTime = microtime(true);
 $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
+
+// Normalizar el valor de project para que coincida con las claves de wikis
+// Primero, quitar dominios y sufijos no deseados
 $project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
 // Luego, asegurar que el formato sea consistente (ejemplo: 'eswiki', 'enwikiquote')
-$project = str_replace(['.wikiquote', '.wikipedia', '.wikisource'], '', $project);
-
-// Si contiene 'wikiquote', 'wikipedia' o 'wikisource', mantener la correcta
 if (strpos($project, 'wikiquote') !== false) {
-    $project = $project . 'wikiquote';  // Asegurarse de que sea 'wikiquote'
+    // Solo agregar 'wikiquote' si no está presente
+    if (strpos($project, 'wikiquote') === false) {
+        $project = $project . 'wikiquote';  // Asegurarse de que sea 'wikiquote'
+    }
 } elseif (strpos($project, 'wikisource') !== false) {
-    $project = $project . 'wikisource';  // Asegurarse de que sea 'wikisource'
+    // Solo agregar 'wikisource' si no está presente
+    if (strpos($project, 'wikisource') === false) {
+        $project = $project . 'wikisource';  // Asegurarse de que sea 'wikisource'
+    }
 } else {
-    $project = $project . 'wikipedia';  // Para otros casos, se asume 'wikipedia'
+    // Para otros casos, se asume 'wikipedia'
+    if (strpos($project, 'wiki') === false) {
+        $project = $project . 'wiki';  // Para Wikipedia, asegurarse de que tenga 'wiki'
+    }
 }
 
 // Depuración: Mostrar el valor final de 'project' después de la normalización
@@ -64,6 +73,7 @@ if ($wiki_key === false) {
 } else {
     echo "Found wiki key: " . $wiki_key . "<br>";
 }
+
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
