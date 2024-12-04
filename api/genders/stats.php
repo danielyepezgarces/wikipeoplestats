@@ -60,7 +60,7 @@ if ($wiki_key === false) {
     echo json_encode(['error' => 'Project not found']);
     exit;
 } else {
-    echo "Found wiki key: " . $wiki_key . "<br>";
+
 }
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
