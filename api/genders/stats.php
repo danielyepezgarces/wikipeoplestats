@@ -16,25 +16,21 @@ $project = isset($_GET['project']) ? $_GET['project'] : '';
 $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
 
-// Normalizar el valor de project para que coincida con las claves de wikis
-// Primero, quitar dominios y sufijos no deseados
-$project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
+// Primero, eliminar los sufijos de dominio como '.org', '.com', etc.
+$project = preg_replace('/\.(wikipedia|wikiquote|wikisource)\.org$/', '', $project); // Eliminar dominios
 
-// Luego, asegurar que el formato sea consistente (ejemplo: 'eswiki', 'enwikiquote')
+// Normalizar el valor de project para que coincida con las claves de wikis
+// Verificamos si el proyecto es un wikiquote, wikisource, o wikipedia
 if (strpos($project, 'wikiquote') !== false) {
-    // Solo agregar 'wikiquote' si no está presente
-    if (strpos($project, 'wikiquote') === false) {
-        $project = $project . 'wikiquote';  // Asegurarse de que sea 'wikiquote'
-    }
+    // Asegurarse de que sea 'wikiquote'
+    $project = $project . 'wikiquote';
 } elseif (strpos($project, 'wikisource') !== false) {
-    // Solo agregar 'wikisource' si no está presente
-    if (strpos($project, 'wikisource') === false) {
-        $project = $project . 'wikisource';  // Asegurarse de que sea 'wikisource'
-    }
+    // Asegurarse de que sea 'wikisource'
+    $project = $project . 'wikisource';
 } else {
-    // Para otros casos, se asume 'wikipedia'
+    // Para otros casos, asumimos que es wikipedia
     if (strpos($project, 'wiki') === false) {
-        $project = $project . 'wiki';  // Para Wikipedia, asegurarse de que tenga 'wiki'
+        $project = $project . 'wiki';  // Asegurarse de que sea 'wiki' para wikipedia
     }
 }
 
@@ -73,6 +69,7 @@ if ($wiki_key === false) {
 } else {
     echo "Found wiki key: " . $wiki_key . "<br>";
 }
+
 
 
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
