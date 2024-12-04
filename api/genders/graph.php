@@ -52,10 +52,6 @@ if ($wiki_key !== false) {
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : $wikis[$wiki_key]['creation_date'];
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d');
 
-// Depuración: Mostrar las fechas
-var_dump($start_date);
-var_dump($end_date);
-
 // Generar una tabla de calendario para el rango de fechas especificado
 $start_year = (int)date('Y', strtotime($start_date));
 $start_month = (int)date('m', strtotime($start_date));
@@ -74,8 +70,6 @@ for ($year = $start_year; $year <= $end_year; $year++) {
     }
 }
 
-// Depuración: Verificar el calendario generado
-var_dump($calendar);
 
 // Generar clave de caché única
 $cacheKey = "graph_{$wiki['wiki']}_{$start_date}_{$end_date}";
