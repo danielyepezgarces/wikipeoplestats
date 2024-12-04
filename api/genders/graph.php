@@ -16,8 +16,6 @@ $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecc
 // Normalizar el valor de project para que coincida con las claves de wikis
 $project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
-// Depuración: Mostrar el valor de $project
-var_dump($project);
 
 // Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
@@ -39,8 +37,6 @@ if ($wiki_key === false) {
     }
 }
 
-// Depuración: Verificar si se encontró la wiki
-var_dump($wiki_key);
 
 // Verificar si encontramos el proyecto en wikis
 if ($wiki_key !== false) {
@@ -88,7 +84,7 @@ $cacheKey = "graph_{$wiki['wiki']}_{$start_date}_{$end_date}";
 $cachedResponse = $memcache->get($cacheKey);
 
 // Duración del caché en segundos (6 horas)
-$cacheDuration = 21600; 
+$cacheDuration = 21600;
 
 if ($cachedResponse) {
     // Si encontramos el caché, devolver la respuesta
@@ -173,9 +169,6 @@ $memcache->set($cacheKey, json_encode($response), $cacheDuration);
 // Medir el tiempo de ejecución
 $executionTime = microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"];
 $response['executionTime'] = round($executionTime * 1000, 2); // En milisegundos
-
-// Depuración: Verificar la respuesta final antes de enviarla
-var_dump($response);
 
 echo json_encode($response);
 
