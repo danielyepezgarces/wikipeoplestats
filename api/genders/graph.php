@@ -15,7 +15,7 @@ $project = $conn->real_escape_string($project);  // Escapar para prevenir inyecc
 
 // Normalizar el valor de project para que coincida con las claves de wikis
 // Primero, quitar dominios y sufijos no deseados
-$project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org'], '', $project);
+$project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
 // Luego, asegurarse de que tenga el formato correcto (ejemplo: 'eswiki', 'enwikiquote')
 if (strpos($project, 'wikiquote') !== false) {
@@ -57,13 +57,6 @@ if ($wiki_key !== false) {
     exit;
 }
 
-
-// Si no se encuentra la wiki, devolver un error
-if ($wiki_key === false) {
-    echo json_encode(['error' => 'Invalid project']);
-    exit;
-}
-
 // Si no se proporcionan fechas, usar valores predeterminados
 if (empty($start_date)) {
     $start_date = $wikis[$wiki_key]['creation_date'];
@@ -91,7 +84,7 @@ for ($year = $start_year; $year <= $end_year; $year++) {
 }
 
 // Generar clave de caché única
-$cacheKey = "graph_{$project}_{$start_date}_{$end_date}";
+$cacheKey = "graph_{$wiki['wiki']}_{$start_date}_{$end_date}";
 
 // Comprobar si ya tenemos la respuesta en caché
 $cachedResponse = $memcache->get($cacheKey);
@@ -111,8 +104,9 @@ if ($cachedResponse) {
     exit;
 }
 
-// Definir la consulta dependiendo del proyecto y las fechas
-if ($language_code === 'all') {
+// Validar si se pasó un proyecto válido
+if ($project === 'all') {
+    // Consulta para todos los proyectos
     $sql = "
         SELECT
             YEAR(a.creation_date) AS year,
@@ -121,7 +115,7 @@ if ($language_code === 'all') {
             SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
             SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
-            FROM articles a
+        FROM articles a
         JOIN project w ON a.site = w.site
         LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
         WHERE a.creation_date >= '$start_date'
@@ -129,6 +123,16 @@ if ($language_code === 'all') {
         GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
     ";
 } else {
+    // Buscar el proyecto en el array de wikis
+    $wiki_key = array_search($project, array_column($wikis, 'wiki'));
+
+    // Si no se encuentra el proyecto, se genera un error
+    if ($wiki_key === false) {
+        echo json_encode(['error' => 'Invalid project']);
+        exit;
+    }
+
+    // Definir la consulta para un proyecto específico
     $sql = "
         SELECT
             YEAR(a.creation_date) AS year,
@@ -137,10 +141,10 @@ if ($language_code === 'all') {
             SUM(CASE WHEN p.gender = 'Q6581072' THEN 1 ELSE 0 END) AS totalWomen,
             SUM(CASE WHEN p.gender = 'Q6581097' THEN 1 ELSE 0 END) AS totalMen,
             SUM(CASE WHEN p.gender NOT IN ('Q6581072', 'Q6581097') OR p.gender IS NULL THEN 1 ELSE 0 END) AS otherGenders
-            FROM articles a
+        FROM articles a
         JOIN project w ON a.site = w.site
         LEFT JOIN people p ON a.wikidata_id = p.wikidata_id
-        WHERE a.site = '{$languages[$language_code]['wiki']}'
+        WHERE a.site = '{$wikis[$wiki_key]['wiki']}'
             AND a.creation_date >= '$start_date'
             AND a.creation_date <= '$end_date'
         GROUP BY YEAR(a.creation_date), MONTH(a.creation_date)
