@@ -119,6 +119,13 @@ $sql = "
 
 $sql .= " AND a.site = '{$wiki['wiki']}'";  // Usar el valor de wiki obtenido
 
+
+echo "Wiki Key: " . $wiki_key . "<br>";
+
+// Verificar la consulta SQL
+echo "SQL: " . $sql . "<br>";
+
+
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
