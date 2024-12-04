@@ -35,16 +35,8 @@ foreach ($domainMapping as $domain => $wiki) {
     }
 }
 
-// Depuración: Mostrar el valor final de 'project' después de la normalización
-echo "Normalized project: " . $project . "<br>";
-
 // Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
-
-// Depuración: Mostrar el contenido de '$wikis'
-echo "<pre>";
-print_r($wikis);
-echo "</pre>";
 
 // Si no se encuentra, intentar variantes posibles
 if ($wiki_key === false) {
