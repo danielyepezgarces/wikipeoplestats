@@ -3,40 +3,39 @@ header('Content-Type: application/json; charset=utf-8');
 
 include '../../languages.php';
 
-// Leer el parámetro de búsqueda
-$query = isset($_GET['query']) ? strtolower(trim($_GET['query'])) : '';
+// Asociar prefijos con dominios
+$domains = [
+    'wiki' => 'wikipedia.org',
+    'wikiquote' => 'wikiquote.org',
+    'wikisource' => 'wikisource.org',
+];
+
+// Leer el parámetro de entrada
+$query = isset($_GET['dbname']) ? strtolower(trim($_GET['dbname'])) : '';
 
 if ($query) {
-    // Normalizar la consulta
-    $normalizedQuery = str_replace(['.', ' '], '', $query); // Eliminar puntos y espacios
-    $normalizedQuery = preg_replace('/\.(org|com)$/', '', $normalizedQuery); // Eliminar dominios finales
-
-    // Identificar el proyecto específico si corresponde
-    $project = null;
-    if (str_contains($query, 'wikipedia')) {
-        $project = 'wiki';
-    } elseif (str_contains($query, 'wikisource')) {
-        $project = 'wikisource';
-    } elseif (str_contains($query, 'wikiquote')) {
-        $project = 'wikiquote';
-    }
-
-    // Filtrar resultados según proyecto
-    $filtered = array_filter($wikis, function ($wiki) use ($normalizedQuery, $project) {
-        $matchesCode = str_starts_with($wiki['wiki'], $normalizedQuery); // Coincidencia por código
-        $matchesProject = $project ? str_contains($wiki['wiki'], $project) : true; // Coincidencia por proyecto
-        return $matchesCode && $matchesProject;
+    // Buscar en la lista de wikis
+    $result = array_filter($wikis, function ($wiki) use ($query) {
+        return $wiki['wiki'] === $query;
     });
 
-    // Manejo específico para dominios como 'es.wikisource.org'
-    if (str_ends_with($query, '.org')) {
-        $filtered = array_filter($filtered, function ($wiki) use ($project) {
-            return str_contains($wiki['wiki'], $project); // Solo devolver el proyecto específico
-        });
+    if (!empty($result)) {
+        $result = array_values($result)[0]; // Primer resultado
+        $dbname = $result['wiki'];
+
+        // Detectar dominio del dbname
+        foreach ($domains as $prefix => $domain) {
+            if (str_contains($dbname, $prefix)) {
+                $result['domain'] = "{$result['code']}.$domain";
+                break;
+            }
+        }
+    } else {
+        $result = ['error' => 'Database name not found.'];
     }
 } else {
-    $filtered = $wikis; // Devuelve todo si no hay filtro (opcional)
+    $result = ['error' => 'No dbname provided.'];
 }
 
-// Devuelve los datos en formato JSON
-echo json_encode(array_values($filtered), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+// Devolver JSON
+echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
