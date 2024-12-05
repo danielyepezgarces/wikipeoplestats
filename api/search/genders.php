@@ -24,7 +24,7 @@ function getDomainFromWiki($wiki) {
 }
 
 // Leer los parámetros
-$input = isset($_GET['input']) ? strtolower(trim($_GET['input'])) : '';
+$input = isset($_GET['query']) ? strtolower(trim($_GET['query'])) : '';
 
 $result = [];
 
