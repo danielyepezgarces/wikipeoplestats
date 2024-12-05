@@ -78,7 +78,88 @@ include 'languages.php'; // Cargar idiomas y traducciones
 <?php include 'languageselector.php'; // Incluir el encabezado ?>
 
 
-    <script>
+<script>
+let wikiCreationDate = ''; // Ejemplo: Fecha de creación de la wiki (puedes actualizarla dinámicamente)
+
+// Función para manejar el autocomplete de las wikis
+function autocompleteWiki(input) {
+    const query = input.value;
+
+    // Si el campo está vacío, no mostrar sugerencias
+    if (!query) {
+        document.getElementById('suggestions').classList.add('hidden');
+        return;
+    }
+
+    // Llamada a la API de búsqueda (simulada por ahora)
+    fetch(`https://wikipeoplestats.wmcloud.org/api/search/genders.php?query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const suggestions = data.wikis || [];
+            const suggestionsList = document.getElementById('suggestions');
+            suggestionsList.innerHTML = ''; // Limpiar las sugerencias anteriores
+
+            if (suggestions.length > 0) {
+                suggestionsList.classList.remove('hidden');
+                suggestions.forEach(wiki => {
+                    const listItem = document.createElement('div');
+                    listItem.classList.add('suggestion-item');
+                    listItem.textContent = `${wiki.wiki} (${wiki.domain})`;
+                    listItem.onclick = function() {
+                        document.getElementById('project').value = wiki.wiki;
+                        document.getElementById('suggestions').classList.add('hidden');
+                        wikiCreationDate = wiki.creation_date; // Actualizar fecha de creación
+                    };
+                    suggestionsList.appendChild(listItem);
+                });
+            } else {
+                suggestionsList.classList.add('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching autocomplete data:', error);
+            document.getElementById('suggestions').classList.add('hidden');
+        });
+}
+
+// Función para validar las fechas antes de enviar el formulario
+function validateDates() {
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+
+    // Validar fecha de inicio
+    if (startDateInput.value < wikiCreationDate) {
+        alert(`La fecha de inicio debe ser igual o mayor a la fecha de creación de la wiki seleccionada (${wikiCreationDate}).`);
+        return false;
+    }
+
+    // Validar que la fecha de inicio no sea mayor que la fecha actual
+    if (startDateInput.value > todayString) {
+        alert("La fecha de inicio no puede ser mayor que la fecha de hoy.");
+        return false;
+    }
+
+    // Si la fecha de fin es proporcionada, validar que sea mayor o igual a la fecha de inicio
+    if (endDateInput.value) {
+        if (endDateInput.value < startDateInput.value) {
+            alert("La fecha de fin debe ser igual o mayor que la fecha de inicio.");
+            return false;
+        }
+
+        // Validar que la fecha de fin no sea mayor que la fecha actual
+        if (endDateInput.value > todayString) {
+            alert("La fecha de fin no puede ser mayor que la fecha de hoy.");
+            return false;
+        }
+    }
+
+    // Si todo está bien, redirigir a la nueva URL
+    return redirectToUrl();
+}
+
+// Función para redirigir a la URL con los parámetros seleccionados
 function redirectToUrl() {
     const project = document.getElementById('project').value;
     const startDate = document.getElementById('start_date').value;
@@ -102,90 +183,7 @@ function redirectToUrl() {
     window.location.href = url;
     return false; // Prevenir el envío del formulario
 }
-</script>
-<script>
-    let wikiCreationDate = ''; // Variable para almacenar la fecha de creación
 
-    // Función para obtener las wikis de la API y manejar la validación
-    function fetchWikiData(input) {
-        fetch(`https://wikipeoplestats.wmcloud.org/api/search/genders.php?query=${input}`)
-            .then(response => response.json())
-            .then(data => {
-                const wikis = data.wikis || [];
-                const suggestionsContainer = document.getElementById('suggestions');
-
-                // Limpiar las sugerencias previas
-                suggestionsContainer.innerHTML = '';
-
-                // Mostrar las sugerencias de wikis
-                wikis.forEach(wiki => {
-                    const div = document.createElement('div');
-                    div.className = "cursor-pointer hover:bg-gray-100 p-2"; // Añadir estilo de hover
-                    div.textContent = `${wiki.wiki} - ${wiki.code}`;
-                    div.onclick = () => {
-                        document.getElementById('project').value = wiki.wiki; // Establecer el valor en el input
-                        suggestionsContainer.classList.add('hidden'); // Ocultar las sugerencias
-                        wikiCreationDate = wiki.creation_date; // Guardar la fecha de creación
-                        setCreationDate(wikiCreationDate); // Establecer la fecha de creación en los inputs
-                    };
-                    suggestionsContainer.appendChild(div);
-                });
-
-                // Mostrar el contenedor de sugerencias si hay wikis
-                suggestionsContainer.classList.toggle('hidden', wikis.length === 0);
-            })
-            .catch(error => console.error('Error fetching wiki data:', error));
-    }
-
-    // Establecer las fechas mínimas y máximas para las entradas de fecha
-    function setCreationDate(creationDate) {
-        const startDateInput = document.getElementById('start_date');
-        const endDateInput = document.getElementById('end_date');
-
-        // Establecer la fecha mínima de inicio y la fecha máxima de fin
-        startDateInput.min = creationDate; // La fecha de inicio no puede ser antes de la fecha de creación
-        const today = new Date().toISOString().split('T')[0];
-        endDateInput.max = today; // La fecha de fin no puede ser posterior a la fecha actual
-    }
-
-    // Función para validar las fechas antes de enviar el formulario
-    function validateDates() {
-        const startDateInput = document.getElementById('start_date');
-        const endDateInput = document.getElementById('end_date');
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0];
-
-        // Comprobación de fechas
-        if (startDateInput.value < wikiCreationDate) {
-            alert(`La fecha de inicio debe ser igual o mayor a la fecha de creación de la wiki seleccionada (${wikiCreationDate}).`);
-            return false;
-        }
-
-        if (startDateInput.value > todayString) {
-            alert("La fecha de inicio no puede ser mayor que la fecha de hoy.");
-            return false;
-        }
-
-        if (endDateInput.value < startDateInput.value) {
-            alert("La fecha de fin debe ser igual o mayor que la fecha de inicio.");
-            return false;
-        }
-
-        return true; // Validación correcta
-    }
-
-    // Autocompletar de wiki
-    document.getElementById('project').addEventListener('input', function() {
-        const input = this.value;
-        fetchWikiData(input);
-    });
-
-    // Establecer el máximo de end_date al cargar la página
-    window.onload = function() {
-        const endDateInput = document.getElementById('end_date');
-        const today = new Date();
-        endDateInput.max = today.toISOString().split('T')[0];
-    }
 </script>
 
     <script src="https://wikipeoplestats.wmcloud.org/assets/js/main.js"></script>
