@@ -7,20 +7,31 @@ include '../../languages.php';
 $query = isset($_GET['query']) ? strtolower(trim($_GET['query'])) : '';
 
 if ($query) {
-    // Normalizar la consulta para tratar diferentes formatos
+    // Normalizar la consulta
     $normalizedQuery = str_replace(['.', ' '], '', $query); // Eliminar puntos y espacios
-    $normalizedQuery = preg_replace('/wikipedia|wikiquote|wikisource|\.org$/', '', $normalizedQuery); // Eliminar sufijos como 'wikipedia.org'
-    
-    // Filtrar los resultados según el término normalizado
-    $filtered = array_filter($wikis, function ($wiki) use ($normalizedQuery) {
-        // Comparar contra 'wiki', 'code' y términos normalizados
-        return str_contains($wiki['wiki'], $normalizedQuery) || str_contains($wiki['code'], $normalizedQuery);
+    $normalizedQuery = preg_replace('/\.(org|com)$/', '', $normalizedQuery); // Eliminar dominios finales
+
+    // Identificar el proyecto específico si corresponde
+    $project = null;
+    if (str_contains($query, 'wikipedia')) {
+        $project = 'wiki';
+    } elseif (str_contains($query, 'wikisource')) {
+        $project = 'wikisource';
+    } elseif (str_contains($query, 'wikiquote')) {
+        $project = 'wikiquote';
+    }
+
+    // Filtrar resultados según proyecto
+    $filtered = array_filter($wikis, function ($wiki) use ($normalizedQuery, $project) {
+        $matchesCode = str_starts_with($wiki['wiki'], $normalizedQuery); // Coincidencia por código
+        $matchesProject = $project ? str_contains($wiki['wiki'], $project) : true; // Coincidencia por proyecto
+        return $matchesCode && $matchesProject;
     });
 
-    // Si el término es exacto como un dominio, priorizar resultados únicos
-    if (str_ends_with($query, '.wikipedia.org')) {
-        $filtered = array_filter($filtered, function ($wiki) use ($normalizedQuery) {
-            return str_ends_with($wiki['wiki'], 'wiki'); // Solo devuelve wikis principales
+    // Manejo específico para dominios como 'es.wikisource.org'
+    if (str_ends_with($query, '.org')) {
+        $filtered = array_filter($filtered, function ($wiki) use ($project) {
+            return str_contains($wiki['wiki'], $project); // Solo devolver el proyecto específico
         });
     }
 } else {
