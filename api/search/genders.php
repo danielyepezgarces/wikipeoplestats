@@ -1,15 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-// Datos de ejemplo
-$wikis = [
-    ['code' => 'aa', 'wiki' => 'aawiki', 'creation_date' => '2001-10-16'],
-    ['code' => 'ab', 'wiki' => 'abwiki', 'creation_date' => '2001-12-20'],
-    ['code' => 'ace', 'wiki' => 'acewiki', 'creation_date' => '2004-03-29'],
-    ['code' => 'ady', 'wiki' => 'adywiki', 'creation_date' => '2004-05-28'],
-    ['code' => 'af', 'wiki' => 'afwiki', 'creation_date' => '2001-10-16'],
-    // Más elementos...
-];
+include '../../languages.php';
 
 // Leer el parámetro de búsqueda
 $query = isset($_GET['query']) ? strtolower($_GET['query']) : '';
