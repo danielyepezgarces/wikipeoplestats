@@ -3,7 +3,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
 ?>
 
 <!DOCTYPE html>
-<html lang="<?php echo $currentLang['code']; ?>">
+<html lang="<?php echo htmlspecialchars($currentLang['code']); ?>" dir="<?php echo htmlspecialchars($currentLang['text_direction']); ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
     </script>
     <!-- Otras cabeceras -->
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
     <?php include 'header.php'; // Incluir el encabezado ?>
 
     <main class="container mx-auto px-4 py-8">
