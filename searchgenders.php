@@ -117,7 +117,7 @@ function autocompleteWiki(input) {
                 suggestions.forEach(wiki => {
                     const listItem = document.createElement('div');
                     listItem.className = 
-                        "p-2 cursor-pointer hover:bg-gray-100 hover:text-blue-600 transition duration-200 text-sm";
+                        "p-2 cursor-pointer hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-gray-900 transition duration-200 text-sm border-b border-gray-200 dark:border-gray-700 last:border-b-0";
                     listItem.textContent = `${wiki.wiki} (${wiki.domain})`;
                     listItem.onclick = function () {
                         document.getElementById('project').value = wiki.wiki;
