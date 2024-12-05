@@ -28,20 +28,50 @@ $input = isset($_GET['input']) ? strtolower(trim($_GET['input'])) : '';
 
 $result = [];
 
-// Caso 1: Buscar proyectos por dominio (como `es.wikipedia.org`, `en.wikiquote.org`, etc.)
+// Caso 1: Buscar proyectos por dominio o nombre de wiki (ej. `eswiki`, `eswikisource`, `es.wikipedia.org`, etc.)
 if ($input) {
     $found_wikis = [];
 
-    foreach ($wikis as $wiki) {
-        $domain = getDomainFromWiki($wiki['wiki']);
+    // Comprobamos si el input es solo un código de idioma (ej. 'es', 'en', etc.)
+    $is_language_code = strlen($input) === 2;  // Verifica si es un código de idioma de 2 caracteres (ej. 'es', 'en', etc.)
+    $is_wiki_name = preg_match('/^[a-z]+(wiki|wikiquote|wikisource)$/', $input); // Verifica si es un nombre de wiki como 'eswiki', 'eswikiquote', etc.
 
-        if (strpos($domain, $input) !== false) {
-            $found_wikis[] = [
-                'code' => $wiki['code'],
-                'wiki' => $wiki['wiki'],
-                'domain' => $domain,
-                'creation_date' => $wiki['creation_date'],
-            ];
+    foreach ($wikis as $wiki) {
+        // Generamos el dominio
+        $domain = getDomainFromWiki($wiki['wiki']);
+        
+        // Si el input es un código de idioma, buscamos todos los proyectos de ese idioma
+        if ($is_language_code) {
+            if (strpos($wiki['code'], $input) !== false) {
+                $found_wikis[] = [
+                    'code' => $wiki['code'],
+                    'wiki' => $wiki['wiki'],
+                    'domain' => $domain,
+                    'creation_date' => $wiki['creation_date'],
+                ];
+            }
+        }
+        // Si el input es un nombre de wiki (como 'eswiki', 'eswikisource', etc.)
+        elseif ($is_wiki_name) {
+            if (strpos($wiki['wiki'], $input) !== false) {
+                $found_wikis[] = [
+                    'code' => $wiki['code'],
+                    'wiki' => $wiki['wiki'],
+                    'domain' => $domain,
+                    'creation_date' => $wiki['creation_date'],
+                ];
+            }
+        }
+        // Si el input no es ni un código de idioma ni un nombre de wiki, buscamos en el dominio completo
+        else {
+            if (strpos($domain, $input) !== false) {
+                $found_wikis[] = [
+                    'code' => $wiki['code'],
+                    'wiki' => $wiki['wiki'],
+                    'domain' => $domain,
+                    'creation_date' => $wiki['creation_date'],
+                ];
+            }
         }
     }
 
