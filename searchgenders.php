@@ -48,7 +48,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
             class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring focus:ring-primary-500 focus:border-primary-500 h-10 appearance-none transition duration-300"
             required oninput="autocompleteWiki(this)">
         <div id="suggestions"
-            class="absolute bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 shadow-lg border dark:border-gray-600 w-full rounded-md mt-1 hidden z-10">
+            class="absolute z-10 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg rounded-lg max-h-60 overflow-y-auto hidden scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-100 dark:scrollbar-thumb-blue-400 dark:scrollbar-track-gray-800">
             <!-- Las sugerencias se mostrarán aquí -->
         </div>
     </div>
@@ -116,8 +116,8 @@ function autocompleteWiki(input) {
                 suggestionsList.classList.remove('hidden');
                 suggestions.forEach(wiki => {
                     const listItem = document.createElement('div');
-                    listItem.className = 
-                        "p-2 cursor-pointer hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-gray-900 transition duration-200 text-sm border-b border-gray-200 dark:border-gray-700 last:border-b-0";
+                    listItem.className =
+                        "p-2 cursor-pointer hover:bg-blue-500 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition duration-200 text-sm border-b border-gray-200 dark:border-gray-700 last:border-b-0";
                     listItem.textContent = `${wiki.wiki} (${wiki.domain})`;
                     listItem.onclick = function () {
                         document.getElementById('project').value = wiki.wiki;
