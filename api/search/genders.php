@@ -3,38 +3,59 @@ header('Content-Type: application/json; charset=utf-8');
 
 include '../../languages.php';
 
-// Asociar prefijos con dominios
-$domains = [
-    'wiki' => 'wikipedia.org',
-    'wikiquote' => 'wikiquote.org',
-    'wikisource' => 'wikisource.org',
-];
+// Función para generar dominios basados en `wiki`
+function getDomainFromWiki($wiki) {
+    $domains = [
+        'wiki' => 'wikipedia.org',
+        'wikiquote' => 'wikiquote.org',
+        'wikisource' => 'wikisource.org',
+    ];
 
-// Leer el parámetro de entrada
-$query = isset($_GET['dbname']) ? strtolower(trim($_GET['dbname'])) : '';
+    // Separar el nombre de wiki y el tipo de proyecto
+    if (preg_match('/^([a-z]+)(wiki|wikiquote|wikisource)$/', $wiki, $matches)) {
+        $language = $matches[1];
+        $project = $matches[2];
 
-if ($query) {
-    // Buscar en la lista de wikis
-    $result = array_filter($wikis, function ($wiki) use ($query) {
-        return $wiki['wiki'] === $query;
-    });
-
-    if (!empty($result)) {
-        $result = array_values($result)[0]; // Primer resultado
-        $dbname = $result['wiki'];
-
-        // Detectar dominio del dbname
-        foreach ($domains as $prefix => $domain) {
-            if (str_contains($dbname, $prefix)) {
-                $result['domain'] = "{$result['code']}.$domain";
-                break;
-            }
+        if (isset($domains[$project])) {
+            return "{$language}.{$domains[$project]}";
         }
-    } else {
-        $result = ['error' => 'Database name not found.'];
     }
-} else {
-    $result = ['error' => 'No dbname provided.'];
+    return null;
+}
+
+// Leer los parámetros
+$input = isset($_GET['input']) ? strtolower(trim($_GET['input'])) : '';
+
+$result = [];
+
+// Caso 1: Buscar proyectos por dominio (como `es.wikipedia.org`, `en.wikiquote.org`, etc.)
+if ($input) {
+    $found_wikis = [];
+
+    foreach ($wikis as $wiki) {
+        $domain = getDomainFromWiki($wiki['wiki']);
+
+        if (strpos($domain, $input) !== false) {
+            $found_wikis[] = [
+                'code' => $wiki['code'],
+                'wiki' => $wiki['wiki'],
+                'domain' => $domain,
+                'creation_date' => $wiki['creation_date'],
+            ];
+        }
+    }
+
+    if (!empty($found_wikis)) {
+        $result['input'] = $input;
+        $result['wikis'] = $found_wikis;
+    } else {
+        $result['error'] = "No wikis found for the input '{$input}'.";
+    }
+}
+
+// Caso 2: Ningún parámetro proporcionado
+else {
+    $result['error'] = 'No input parameter provided. Please provide a domain or wiki name to search.';
 }
 
 // Devolver JSON
