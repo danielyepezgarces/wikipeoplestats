@@ -92,7 +92,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
 
 
 <script>
-let wikiCreationDate = ''; // Ejemplo: Fecha de creación de la wiki (puedes actualizarla dinámicamente)
+let wikiCreationDate = ''; // Fecha de creación de la wiki (se actualiza dinámicamente)
 
 // Función para manejar el autocomplete de las wikis
 function autocompleteWiki(input) {
@@ -104,7 +104,7 @@ function autocompleteWiki(input) {
         return;
     }
 
-    // Llamada a la API de búsqueda (simulada por ahora)
+    // Llamada a la API de búsqueda
     fetch(`https://wikipeoplestats.wmcloud.org/api/search/genders.php?query=${query}`)
         .then(response => response.json())
         .then(data => {
@@ -116,9 +116,10 @@ function autocompleteWiki(input) {
                 suggestionsList.classList.remove('hidden');
                 suggestions.forEach(wiki => {
                     const listItem = document.createElement('div');
-                    listItem.classList.add('suggestion-item');
+                    listItem.className = 
+                        "p-2 cursor-pointer hover:bg-gray-100 hover:text-blue-600 transition duration-200 text-sm";
                     listItem.textContent = `${wiki.wiki} (${wiki.domain})`;
-                    listItem.onclick = function() {
+                    listItem.onclick = function () {
                         document.getElementById('project').value = wiki.wiki;
                         document.getElementById('suggestions').classList.add('hidden');
                         wikiCreationDate = wiki.creation_date; // Actualizar fecha de creación
@@ -196,7 +197,6 @@ function redirectToUrl() {
     window.location.href = url;
     return false; // Prevenir el envío del formulario
 }
-
 </script>
 
     <script src="https://wikipeoplestats.wmcloud.org/assets/js/main.js"></script>
