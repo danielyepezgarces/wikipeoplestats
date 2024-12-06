@@ -11,29 +11,12 @@ $memcache->addServer('localhost', 11211); // Cambia según tu configuración
 // Medir tiempo de inicio
 $startTime = microtime(true);
 
-$domainMapping = [
-    'wikipedia' => 'wiki',
-    'wikiquote' => 'wikiquote',
-    'wikisource' => 'wikisource',
-];
-
-// Obtener el valor de 'project' y normalizarlo
+// Obtener el valor de project
 $project = isset($_GET['project']) ? $_GET['project'] : '';
+$project = $conn->real_escape_string($project);  // Escapar para prevenir inyecciones SQL
 
-// Eliminar el sufijo .org y cualquier punto en el subdominio
-$project = preg_replace('/\.(org|com|net|edu|gov)$/', '', $project);
-
-// Eliminar puntos (.) en el subdominio (ej. "es.wikiquote" => "eswikiquote")
-$project = str_replace('.', '', $project);
-
-// Mapeo específico de 'wikipedia' a 'wiki'
-foreach ($domainMapping as $domain => $wiki) {
-    if (strpos($project, $domain) !== false) {
-        // Si es 'wikipedia', lo convertimos a 'wiki'
-        $project = preg_replace('/^' . preg_quote($domain, '/') . '/', $wiki, $project);
-        break;
-    }
-}
+// Normalizar el valor de project para que coincida con las claves de wikis
+$project = str_replace(['.wikipedia.org', '.wikiquote.org', '.wikisource.org', '.wikipedia', '.wikiquote', '.wikisource'], '', $project);
 
 // Buscar la wiki correspondiente en el array wikis
 $wiki_key = array_search($project, array_column($wikis, 'wiki'));
@@ -55,18 +38,13 @@ if ($wiki_key === false) {
     }
 }
 
-// Depuración: Verificar si se encontró el proyecto
-if ($wiki_key === false) {
+// Verificar si encontramos el proyecto en wikis
+if ($wiki_key !== false) {
+    // Aquí puedes acceder a los datos de la wiki correspondiente
+    $wiki = $wikis[$wiki_key];
+} else {
+    // Si no se encuentra, enviar un error
     echo json_encode(['error' => 'Project not found']);
-    exit;
-}
-
-// Asegúrate de que $wiki es un array válido
-$wiki = $wikis[$wiki_key];
-
-// Verifica si $wiki contiene la clave 'wiki'
-if (!isset($wiki['wiki'])) {
-    echo json_encode(['error' => 'Invalid wiki data']);
     exit;
 }
 
