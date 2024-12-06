@@ -64,6 +64,10 @@ if ($currentWiki === 'globalwiki') {
 }
 
 
+$welcomeMessage = __('welcome_message');
+$rotatingPlatforms = ["Wikipedia", "Wikiquote", "Wikisource"];
+
+
 // Calcular los ratios
 $ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
 $ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
@@ -106,7 +110,7 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 <main class="container mx-auto px-4 py-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-        <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
+        <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo $welcomeMessage; ?></h1>
         <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
     </div>
 
@@ -261,6 +265,26 @@ function purgeCache() {
             }
         }, 1000);
     </script>
+<script>
+    // Pasar datos desde PHP a JavaScript
+    const welcomeMessageTemplate = <?php echo json_encode($welcomeMessage); ?>;
+    const rotatingPlatforms = <?php echo json_encode($rotatingPlatforms); ?>;
 
+    let index = 0;
+
+    // Función para actualizar el mensaje dinámicamente
+    function updateContent() {
+        const platform = rotatingPlatforms[index];
+        const content = welcomeMessageTemplate.replace("{platform}", platform);
+
+        // Actualizar el texto en el h1
+        document.getElementById("welcome-message").textContent = content;
+        index = (index + 1) % rotatingPlatforms.length; // Cambiar al siguiente
+    }
+
+    // Inicializar y rotar cada 2 segundos
+    updateContent(); // Mostrar el primer texto
+    setInterval(updateContent, 2000); // Cambiar cada 2 segundos
+</script>
 </body>
 </html>
