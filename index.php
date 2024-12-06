@@ -10,7 +10,7 @@ $wikiproject = $currentWiki === "globalwiki" ? "all" : $currentWiki;
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-curl_setopt($ch, CURLOPT_URL, "https://wikipeoplestats.wmcloud.org/api/stats/{$wikiproject}");
+curl_setopt($ch, CURLOPT_URL, "https://wikipeoplestats.wmcloud.org/api/stats/all");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "User-Agent: WikiStatsPeople/1.0"
