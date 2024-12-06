@@ -275,7 +275,7 @@ function purgeCache() {
     // Función para actualizar el mensaje dinámicamente
     function updateContent() {
         const platform = rotatingPlatforms[index];
-        const content = welcomeMessageTemplate.replace("{platform}", platform);
+        const content = welcomeMessageTemplate.replace("{platform}", platform); // Reemplazar el marcador
 
         // Actualizar el texto en el h1
         document.getElementById("welcome-message").textContent = content;
@@ -283,8 +283,10 @@ function purgeCache() {
     }
 
     // Inicializar y rotar cada 2 segundos
-    updateContent(); // Mostrar el primer texto
     setInterval(updateContent, 2000); // Cambiar cada 2 segundos
+
+    // Llamar inmediatamente a la función para mostrar el primer texto
+    updateContent();
 </script>
 </body>
 </html>
