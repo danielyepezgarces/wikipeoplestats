@@ -28,46 +28,33 @@ curl_close($ch);
 // Decodificar la respuesta JSON
 $data = json_decode($response, true);
 
-// Verificar si hay un error en la respuesta
-if (isset($data['error']) && $data['error'] === 'No data found') {
-    // Asignar cero a todas las estadísticas
-    $totalPeople = 0;
-    $totalWomen = 0;
-    $totalMen = 0;
-    $otherGenders = 0;
-    $totalContributions = 0;
-    $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
-    $lastUpdated = "N/A";
+// Inicializar variables
+$totalPeople = 0;
+$totalWomen = 0;
+$totalMen = 0;
+$otherGenders = 0;
+$totalContributions = 0;
+$lastUpdated = "N/A";
+$cachedUntil = "N/A";
+$errorMessage = "";
+
+// Verificar si hay datos válidos en la respuesta
+if (isset($data) && is_array($data) && !isset($data['error'])) {
+    $totalPeople = (int)($data['totalPeople'] ?? 0);
+    $totalWomen = (int)($data['totalWomen'] ?? 0);
+    $totalMen = (int)($data['totalMen'] ?? 0);
+    $otherGenders = (int)($data['otherGenders'] ?? 0);
+    $totalContributions = (int)($data['totalContributions'] ?? 0);
+    $lastUpdated = htmlspecialchars($data['lastUpdated'] ?? "N/A");
+    $cachedUntil = htmlspecialchars($data['cachedUntil'] ?? "N/A");
+} else {
     $errorMessage = __('coming_soon_tracking_wiki');
-} else {
-    // Asignar los valores de la respuesta
-    $totalPeople = $data['totalPeople'] ?? 0;
-    $totalWomen = $data['totalWomen'] ?? 0;
-    $totalMen = $data['totalMen'] ?? 0;
-    $otherGenders = $data['otherGenders'] ?? 0;
-    $totalContributions = $data['totalContributions'] ?? 0;
-    $lastUpdated = $data['lastUpdated'];
-    $cachedUntil = $data['cachedUntil']; // Obtén la fecha de expiración
-
-// Mensaje de éxito según la wiki
-if ($currentWiki === 'globalwiki') {
-    $errorMessage = __('homepage_global_stats_credits');
-} else {
-    $lastUpdated = isset($data['last_updated']) ? $data['last_updated'] : 'N/A';
-    $errorMessage = sprintf(
-        __('homepage_stats_credits'), 
-        str_replace('wiki', '.wikipedia', $currentWiki)
-    ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
 }
-}
-
 
 // Calcular los ratios
-$ratioWomen = $totalPeople > 0 ? ($totalWomen / (float)$totalPeople) * 100 : 0;
-$ratioMen = $totalPeople > 0 ? ($totalMen / (float)$totalPeople) * 100 : 0;
-$ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / (float)$totalPeople) * 100 : 0;
-
-// Obtener y formatear la última actualización
+$ratioWomen = $totalPeople > 0 ? round(($totalWomen / $totalPeople) * 100, 2) : 0;
+$ratioMen = $totalPeople > 0 ? round(($totalMen / $totalPeople) * 100, 2) : 0;
+$ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 100, 2) : 0;
 ?>
 
 <!DOCTYPE html>
@@ -103,68 +90,41 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / (float)$totalPeople) * 
 
 
 <main class="container mx-auto px-4 py-8">
-    <!-- Welcome Section -->
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-        <h1 class="text-4xl text-center font-extrabold mb-4 text-gray-900 dark:text-gray-100">
-            <?php echo __('welcome_message'); ?>
-        </h1>
-        <p class="text-lg text-gray-700 text-center dark:text-gray-300 leading-relaxed">
-            <?php echo __('main_home_content'); ?>
-        </p>
+        <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
+        <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
     </div>
 
-    <!-- Statistics Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        <!-- Total People -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow duration-300">
-            <i class="fas fa-users text-4xl text-blue-500 mb-3"></i>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100"><?php echo __('total_people'); ?></h3>
-            <p class="odometer text-3xl font-bold text-gray-700 dark:text-gray-300 mt-2" 
-               data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalPeople)); ?>">0</p>
-        </div>
-
-        <!-- Total Women -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow duration-300">
-            <i class="fas fa-female text-4xl text-pink-500 mb-3"></i>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100"><?php echo __('total_women'); ?></h3>
-            <p class="odometer text-3xl font-bold text-gray-700 dark:text-gray-300 mt-2" 
-               data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">0</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                <?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%
-            </p>
-        </div>
-
-        <!-- Total Men -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow duration-300">
-            <i class="fas fa-male text-4xl text-blue-700 mb-3"></i>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100"><?php echo __('total_men'); ?></h3>
-            <p class="odometer text-3xl font-bold text-gray-700 dark:text-gray-300 mt-2" 
-               data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">0</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                <?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%
-            </p>
-        </div>
-
-        <!-- Other Genders -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow duration-300">
-            <i class="fas fa-genderless text-4xl text-purple-500 mb-3"></i>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100"><?php echo __('other_genders'); ?></h3>
-            <p class="odometer text-3xl font-bold text-gray-700 dark:text-gray-300 mt-2" 
-               data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                <?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%
-            </p>
-        </div>
-
-        <!-- Total Contributions -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center hover:shadow-lg transition-shadow duration-300">
-            <i class="fas fa-concierge-bell text-4xl text-green-500 mb-3"></i>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100"><?php echo __('total_editors'); ?></h3>
-            <p class="odometer text-3xl font-bold text-gray-700 dark:text-gray-300 mt-2" 
-               data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
-        </div>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-users text-3xl text-blue-500 mb-2"></i>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_people'); ?></h3>
+        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalPeople)); ?>">0</p>
     </div>
-</main>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_women'); ?></h3>
+        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">0</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_men'); ?></h3>
+        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">0</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('other_genders'); ?></h3>
+        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
+        <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
+    </div>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+        <i class="fas fa-concierge-bell text-3xl text-green-500 mb-2"></i>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_editors'); ?></h3>
+        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
+    </div>
+</div>
 
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $errorMessage; ?>
