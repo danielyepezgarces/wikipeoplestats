@@ -126,6 +126,7 @@ $ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 1
     </div>
 </div>
 
+
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $errorMessage; ?>
 </p>
