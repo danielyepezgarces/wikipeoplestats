@@ -102,7 +102,7 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 <main class="container mx-auto px-4 py-8">
 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
     <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
-    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300">    <?php 
+    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300" id="wikimediaprojects">  <?php
         // Inicialmente, se carga el nombre del proyecto en el HTML
         $projectName = __('project_wikipedia'); // Este valor puede cambiar según el proyecto que desees mostrar
         echo sprintf(__('main_home_content'), $projectName); 
@@ -264,7 +264,7 @@ function purgeCache() {
     ];
     
     let currentIndex = 0;
-    const projectTextElement = document.getElementById("projectText");
+    const projectTextElement = document.getElementById("wikimediaprojects");
 
     // Función para actualizar el contenido cada 3 segundos
     function updateProjectText() {
