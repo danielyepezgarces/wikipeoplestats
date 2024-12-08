@@ -2,9 +2,7 @@
 
 include 'languages.php';
 
-// Now you can access the wiki parameter like this:
-$currentWiki = $currentLang['wiki'];
-$wikiproject = $currentWiki === "globalwiki" ? "all" : $currentWiki;
+$wikiproject = "all";
 
 // Inicializar cURL
 $ch = curl_init();
