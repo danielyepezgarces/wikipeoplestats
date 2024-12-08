@@ -277,7 +277,7 @@ function purgeCache() {
     }
 
     // Actualizar el texto cada 3 segundos
-    setInterval(updateProjectText, 3000);
+    setInterval(updateProjectText, 1000);
 
     // Llamada inicial para mostrar el primer texto
     updateProjectText();
