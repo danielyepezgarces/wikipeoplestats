@@ -57,13 +57,13 @@ $ratioMen = $totalPeople > 0 ? round(($totalMen / $totalPeople) * 100, 2) : 0;
 $ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 100, 2) : 0;
 
 $projects = ['Wikipedia', 'Wikiquote', 'Wikisource'];
-$currentProject = $projects[floor(time() / 3) % count($projects)]; // Cambiar cada 3 segundos
+$currentProject = $projects[0]; // Comienza con el primer proyecto
 
 // Obtener el nombre traducido del proyecto
 $currentProjectTranslated = __($currentProject);
 
-// Obtener el mensaje principal y formatearlo con el nombre del proyecto traducido
-$main_home_content = sprintf(__('main_home_content'), $currentProjectTranslated);
+// Obtener el mensaje principal
+$message = sprintf(__('main_home_content'), $currentProjectTranslated);
 
 ?>
 
@@ -102,7 +102,12 @@ $main_home_content = sprintf(__('main_home_content'), $currentProjectTranslated)
 <main class="container mx-auto px-4 py-8">
 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
     <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
-    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo $main_home_content; ?></p>
+    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300">    <?php 
+        // Inicialmente, se carga el nombre del proyecto en el HTML
+        $projectName = __('project_wikipedia'); // Este valor puede cambiar según el proyecto que desees mostrar
+        echo sprintf(__('main_home_content'), $projectName); 
+    ?>
+    </p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
@@ -147,9 +152,9 @@ $main_home_content = sprintf(__('main_home_content'), $currentProjectTranslated)
         <?php echo sprintf(__('cached_version_message'), "<span id='cachecountdown'></span>"); ?>
     </p>
     <div class="mt-4 inline-flex items-center justify-center">
-        <button 
-            id="purge-cache" 
-            onclick="purgeCache()" 
+        <button
+            id="purge-cache"
+            onclick="purgeCache()"
             class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition flex items-center"
         >
             <span class="mr-2"><?php echo __('purge_cache_button'); ?></span>
@@ -209,7 +214,7 @@ function purgeCache() {
     .then(data => {
         // Muestra el toast de éxito
         showToast("<?php echo __('cache_purged_successfully'); ?>");
-        
+
         // Recarga la página después de 2 segundos
         setTimeout(() => {
             location.reload();
@@ -251,5 +256,32 @@ function purgeCache() {
             }
         }, 1000);
     </script>
+    <script>
+    const projectNames = [
+        "<?php echo __('project_wikipedia'); ?>", 
+        "<?php echo __('project_wikiquote'); ?>", 
+        "<?php echo __('project_wikisource'); ?>"
+    ];
+    
+    let currentIndex = 0;
+    const projectTextElement = document.getElementById("projectText");
+
+    // Función para actualizar el contenido cada 3 segundos
+    function updateProjectText() {
+        const currentProject = projectNames[currentIndex];
+        const newText = "<?php echo __('main_home_content'); ?>".replace('%s', currentProject);
+        projectTextElement.innerHTML = newText;
+        
+        // Cambiar al siguiente proyecto
+        currentIndex = (currentIndex + 1) % projectNames.length;
+    }
+
+    // Actualizar el texto cada 3 segundos
+    setInterval(updateProjectText, 3000);
+
+    // Llamada inicial para mostrar el primer texto
+    updateProjectText();
+</script>
+
 </body>
 </html>
