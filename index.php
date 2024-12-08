@@ -246,6 +246,6 @@ function purgeCache() {
             }
         }, 1000);
     </script>
-    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
+    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/odometer.js"></script>
 </body>
 </html>
