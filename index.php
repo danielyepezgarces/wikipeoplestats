@@ -167,12 +167,16 @@ $ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 1
     <script src="/assets/js/main.js?v=2"></script>
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script>
+    <script>
     // Inicializa los odómetros
     document.querySelectorAll('.odometer').forEach(function (odometer) {
-        odometer.innerHTML = odometer.getAttribute('data-odometer-final');
+        // Obtiene el valor final y elimina espacios
+        const finalValue = odometer.getAttribute('data-odometer-final').replace(/\s+/g, '');
+        // Asigna el valor procesado al odómetro
+        odometer.innerHTML = finalValue;
     });
 </script>
+
 
 
 <script>
