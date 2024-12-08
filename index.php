@@ -28,8 +28,6 @@ curl_close($ch);
 // Decodificar la respuesta JSON
 $data = json_decode($response, true);
 
-var_dump($data);
-
 // Verificar si hay un error en la respuesta
 if (isset($data['error']) && $data['error'] === 'No data found') {
     // Asignar cero a todas las estadísticas
@@ -68,11 +66,6 @@ if ($currentWiki === 'globalwiki') {
 $ratioWomen = $totalPeople > 0 ? ($totalWomen / (float)$totalPeople) * 100 : 0;
 $ratioMen = $totalPeople > 0 ? ($totalMen / (float)$totalPeople) * 100 : 0;
 $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / (float)$totalPeople) * 100 : 0;
-
-echo "Total de personas: $totalPeople\n";
-echo "Total de mujeres: $totalWomen (" . number_format($womenPercentage, 2) . "%)\n";
-echo "Total de hombres: $totalMen (" . number_format($menPercentage, 2) . "%)\n";
-echo "Otros géneros: $otherGenders (" . number_format($otherPercentage, 2) . "%)\n";
 
 // Obtener y formatear la última actualización
 ?>
