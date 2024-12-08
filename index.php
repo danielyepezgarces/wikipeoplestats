@@ -55,6 +55,16 @@ if (isset($data) && is_array($data) && !isset($data['error'])) {
 $ratioWomen = $totalPeople > 0 ? round(($totalWomen / $totalPeople) * 100, 2) : 0;
 $ratioMen = $totalPeople > 0 ? round(($totalMen / $totalPeople) * 100, 2) : 0;
 $ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 100, 2) : 0;
+
+$projects = ['Wikipedia', 'Wikiquote', 'Wikisource'];
+$currentProject = $projects[floor(time() / 3) % count($projects)]; // Cambiar cada 3 segundos
+
+// Obtener el nombre traducido del proyecto
+$currentProjectTranslated = __($currentProject);
+
+// Obtener el mensaje principal y formatearlo con el nombre del proyecto traducido
+$main_home_content = sprintf(__('main_home_content'), $currentProjectTranslated);
+
 ?>
 
 <!DOCTYPE html>
@@ -92,7 +102,7 @@ $ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 1
 <main class="container mx-auto px-4 py-8">
 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
     <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
-    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
+    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo $main_home_content; ?></p>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
