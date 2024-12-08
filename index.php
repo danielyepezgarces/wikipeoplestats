@@ -69,6 +69,11 @@ $ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
 $ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
 $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
 
+echo "Total de personas: $totalPeople\n";
+echo "Total de mujeres: $totalWomen (" . number_format($womenPercentage, 2) . "%)\n";
+echo "Total de hombres: $totalMen (" . number_format($menPercentage, 2) . "%)\n";
+echo "Otros géneros: $otherGenders (" . number_format($otherPercentage, 2) . "%)\n";
+
 // Obtener y formatear la última actualización
 ?>
 
