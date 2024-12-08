@@ -65,9 +65,9 @@ if ($currentWiki === 'globalwiki') {
 
 
 // Calcular los ratios
-$ratioWomen = $totalPeople > 0 ? ($totalWomen / $totalPeople) * 100 : 0;
-$ratioMen = $totalPeople > 0 ? ($totalMen / $totalPeople) * 100 : 0;
-$ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0;
+$ratioWomen = $totalPeople > 0 ? ($totalWomen / (float)$totalPeople) * 100 : 0;
+$ratioMen = $totalPeople > 0 ? ($totalMen / (float)$totalPeople) * 100 : 0;
+$ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / (float)$totalPeople) * 100 : 0;
 
 echo "Total de personas: $totalPeople\n";
 echo "Total de mujeres: $totalWomen (" . number_format($womenPercentage, 2) . "%)\n";
