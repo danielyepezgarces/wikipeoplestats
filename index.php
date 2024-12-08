@@ -90,39 +90,39 @@ $ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 1
 
 
 <main class="container mx-auto px-4 py-8">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-        <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
-        <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
-    </div>
+<div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
+    <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
+    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300"><?php echo __('main_home_content'); ?></p>
+</div>
 
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
+<div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-users text-3xl text-blue-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_people'); ?></h3>
-        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalPeople)); ?>">0</p>
+        <p class="text-2xl font-semibold text-gray-700 dark:text-gray-300"><?php echo number_format($totalPeople); ?></p>
     </div>
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-female text-3xl text-pink-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_women'); ?></h3>
-        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalWomen)); ?>">0</p>
+        <p class="text-2xl font-semibold text-gray-700 dark:text-gray-300"><?php echo number_format($totalWomen); ?></p>
         <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalWomen / $totalPeople) * 100 : 0, 2); ?>%</p>
     </div>
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-male text-3xl text-blue-700 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_men'); ?></h3>
-        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalMen)); ?>">0</p>
+        <p class="text-2xl font-semibold text-gray-700 dark:text-gray-300"><?php echo number_format($totalMen); ?></p>
         <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($totalMen / $totalPeople) * 100 : 0, 2); ?>%</p>
     </div>
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-genderless text-3xl text-purple-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('other_genders'); ?></h3>
-        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($otherGenders)); ?>">0</p>
+        <p class="text-2xl font-semibold text-gray-700 dark:text-gray-300"><?php echo number_format($otherGenders); ?></p>
         <p class="mt-2 text-gray-500 dark:text-gray-400"><?php echo number_format(($totalPeople > 0) ? ($otherGenders / $totalPeople) * 100 : 0, 2); ?>%</p>
     </div>
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-concierge-bell text-3xl text-green-500 mb-2"></i>
         <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo __('total_editors'); ?></h3>
-        <p class="odometer text-2xl font-semibold text-gray-700 dark:text-gray-300" data-odometer-final="<?php echo str_replace(',', ' ', number_format($totalContributions)); ?>">0</p>
+        <p class="text-2xl font-semibold text-gray-700 dark:text-gray-300"><?php echo number_format($totalContributions); ?></p>
     </div>
 </div>
 
@@ -165,19 +165,7 @@ $ratioOtherGenders = $totalPeople > 0 ? round(($otherGenders / $totalPeople) * 1
     <?php include 'languageselector.php'; ?>
 
     <script src="/assets/js/main.js?v=2"></script>
-    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/odometer.min.js"></script>
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script>
-    // Inicializa los odómetros
-    document.querySelectorAll('.odometer').forEach(function (odometer) {
-        // Obtiene el valor final y elimina espacios
-        const finalValue = odometer.getAttribute('data-odometer-final').replace(/\s+/g, '');
-        // Asigna el valor procesado al odómetro
-        odometer.innerHTML = finalValue;
-    });
-</script>
-
-
 
 <script>
 function showToast(message, bgColor = 'bg-green-500') {
