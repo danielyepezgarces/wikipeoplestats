@@ -730,17 +730,36 @@ if (isset($_SESSION['lang'])) {
     $_SESSION['lang'] = $currentLang['code'];
 }
 
-// Load translations
+// Cargar traducciones del idioma actual
 $translations = [];
 $jsonFile = __DIR__ . '/languages/' . $currentLang['code'] . '.json';
 if (file_exists($jsonFile)) {
     $translations = json_decode(file_get_contents($jsonFile), true);
 }
 
-// Translation function
+// Cargar traducciones en inglés como fallback
+$translations_en = [];
+$defaultJsonFile = __DIR__ . '/languages/en.json';
+if (file_exists($defaultJsonFile)) {
+    $translations_en = json_decode(file_get_contents($defaultJsonFile), true);
+}
+
+// Función de traducción
 function __($key) {
-    global $translations;
-    return $translations[$key] ?? $key;
+    global $translations, $translations_en;
+
+    // Buscar en las traducciones del idioma actual
+    if (isset($translations[$key])) {
+        return $translations[$key];
+    }
+
+    // Si no existe, buscar en el idioma predeterminado (inglés)
+    if (isset($translations_en[$key])) {
+        return $translations_en[$key];
+    }
+
+    // Si no existe en ninguno, devolver la clave original
+    return $key;
 }
 
 // Set locale for date formatting
