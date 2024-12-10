@@ -662,6 +662,7 @@ $wikis = [
     ['code' => 'wa', 'wiki' => 'wawiki', 'creation_date' => '2006-03-01'],
     ['code' => 'wo', 'wiki' => 'wowiki', 'creation_date' => '2007-05-01'],
     ['code' => 'wuu', 'wiki' => 'wuuwiki', 'creation_date' => '2006-01-01'],
+    ['code' => 'www', 'wiki' => 'wikidatawiki', 'creation_date' => '2012-10-29'],
     ['code' => 'xal', 'wiki' => 'xalwiki', 'creation_date' => '2007-01-01'],
     ['code' => 'xh', 'wiki' => 'xhwiki', 'creation_date' => '2007-01-01'],
     ['code' => 'xmf', 'wiki' => 'xmfwiki', 'creation_date' => '2007-03-01'],
