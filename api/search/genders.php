@@ -9,17 +9,23 @@ function getDomainFromWiki($wiki) {
         'wiki' => 'wikipedia.org',
         'wikiquote' => 'wikiquote.org',
         'wikisource' => 'wikisource.org',
+        'wikidata' => 'wikidata.org', // Añadido para Wikidata
     ];
 
     // Separar el nombre de wiki y el tipo de proyecto
-    if (preg_match('/^([a-z]+)(wiki|wikiquote|wikisource)$/', $wiki, $matches)) {
+    if (preg_match('/^([a-z]+)(wiki|wikiquote|wikisource|wikidata)$/', $wiki, $matches)) {
         $language = $matches[1];
         $project = $matches[2];
+
+        if ($project === 'wikidata') {
+            return 'www.wikidata.org'; // Wikidata no utiliza prefijos de idioma
+        }
 
         if (isset($domains[$project])) {
             return "{$language}.{$domains[$project]}";
         }
     }
+
     return null;
 }
 
@@ -34,7 +40,7 @@ if ($input) {
 
     // Comprobamos si el input es solo un código de idioma (ej. 'es', 'en', etc.)
     $is_language_code = strlen($input) === 2;  // Verifica si es un código de idioma de 2 caracteres (ej. 'es', 'en', etc.)
-    $is_wiki_name = preg_match('/^[a-z]+(wiki|wikiquote|wikisource)$/', $input); // Verifica si es un nombre de wiki como 'eswiki', 'eswikiquote', etc.
+    $is_wiki_name = preg_match('/^[a-z]+(wiki|wikiquote|wikisource|wikidata)$/', $input); // Incluido Wikidata
 
     foreach ($wikis as $wiki) {
         // Generamos el dominio
@@ -51,7 +57,7 @@ if ($input) {
                 ];
             }
         }
-        // Si el input es un nombre de wiki (como 'eswiki', 'eswikisource', etc.)
+        // Si el input es un nombre de wiki (como 'eswiki', 'eswikisource', 'wikidatawiki', etc.)
         elseif ($is_wiki_name) {
             if (strpos($wiki['wiki'], $input) !== false) {
                 $found_wikis[] = [
