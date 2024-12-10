@@ -9,17 +9,17 @@ function getDomainFromWiki($wiki) {
         'wiki' => 'wikipedia.org',
         'wikiquote' => 'wikiquote.org',
         'wikisource' => 'wikisource.org',
-        'wikidata' => 'wikidata.org', // Añadido para Wikidata
     ];
 
+    // Caso especial para Wikidata
+    if ($wiki === 'wikidatawiki') {
+        return 'wikidata.org';
+    }
+
     // Separar el nombre de wiki y el tipo de proyecto
-    if (preg_match('/^([a-z]+)(wiki|wikiquote|wikisource|wikidata)$/', $wiki, $matches)) {
+    if (preg_match('/^([a-z]+)(wiki|wikiquote|wikisource)$/', $wiki, $matches)) {
         $language = $matches[1];
         $project = $matches[2];
-
-        if ($project === 'wikidata') {
-            return 'www.wikidata.org'; // Wikidata no utiliza prefijos de idioma
-        }
 
         if (isset($domains[$project])) {
             return "{$language}.{$domains[$project]}";
