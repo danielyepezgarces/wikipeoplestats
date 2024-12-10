@@ -104,8 +104,8 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('welcome_message'); ?></h1>
     <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300" id="wikimediaprojects">  <?php
         // Inicialmente, se carga el nombre del proyecto en el HTML
-        $projectName = __('project_wikipedia'); // Este valor puede cambiar según el proyecto que desees mostrar
-        echo sprintf(__('main_home_content'), $projectName); 
+        $projectName = __('project_wikidata'); // Este valor puede cambiar según el proyecto que desees mostrar
+        echo sprintf(__('main_home_content'), $projectName);
     ?>
     </p>
 </div>
@@ -258,11 +258,12 @@ function purgeCache() {
     </script>
     <script>
     const projectNames = [
-        "<?php echo __('project_wikipedia'); ?>", 
-        "<?php echo __('project_wikiquote'); ?>", 
+        "<?php echo __('project_wikidata'); ?>",
+        "<?php echo __('project_wikipedia'); ?>",
+        "<?php echo __('project_wikiquote'); ?>",
         "<?php echo __('project_wikisource'); ?>"
     ];
-    
+
     let currentIndex = 0;
     const projectTextElement = document.getElementById("wikimediaprojects");
 
@@ -271,7 +272,7 @@ function purgeCache() {
         const currentProject = projectNames[currentIndex];
         const newText = "<?php echo __('main_home_content'); ?>".replace('%s', currentProject);
         projectTextElement.innerHTML = newText;
-        
+
         // Cambiar al siguiente proyecto
         currentIndex = (currentIndex + 1) % projectNames.length;
     }
