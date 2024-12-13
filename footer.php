@@ -29,7 +29,7 @@
     <!-- Badge: Powered by Wikimedia -->
     <div class="inline-flex items-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-2 px-4 shadow-md hover:bg-gray-200 dark:hover:bg-gray-700 w-full sm:w-auto mb-4 sm:mb-0">
         <a href="https://wikitech.wikimedia.org/wiki/Help:Cloud_Services_introduction" target="_blank" class="flex items-center w-full">
-            <img class="h-12 mr-2 mx-auto sm:mx-0" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Wikimedia_Cloud_Services_logo.svg" alt="Wikimedia Cloud Services Logo">
+            <img class="h-12 w-12 mr-2 mx-auto sm:mx-0" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Wikimedia_Cloud_Services_logo.svg" alt="Wikimedia Cloud Services Logo">
             <div class="flex flex-col items-center sm:items-start text-center w-full">
                 <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Powered by</span>
                 <span class="text-sm font-semibold font-montserrat text-gray-800 dark:text-white">Wikimedia</span>
@@ -41,7 +41,7 @@
     <!-- Badge: Data from Wikidata -->
     <div class="inline-flex items-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-2 px-4 shadow-md hover:bg-gray-200 dark:hover:bg-gray-700 w-full sm:w-auto mb-4 sm:mb-0">
         <a href="https://www.wikidata.org" target="_blank" class="flex items-center w-full">
-            <img class="h-12 mr-2 mx-auto sm:mx-0" src="https://upload.wikimedia.org/wikipedia/commons/7/71/Wikidata.svg" alt="Wikidata Logo">
+            <img class="h-12 w-12 mr-2 mx-auto sm:mx-0" src="https://upload.wikimedia.org/wikipedia/commons/7/71/Wikidata.svg" alt="Wikidata Logo">
             <div class="flex flex-col items-center sm:items-start text-center w-full">
                 <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Data from</span>
                 <span class="text-sm font-semibold font-montserrat text-gray-800 dark:text-white">Wikidata</span>
@@ -62,7 +62,6 @@
         </a>
     </div>
 </div>
-
 
 
         <!-- Mobile Footer Options -->
