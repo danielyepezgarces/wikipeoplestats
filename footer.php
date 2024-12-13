@@ -25,17 +25,43 @@
             </div>
         </div>
 
-                <!-- Powered by Wikimedia Badge -->
-        <div class="flex justify-center mt-6">
-            <div class="inline-flex items-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-2 shadow-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                <img class="h-12 mr-2" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Wikimedia_Cloud_Services_logo.svg" alt="Wikimedia Cloud Services Logo">
-                <div class="flex flex-col items-stretch text-center w-full">
-                    <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Powered by</span>
-                    <span class="text-sm font-semibold font-montserrat text-gray-800 dark:text-white">Wikimedia</span>
-                    <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Cloud Services</span>
-                </div>
+        <div class="flex justify-center mt-6 space-x-4">
+    <!-- Badge: Powered by Wikimedia -->
+    <div class="inline-flex items-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-2 px-4 shadow-md hover:bg-gray-200 dark:hover:bg-gray-700">
+        <a href="https://wikitech.wikimedia.org/wiki/Help:Cloud_Services_introduction" target="_blank" class="flex items-center">
+            <img class="h-12 mr-2" src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Wikimedia_Cloud_Services_logo.svg" alt="Wikimedia Cloud Services Logo">
+            <div class="flex flex-col items-stretch text-center w-full">
+                <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Powered by</span>
+                <span class="text-sm font-semibold font-montserrat text-gray-800 dark:text-white">Wikimedia</span>
+                <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Cloud Services</span>
             </div>
-        </div>
+        </a>
+    </div>
+
+    <!-- Badge: Data from Wikidata -->
+    <div class="inline-flex items-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-2 px-4 shadow-md hover:bg-gray-200 dark:hover:bg-gray-700">
+        <a href="https://www.wikidata.org" target="_blank" class="flex items-center">
+            <img class="h-12 mr-2" src="https://upload.wikimedia.org/wikipedia/commons/7/71/Wikidata.svg" alt="Wikidata Logo">
+            <div class="flex flex-col items-center text-center w-full">
+                <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Data from</span>
+                <span class="text-sm font-semibold font-montserrat text-gray-800 dark:text-white">Wikidata</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Badge: Data queried via QLever -->
+    <div class="inline-flex items-center bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl p-2 px-4 shadow-md hover:bg-gray-200 dark:hover:bg-gray-700">
+        <a href="https://qlever.cs.uni-freiburg.de/wikidata" target="_blank" class="flex items-center">
+            <div class="flex items-center justify-center h-12 w-12 mr-2">
+                <i class="fas fa-bolt text-[#82B36F] text-3xl"></i>
+            </div>
+            <div class="flex flex-col items-center text-center w-full">
+                <span class="text-sm font-normal text-gray-800 dark:text-gray-200">Data queried</span>
+                <span class="text-sm font-semibold font-montserrat text-gray-800 dark:text-white">via QLever</span>
+            </div>
+        </a>
+    </div>
+</div>
 
         <!-- Mobile Footer Options -->
         <div class="flex items-center justify-center md:hidden mt-6 space-x-[10px]">
