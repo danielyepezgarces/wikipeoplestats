@@ -1,8 +1,8 @@
 <!-- NOTICE -->
 <div class="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100 text-center py-4 px-2 sm:px-4 sm:py-3 shadow-md">
-    <div class="flex items-center justify-center space-x-2">
-        <span class="text-lg sm:text-xl font-bold">⚠️</span>
-        <p class="text-sm sm:text-base font-medium">
+    <div class="flex items-center justify-start sm:justify-center space-x-2">
+        <span class="text-lg sm:text-xl font-bold flex-shrink-0">⚠️</span>
+        <p class="text-sm sm:text-base font-medium text-left">
             <?php echo __('migration_db_notice'); ?>
         </p>
     </div>
