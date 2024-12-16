@@ -1,3 +1,9 @@
+<----- NOTICE ----->
+<div class="bg-blue-100 text-blue-900 dark:bg-blue-900 dark:text-blue-100 text-center py-3">
+        ⚠️ **<?php echo __('migration_db_notice'); ?>**
+</div>
+
+<----- HEADER ------>
 <header class="sticky top-0 z-50 w-full bg-gray-100 dark:bg-gray-800 shadow-md">
     <div class="container mx-auto px-4">
         <div class="flex items-center justify-between h-16">

@@ -83,5 +83,6 @@
     "Sep": "Sep",
     "Oct": "Oct",
     "Nov": "Nov",
-    "Dec": "Dec"
+    "Dec": "Dec",
+    "migration_db_notice": "Our statistics are currently unavailable due to a database migration. We will notify you once the process is complete."
   }
