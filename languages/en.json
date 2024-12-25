@@ -20,7 +20,7 @@
     "compare_users": "Compare Users",
     "compare_countries": "Compare Countries",
     "welcome_message": "Welcome to WikiPeopleStats",
-    "main_home_content": "The tool allows users to track and analyze gender representation in the articles of %s.",
+    "main_home_content": "The tool allows users to track and analyze gender representation in %s.",
     "main_user_content": "You are tracking the contributions of %s in the Wikipedia articles for the project %s. This tool stores data on contributions and helps uncover trends, fostering more inclusive content over time.",
     "current_date": "Current date:",
     "project_wikidata": "Wikidata",

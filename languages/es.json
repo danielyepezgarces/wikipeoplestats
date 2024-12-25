@@ -20,7 +20,7 @@
     "compare_users": "Comparar usuarios",
     "compare_countries": "Comparar países",
     "welcome_message": "Bienvenido a WikiPeopleStats",
-    "main_home_content": "La herramienta permite a los usuarios rastrear y analizar la representación de género en los artículos de %s.",
+    "main_home_content": "La herramienta permite a los usuarios rastrear y analizar la representación de género en %s.",
     "main_user_content": "Estás rastreando las contribuciones de %s en los artículos de Wikipedia para el proyecto %s. ",
     "current_date": "Fecha actual:",
     "select_language": "Seleccionar idioma",
