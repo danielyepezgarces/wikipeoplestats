@@ -675,7 +675,7 @@ $wikis = [
 ];
 
 // Idioma predeterminado
-$defaultLang = null;
+$defaultLang = "en";
 
 foreach ($languages as $language) {
     if ($language['code'] === 'en') {
