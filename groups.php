@@ -161,7 +161,7 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         <p class="text-lg mt-2"><?php echo $group_description; ?></p>
     </div>
     <!-- Copyright en la parte derecha -->
-    <div class="absolute bottom-2 right-4 text-sm text-white italic shadow-lg">
+    <div class="absolute bottom-2 right-4 bg-black/60 p-2 rounded-md text-sm text-white italic">
         © Paula Kindsvater (CC-BY-SA 4.0)
     </div>
 </div>
