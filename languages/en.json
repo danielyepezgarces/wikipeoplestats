@@ -84,5 +84,9 @@
     "Oct": "Oct",
     "Nov": "Nov",
     "Dec": "Dec",
-    "migration_db_notice": "Our statistics are currently unavailable due to a database migration. We will notify you once the process is complete."
+    "migration_db_notice": "Our statistics are currently unavailable due to a database migration. We will notify you once the process is complete.",
+    "welcome_group_message": "Welcome to the group %s!",
+    "Group Admin": "Group Admin",
+    "Members Count": "Members Count",
+    "group_description": "Group Description"
   }
