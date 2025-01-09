@@ -210,7 +210,7 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
 </div>
 
 <!-- Modal para la Lista de Miembros -->
-<div id="members-modal" class="fixed inset-0 flex justify-center items-center">
+<div id="members-modal" class="hidden fixed inset-0 flex justify-center items-center">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-auto max-w-xl">
         <div class="flex justify-center items-center">
             <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center flex-1"><?php echo __('Members List'); ?>:</h3>
