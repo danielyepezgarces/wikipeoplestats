@@ -164,11 +164,13 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
 
         <!-- Avatar centrado sobre el banner -->
         <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-            <div class="h-36 w-36 rounded-full bg-white p-2 shadow-lg">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Wikimedia_Argentina_logo_white.svg" 
-                     alt="Group Avatar" class="h-full w-full rounded-full object-contain">
-            </div>
-        </div>
+    <!-- Contenedor del Avatar con fondo que cambia según el modo -->
+    <div class="h-36 w-36 rounded-full p-2 shadow-lg bg-gray-100 dark:bg-gray-700">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Wikimedia_Argentina_logo_white.svg" 
+             alt="Group Avatar" class="h-full w-full rounded-full object-contain border-4 border-gray-900 dark:border-gray-100">
+    </div>
+</div>
+
     </div>
 
     <div class="mt-20 text-center px-6 flex flex-col justify-between h-full">
