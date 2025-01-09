@@ -295,6 +295,11 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         <?php include 'languageselector.php'; ?>
         
     <script>
+    function toggleMemberList() {
+        const memberList = document.getElementById('members-list');
+        memberList.classList.toggle('hidden');
+    }
+
         let isCumulative = false; // Estado inicial
         let chart; // Variable para almacenar la instancia del gráfico
 
