@@ -97,11 +97,11 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 $lastUpdated = $data['lastUpdated'];
 
 $members = [
-    ['username' => 'Usuario 1', 'join_date' => '2023-01-01'],
-    ['username' => 'Usuario 2', 'join_date' => '2023-02-15'],
-    ['username' => 'Usuario 3', 'join_date' => '2023-03-30'],
-    ['username' => 'Usuario 4', 'join_date' => '2023-04-12'],
-    ['username' => 'Usuario 5', 'join_date' => '2023-05-25'],
+    ['username' => 'Usuario 1', 'join_date' => '2023-01-01', 'member_type' => 'Afiliado'],
+    ['username' => 'Usuario 2', 'join_date' => '2023-02-15', 'member_type' => 'Socio'],
+    ['username' => 'Usuario 3', 'join_date' => '2023-03-30', 'member_type' => 'Afiliado'],
+    ['username' => 'Usuario 4', 'join_date' => '2023-04-12', 'member_type' => 'Socio'],
+    ['username' => 'Usuario 5', 'join_date' => '2023-05-25', 'member_type' => 'Afiliado'],
 ];
 
 $group_name = "Wikimedia Argentina";
@@ -221,24 +221,27 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
 
         <!-- Tabla con los miembros -->
         <table class="min-w-full text-left table-auto mt-4">
-            <thead>
-                <tr>
-                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('user'); ?></th>
-                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('join-date'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                // Mostrar los miembros con datos falsos
-                foreach ($members as $member) {
-                    echo "<tr>
-                            <td class='py-2 px-4 text-lg text-gray-700 dark:text-gray-300'>{$member['username']}</td>
-                            <td class='py-2 px-4 text-lg text-gray-700 dark:text-gray-300'>{$member['join_date']}</td>
-                          </tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+    <thead>
+        <tr>
+            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('User'); ?></th>
+            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('Join Date'); ?></th>
+            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('Member Type'); ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        // Mostrar los miembros con datos falsos
+        foreach ($members as $member) {
+            echo "<tr>
+                    <td class='py-2 px-4 text-lg text-gray-700 dark:text-gray-300'>{$member['username']}</td>
+                    <td class='py-2 px-4 text-lg text-gray-700 dark:text-gray-300'>{$member['join_date']}</td>
+                    <td class='py-2 px-4 text-lg text-gray-700 dark:text-gray-300'>{$member['member_type']}</td>
+                  </tr>";
+        }
+        ?>
+    </tbody>
+</table>
+
     </div>
 </div>
 
