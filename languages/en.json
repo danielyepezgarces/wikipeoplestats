@@ -93,5 +93,7 @@
     "user": "User",
     "join_date": "Join Date",
     "member_type": "Member Type",
-    "creation_date": "Creation Date"
+    "creation_date": "Creation Date",
+    "join_group": "Join Group",
+    "view_details": "View Details"
   }
