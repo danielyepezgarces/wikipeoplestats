@@ -164,7 +164,7 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
     </div>
 
     <!-- Contenido Principal -->
-    <div class="mt-20 text-center px-6">
+    <div class="mt-20 text-center px-6 flex flex-col justify-between h-full">
         <!-- Nombre del Grupo -->
         <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
             <?php echo $group_name; ?>
@@ -181,7 +181,7 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
         </p>
 
         <!-- Botones de Acción -->
-        <div class="mt-8 flex justify-center space-x-6 mb-6">
+        <div class="mt-8 flex justify-center space-x-6 mb-6 flex-shrink-0">
             <button class="bg-blue-600 text-white px-6 py-3 text-lg rounded-lg shadow hover:bg-blue-700 transition">
                 <?php echo __('Join Group'); ?>
             </button>
