@@ -86,7 +86,8 @@
     "Dec": "Dic",
     "migration_db_notice": "Nuestras estadísticas no estarán disponibles debido a la migración de nuestra base de datos hasta nuevo aviso.",
     "welcome_group_message": "¡Bienvenido al grupo %s!",
-    "Group Admin": "Administrador del grupo",
-    "Members Count": "Cantidad de miembros",
+    "members_list": "Miembros",
+    "group_admin": "Administrador del grupo",
+    "members_count": "Cantidad de miembros",
     "group_description": "Descripción del grupo"
   }

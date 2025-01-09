@@ -183,13 +183,13 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
     <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
         <!-- Administrador -->
         <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
-            <span class="font-semibold text-2xl"><?php echo __('Group Admin'); ?>:</span>
+            <span class="font-semibold text-2xl"><?php echo __('group_admin'); ?>:</span>
             <span class="text-lg"><?php echo $admin_name; ?></span>
         </div>
 
         <!-- Número de Miembros -->
         <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
-            <span class="font-semibold text-2xl"><?php echo __('Members Count'); ?>:</span>
+            <span class="font-semibold text-2xl"><?php echo __('members_count'); ?>:</span>
             <span class="text-lg cursor-pointer" id="members-count" onclick="openModal()"><?php echo $members_count; ?></span>
         </div>
 
@@ -203,10 +203,10 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
     <!-- Botones de Acción -->
     <div class="mt-8 flex justify-center space-x-6 mb-6 flex-shrink-0">
         <button class="bg-blue-600 text-white px-6 py-3 text-lg rounded-lg shadow hover:bg-blue-700 transition">
-            <?php echo __('Join Group'); ?>
+            <?php echo __('join_group'); ?>
         </button>
         <button class="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-6 py-3 text-lg rounded-lg shadow hover:bg-gray-400 dark:hover:bg-gray-600 transition">
-            <?php echo __('View Details'); ?>
+            <?php echo __('view_details'); ?>
         </button>
     </div>
 </div>
@@ -215,7 +215,7 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
 <div id="members-modal" class="hidden fixed inset-0 flex justify-center items-center">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-auto max-w-xl">
         <div class="flex justify-center items-center">
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center flex-1"><?php echo __('Members List'); ?>:</h3>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center flex-1"><?php echo __('members-list'); ?>:</h3>
             <button onclick="closeModal()" class="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xl">&times;</button>
         </div>
 
@@ -223,8 +223,8 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         <table class="min-w-full text-left table-auto mt-4">
             <thead>
                 <tr>
-                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('User'); ?></th>
-                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('Join Date'); ?></th>
+                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('user'); ?></th>
+                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('join-date'); ?></th>
                 </tr>
             </thead>
             <tbody>
