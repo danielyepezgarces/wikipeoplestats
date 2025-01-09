@@ -141,22 +141,49 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
 
     
     <main class="container mx-auto px-4 py-8">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-    <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100">
-        <?php 
-            echo sprintf(__('welcome_group_message'), $group_name); 
-        ?>
-    </h1>
-    <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
-        <strong><?php echo __('Group Admin'); ?>:</strong> <?php echo $admin_name; ?>
-    </p>
-    <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
-        <strong><?php echo __('Members Count'); ?>:</strong> <?php echo $members_count; ?>
-    </p>
-    <p class="text-lg text-gray-700 dark:text-gray-300">
-        <?php echo __('group_description'); ?>: <?php echo $group_description; ?>
-    </p>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full max-w-lg mx-auto">
+    <!-- Header con Imagen del Grupo -->
+    <div class="relative">
+        <img src="<?php echo $group_banner_url; ?>" alt="Group Banner" class="h-32 w-full object-cover rounded-t-lg">
+        <div class="absolute -bottom-8 left-4">
+            <img src="<?php echo $group_avatar_url; ?>" alt="Group Avatar" class="h-16 w-16 rounded-full border-4 border-white dark:border-gray-800 shadow-md">
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="mt-10 text-center">
+        <!-- Nombre del Grupo -->
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <?php echo $group_name; ?>
+        </h2>
+
+        <!-- Administrador -->
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <span class="font-semibold"><?php echo __('Group Admin'); ?>:</span> <?php echo $admin_name; ?>
+        </p>
+
+        <!-- Número de Miembros -->
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <span class="font-semibold"><?php echo __('Members Count'); ?>:</span> <?php echo $members_count; ?>
+        </p>
+
+        <!-- Descripción del Grupo -->
+        <p class="mt-4 text-gray-700 dark:text-gray-300">
+            <?php echo $group_description; ?>
+        </p>
+
+        <!-- Botones de Acción -->
+        <div class="mt-6 flex justify-center space-x-4">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600">
+                <?php echo __('Join Group'); ?>
+            </button>
+            <button class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg shadow hover:bg-gray-300 dark:hover:bg-gray-600">
+                <?php echo __('View Details'); ?>
+            </button>
+        </div>
+    </div>
 </div>
+
 
 
 
