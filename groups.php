@@ -141,22 +141,22 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
 
     
     <main class="container mx-auto px-4 py-8">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-10 w-full max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-10 w-full">
     <!-- Header con Imagen del Grupo -->
     <div class="relative">
-        <!-- Banner con centrado al fondo -->
-        <div class="h-64 w-full bg-cover bg-center rounded-t-lg" 
+        <!-- Banner ocupa todo el ancho y alto sin margen -->
+        <div class="h-72 w-full bg-cover bg-center rounded-t-lg" 
              style="background-image: url('https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg'); background-position: bottom;">
             <!-- Texto superpuesto sobre el banner -->
-            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white p-4">
-                <h2 class="text-3xl font-bold"><?php echo $group_name; ?></h2>
-                <p class="text-sm"><?php echo $group_description; ?></p>
+            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white p-6">
+                <h2 class="text-4xl font-bold"><?php echo $group_name; ?></h2>
+                <p class="text-lg mt-2"><?php echo $group_description; ?></p>
             </div>
         </div>
 
         <!-- Avatar centrado sobre el banner -->
         <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-            <div class="h-32 w-32 rounded-full bg-white p-1 shadow-lg">
+            <div class="h-36 w-36 rounded-full bg-white p-2 shadow-lg">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Wikimedia_Argentina_logo_white.svg" 
                      alt="Group Avatar" class="h-full w-full rounded-full object-contain">
             </div>
@@ -164,9 +164,9 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
     </div>
 
     <!-- Contenido Principal -->
-    <div class="mt-20 text-center">
+    <div class="mt-20 text-center px-6">
         <!-- Nombre del Grupo -->
-        <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
             <?php echo $group_name; ?>
         </h2>
 
