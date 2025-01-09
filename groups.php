@@ -242,18 +242,6 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
     </div>
 </div>
 
-        <!-- Botones de Acción -->
-        <div class="mt-8 flex justify-center space-x-6 mb-6 flex-shrink-0">
-            <button class="bg-blue-600 text-white px-6 py-3 text-lg rounded-lg shadow hover:bg-blue-700 transition">
-                <?php echo __('Join Group'); ?>
-            </button>
-            <button class="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-6 py-3 text-lg rounded-lg shadow hover:bg-gray-400 dark:hover:bg-gray-600 transition">
-                <?php echo __('View Details'); ?>
-            </button>
-        </div>
-    </div>
-</div>
-
 
 
 
