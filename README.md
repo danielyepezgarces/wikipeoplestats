@@ -30,7 +30,7 @@ My project stores the following parameters in the database
 * MariaDB 11.4 or MySQL 8.0
 * Memcached 1.6
 * Apache 2.4
-* PHP 8.3
+* PHP 8.4
 * Python 3.13 (bot usage)
 ## Hardware
 * 8 GB RAM (Webservice + Cache)
