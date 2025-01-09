@@ -158,7 +158,6 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
              style="background-image: url('https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg'); background-position: bottom;">
             <!-- Texto superpuesto sobre el banner -->
             <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white p-6">
-                <h2 class="text-4xl font-bold"><?php echo $group_name; ?></h2>
                 <p class="text-lg mt-2"><?php echo $group_description; ?></p>
             </div>
         </div>
