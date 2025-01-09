@@ -155,12 +155,17 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
     <div class="relative">
         <!-- Banner ocupa todo el ancho y alto sin margen -->
         <div class="h-72 w-full bg-cover bg-center rounded-t-lg" 
-             style="background-image: url('https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg'); background-position: bottom;">
-            <!-- Texto superpuesto sobre el banner -->
-            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white p-6">
-                <p class="text-lg mt-2"><?php echo $group_description; ?></p>
-            </div>
-        </div>
+     style="background-image: url('https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg'); background-position: bottom;">
+    <!-- Texto superpuesto sobre el banner -->
+    <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white p-6">
+        <p class="text-lg mt-2"><?php echo $group_description; ?></p>
+    </div>
+    <!-- Copyright en la parte derecha -->
+    <div class="absolute bottom-2 right-4 text-sm text-white italic">
+        © Paula Kindsvater (CC-BY-SA 4.0)
+    </div>
+</div>
+
 
         <!-- Avatar centrado sobre el banner -->
         <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
