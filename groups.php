@@ -179,8 +179,8 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
             <?php echo $group_name; ?>
         </h2>
 
-    <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
-    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+   <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
+   <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
         <!-- Administrador -->
         <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
             <span class="font-semibold text-2xl"><?php echo __('Group Admin'); ?>:</span>
@@ -190,7 +190,7 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         <!-- Número de Miembros -->
         <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
             <span class="font-semibold text-2xl"><?php echo __('Members Count'); ?>:</span>
-            <span class="text-lg cursor-pointer" id="members-count" onclick="toggleMemberList()"><?php echo $members_count; ?></span>
+            <span class="text-lg cursor-pointer" id="members-count" onclick="openModal()"><?php echo $members_count; ?></span>
         </div>
 
         <!-- Fecha de Creación -->
@@ -200,12 +200,27 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         </div>
     </div>
 
-    <!-- Lista de Miembros (modal o desplegable) -->
-    <div id="members-list" class="hidden mt-4 p-4 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-500">
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"><?php echo __('Members List'); ?>:</h3>
+    <!-- Botones de Acción -->
+    <div class="mt-8 flex justify-center space-x-6 mb-6 flex-shrink-0">
+        <button class="bg-blue-600 text-white px-6 py-3 text-lg rounded-lg shadow hover:bg-blue-700 transition">
+            <?php echo __('Join Group'); ?>
+        </button>
+        <button class="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-6 py-3 text-lg rounded-lg shadow hover:bg-gray-400 dark:hover:bg-gray-600 transition">
+            <?php echo __('View Details'); ?>
+        </button>
+    </div>
+</div>
+
+<!-- Modal para la Lista de Miembros -->
+<div id="members-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-11/12 md:w-1/2">
+        <div class="flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?php echo __('Members List'); ?>:</h3>
+            <button onclick="closeModal()" class="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xl">&times;</button>
+        </div>
 
         <!-- Tabla con los miembros -->
-        <table class="min-w-full text-left table-auto">
+        <table class="min-w-full text-left table-auto mt-4">
             <thead>
                 <tr>
                     <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('User'); ?></th>
@@ -225,6 +240,7 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
             </tbody>
         </table>
     </div>
+</div>
 
         <!-- Botones de Acción -->
         <div class="mt-8 flex justify-center space-x-6 mb-6 flex-shrink-0">
@@ -295,9 +311,13 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         <?php include 'languageselector.php'; ?>
         
     <script>
-    function toggleMemberList() {
-        const memberList = document.getElementById('members-list');
-        memberList.classList.toggle('hidden');
+    function openModal() {
+        document.getElementById('members-modal').classList.remove('hidden');
+    }
+
+    // Cerrar el modal
+    function closeModal() {
+        document.getElementById('members-modal').classList.add('hidden');
     }
 
         let isCumulative = false; // Estado inicial
