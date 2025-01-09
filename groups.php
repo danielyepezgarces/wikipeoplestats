@@ -170,15 +170,23 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
             <?php echo $group_name; ?>
         </h2>
 
+      <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
         <!-- Administrador -->
-        <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">
+        <div class="text-lg text-gray-600 dark:text-gray-400">
             <span class="font-semibold"><?php echo __('Group Admin'); ?>:</span> <?php echo $admin_name; ?>
-        </p>
+        </div>
 
         <!-- Número de Miembros -->
-        <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">
+        <div class="text-lg text-gray-600 dark:text-gray-400">
             <span class="font-semibold"><?php echo __('Members Count'); ?>:</span> <?php echo $members_count; ?>
-        </p>
+        </div>
+
+        <!-- Fecha de Creación -->
+        <div class="text-lg text-gray-600 dark:text-gray-400">
+            <span class="font-semibold"><?php echo __('Creation Date'); ?>:</span> <?php echo $creation_date; ?>
+        </div>
+    </div>
 
         <!-- Botones de Acción -->
         <div class="mt-8 flex justify-center space-x-6 mb-6 flex-shrink-0">
