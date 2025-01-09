@@ -93,5 +93,7 @@
     "user": "Usuario",
     "join_date": "Fecha de Ingreso",
     "member_type": "Tipo de Miembro",
-    "creation_date": "Fecha de creacion"
+    "creation_date": "Fecha de creacion",
+    "join_group": "Unirse al grupo",
+    "view_details": "Ver detalles"
   }
