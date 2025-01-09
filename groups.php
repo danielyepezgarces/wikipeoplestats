@@ -223,9 +223,9 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         <table class="min-w-full text-left table-auto mt-4">
     <thead>
         <tr>
-            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('User'); ?></th>
-            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('Join Date'); ?></th>
-            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('Member Type'); ?></th>
+            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('user'); ?></th>
+            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('join_date'); ?></th>
+            <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('member_type'); ?></th>
         </tr>
     </thead>
     <tbody>

@@ -89,5 +89,8 @@
     "members_list": "Miembros",
     "group_admin": "Administrador del grupo",
     "members_count": "Cantidad de miembros",
-    "group_description": "Descripción del grupo"
+    "group_description": "Descripción del grupo",
+    "user": "Usuario",
+    "join_date": "Fecha de Ingreso",
+    "member_type": "Tipo de Miembro"
   }

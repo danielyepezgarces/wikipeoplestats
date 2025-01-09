@@ -89,5 +89,8 @@
     "members_list": "Members",
     "group_admin": "Group Admin",
     "members_count": "Members Count",
-    "group_description": "Group Description"
+    "group_description": "Group Description",
+    "user": "User",
+    "join_date": "Join Date",
+    "member_type": "Member Type"
   }
