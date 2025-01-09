@@ -212,9 +212,9 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
 
 <!-- Modal para la Lista de Miembros -->
 <div id="members-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-11/12 md:w-1/2">
-        <div class="flex justify-between items-center">
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100"><?php echo __('Members List'); ?>:</h3>
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg w-auto max-w-xl">
+        <div class="flex justify-center items-center">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 text-center flex-1"><?php echo __('Members List'); ?>:</h3>
             <button onclick="closeModal()" class="text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xl">&times;</button>
         </div>
 
