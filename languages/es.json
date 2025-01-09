@@ -92,5 +92,6 @@
     "group_description": "Descripción del grupo",
     "user": "Usuario",
     "join_date": "Fecha de Ingreso",
-    "member_type": "Tipo de Miembro"
+    "member_type": "Tipo de Miembro",
+    "creation_date": "Fecha de creacion"
   }

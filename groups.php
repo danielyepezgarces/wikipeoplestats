@@ -195,7 +195,7 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
 
         <!-- Fecha de Creación -->
         <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
-            <span class="font-semibold text-2xl"><?php echo __('Creation Date'); ?>:</span>
+            <span class="font-semibold text-2xl"><?php echo __('creation_date'); ?>:</span>
             <span class="text-lg"><?php echo $creation_date; ?></span>
         </div>
     </div>
