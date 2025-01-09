@@ -141,7 +141,7 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
 
     
     <main class="container mx-auto px-4 py-8">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-10 w-full max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-10 w-full max-w mx-auto">
     <!-- Header con Imagen del Grupo -->
     <div class="relative">
         <!-- Banner con centrado al fondo -->
