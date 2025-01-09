@@ -170,21 +170,24 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
             <?php echo $group_name; ?>
         </h2>
 
-      <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
-      <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
         <!-- Administrador -->
-        <div class="text-lg text-gray-600 dark:text-gray-400">
-            <span class="font-semibold"><?php echo __('Group Admin'); ?>:</span> <?php echo $admin_name; ?>
+        <div class="text-lg text-gray-600 dark:text-gray-400 flex flex-col items-center">
+            <span class="font-semibold"><?php echo __('Group Admin'); ?>:</span>
+            <span><?php echo $admin_name; ?></span>
         </div>
 
         <!-- Número de Miembros -->
-        <div class="text-lg text-gray-600 dark:text-gray-400">
-            <span class="font-semibold"><?php echo __('Members Count'); ?>:</span> <?php echo $members_count; ?>
+        <div class="text-lg text-gray-600 dark:text-gray-400 flex flex-col items-center">
+            <span class="font-semibold"><?php echo __('Members Count'); ?>:</span>
+            <span><?php echo $members_count; ?></span>
         </div>
 
         <!-- Fecha de Creación -->
-        <div class="text-lg text-gray-600 dark:text-gray-400">
-            <span class="font-semibold"><?php echo __('Creation Date'); ?>:</span> <?php echo $creation_date; ?>
+        <div class="text-lg text-gray-600 dark:text-gray-400 flex flex-col items-center">
+            <span class="font-semibold"><?php echo __('Creation Date'); ?>:</span>
+            <span><?php echo $creation_date; ?></span>
         </div>
     </div>
 
