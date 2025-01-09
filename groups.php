@@ -172,15 +172,14 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         </div>
     </div>
 
-    <!-- Contenido Principal -->
     <div class="mt-20 text-center px-6 flex flex-col justify-between h-full">
-        <!-- Nombre del Grupo -->
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            <?php echo $group_name; ?>
-        </h2>
+    <!-- Nombre del Grupo -->
+    <h2 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        <?php echo $group_name; ?>
+    </h2>
 
-   <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
-   <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
         <!-- Administrador -->
         <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
             <span class="font-semibold text-2xl"><?php echo __('Group Admin'); ?>:</span>
@@ -239,6 +238,9 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
                 ?>
             </tbody>
         </table>
+    </div>
+</div>
+
     </div>
 </div>
 
