@@ -144,14 +144,27 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
     <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg mb-10 w-full max-w-4xl mx-auto">
     <!-- Header con Imagen del Grupo -->
     <div class="relative">
-        <img src="<?php echo $group_banner_url; ?>" alt="Group Banner" class="h-48 w-full object-cover rounded-t-lg">
-        <div class="absolute -bottom-12 left-6">
-            <img src="<?php echo $group_avatar_url; ?>" alt="Group Avatar" class="h-24 w-24 rounded-full border-4 border-white dark:border-gray-800 shadow-lg">
+        <!-- Banner con centrado al fondo -->
+        <div class="h-48 w-full bg-cover bg-center rounded-t-lg" 
+             style="background-image: url('https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg'); background-position: bottom;">
+            <!-- Texto superpuesto sobre el banner -->
+            <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent text-white p-4 rounded-b-lg">
+                <h2 class="text-3xl font-bold"><?php echo $group_name; ?></h2>
+                <p class="text-sm"><?php echo $group_description; ?></p>
+            </div>
+        </div>
+
+        <!-- Avatar centrado sobre el banner -->
+        <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+            <div class="h-24 w-24 rounded-full bg-white p-1 shadow-lg">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Wikimedia_Argentina_logo_white.svg" 
+                     alt="Group Avatar" class="h-full w-full rounded-full object-contain">
+            </div>
         </div>
     </div>
 
     <!-- Contenido Principal -->
-    <div class="mt-14 text-center">
+    <div class="mt-16 text-center">
         <!-- Nombre del Grupo -->
         <h2 class="text-4xl font-bold text-gray-900 dark:text-gray-100">
             <?php echo $group_name; ?>
@@ -165,11 +178,6 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
         <!-- Número de Miembros -->
         <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">
             <span class="font-semibold"><?php echo __('Members Count'); ?>:</span> <?php echo $members_count; ?>
-        </p>
-
-        <!-- Descripción del Grupo -->
-        <p class="mt-6 text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-            <?php echo $group_description; ?>
         </p>
 
         <!-- Botones de Acción -->
