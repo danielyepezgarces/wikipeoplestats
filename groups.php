@@ -95,6 +95,11 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 
 // Obtener y formatear la última actualización
 $lastUpdated = $data['lastUpdated'];
+
+$group_name = "Wikimedia Argentina";
+$admin_name = "Daniel YG";
+$members_count = 125;
+$group_description = "Wikimedia Argentina promueve la educación y el acceso a la cultura";
 ?>
 
 <!DOCTYPE html>
@@ -139,13 +144,20 @@ $lastUpdated = $data['lastUpdated'];
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
     <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100">
         <?php 
-            echo sprintf(__('welcome_user_message'), $username, $project); 
+            echo sprintf(__('welcome_group_message'), $group_name); 
         ?>
     </h1>
-    <p class="text-xl text-gray-700 text-center justify-center dark:text-gray-300">
-    <?php echo sprintf(__('main_user_content'), $username, $project); ?>
+    <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
+        <strong><?php echo __('Group Admin'); ?>:</strong> <?php echo $admin_name; ?>
+    </p>
+    <p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
+        <strong><?php echo __('Members Count'); ?>:</strong> <?php echo $members_count; ?>
+    </p>
+    <p class="text-lg text-gray-700 dark:text-gray-300">
+        <?php echo __('group_description'); ?>: <?php echo $group_description; ?>
     </p>
 </div>
+
 
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mt-8">
