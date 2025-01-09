@@ -96,10 +96,19 @@ $ratioOtherGenders = $totalPeople > 0 ? ($otherGenders / $totalPeople) * 100 : 0
 // Obtener y formatear la última actualización
 $lastUpdated = $data['lastUpdated'];
 
+$members = [
+    ['username' => 'Usuario 1', 'join_date' => '2023-01-01'],
+    ['username' => 'Usuario 2', 'join_date' => '2023-02-15'],
+    ['username' => 'Usuario 3', 'join_date' => '2023-03-30'],
+    ['username' => 'Usuario 4', 'join_date' => '2023-04-12'],
+    ['username' => 'Usuario 5', 'join_date' => '2023-05-25'],
+];
+
 $group_name = "Wikimedia Argentina";
 $admin_name = "Daniel YG";
 $members_count = 125;
 $group_description = "Wikimedia Argentina promueve la educación y el acceso a la cultura";
+$creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también obtenerla de la base de datos)
 ?>
 
 <!DOCTYPE html>
@@ -173,22 +182,48 @@ $group_description = "Wikimedia Argentina promueve la educación y el acceso a l
     <!-- Información del Grupo: Administrador, Miembros, Fecha de Creación -->
     <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
         <!-- Administrador -->
-        <div class="text-lg text-gray-600 dark:text-gray-400 flex flex-col items-center">
-            <span class="font-semibold"><?php echo __('Group Admin'); ?>:</span>
-            <span><?php echo $admin_name; ?></span>
+        <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
+            <span class="font-semibold text-2xl"><?php echo __('Group Admin'); ?>:</span>
+            <span class="text-lg"><?php echo $admin_name; ?></span>
         </div>
 
         <!-- Número de Miembros -->
-        <div class="text-lg text-gray-600 dark:text-gray-400 flex flex-col items-center">
-            <span class="font-semibold"><?php echo __('Members Count'); ?>:</span>
-            <span><?php echo $members_count; ?></span>
+        <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
+            <span class="font-semibold text-2xl"><?php echo __('Members Count'); ?>:</span>
+            <span class="text-lg cursor-pointer" id="members-count" onclick="toggleMemberList()"><?php echo $members_count; ?></span>
         </div>
 
         <!-- Fecha de Creación -->
-        <div class="text-lg text-gray-600 dark:text-gray-400 flex flex-col items-center">
-            <span class="font-semibold"><?php echo __('Creation Date'); ?>:</span>
-            <span><?php echo $creation_date; ?></span>
+        <div class="text-xl text-gray-600 dark:text-gray-400 flex flex-col items-center">
+            <span class="font-semibold text-2xl"><?php echo __('Creation Date'); ?>:</span>
+            <span class="text-lg"><?php echo $creation_date; ?></span>
         </div>
+    </div>
+
+    <!-- Lista de Miembros (modal o desplegable) -->
+    <div id="members-list" class="hidden mt-4 p-4 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-500">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4"><?php echo __('Members List'); ?>:</h3>
+
+        <!-- Tabla con los miembros -->
+        <table class="min-w-full text-left table-auto">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('User'); ?></th>
+                    <th class="py-2 px-4 text-lg font-semibold text-gray-900 dark:text-gray-100"><?php echo __('Join Date'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                // Mostrar los miembros con datos falsos
+                foreach ($members as $member) {
+                    echo "<tr>
+                            <td class='py-2 px-4 text-lg text-gray-700 dark:text-gray-300'>{$member['username']}</td>
+                            <td class='py-2 px-4 text-lg text-gray-700 dark:text-gray-300'>{$member['join_date']}</td>
+                          </tr>";
+                }
+                ?>
+            </tbody>
+        </table>
     </div>
 
         <!-- Botones de Acción -->
