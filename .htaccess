@@ -1,6 +1,24 @@
 RewriteEngine On
 RewriteBase /
 
+#Cache Rules
+<IfModule mod_headers.c>
+    # Cache images for 1 year
+    <FilesMatch "\.(jpg|jpeg|png|gif|ico|webp|svg)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Cache CSS and JavaScript for 1 week
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=604800, must-revalidate"
+    </FilesMatch>
+
+    # Cache fonts for 1 month
+    <FilesMatch "\.(woff|woff2|ttf|eot|otf)$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>
+
 RewriteRule ^search/genders/?$ /searchgenders.php [L,QSA]
 RewriteRule ^search/users/?$ /searchusers.php [L,QSA]
 RewriteRule ^users/([a-zA-Z0-9_-]+)/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?username=$1&start_date=$2&end_date=$3 [L,QSA]
@@ -19,3 +37,8 @@ RewriteRule ^api/genders/graph/([a-zA-Z0-9_.-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2})
 RewriteRule ^api/genders/stats/([a-zA-Z0-9_.-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/genders/stats.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
 RewriteRule ^api/users/stats/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/stats.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
 RewriteRule ^api/users/graph/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/graph.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
+
+#Denied 
+<Files "config.php">
+    Redirect 404 /config.php
+</Files>

@@ -81,7 +81,7 @@ $dateRange = getDateRange($timeFrame);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('sitename'); ?></title>
     <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/6.6.0/css/all.css">
+    <link rel="stylesheet" href="libs/font-awesome/all.min.css">
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
     <!-- Incluir CSS de DataTables -->
 

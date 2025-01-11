@@ -8,7 +8,7 @@
         <div class="grid grid-cols-2 gap-4 rounded-lg md:grid-cols-3 lg:gap-6">
             <!-- logo - start -->
             <div class="flex h-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 p-4 text-gray-400 sm:h-32">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Imagotipo_Wikimedia_Colombia_Versi%C3%B3n_horizontal_%28negro%29_2023.svg" 
+                <img src="assets/images/chapters/wmco.svg" 
                      alt="Wikimedia Colombia" 
                      class="h-20 w-auto dark:invert" /> <!-- Cambié h-22 a h-16 -->
             </div>

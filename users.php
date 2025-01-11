@@ -104,9 +104,9 @@ $lastUpdated = $data['lastUpdated'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($username) . ' - ' . __('sitename'); ?></title>
     <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+    <link rel="stylesheet" href="libs/font-awesome/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/apexcharts/3.54.0/apexcharts.js"></script>
+    <script src="libs/apexcharts/apexcharts.js"></script>
     <style>
     #chartContainer {
         width: 100%; /* O cualquier ancho deseado */
