@@ -2,7 +2,7 @@ RewriteEngine On
 RewriteBase /
 
 # Redirigir wikipeoplestats.org a www.wikipeoplestats.org
-RewriteCond %{HTTP_HOST} !^www\.wikipeoplestats\.org$ [NC]
+RewriteCond %{HTTP_HOST} ^wikipeoplestats\.org$ [NC]
 RewriteRule ^(.*)$ https://www.wikipeoplestats.org/$1 [R=301,L]
 
 # Cache Rules
