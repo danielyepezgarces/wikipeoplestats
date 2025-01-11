@@ -8,7 +8,7 @@ $wikiproject = "all";
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-curl_setopt($ch, CURLOPT_URL, "https://wikipeoplestats.org/api/stats/{$wikiproject}");
+curl_setopt($ch, CURLOPT_URL, "https://api.wikipeoplestats.org/v1/stats/{$wikiproject}");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "User-Agent: WikiStatsPeople/1.0"
@@ -204,7 +204,7 @@ function hideToast() {
 }
 
 function purgeCache() {
-    fetch("https://wikipeoplestats.org/api/stats/<?php echo $wikiproject; ?>?action=purge", {
+    fetch("https://api.wikipeoplestats.org/v1/stats/<?php echo $wikiproject; ?>?action=purge", {
         method: 'GET',
         headers: {
             "User-Agent": "WikiStatsPeople/1.0"

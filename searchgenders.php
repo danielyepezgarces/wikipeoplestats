@@ -105,7 +105,7 @@ function autocompleteWiki(input) {
     }
 
     // Llamada a la API de búsqueda
-    fetch(`https://wikipeoplestats.org/api/search/genders.php?query=${query}`)
+    fetch(`https://api.wikipeoplestats.org/v1/search/genders.php?query=${query}`)
         .then(response => response.json())
         .then(data => {
             const suggestions = data.wikis || [];

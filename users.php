@@ -24,7 +24,7 @@ if (empty($end_date)) {
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-$url = "https://wikipeoplestats.org/api/users/stats/{$project}/{$username}";
+$url = "https://api.wikipeoplestats.org/v1/users/stats/{$project}/{$username}";
 if (!empty($start_date)) {
     $url .= "/{$start_date}";
     if (!empty($end_date)) {
@@ -207,7 +207,7 @@ $lastUpdated = $data['lastUpdated'];
 
         async function fetchData() {
             try {
-                const response = await fetch('https://wikipeoplestats.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
+                const response = await fetch('https://api.wikipeoplestats.org/v1/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
                 const data = await response.json();
 
                 const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);

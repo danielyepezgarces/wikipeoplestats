@@ -25,7 +25,7 @@ if (empty($end_date)) {
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-$url = "https://wikipeoplestats.org/api/genders/stats/{$project}";
+$url = "https://api.wikipeoplestats.org/v1/genders/stats/{$project}";
 if (!empty($start_date)) {
     $url .= "/{$start_date}";
     if (!empty($end_date)) {
@@ -213,7 +213,7 @@ html.dark .apexcharts-legend-text {
     async function fetchData() {
         try {
             // Realiza la solicitud de datos a la API
-            const response = await fetch('https://wikipeoplestats.org/api/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
+            const response = await fetch('https://api.wikipeoplestats.org/v1/genders/graph/<?php echo $project; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
             const data = await response.json();
 
             // Filtra los datos para asegurarse de que no estén vacíos
