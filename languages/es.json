@@ -84,7 +84,7 @@
     "Oct": "Oct",
     "Nov": "Nov",
     "Dec": "Dic",
-    "migration_db_notice": "Nuestras estadísticas no estarán disponibles debido a la migración de nuestra base de datos hasta nuevo aviso.",
+    "migration_db_notice": "¡Las estadísticas ya están disponibles! Sin embargo, ten en cuenta que las cifras se actualizarán progresivamente en los próximos días.",
     "welcome_group_message": "¡Bienvenido al grupo %s!",
     "members_list": "Miembros",
     "group_admin": "Administrador del grupo",
