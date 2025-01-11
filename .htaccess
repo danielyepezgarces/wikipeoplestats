@@ -1,6 +1,9 @@
 RewriteEngine On
 RewriteBase /
 
+RewriteCond %{HTTP_HOST} ^wikipeoplestats\.org [NC]
+RewriteRule ^(.*)$ https://www.wikipeoplestats.org/$1 [L,R=301,NC]
+
 # Cache Rules
 <IfModule mod_headers.c>
     # Cache images for 1 year
