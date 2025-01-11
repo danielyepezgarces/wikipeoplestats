@@ -24,6 +24,7 @@ RewriteBase /
     </FilesMatch>
 </IfModule>
 
+<IfModule mod_rewrite.c>
 RewriteRule ^search/genders/?$ /searchgenders.php [L,QSA]
 RewriteRule ^search/users/?$ /searchusers.php [L,QSA]
 RewriteRule ^users/([a-zA-Z0-9_-]+)/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?username=$1&start_date=$2&end_date=$3 [L,QSA]
@@ -45,6 +46,7 @@ RewriteRule ^genders/graph/([a-zA-Z0-9_.-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?
 RewriteRule ^genders/stats/([a-zA-Z0-9_.-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/genders/stats.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
 RewriteRule ^users/stats/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/stats.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
 RewriteRule ^users/graph/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?(?:/([0-9]{4}-[0-9]{2}-[0-9]{2}))?$ /api/users/graph.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
+</IfModule>
 
 #Denied 
 <Files "config.php">
