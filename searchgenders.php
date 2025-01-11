@@ -105,7 +105,7 @@ function autocompleteWiki(input) {
     }
 
     // Llamada a la API de búsqueda
-    fetch(`https://wikipeoplestats.wmcloud.org/api/search/genders.php?query=${query}`)
+    fetch(`https://wikipeoplestats.org/api/search/genders.php?query=${query}`)
         .then(response => response.json())
         .then(data => {
             const suggestions = data.wikis || [];
@@ -199,6 +199,6 @@ function redirectToUrl() {
 }
 </script>
 
-    <script src="https://wikipeoplestats.wmcloud.org/assets/js/main.js"></script>
+    <script src="https://wikipeoplestats.org/assets/js/main.js"></script>
 </body>
 </html>

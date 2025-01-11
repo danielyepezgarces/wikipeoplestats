@@ -1,7 +1,7 @@
 # Introduction
 WikiPeopleStats is a project to measure the gender gap on Wikimedia wikis
 
-Live: https://wikipeoplestats.wmcloud.org/
+Live: https://wikipeoplestats.org/
 
 Docs: Coming soon
 

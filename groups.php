@@ -24,7 +24,7 @@ if (empty($end_date)) {
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-$url = "https://wikipeoplestats.wmcloud.org/api/users/stats/{$project}/{$username}";
+$url = "https://wikipeoplestats.org/api/users/stats/{$project}/{$username}";
 if (!empty($start_date)) {
     $url .= "/{$start_date}";
     if (!empty($end_date)) {
@@ -326,7 +326,7 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
 
         async function fetchData() {
             try {
-                const response = await fetch('https://wikipeoplestats.wmcloud.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
+                const response = await fetch('https://wikipeoplestats.org/api/users/graph/<?php echo $project; ?>/<?php echo $username; ?>/<?php echo $start_date; ?>/<?php echo $end_date; ?>');
                 const data = await response.json();
 
                 const firstNonZeroIndex = data.data.findIndex(item => item.total > 0 || item.totalWomen > 0 || item.totalMen > 0 || item.otherGenders > 0);
@@ -418,6 +418,6 @@ $creation_date = '2024-01-01'; // Fecha de creación del grupo (puedes también 
         // Llamar a la función para obtener datos
         fetchData();
     </script>
-    <script src="https://wikipeoplestats.wmcloud.org/assets/js/main.js"></script>
+    <script src="https://wikipeoplestats.org/assets/js/main.js"></script>
 </body>
 </html>
