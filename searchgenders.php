@@ -175,28 +175,44 @@ function validateDates() {
 
 // Función para redirigir a la URL con los parámetros seleccionados
 function redirectToUrl() {
-    const project = document.getElementById('project').value;
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
+    const project = document.getElementById('project').value.trim();
+    const startDate = document.getElementById('start_date').value.trim();
+    const endDate = document.getElementById('end_date').value.trim();
 
-    // Crear la URL base
-    let url = `/genders/${project}`;
+    if (!project) {
+        alert("Por favor selecciona un proyecto válido.");
+        return false;
+    }
 
-    // Lógica para manejar las fechas
+    // Separar idioma y tipo de proyecto
+    const match = project.match(/^([a-z]{2,3})(wiki(?:quote|source|books|versity|news|data)?)$/);
+    if (!match) {
+        alert("El formato del proyecto no es válido.");
+        return false;
+    }
+
+    const lang = match[1]; // Código de idioma (ej: 'es')
+    const type = match[2] === 'wiki' ? '' : `.${match[2].replace('wiki', '')}`; // Tipo de proyecto (ej: '.quote', '.source', o vacío para wiki)
+
+    // Construir el subdominio dinámico
+    let url = `https://${lang}${type}.wikipeoplestats.org/genders`;
+
+    // Añadir fechas si están presentes
     if (startDate && endDate) {
         url += `/${startDate}/${endDate}`;
     } else if (startDate) {
         url += `/${startDate}/`;
     } else if (endDate) {
-        url += `//${endDate}`; // Aquí pasamos la barra vacía
+        url += `//${endDate}`; // Doble barra si solo hay fecha de fin
     } else {
-        url += `//`; // Pasamos dos barras si no hay parámetros
+        url += `//`; // Doble barra si no hay fechas
     }
 
     // Redirigir a la nueva URL
     window.location.href = url;
     return false; // Prevenir el envío del formulario
 }
+
 </script>
 
     <script src="https://wikipeoplestats.org/assets/js/main.js"></script>
