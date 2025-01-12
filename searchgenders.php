@@ -143,26 +143,26 @@ function validateDates() {
     const today = new Date();
     const todayString = today.toISOString().split('T')[0];
 
-    // Validar fecha de inicio
-    if (startDateInput.value < wikiCreationDate) {
-        alert(`La fecha de inicio debe ser igual o mayor a la fecha de creación de la wiki seleccionada (${wikiCreationDate}).`);
-        return false;
+    // Validar fecha de inicio si está presente
+    if (startDateInput.value) {
+        if (startDateInput.value < wikiCreationDate) {
+            alert(`La fecha de inicio debe ser igual o mayor a la fecha de creación de la wiki seleccionada (${wikiCreationDate}).`);
+            return false;
+        }
+
+        if (startDateInput.value > todayString) {
+            alert("La fecha de inicio no puede ser mayor que la fecha de hoy.");
+            return false;
+        }
     }
 
-    // Validar que la fecha de inicio no sea mayor que la fecha actual
-    if (startDateInput.value > todayString) {
-        alert("La fecha de inicio no puede ser mayor que la fecha de hoy.");
-        return false;
-    }
-
-    // Si la fecha de fin es proporcionada, validar que sea mayor o igual a la fecha de inicio
+    // Validar fecha de fin si está presente
     if (endDateInput.value) {
-        if (endDateInput.value < startDateInput.value) {
+        if (startDateInput.value && endDateInput.value < startDateInput.value) {
             alert("La fecha de fin debe ser igual o mayor que la fecha de inicio.");
             return false;
         }
 
-        // Validar que la fecha de fin no sea mayor que la fecha actual
         if (endDateInput.value > todayString) {
             alert("La fecha de fin no puede ser mayor que la fecha de hoy.");
             return false;
@@ -172,6 +172,7 @@ function validateDates() {
     // Si todo está bien, redirigir a la nueva URL
     return redirectToUrl();
 }
+
 
 // Función para redirigir a la URL con los parámetros seleccionados
 function redirectToUrl() {
