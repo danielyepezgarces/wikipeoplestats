@@ -32,14 +32,13 @@ RewriteRule ^(.*)$ https://www.wikipeoplestats.org/$1 [L,R=301,NC]
     RewriteRule ^search/genders/?$ /searchgenders.php [L,QSA]
     RewriteRule ^search/users/?$ /searchusers.php [L,QSA]
     RewriteRule ^users/([a-zA-Z0-9_-]+)/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?username=$1&start_date=$2&end_date=$3 [L,QSA]
-    RewriteRule ^genders/?$ /searchgenders.php [L,QSA]
-    RewriteRule ^genders/([a-zA-Z0-9_.-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /genders.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
+    RewriteRule ^genders/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /genders.php?start_date=$1&end_date=$2 [L,QSA]
     RewriteRule ^users/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /users.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
 
     RewriteRule ^groups/([a-zA-Z0-9_.-]+)/([a-zA-Z0-9_-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /groups.php?project=$1&username=$2&start_date=$3&end_date=$4 [L,QSA]
 
     RewriteRule ^rankings/wikis$ rankingswiki.php [L]
-
+    
     RewriteRule ^compare/wiki/([a-zA-Z0-9_.-]+)/?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?/?([0-9]{4}-[0-9]{2}-[0-9]{2})?$ /comparewiki.php?project=$1&start_date=$2&end_date=$3 [L,QSA]
 </IfModule>
 
