@@ -1,14 +1,10 @@
 <?php
 include 'languages.php'; // Cargar idiomas y traducciones
+include 'settings.php'; // Cargar idiomas y traducciones
 
-$project = isset($_GET['project']) ? $_GET['project'] : '';
+$project = $wikiproject;
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
-
-// Buscar la información del proyecto seleccionado en el array wikis
-$wiki = array_filter($wikis, function($w) use ($project) {
-  return $w['wiki'] === $project; // Comparar el valor de 'wiki' en el array con 'project' de la URL
-});
 
 // Obtener la fecha de creación si existe el proyecto
 $creation_date = !empty($wiki) ? reset($wiki)['creation_date'] : '';
