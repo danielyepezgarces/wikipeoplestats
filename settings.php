@@ -52,7 +52,7 @@ function getProject($currentDomain) {
 
     // Verificar si el idioma es válido
     if (!in_array($lang, $supportedLanguages)) {
-        return "unknown";
+        return "wikidata";
     }
 
     // Determinar el proyecto
@@ -64,7 +64,7 @@ function getProject($currentDomain) {
         case 'wikisource':
             return $lang . 'source';
         default:
-            return "unknown";
+            return "wikidata";
     }
 }
 
