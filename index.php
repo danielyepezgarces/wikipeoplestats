@@ -35,7 +35,7 @@ $otherGenders = 0;
 $totalContributions = 0;
 $lastUpdated = "N/A";
 $cachedUntil = "N/A";
-$errorMessage = "";
+$statsCredits = "";
 
 // Verificar si hay datos válidos en la respuesta
 if (isset($data) && is_array($data) && !isset($data['error'])) {
@@ -46,8 +46,17 @@ if (isset($data) && is_array($data) && !isset($data['error'])) {
     $totalContributions = (int)($data['totalContributions'] ?? 0);
     $lastUpdated = htmlspecialchars($data['lastUpdated'] ?? "N/A");
     $cachedUntil = htmlspecialchars($data['cachedUntil'] ?? "N/A");
+
+    // Verificar si todas las estadísticas son 0
+    if ($totalPeople === 0 && $totalWomen === 0 && $totalMen === 0 && $otherGenders === 0 && $totalContributions === 0) {
+        $statsCredits = __('coming_soon_tracking_wiki');
+    } else {
+        // Si hay estadísticas, mostrar créditos
+        $wikidomain = htmlspecialchars($data['wikidomain'] ?? "unknown");
+        $statsCredits = sprintf(__('homepage_stats_credits'), $wikidomain);
+    }
 } else {
-    $errorMessage = __('coming_soon_tracking_wiki');
+    $statsCredits = __('coming_soon_tracking_wiki');
 }
 
 // Calcular los ratios
@@ -142,7 +151,7 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 
 
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
-    <?php echo $errorMessage; ?>
+    <?php echo $statsCredits; ?>
 </p>
 
 <div class="mt-8 text-center">
