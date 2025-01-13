@@ -99,6 +99,6 @@ function getOriginalDomain($currentDomain) {
 $wikiproject = getProject($currentDomain);
 
 // Obtener el dominio original
-$originalDomain = getOriginalDomain($currentDomain);
+$wikidomain = getOriginalDomain($currentDomain);
 
 ?>
