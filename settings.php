@@ -57,12 +57,39 @@ function getProject($currentDomain) {
 
     // Determinar el proyecto
     switch ($projectType) {
-        case 'wikipeoplestats':
+        case 'wikipedia':
             return $lang . 'wiki';
-        case 'quote':
+        case 'wikiquote':
             return $lang . 'quote';
-        case 'source':
+        case 'wikisource':
             return $lang . 'source';
+        default:
+            return "unknown";
+    }
+}
+
+// Función para obtener el dominio original
+function getOriginalDomain($currentDomain) {
+    // Separar el dominio en partes
+    $parts = explode('.', $currentDomain);
+
+    // Verificar si el dominio tiene al menos 3 partes
+    if (count($parts) < 3) {
+        return $currentDomain;
+    }
+
+    // Obtener el idioma y el tipo de proyecto
+    $lang = $parts[0];
+    $projectType = $parts[1];
+
+    // Determinar el dominio original
+    switch ($projectType) {
+        case 'wikipedia':
+            return $lang . '.wikipedia.org';
+        case 'wikiquote':
+            return $lang . '.wikiquote.org';
+        case 'wikisource':
+            return $lang . '.wikisource.org';
         default:
             return "unknown";
     }
@@ -70,4 +97,8 @@ function getProject($currentDomain) {
 
 // Obtener el proyecto correspondiente
 $wikiproject = getProject($currentDomain);
+
+// Obtener el dominio original
+$originalDomain = getOriginalDomain($currentDomain);
+
 ?>
