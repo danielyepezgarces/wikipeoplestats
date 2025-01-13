@@ -17,7 +17,7 @@ function getProject($currentDomain) {
     $projectType = $parts[1];
 
     // Lista de idiomas soportados
-    supported_languages = [
+    $supported_languages = [
         "aa", "ab", "ace", "ady", "af", "ak", "als", "alt", "am", "ami", "an", "ang", "ann", "anp", "ar",
         "arc", "ary", "arz", "as", "ast", "atj", "av", "avk", "awa", "ay", "az", "azb", "ba", "ban", "bar",
         "bat-smg", "bbc", "bcl", "bdr", "be", "be-tarask", "be-x-old", "bew", "bg", "bh", "bi", "bjn",
