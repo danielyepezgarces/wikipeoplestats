@@ -91,7 +91,7 @@ function getOriginalDomain($currentDomain) {
         case 'wikisource':
             return $lang . '.wikisource.org';
         default:
-            return "unknown";
+            return "www.wikidata.org";
     }
 }
 
