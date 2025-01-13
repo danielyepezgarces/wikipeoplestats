@@ -70,12 +70,17 @@ function getProject($currentDomain) {
 
 // Función para obtener el dominio original
 function getOriginalDomain($currentDomain) {
+    // Verificar si el dominio es www.wikipeoplestats.org
+    if ($currentDomain === 'www.wikipeoplestats.org') {
+        return 'www.wikidata.org';
+    }
+
     // Separar el dominio en partes
     $parts = explode('.', $currentDomain);
 
     // Verificar si el dominio tiene al menos 3 partes
     if (count($parts) < 3) {
-        return $currentDomain;
+        return 'wikidata.org';
     }
 
     // Obtener el idioma y el tipo de proyecto
@@ -91,7 +96,7 @@ function getOriginalDomain($currentDomain) {
         case 'wikisource':
             return $lang . '.wikisource.org';
         default:
-            return "www.wikidata.org";
+            return 'wikidata.org';
     }
 }
 
