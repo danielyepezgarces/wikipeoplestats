@@ -105,7 +105,7 @@ $lastUpdated = $data['lastUpdated'];
     <title><?php echo htmlspecialchars($username) . ' - ' . __('sitename'); ?></title>
     <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="libs/font-awesome/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets\js\tailwind.js"></script>
     <script src="libs/apexcharts/apexcharts.js"></script>
     <style>
     #chartContainer {

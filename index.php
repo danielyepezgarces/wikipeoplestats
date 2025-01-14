@@ -86,7 +86,7 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="libs/font-awesome/all.min.css">
     <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets\js\tailwind.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',

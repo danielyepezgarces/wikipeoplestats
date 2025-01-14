@@ -90,7 +90,7 @@ $dateRange = getDateRange($timeFrame);
 
     <!-- Incluir JS de DataTables -->
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets\js\tailwind.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
