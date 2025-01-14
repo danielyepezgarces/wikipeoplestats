@@ -57,9 +57,9 @@ function getProject($currentDomain) {
         return $lang . 'wikisource'; // Asignamos al proyecto wikisource
     }
 
-    // Determinar el dominio para Wikipedia
+    // Verificar si el dominio es del tipo "wiki" (como aa.wikipeoplestats.org)
     if ($projectType === 'wikipedia') {
-        return $lang . 'wiki';
+        return $lang . 'wiki'; // Asignamos al proyecto wikipedia
     }
 
     // Si no coincide con ningún proyecto conocido, retornar "wikidata"
