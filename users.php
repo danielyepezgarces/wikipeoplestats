@@ -103,7 +103,7 @@ $lastUpdated = $data['lastUpdated'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($username) . ' - ' . __('sitename'); ?></title>
-    <link href='https://tools-static.wmflabs.org/fontcdn/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
+    <link href='assets\css\fonts\styles.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="libs/font-awesome/all.min.css">
     <script src="assets\js\tailwind.js"></script>
     <script src="libs/apexcharts/apexcharts.js"></script>
