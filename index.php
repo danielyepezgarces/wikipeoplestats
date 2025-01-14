@@ -3,6 +3,9 @@
 include 'languages.php';
 include 'settings.php';
 
+$wikiproject = getProject($currentDomain);
+$wikidomain = getOriginalDomain($currentDomain);
+
 // Inicializar cURL
 $ch = curl_init();
 

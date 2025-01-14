@@ -100,10 +100,4 @@ function getOriginalDomain($currentDomain) {
     }
 }
 
-// Obtener el proyecto correspondiente
-$wikiproject = getProject($currentDomain);
-
-// Obtener el dominio original
-$wikidomain = getOriginalDomain($currentDomain);
-
 ?>
