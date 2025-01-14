@@ -53,7 +53,7 @@ function getProject($currentDomain) {
     // Verificar si el dominio es de tipo "wikipeoplestats"
     if ($projectType === 'wikipeoplestats') {
         // Si el dominio contiene "wikipeoplestats", debe ser el proyecto Wikipedia
-        return $lang . 'wikipedia'; // Asignamos al proyecto wikipedia
+        return $lang . 'wiki'; // Asignamos al proyecto wikipedia
     }
 
     // Verificar si el proyecto es de tipo "quote" o "source"
