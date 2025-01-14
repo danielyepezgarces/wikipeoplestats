@@ -6,8 +6,6 @@ include 'settings.php';
 $wikiproject = getProject($currentDomain);
 $wikidomain = getOriginalDomain($currentDomain);
 
-echo $wikidomain;
-
 // Inicializar cURL
 $ch = curl_init();
 
@@ -62,8 +60,6 @@ if (isset($data) && is_array($data) && !isset($data['error'])) {
     if ($totalPeople === 0 && $totalWomen === 0 && $totalMen === 0 && $otherGenders === 0 && $totalContributions === 0) {
         $statsCredits = __('coming_soon_tracking_wiki');
     } else {
-        // Si hay estadísticas, mostrar créditos
-        $wikidomain = htmlspecialchars($data['wikidomain'] ?? "unknown");
         $statsCredits = sprintf(__('homepage_stats_credits'), $wikidomain);
     }
 } else {
