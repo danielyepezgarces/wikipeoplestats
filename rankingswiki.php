@@ -82,9 +82,6 @@ $dateRange = getDateRange($timeFrame);
     <title><?php echo __('sitename'); ?></title>
     <link href='assets\css\fonts\styles.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="libs/font-awesome/all.min.css">
-    <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
-    <!-- Incluir CSS de DataTables -->
-
     <!-- Incluir jQuery (DataTables depende de jQuery) -->
     <script src="libs\jquery\main.min.js"></script>
 
