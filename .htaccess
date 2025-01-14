@@ -2,9 +2,7 @@ RewriteEngine On
 RewriteBase /
 
 RewriteCond %{HTTP_HOST} ^wikipeoplestats\.org$ [NC]
-RewriteCond %{HTTP_HOST} !^www\.wikipeoplestats\.org$ [NC]
 RewriteRule ^(.*)$ https://www.wikipeoplestats.org/$1 [L,R=301]
-
 
 # Cache Rules
 <IfModule mod_headers.c>
