@@ -6,6 +6,8 @@ include 'settings.php';
 $wikiproject = getProject($currentDomain);
 $wikidomain = getOriginalDomain($currentDomain);
 
+echo $wikidomain;
+
 // Inicializar cURL
 $ch = curl_init();
 
