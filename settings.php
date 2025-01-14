@@ -23,8 +23,8 @@ $supportedLanguages = [
 ];
 
 // Lista de proyectos tipo "quote" y "source"
-$quoteProjects = ["wikiquote"];
-$sourceProjects = ["wikisource"];
+$quoteProjects = ["quote"];
+$sourceProjects = ["source"];
 
 // Función para obtener el proyecto adecuado según el dominio
 function getProject($currentDomain) {
@@ -52,9 +52,9 @@ function getProject($currentDomain) {
 
     // Verificar si el proyecto es de tipo "quote" o "source"
     if (in_array($projectType, $GLOBALS['quoteProjects'])) {
-        return $lang . 'quote';
+        return $lang . 'wikiquote'; // Asignamos al proyecto wikiquote
     } elseif (in_array($projectType, $GLOBALS['sourceProjects'])) {
-        return $lang . 'source';
+        return $lang . 'wikisource'; // Asignamos al proyecto wikisource
     }
 
     // Determinar el dominio para Wikipedia
