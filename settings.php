@@ -50,6 +50,12 @@ function getProject($currentDomain) {
         return "wikidata";
     }
 
+    // Verificar si el dominio es de tipo "wikipeoplestats"
+    if ($projectType === 'wikipeoplestats') {
+        // Si el dominio contiene "wikipeoplestats", debe ser el proyecto Wikipedia
+        return $lang . 'wikipedia'; // Asignamos al proyecto wikipedia
+    }
+
     // Verificar si el proyecto es de tipo "quote" o "source"
     if (in_array($projectType, $GLOBALS['quoteProjects'])) {
         return $lang . 'wikiquote'; // Asignamos al proyecto wikiquote
@@ -57,12 +63,7 @@ function getProject($currentDomain) {
         return $lang . 'wikisource'; // Asignamos al proyecto wikisource
     }
 
-    // Verificar si el dominio es del tipo "wiki" (como aa.wikipeoplestats.org)
-    if ($projectType === 'wikipedia') {
-        return $lang . 'wiki'; // Asignamos al proyecto wikipedia
-    }
-
-    // Si no coincide con ningún proyecto conocido, retornar "wikidata"
+    // Para otros casos de proyecto, asignamos "wikidata" por defecto
     return "wikidata";
 }
 
@@ -93,12 +94,11 @@ function getOriginalDomain($currentDomain) {
     }
 
     // Para Wikipedia y otros proyectos
-    if ($projectType === 'wikipedia') {
-        return $lang . '.wikipedia.org';
+    if ($projectType === 'wikipeoplestats') {
+        return $lang . '.wikipedia.org'; // Asignamos el dominio a Wikipedia
     }
 
     // Si no coincide con ningún proyecto conocido, retornar "wikidata.org"
     return 'wikidata.org';
 }
-
 ?>
