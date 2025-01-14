@@ -21,9 +21,9 @@ RewriteRule ^(.*)$ https://www.wikipeoplestats.org/$1 [L,R=301,NC]
         Header set Cache-Control "public, max-age=604800, must-revalidate"
     </FilesMatch>
 
-    # Cache fonts for 1 month
+    # Cache fonts for 1 year
     <FilesMatch "\.(woff|woff2|ttf|eot|otf)$">
-        Header set Cache-Control "public, max-age=2592000"
+        Header set Cache-Control "public, max-age=31536000"
     </FilesMatch>
 </IfModule>
 
