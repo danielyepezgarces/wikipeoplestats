@@ -2,6 +2,30 @@
 // Obtener el dominio actual
 $currentDomain = $_SERVER['HTTP_HOST'];
 
+// Lista de idiomas soportados
+$supportedLanguages = [
+    "aa", "ab", "ace", "ady", "af", "ak", "als", "alt", "am", "ami", "an", "ang", "ann", "anp", "ar",
+    "arc", "ary", "arz", "as", "ast", "atj", "av", "avk", "awa", "ay", "az", "azb", "ba", "ban", "bar",
+    "bcl", "be", "be-x-old", "bg", "bh", "bi", "bjn", "bm", "bn", "bo", "bpy", "br", "bs", "bug", "bxr", 
+    "ca", "cbk-zam", "ce", "ceb", "ch", "chk", "clc", "co", "cr", "crh", "cs", "csb", "cu", "cv", "cy", 
+    "da", "de", "de-ch", "dsb", "dtp", "dv", "dz", "ee", "el", "eml", "en", "eo", "es", "et", "eu", "ext", 
+    "fa", "ff", "fi", "fo", "fr", "frp", "frr", "fur", "fy", "ga", "gaa", "gan", "gd", "gl", "glk", "gn", 
+    "gu", "gv", "hak", "he", "hi", "hif", "hr", "hsb", "ht", "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", 
+    "ik", "io", "is", "it", "ja", "jbo", "jv", "ka", "kaa", "kab", "kg", "kk", "kl", "km", "kn", "ko", "kok", 
+    "kri", "ku", "kv", "kw", "ky", "la", "lad", "lb", "lbe", "lez", "li", "lij", "lmo", "ln", "lo", "lt", "ltg", 
+    "lv", "map-bms", "mg", "mh", "mhr", "mi", "min", "mk", "ml", "mn", "mr", "ms", "mt", "my", "mzn", "nah", 
+    "nap", "nb", "nds", "nds-nl", "ne", "new", "nl", "nn", "no", "nov", "nqo", "nr", "nv", "oc", "om", "or", 
+    "os", "pa", "pap", "pl", "pms", "pnb", "ps", "pt", "qu", "quc", "quh", "rm", "rmy", "rn", "ro", "roa-rup", 
+    "ru", "ru-sib", "rw", "sah", "sa", "sco", "sd", "se", "si", "simple", "sk", "sl", "sq", "sr", "srn", "ss", 
+    "st", "su", "sv", "sw", "ta", "te", "tet", "tg", "th", "ti", "tk", "tl", "tr", "ts", "tt", "ug", "uk", "ur", 
+    "uz", "vec", "vep", "vi", "vls", "vo", "wa", "war", "wo", "xh", "yi", "yo", "za", "zea", "zh", "zh-classical", 
+    "zh-cn", "zh-hans", "zh-hant", "zu"
+];
+
+// Lista de proyectos tipo "quote" y "source"
+$quoteProjects = ["wikiquote"];
+$sourceProjects = ["wikisource"];
+
 // Función para obtener el proyecto adecuado según el dominio
 function getProject($currentDomain) {
     // Separar el dominio en partes
@@ -16,56 +40,30 @@ function getProject($currentDomain) {
     $lang = $parts[0];
     $projectType = $parts[1];
 
-    // Lista de idiomas soportados
-    $supportedLanguages = [
-        "aa", "ab", "ace", "ady", "af", "ak", "als", "alt", "am", "ami", "an", "ang", "ann", "anp", "ar",
-        "arc", "ary", "arz", "as", "ast", "atj", "av", "avk", "awa", "ay", "az", "azb", "ba", "ban", "bar",
-        "bat-smg", "bbc", "bcl", "bdr", "be", "be-tarask", "be-x-old", "bew", "bg", "bh", "bi", "bjn",
-        "blk", "bm", "bn", "bo", "bpy", "br", "bs", "btm", "bug", "bxr", "ca", "cbk-zam", "cdo", "ce",
-        "ceb", "ch", "cho", "chr", "chy", "ckb", "co", "cr", "crh", "cs", "csb", "cu", "cv", "cy", "da",
-        "dag", "de", "dga", "din", "diq", "dsb", "dtp", "dty", "dv", "dz", "ee", "el", "eml", "en", "eo",
-        "es", "et", "eu", "ext", "fa", "fat", "ff", "fi", "fiu-vro", "fj", "fo", "fon", "fr", "frp", "frr",
-        "fur", "fy", "ga", "gag", "gan", "gcr", "gd", "gl", "glk", "gn", "gom", "gor", "got", "gpe", "gsw",
-        "gu", "guc", "gur", "guw", "gv", "ha", "hak", "haw", "he", "hi", "hif", "ho", "hr", "hsb", "ht",
-        "hu", "hy", "hyw", "hz", "ia", "iba", "id", "ie", "ig", "igl", "ii", "ik", "ilo", "inh", "io", "is",
-        "it", "iu", "ja", "jam", "jbo", "jv", "ka", "kaa", "kab", "kbd", "kbp", "kcg", "kg", "kge", "ki",
-        "kj", "kk", "kl", "km", "kn", "ko", "koi", "kr", "krc", "ks", "ksh", "ku", "kus", "kv", "kw", "ky",
-        "la", "lad", "lb", "lbe", "lez", "lfn", "lg", "li", "lij", "lld", "lmo", "ln", "lo", "lrc", "lt",
-        "ltg", "lv", "lzh", "mad", "mai", "map-bms", "mdf", "mg", "mh", "mhr", "mi", "min", "mk", "ml",
-        "mn", "mni", "mnw", "mo", "mos", "mr", "mrj", "ms", "mt", "mus", "mwl", "my", "myv", "mzn", "na",
-        "nah", "nan", "nap", "nds", "nds-nl", "ne", "new", "ng", "nia", "nl", "nn", "no", "nov", "nqo",
-        "nr", "nrm", "nso", "nv", "ny", "oc", "olo", "om", "or", "os", "pa", "pag", "pam", "pap", "pcd",
-        "pcm", "pdc", "pfl", "pi", "pih", "pl", "pms", "pnb", "pnt", "ps", "pt", "pwn", "qu", "rm", "rmy",
-        "rn", "ro", "roa-rup", "roa-tara", "rsk", "ru", "rue", "rup", "rw", "sa", "sah", "sat", "sc", "scn",
-        "sco", "sd", "se", "sg", "sgs", "sh", "shi", "shn", "shy", "si", "simple", "sk", "skr", "sl", "sm",
-        "smn", "sn", "so", "sq", "sr", "srn", "ss", "st", "stq", "su", "sv", "sw", "szl", "szy", "ta",
-        "tay", "tcy", "tdd", "te", "tet", "tg", "th", "ti", "tig", "tk", "tl", "tly", "tn", "to", "tpi",
-        "tr", "trv", "ts", "tt", "tum", "tw", "ty", "tyv", "udm", "ug", "uk", "ur", "uz", "ve", "vec",
-        "vep", "vi", "vls", "vo", "vro", "wa", "war", "wo", "wuu", "xal", "xh", "xmf", "yi", "yo", "yue",
-        "za", "zea", "zgh", "zh", "zh-classical", "zh-min-nan", "zh-yue", "zu"
-    ];
-
     // Verificar si el dominio es www.wikipeoplestats.org
     if ($currentDomain === 'www.wikipeoplestats.org') {
         return 'all';
     }
 
     // Verificar si el idioma es válido
-    if (!in_array($lang, $supportedLanguages)) {
+    if (!in_array($lang, $GLOBALS['supportedLanguages'])) {
         return "wikidata";
     }
 
-    // Determinar el proyecto
-    switch ($projectType) {
-        case 'wikipedia':
-            return $lang . 'wiki';
-        case 'wikiquote':
-            return $lang . 'quote';
-        case 'wikisource':
-            return $lang . 'source';
-        default:
-            return "wikidata";
+    // Verificar si el proyecto es de tipo "quote" o "source"
+    if (in_array($projectType, $GLOBALS['quoteProjects'])) {
+        return $lang . 'quote';
+    } elseif (in_array($projectType, $GLOBALS['sourceProjects'])) {
+        return $lang . 'source';
     }
+
+    // Determinar el dominio para Wikipedia
+    if ($projectType === 'wikipedia') {
+        return $lang . 'wiki';
+    }
+
+    // Si no coincide con ningún proyecto conocido, retornar "wikidata"
+    return "wikidata";
 }
 
 // Función para obtener el dominio original
@@ -88,16 +86,19 @@ function getOriginalDomain($currentDomain) {
     $projectType = $parts[1];
 
     // Determinar el dominio original
-    switch ($projectType) {
-        case 'wikipedia':
-            return $lang . '.wikipedia.org';
-        case 'wikiquote':
-            return $lang . '.wikiquote.org';
-        case 'wikisource':
-            return $lang . '.wikisource.org';
-        default:
-            return 'wikidata.org';
+    if (in_array($projectType, $GLOBALS['quoteProjects'])) {
+        return $lang . '.wikiquote.org';
+    } elseif (in_array($projectType, $GLOBALS['sourceProjects'])) {
+        return $lang . '.wikisource.org';
     }
+
+    // Para Wikipedia y otros proyectos
+    if ($projectType === 'wikipedia') {
+        return $lang . '.wikipedia.org';
+    }
+
+    // Si no coincide con ningún proyecto conocido, retornar "wikidata.org"
+    return 'wikidata.org';
 }
 
 ?>
