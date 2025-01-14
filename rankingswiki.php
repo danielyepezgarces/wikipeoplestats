@@ -86,7 +86,7 @@ $dateRange = getDateRange($timeFrame);
     <!-- Incluir CSS de DataTables -->
 
     <!-- Incluir jQuery (DataTables depende de jQuery) -->
-    <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="libs\jquery\main.min.js"></script>
 
     <!-- Incluir JS de DataTables -->
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
