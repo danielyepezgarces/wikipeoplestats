@@ -12,9 +12,6 @@ $ch = curl_init();
 // Configurar la URL y las opciones de cURL
 $url = "https://api.wikipeoplestats.org/v1/stats/{$wikiproject}";
 
-// Imprimir la URL
-echo "La URL utilizada es: " . $url . "\n";
-
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
