@@ -85,7 +85,6 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='assets\css\fonts\styles.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="libs/font-awesome/all.min.css">
-    <link rel="stylesheet" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/themes/odometer-theme-minimal.min.css">
     <script src="assets\js\tailwind.js"></script>
     <script>
         tailwind.config = {
