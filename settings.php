@@ -77,11 +77,6 @@ function getOriginalDomain($currentDomain) {
     // Separar el dominio en partes
     $parts = explode('.', $currentDomain);
 
-    // Verificar si el dominio tiene al menos 3 partes
-    if (count($parts) < 3) {
-        return 'wikidata.org';
-    }
-
     // Obtener el idioma y el tipo de proyecto
     $lang = $parts[0];
     $projectType = $parts[1];
