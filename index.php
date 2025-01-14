@@ -7,11 +7,20 @@ include 'settings.php';
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-curl_setopt($ch, CURLOPT_URL, "https://api.wikipeoplestats.org/v1/stats/{$wikiproject}");
+$url = "https://api.wikipeoplestats.org/v1/stats/{$wikiproject}";
+
+// Imprimir la URL
+echo "La URL utilizada es: " . $url . "\n";
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "User-Agent: WikiStatsPeople/1.0"
 ]);
+
+$response = curl_exec($ch);
+curl_close($ch);
 
 // Ejecutar la solicitud
 $response = curl_exec($ch);
