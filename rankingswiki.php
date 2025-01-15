@@ -7,23 +7,24 @@ include 'languages.php';
 
 function fetchData($timeFrame, $projectGroup) {
     $url = "https://api.wikipeoplestats.org/v1/rankings/$projectGroup/$timeFrame";
-    echo "Fetching data from URL: $url\n";
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
     $response = curl_exec($ch);
+
     if (curl_errno($ch)) {
-        echo "cURL error: " . curl_error($ch) . "\n";
+        curl_close($ch);
+        return []; // Retorna un arreglo vacío en caso de error
     }
+
     curl_close($ch);
 
     if ($response === false) {
-        echo "Failed to fetch data from URL: $url\n";
-        return [];
+        return []; // Retorna un arreglo vacío si la respuesta no es válida
     }
 
-    return json_decode($response, true);
+    return json_decode($response, true); // Decodifica el JSON
 }
 
 
