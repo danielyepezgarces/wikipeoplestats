@@ -15,17 +15,23 @@ function fetchData($timeFrame, $projectGroup) {
 
     if (curl_errno($ch)) {
         curl_close($ch);
-        return []; // Retorna un arreglo vacío en caso de error
+        return []; // Retorna un arreglo vacío si hay un error en cURL
     }
 
     curl_close($ch);
 
-    if ($response === false) {
-        return []; // Retorna un arreglo vacío si la respuesta no es válida
+    if ($response === false || empty($response)) {
+        return []; // Retorna un arreglo vacío si no hay respuesta
     }
 
-    return json_decode($response, true); // Decodifica el JSON
+    $data = json_decode($response, true); // Decodifica JSON como arreglo asociativo
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return []; // Retorna un arreglo vacío si hay error en el JSON
+    }
+
+    return $data ?? []; // Asegura que siempre se retorne un arreglo
 }
+
 
 
 // Obtener los parámetros de la URL
