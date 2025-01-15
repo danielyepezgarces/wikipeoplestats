@@ -2,8 +2,8 @@
 include 'languages.php';
 
 function fetchData($timeFrame, $projectGroup) {
-    $url = "https://api.wikipeoplestats.org/v1/rankings/wiki.php?interval=$timeFrame&group=$projectGroup";
-
+    $url = "https://api.wikipeoplestats.org/v1/rankings/$projectGroup/$timeFrame";
+    
     // Usar file_get_contents o cURL para obtener los datos de la API
     $response = file_get_contents($url);
 
