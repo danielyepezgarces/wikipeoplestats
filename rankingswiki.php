@@ -203,7 +203,7 @@ $dateRange = getDateRange($timeFrame);
     <?php include 'languageselector.php'; ?>
 
 
-    <script src="/assets/js/main.js?v=1"></script>
+    <script src="https://api.wikipeoplestats.org/assets/js/main.js?v=1"></script>
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/odometer.js/0.4.8/odometer.js"></script>
 <script>
     // Inicializa los odómetros
