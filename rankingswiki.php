@@ -91,14 +91,14 @@ $dateRange = getDateRange($timeFrame);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo __('sitename'); ?></title>
-    <link href='assets\css\fonts\styles.css' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="libs/font-awesome/all.min.css">
+    <link href='https://api.wikipeoplestats.org/assets/css/fonts/styles.css' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://api.wikipeoplestats.org/libs/font-awesome/all.min.css">
     <!-- Incluir jQuery (DataTables depende de jQuery) -->
-    <script src="libs\jquery\main.min.js"></script>
+    <script src="https://api.wikipeoplestats.org/libs/jquery/main.min.js"></script>
 
     <!-- Incluir JS de DataTables -->
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
-    <script src="assets\js\tailwind.js"></script>
+    <script src="https://api.wikipeoplestats.org/assets/js/tailwind.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
