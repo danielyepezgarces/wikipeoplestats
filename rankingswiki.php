@@ -2,22 +2,23 @@
 include 'languages.php';
 
 function fetchData($timeFrame, $projectGroup) {
-    // Generar la URL amigable
     $url = "https://api.wikipeoplestats.org/v1/rankings/$projectGroup/$timeFrame";
-
-    // Imprimir la URL para depuración
     echo "Fetching data from URL: $url\n";
 
-    // Usar file_get_contents o cURL para obtener los datos de la API
-    $response = file_get_contents($url);
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    // Comprobar si la respuesta es válida
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo "cURL error: " . curl_error($ch) . "\n";
+    }
+    curl_close($ch);
+
     if ($response === false) {
-        echo "Failed to fetch data from URL: $url\n"; // Imprimir en caso de error
+        echo "Failed to fetch data from URL: $url\n";
         return [];
     }
 
-    // Decodificar los datos JSON
     return json_decode($response, true);
 }
 
