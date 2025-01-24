@@ -56,7 +56,7 @@ if ($exceptionLang && in_array($exceptionLang, array_column($languages, 'code'))
         </div>
 
         <div class="mt-4 flex justify-end">
-            <button onclick="changeLanguage()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"><?php echo __('save_language'); ?></button>
+            <button onclick="changeLanguage()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none isfocus:shadow-outline"><?php echo __('save_language'); ?></button>
         </div>
     </div>
 </div>
