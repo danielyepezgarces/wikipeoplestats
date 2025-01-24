@@ -1,3 +1,50 @@
+<?php
+// Incluir el archivo de idiomas
+include_once('languages.php');
+
+// Obtener el proyecto actual (subdominio o dominio)
+$currentDomain = $_SERVER['HTTP_HOST'];
+$parts = explode('.', $currentDomain);
+$projectName = (count($parts) >= 3) ? $parts[0] : ''; // Usar el subdominio como el nombre del proyecto
+
+// Obtener el idioma actual según la preferencia global o la excepción local
+$localExceptionLanguage = getLocalExceptionLanguage($projectName);
+if ($localExceptionLanguage !== '') {
+    // Si hay una excepción local, usar ese idioma
+    foreach ($languages as $lang) {
+        if ($lang['code'] === $localExceptionLanguage) {
+            $currentLang = $lang;
+            break;
+        }
+    }
+} else {
+    // Si no hay una excepción local, usar la preferencia global o el idioma predeterminado
+    $currentLang = $languages[0]; // Inglés por defecto, si no hay preferencia global
+    if ($userLanguage = getUserLanguage()) {
+        foreach ($languages as $lang) {
+            if ($lang['code'] === $userLanguage) {
+                $currentLang = $lang;
+                break;
+            }
+        }
+    }
+}
+
+// Función para obtener el idioma de la excepción local para un proyecto
+function getLocalExceptionLanguage($projectName) {
+    if (isset($_COOKIE["local_exception_$projectName"])) {
+        return $_COOKIE["local_exception_$projectName"];
+    }
+    return '';
+}
+
+// Función para obtener el idioma preferido globalmente del usuario
+function getUserLanguage() {
+    return isset($_COOKIE['user_language']) ? $_COOKIE['user_language'] : null;
+}
+
+?>
+
 <div id="language-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-[95%] sm:max-w-lg lg:max-w-4xl xl:max-w-5xl w-full max-h-[80vh] overflow-hidden flex flex-col">
         <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100"><?php echo __('select_language'); ?></h2>
@@ -32,8 +79,8 @@ function changeLanguage() {
     const langCode = document.getElementById('language-selector').value;
     const isGlobal = document.getElementById('global-preference').checked; // Comprobamos si se marca la preferencia global
 
-    // Enviar una solicitud AJAX al servidor para cambiar el idioma en la sesión
-    fetch('https://wikipeoplestats.org/languages.php', {
+    // Enviar una solicitud AJAX al servidor para cambiar el idioma en languages.php
+    fetch('languages.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
