@@ -3,6 +3,11 @@ RewriteBase /
 
 # Cache Rules
 <IfModule mod_headers.c>
+
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+
     # Cache images for 1 year
     <FilesMatch "\.(jpg|jpeg|png|gif|ico|webp|svg)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
@@ -45,8 +50,3 @@ RewriteBase /
 </Files>
 
 
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type"
-</IfModule>
