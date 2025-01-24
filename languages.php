@@ -676,10 +676,7 @@ $wikis = [
     ['code' => 'zu', 'wiki' => 'zuwiki', 'creation_date' => '2007-01-01'],
 ];
 
-// Idioma predeterminado
-$defaultLang = 'en';
-
-// Función para obtener un idioma por su código
+// Función para obtener el idioma por su código
 function getLanguageByCode($code) {
     global $languages;
     foreach ($languages as $language) {
@@ -689,7 +686,6 @@ function getLanguageByCode($code) {
     }
     return null; // Si no se encuentra el idioma
 }
-
 
 // Función para obtener el proyecto según el dominio
 function getProject($currentDomain) {
@@ -734,34 +730,18 @@ function getProject($currentDomain) {
     return "wikidata"; // Si no se encuentra el idioma, asumimos que es "wikidata"
 }
 
-// Función para obtener el dominio original (esencial si necesitas redirigir)
-function getOriginalDomain($currentDomain) {
-    $parts = explode('.', $currentDomain);
-    $lang = $parts[0]; // El idioma es el primer segmento del dominio
-    $projectType = $parts[1]; // El proyecto es el segundo segmento
-
-    // Retornar el dominio original dependiendo del tipo de proyecto
-    if ($projectType === 'wikipeoplestats') {
-        return $lang . '.wikipedia.org'; // Para Wikipedia
-    } elseif ($projectType === 'quote') {
-        return $lang . '.wikiquote.org'; // Para Wikiquote
-    } elseif ($projectType === 'source') {
-        return $lang . '.wikisource.org'; // Para Wikisource
-    }
-
-    // Si no es un proyecto conocido, retornamos el dominio de Wikidata
-    return 'wikidata.org';
-}
-
-// Detectar el dominio actual y el subdominio
+// Obtener el dominio actual
 $currentDomain = $_SERVER['HTTP_HOST'];
-$subdomain = explode('.', $currentDomain)[0]; // Suponemos que el subdominio es el código del idioma
+
+// Obtener el proyecto basado en el dominio
+$project = getProject($currentDomain);
 
 // Idioma predeterminado si no se puede determinar el idioma
+$defaultLang = 'en';
 $currentLang = getLanguageByCode($defaultLang);
 
-// Verificar si existe una excepción local para este subdominio
-$exceptionLang = isset($_COOKIE["local_exception_$subdomain"]) ? $_COOKIE["local_exception_$subdomain"] : null;
+// Verificar si existe una excepción local para este proyecto
+$exceptionLang = isset($_COOKIE["local_exception_$project"]) ? $_COOKIE["local_exception_$project"] : null;
 
 // Si existe una excepción local, usamos ese idioma
 if ($exceptionLang && in_array($exceptionLang, array_column($languages, 'code'))) {
@@ -769,11 +749,11 @@ if ($exceptionLang && in_array($exceptionLang, array_column($languages, 'code'))
 } else {
     // Si no hay excepción local, manejamos el idioma global
     if (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true') {
-        $requestedLang = isset($_COOKIE['language']) ? $_COOKIE['language'] : $subdomain; // Usa subdominio o idioma global
+        $requestedLang = isset($_COOKIE['language']) ? $_COOKIE['language'] : $project; // Usa proyecto o idioma global
         $currentLang = getLanguageByCode($requestedLang);
     } else {
         // Si no hay preferencia global, usamos el idioma por defecto
-        $currentLang = getLanguageByCode($subdomain);
+        $currentLang = getLanguageByCode($project);
     }
 }
 
@@ -799,9 +779,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lang'])) {
 
             // Establecer la excepción local
             if ($localException === 'true') {
-                setcookie("local_exception_$subdomain", $requestedLang, time() + (60 * 60 * 24 * 365), '/'); // Guardar en cookie del subdominio
+                setcookie("local_exception_$project", $requestedLang, time() + (60 * 60 * 24 * 365), '/'); // Guardar en cookie del proyecto
             } else {
-                setcookie("local_exception_$subdomain", '', time() - 3600, '/'); // Eliminar la cookie si no hay excepción
+                setcookie("local_exception_$project", '', time() - 3600, '/'); // Eliminar la cookie si no hay excepción
             }
 
             echo json_encode(['success' => true, 'lang' => $requestedLang]);

@@ -1,6 +1,30 @@
 <?php
 // Incluir el archivo de idiomas
 include_once('languages.php');
+
+// Obtener el dominio actual para determinar el proyecto
+$currentDomain = $_SERVER['HTTP_HOST'];
+$project = getProject($currentDomain);
+
+// Obtener el idioma actual basado en las preferencias globales o la excepción local
+$currentLang = getLanguageByCode($defaultLang);
+
+// Verificar si existe una excepción local para este proyecto
+$exceptionLang = isset($_COOKIE["local_exception_$project"]) ? $_COOKIE["local_exception_$project"] : null;
+
+// Si existe una excepción local, usamos ese idioma
+if ($exceptionLang && in_array($exceptionLang, array_column($languages, 'code'))) {
+    $currentLang = getLanguageByCode($exceptionLang);
+} else {
+    // Si no hay excepción local, manejamos el idioma global
+    if (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true') {
+        $requestedLang = isset($_COOKIE['language']) ? $_COOKIE['language'] : $project; // Usa proyecto o idioma global
+        $currentLang = getLanguageByCode($requestedLang);
+    } else {
+        // Si no hay preferencia global, usamos el idioma por defecto
+        $currentLang = getLanguageByCode($project);
+    }
+}
 ?>
 
 <div id="language-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -21,13 +45,13 @@ include_once('languages.php');
 
         <!-- Checkbox para establecer preferencias globales -->
         <div class="mt-4 flex items-center space-x-2">
-            <input type="checkbox" id="global-preference" <?php echo (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true' && !isset($_COOKIE["local_exception_" . $subdomain])) ? 'checked' : ''; ?> class="form-checkbox text-blue-500" <?php echo isset($_COOKIE["local_exception_" . $subdomain]) ? 'disabled' : ''; ?>>
+            <input type="checkbox" id="global-preference" <?php echo (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true' && !isset($_COOKIE["local_exception_$project"])) ? 'checked' : ''; ?> class="form-checkbox text-blue-500" <?php echo isset($_COOKIE["local_exception_$project"]) ? 'disabled' : ''; ?>>
             <label for="global-preference" class="text-gray-800 dark:text-gray-200"><?php echo __('set_global_preference'); ?></label>
         </div>
 
         <!-- Checkbox para establecer excepción local -->
         <div class="mt-4 flex items-center space-x-2">
-            <input type="checkbox" id="local-exception" <?php echo isset($_COOKIE["local_exception_" . $subdomain]) ? 'checked' : ''; ?> class="form-checkbox text-blue-500">
+            <input type="checkbox" id="local-exception" <?php echo isset($_COOKIE["local_exception_$project"]) ? 'checked' : ''; ?> class="form-checkbox text-blue-500">
             <label for="local-exception" class="text-gray-800 dark:text-gray-200"><?php echo __('set_local_exception'); ?></label>
         </div>
 
