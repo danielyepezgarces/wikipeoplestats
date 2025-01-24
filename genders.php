@@ -3,6 +3,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
 include 'settings.php'; // Cargar idiomas y traducciones
 
 $wikiproject = getProject($currentDomain);
+echo $wikiproject;
 $wikidomain = getOriginalDomain($currentDomain);
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
