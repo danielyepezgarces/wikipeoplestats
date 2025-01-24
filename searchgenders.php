@@ -174,7 +174,6 @@ function validateDates() {
 }
 
 
-// Función para redirigir a la URL con los parámetros seleccionados
 function redirectToUrl() {
     const project = document.getElementById('project').value.trim();
     const startDate = document.getElementById('start_date').value.trim();
@@ -185,7 +184,27 @@ function redirectToUrl() {
         return false;
     }
 
-    // Separar idioma y tipo de proyecto
+    // Caso especial para 'wikidatawiki'
+    if (project === 'wikidatawiki') {
+        let url = `https://www.wikipeoplestats.org/genders`;
+
+        // Añadir fechas si están presentes
+        if (startDate && endDate) {
+            url += `/${startDate}/${endDate}`;
+        } else if (startDate) {
+            url += `/${startDate}/`;
+        } else if (endDate) {
+            url += `//${endDate}`; // Doble barra si solo hay fecha de fin
+        } else {
+            url += `//`; // Doble barra si no hay fechas
+        }
+
+        // Redirigir a la nueva URL
+        window.location.href = url;
+        return false; // Prevenir el envío del formulario
+    }
+
+    // Separar idioma y tipo de proyecto para otros casos
     const match = project.match(/^([a-z]{2,3})(wiki(?:quote|source|books|versity|news|data)?)$/);
     if (!match) {
         alert("El formato del proyecto no es válido.");
