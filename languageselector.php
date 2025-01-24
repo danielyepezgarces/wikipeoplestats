@@ -1,48 +1,6 @@
 <?php
 // Incluir el archivo de idiomas
 include_once('languages.php');
-
-// Obtener el proyecto actual (subdominio o dominio)
-$currentDomain = $_SERVER['HTTP_HOST'];
-$parts = explode('.', $currentDomain);
-$projectName = (count($parts) >= 3) ? $parts[0] : ''; // Usar el subdominio como el nombre del proyecto
-
-// Obtener el idioma actual según la preferencia global o la excepción local
-$localExceptionLanguage = getLocalExceptionLanguage($projectName);
-if ($localExceptionLanguage !== '') {
-    // Si hay una excepción local, usar ese idioma
-    foreach ($languages as $lang) {
-        if ($lang['code'] === $localExceptionLanguage) {
-            $currentLang = $lang;
-            break;
-        }
-    }
-} else {
-    // Si no hay una excepción local, usar la preferencia global o el idioma predeterminado
-    $currentLang = $languages[0]; // Inglés por defecto, si no hay preferencia global
-    if ($userLanguage = getUserLanguage()) {
-        foreach ($languages as $lang) {
-            if ($lang['code'] === $userLanguage) {
-                $currentLang = $lang;
-                break;
-            }
-        }
-    }
-}
-
-// Función para obtener el idioma de la excepción local para un proyecto
-function getLocalExceptionLanguage($projectName) {
-    if (isset($_COOKIE["local_exception_$projectName"])) {
-        return $_COOKIE["local_exception_$projectName"];
-    }
-    return '';
-}
-
-// Función para obtener el idioma preferido globalmente del usuario
-function getUserLanguage() {
-    return isset($_COOKIE['user_language']) ? $_COOKIE['user_language'] : null;
-}
-
 ?>
 
 <div id="language-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -63,8 +21,14 @@ function getUserLanguage() {
 
         <!-- Checkbox para establecer preferencias globales -->
         <div class="mt-4 flex items-center space-x-2">
-            <input type="checkbox" id="global-preference" <?php echo (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true') ? 'checked' : ''; ?> class="form-checkbox text-blue-500">
+            <input type="checkbox" id="global-preference" <?php echo (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true' && !isset($_COOKIE["local_exception_" . $subdomain])) ? 'checked' : ''; ?> class="form-checkbox text-blue-500" <?php echo isset($_COOKIE["local_exception_" . $subdomain]) ? 'disabled' : ''; ?>>
             <label for="global-preference" class="text-gray-800 dark:text-gray-200"><?php echo __('set_global_preference'); ?></label>
+        </div>
+
+        <!-- Checkbox para establecer excepción local -->
+        <div class="mt-4 flex items-center space-x-2">
+            <input type="checkbox" id="local-exception" <?php echo isset($_COOKIE["local_exception_" . $subdomain]) ? 'checked' : ''; ?> class="form-checkbox text-blue-500">
+            <label for="local-exception" class="text-gray-800 dark:text-gray-200"><?php echo __('set_local_exception'); ?></label>
         </div>
 
         <div class="mt-4 flex justify-end">
@@ -78,14 +42,15 @@ function getUserLanguage() {
 function changeLanguage() {
     const langCode = document.getElementById('language-selector').value;
     const isGlobal = document.getElementById('global-preference').checked; // Comprobamos si se marca la preferencia global
+    const isLocalException = document.getElementById('local-exception').checked; // Comprobamos si se marca la excepción local
 
-    // Enviar una solicitud AJAX al servidor para cambiar el idioma en languages.php
-    fetch('languages.php', {
+    // Enviar una solicitud AJAX al servidor para cambiar el idioma en la sesión
+    fetch('https://wikipeoplestats.org/languages.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `lang=${langCode}&global_usage=${isGlobal ? 'true' : 'false'}`,  // Pasamos el código de idioma y la preferencia global
+        body: `lang=${langCode}&global_usage=${isGlobal ? 'true' : 'false'}&local_exception=${isLocalException ? 'true' : 'false'}`,  // Pasamos el código de idioma y la preferencia global
     })
     .then(response => response.json())  // Esperamos una respuesta JSON
     .then(data => {
