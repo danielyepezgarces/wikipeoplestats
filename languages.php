@@ -2,6 +2,8 @@
 // languages.php
 session_start(); // Inicia la sesión
 
+header("Access-Control-Allow-Origin: *");
+
 $languages = [
     ['code' => 'aa', 'name' => 'Afar', 'flag' => '🇪🇷', 'text_direction' => 'ltr'],
     ['code' => 'ab', 'name' => 'Аҧсуа', 'flag' => '🇬🇪', 'text_direction' => 'ltr'],
