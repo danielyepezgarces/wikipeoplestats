@@ -675,55 +675,78 @@ $wikis = [
 ];
 
 // Idioma predeterminado
-$defaultLang = "en";
-$currentLang = $defaultLang;
+$defaultLang = 'en';
 
-// Función para obtener el idioma de una cookie por proyecto
-function getLocalExceptionLanguage($projectName) {
-    if (isset($_COOKIE["local_exception_$projectName"])) {
-        return $_COOKIE["local_exception_$projectName"];
+// Función para obtener un idioma por su código
+function getLanguageByCode($code) {
+    global $languages;
+    foreach ($languages as $language) {
+        if ($language['code'] === $code) {
+            return $language;
+        }
     }
-    return ''; // Si no existe la cookie, no hay excepción local
+    return null; // Si no se encuentra el idioma
 }
 
-// Función para obtener el idioma de la cookie de preferencia global
-function getUserLanguage() {
-    if (isset($_COOKIE['user_language']) && $_COOKIE['user_language'] !== '') {
-        return $_COOKIE['user_language'];
-    }
-    return ''; // Si no existe la cookie, no hay preferencia global
-}
-
-// Detectar el proyecto actual usando el dominio o subdominio
+// Detectar el dominio actual y el subdominio
 $currentDomain = $_SERVER['HTTP_HOST'];
-$projectName = '';  // Puedes usar la lógica para extraer el nombre del proyecto desde el dominio
-$parts = explode('.', $currentDomain);
-if (count($parts) >= 3) {
-    $projectName = $parts[0]; // Usar el subdominio como nombre del proyecto
+$subdomain = explode('.', $currentDomain)[0]; // Suponemos que el subdominio es el código del idioma
+
+// Idioma predeterminado si no se puede determinar el idioma
+$currentLang = getLanguageByCode($defaultLang);
+
+// Verificar si existe una excepción local para este subdominio
+$exceptionLang = isset($_COOKIE["local_exception_$subdomain"]) ? $_COOKIE["local_exception_$subdomain"] : null;
+
+// Si existe una excepción local, usamos ese idioma
+if ($exceptionLang && in_array($exceptionLang, array_column($languages, 'code'))) {
+    $currentLang = getLanguageByCode($exceptionLang);
+} else {
+    // Si no hay excepción local, manejamos el idioma global
+    if (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true') {
+        $requestedLang = isset($_COOKIE['language']) ? $_COOKIE['language'] : $subdomain; // Usa subdominio o idioma global
+        $currentLang = getLanguageByCode($requestedLang);
+    } else {
+        // Si no hay preferencia global, usamos el idioma por defecto
+        $currentLang = getLanguageByCode($subdomain);
+    }
 }
 
-// Obtener el idioma de la excepción local (si existe)
-$localExceptionLanguage = getLocalExceptionLanguage($projectName);
+// Manejo del idioma - Si se está cambiando el idioma
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lang'])) {
+    $requestedLang = $_POST['lang'];
+    $globalUsage = isset($_POST['global_usage']) ? $_POST['global_usage'] : 'false';
+    $localException = isset($_POST['local_exception']) ? $_POST['local_exception'] : 'false';
 
-// Si hay una excepción local, usarla
-if ($localExceptionLanguage !== '') {
+    // Validar que el idioma sea válido
     foreach ($languages as $lang) {
-        if ($lang['code'] === $localExceptionLanguage) {
-            $currentLang = $lang;
-            break;
+        if ($lang['code'] === $requestedLang) {
+            // Guardar el idioma en la sesión (o cookie si se desea mantener la preferencia)
+            $_SESSION['lang'] = $requestedLang;
+            setcookie('language', $requestedLang, time() + (60 * 60 * 24 * 365), '/'); // Guardar en cookie por 1 año
+
+            // Configurar las preferencias globales
+            if ($globalUsage === 'true') {
+                setcookie('global_usage', 'true', time() + (60 * 60 * 24 * 365), '/');
+            } else {
+                setcookie('global_usage', 'false', time() + (60 * 60 * 24 * 365), '/');
+            }
+
+            // Establecer la excepción local
+            if ($localException === 'true') {
+                setcookie("local_exception_$subdomain", $requestedLang, time() + (60 * 60 * 24 * 365), '/'); // Guardar en cookie del subdominio
+            } else {
+                setcookie("local_exception_$subdomain", '', time() - 3600, '/'); // Eliminar la cookie si no hay excepción
+            }
+
+            echo json_encode(['success' => true, 'lang' => $requestedLang]);
+            exit;
         }
     }
-} elseif ($userLanguage = getUserLanguage()) {
-    // Si no hay excepción local, usar la preferencia global
-    foreach ($languages as $lang) {
-        if ($lang['code'] === $userLanguage) {
-            $currentLang = $lang;
-            break;
-        }
-    }
-} else {
-    // Lógica para determinar el idioma predeterminado (como en el ejemplo anterior)
-    $currentLang = $languages[0]; // Inglés por defecto
+
+    // Si el idioma no es válido, retornar un error
+    echo json_encode(['success' => false, 'message' => 'Idioma no válido']);
+    exit;
 }
 
 // Cargar traducciones del idioma actual
@@ -758,50 +781,6 @@ function __($key) {
     return $key;
 }
 
-// Establecer la localización para el formato de fecha
+// Configurar el locale para el formato de fechas
 setlocale(LC_TIME, $currentLang['code'] . '_' . strtoupper($currentLang['code']) . '.UTF-8');
-
-// Lógica para manejar la solicitud de cambio de idioma
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['lang'])) {
-        $requestedLang = $_POST['lang'];
-
-        // Validar que el idioma sea válido
-        foreach ($languages as $lang) {
-            if ($lang['code'] === $requestedLang) {
-                $_SESSION['lang'] = $requestedLang; // Guardar en la sesión
-                setcookie('user_language', $requestedLang, time() + (60 * 60 * 24 * 365), '/'); // Guardar en cookie global
-                echo json_encode(['success' => true, 'lang' => $requestedLang]);
-                exit;
-            }
-        }
-
-        // Si el idioma no es válido, retornar un error
-        echo json_encode(['success' => false, 'message' => 'Idioma no válido']);
-        exit;
-    }
-
-    // Cambiar la preferencia global
-    if (isset($_POST['global_usage'])) {
-        if ($_POST['global_usage'] === 'true') {
-            setcookie('global_usage', 'true', time() + (60 * 60 * 24 * 365), '/');
-        } else {
-            setcookie('global_usage', 'false', time() + (60 * 60 * 24 * 365), '/');
-        }
-    }
-
-    // Manejar la excepción local para un proyecto
-    if (isset($_POST['local_exception']) && $_POST['local_exception'] !== '') {
-        $projectName = $_POST['project_name'];  // Obtenemos el nombre del proyecto (subdominio)
-        setcookie("local_exception_$projectName", $_POST['local_exception'], time() + (60 * 60 * 24 * 365), '/');
-        echo json_encode(['success' => true]);
-        exit;
-    } elseif (isset($_POST['local_exception']) && $_POST['local_exception'] === '') {
-        $projectName = $_POST['project_name'];
-        setcookie("local_exception_$projectName", '', time() - 3600, '/');
-        echo json_encode(['success' => true]);
-        exit;
-    }
-}
-
 ?>
