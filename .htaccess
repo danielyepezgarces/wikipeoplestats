@@ -1,13 +1,10 @@
 RewriteEngine On
 RewriteBase /
 
+Header set Access-Control-Allow-Origin "*"
+
 # Cache Rules
 <IfModule mod_headers.c>
-
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type"
-
     # Cache images for 1 year
     <FilesMatch "\.(jpg|jpeg|png|gif|ico|webp|svg)$">
         Header set Cache-Control "public, max-age=31536000, immutable"
@@ -26,6 +23,7 @@ RewriteBase /
     # Cache fonts for 1 year
     <FilesMatch "\.(woff|woff2|ttf|eot|otf)$">
         Header set Cache-Control "public, max-age=31536000"
+        Header set Access-Control-Allow-Origin "*"
     </FilesMatch>
 </IfModule>
 
