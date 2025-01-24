@@ -2,7 +2,8 @@
 include 'languages.php'; // Cargar idiomas y traducciones
 include 'settings.php'; // Cargar idiomas y traducciones
 
-$project = $wikiproject;
+$wikiproject = getProject($currentDomain);
+$wikidomain = getOriginalDomain($currentDomain);
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
 
@@ -21,7 +22,7 @@ if (empty($end_date)) {
 $ch = curl_init();
 
 // Configurar la URL y las opciones de cURL
-$url = "https://api.wikipeoplestats.org/v1/genders/stats/{$project}";
+$url = "https://api.wikipeoplestats.org/v1/genders/stats/{$wikiproject}";
 if (!empty($start_date)) {
     $url .= "/{$start_date}";
     if (!empty($end_date)) {
