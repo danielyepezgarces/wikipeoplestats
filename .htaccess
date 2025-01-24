@@ -1,6 +1,8 @@
 RewriteEngine On
 RewriteBase /
 
+php_value display_errors On
+
 # Cache Rules
 <IfModule mod_headers.c>
     # Cache images for 1 year
