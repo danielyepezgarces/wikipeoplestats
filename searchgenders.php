@@ -10,7 +10,7 @@ include 'languages.php'; // Cargar idiomas y traducciones
     <title><?php echo __('sitename'); ?></title>
    <link href='assets\css\fonts\styles.css' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://www.wikipeoplestats.org/search/assets/js/tailwind.js"></script>
+    <script src="https://www.wikipeoplestats.org/assets/js/tailwind.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
