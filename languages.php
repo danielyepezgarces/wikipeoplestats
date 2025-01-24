@@ -688,6 +688,69 @@ function getLanguageByCode($code) {
     return null; // Si no se encuentra el idioma
 }
 
+
+// Función para obtener el proyecto según el dominio
+function getProject($currentDomain) {
+    $parts = explode('.', $currentDomain);
+    
+    if (count($parts) < 3) {
+        return "unknown"; // Si no tiene subdominio, no es válido
+    }
+
+    $lang = $parts[0]; // Asumimos que el primer segmento del dominio es el idioma
+    $projectType = $parts[1]; // El segundo segmento sería el tipo de proyecto (por ejemplo, wikipedia, wikiquote, etc.)
+
+    // Verificar si el dominio es www.wikipeoplestats.org
+    if ($currentDomain === 'www.wikipeoplestats.org') {
+        return 'all'; // Si es 'wikipeoplestats', retornamos el proyecto 'all'
+    }
+
+    // Verificar si el idioma es válido
+    global $languages;
+    foreach ($languages as $language) {
+        if ($language['code'] === $lang) {
+            // Si el dominio es de tipo "wikipeoplestats", asignamos al proyecto de Wikipedia
+            if ($projectType === 'wikipeoplestats') {
+                return $lang . 'wiki';
+            }
+
+            // Si es un proyecto de "quote"
+            if ($projectType === 'quote') {
+                return $lang . 'wikiquote';
+            }
+
+            // Si es un proyecto de "source"
+            if ($projectType === 'source') {
+                return $lang . 'wikisource';
+            }
+
+            // Para otros proyectos, regresamos el proyecto predeterminado
+            return "wikidata"; // De lo contrario, asignamos un proyecto genérico
+        }
+    }
+
+    return "wikidata"; // Si no se encuentra el idioma, asumimos que es "wikidata"
+}
+
+// Función para obtener el dominio original (esencial si necesitas redirigir)
+function getOriginalDomain($currentDomain) {
+    $parts = explode('.', $currentDomain);
+    $lang = $parts[0]; // El idioma es el primer segmento del dominio
+    $projectType = $parts[1]; // El proyecto es el segundo segmento
+
+    // Retornar el dominio original dependiendo del tipo de proyecto
+    if ($projectType === 'wikipeoplestats') {
+        return $lang . '.wikipedia.org'; // Para Wikipedia
+    } elseif ($projectType === 'quote') {
+        return $lang . '.wikiquote.org'; // Para Wikiquote
+    } elseif ($projectType === 'source') {
+        return $lang . '.wikisource.org'; // Para Wikisource
+    }
+
+    // Si no es un proyecto conocido, retornamos el dominio de Wikidata
+    return 'wikidata.org';
+}
+
 // Detectar el dominio actual y el subdominio
 $currentDomain = $_SERVER['HTTP_HOST'];
 $subdomain = explode('.', $currentDomain)[0]; // Suponemos que el subdominio es el código del idioma
