@@ -16,7 +16,7 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "User-Agent: WikiStatsPeople/1.0"
+    "User-Agent: WikiPeopleStats/1.0"
 ]);
 
 $response = curl_exec($ch);
