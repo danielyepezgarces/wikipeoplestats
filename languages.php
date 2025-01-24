@@ -687,6 +687,25 @@ function getLanguageByCode($code) {
     return null; // Si no se encuentra el idioma
 }
 
+// Función para obtener el dominio original (esencial si necesitas redirigir)
+function getOriginalDomain($currentDomain) {
+    $parts = explode('.', $currentDomain);
+    $lang = $parts[0]; // El idioma es el primer segmento del dominio
+    $projectType = $parts[1]; // El proyecto es el segundo segmento
+
+    // Retornar el dominio original dependiendo del tipo de proyecto
+    if ($projectType === 'wikipeoplestats') {
+        return $lang . '.wikipedia.org'; // Para Wikipedia
+    } elseif ($projectType === 'quote') {
+        return $lang . '.wikiquote.org'; // Para Wikiquote
+    } elseif ($projectType === 'source') {
+        return $lang . '.wikisource.org'; // Para Wikisource
+    }
+
+    // Si no es un proyecto conocido, retornamos el dominio de Wikidata
+    return 'wikidata.org';
+}
+
 // Función para obtener el proyecto según el dominio
 function getProject($currentDomain) {
     $parts = explode('.', $currentDomain);
