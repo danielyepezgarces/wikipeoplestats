@@ -676,24 +676,127 @@ $wikis = [
 
 // Idioma predeterminado
 $defaultLang = "en";
-
-foreach ($languages as $language) {
-    if ($language['code'] === 'en') {
-        $defaultLang = $language;
-        break;
-    }
-}
-
 $currentLang = $defaultLang;
 
-// Si el idioma se está cambiando
+// Función para obtener el proyecto según el dominio
+function getProject($currentDomain) {
+    $parts = explode('.', $currentDomain);
+    
+    if (count($parts) < 3) {
+        return "unknown"; // Si no tiene subdominio, no es válido
+    }
+
+    $lang = $parts[0]; // Asumimos que el primer segmento del dominio es el idioma
+    $projectType = $parts[1]; // El segundo segmento sería el tipo de proyecto (por ejemplo, wikipedia, wikiquote, etc.)
+
+    // Verificar si el dominio es www.wikipeoplestats.org
+    if ($currentDomain === 'www.wikipeoplestats.org') {
+        return 'all'; // Si es 'wikipeoplestats', retornamos el proyecto 'all'
+    }
+
+    // Verificar si el idioma es válido
+    global $languages;
+    foreach ($languages as $language) {
+        if ($language['code'] === $lang) {
+            // Si el dominio es de tipo "wikipeoplestats", asignamos al proyecto de Wikipedia
+            if ($projectType === 'wikipeoplestats') {
+                return $lang . 'wiki';
+            }
+
+            // Si es un proyecto de "quote"
+            if ($projectType === 'quote') {
+                return $lang . 'wikiquote';
+            }
+
+            // Si es un proyecto de "source"
+            if ($projectType === 'source') {
+                return $lang . 'wikisource';
+            }
+
+            // Para otros proyectos, regresamos el proyecto predeterminado
+            return "wikidata"; // De lo contrario, asignamos un proyecto genérico
+        }
+    }
+
+    return "wikidata"; // Si no se encuentra el idioma, asumimos que es "wikidata"
+}
+
+// Función para obtener el dominio original (esencial si necesitas redirigir)
+function getOriginalDomain($currentDomain) {
+    $parts = explode('.', $currentDomain);
+    $lang = $parts[0]; // El idioma es el primer segmento del dominio
+    $projectType = $parts[1]; // El proyecto es el segundo segmento
+
+    // Retornar el dominio original dependiendo del tipo de proyecto
+    if ($projectType === 'wikipeoplestats') {
+        return $lang . '.wikipedia.org'; // Para Wikipedia
+    } elseif ($projectType === 'quote') {
+        return $lang . '.wikiquote.org'; // Para Wikiquote
+    } elseif ($projectType === 'source') {
+        return $lang . '.wikisource.org'; // Para Wikisource
+    }
+
+    // Si no es un proyecto conocido, retornamos el dominio de Wikidata
+    return 'wikidata.org';
+}
+
+// Función para obtener el idioma actual (desde la cookie o el subdominio)
+function getCurrentLanguage() {
+    global $languages, $defaultLang;
+
+    // Verificar si existe la cookie de preferencia global
+    if (isset($_COOKIE['global_usage']) && $_COOKIE['global_usage'] == 'true' && isset($_COOKIE['user_language'])) {
+        $cookieLang = $_COOKIE['user_language'];
+        // Validar que el idioma de la cookie sea uno de los soportados
+        foreach ($languages as $lang) {
+            if ($lang['code'] === $cookieLang) {
+                return $lang;
+            }
+        }
+    }
+
+    // Si no hay cookie o no es válido, verificar el subdominio
+    $currentDomain = $_SERVER['HTTP_HOST'];
+    $parts = explode('.', $currentDomain);
+    $subdomainLang = $parts[0]; // Suponemos que el subdominio es el idioma
+
+    foreach ($languages as $lang) {
+        if ($lang['code'] === $subdomainLang) {
+            return $lang;
+        }
+    }
+
+    // Si no hay preferencia global ni subdominio, usar el idioma predeterminado
+    return getLanguageByCode($defaultLang);
+}
+
+// Obtener el idioma por su código
+function getLanguageByCode($code) {
+    global $languages;
+    foreach ($languages as $language) {
+        if ($language['code'] === $code) {
+            return $language;
+        }
+    }
+    return null; // Si no se encuentra el idioma
+}
+
+// Si el usuario está cambiando el idioma
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lang'])) {
     $requestedLang = $_POST['lang'];
 
     // Validar que el idioma sea válido
     foreach ($languages as $lang) {
         if ($lang['code'] === $requestedLang) {
-            $_SESSION['lang'] = $requestedLang; // Guardar en la sesión
+            // Si el usuario ha optado por una preferencia global, guardar en cookie
+            if (isset($_POST['global_usage']) && $_POST['global_usage'] == 'true') {
+                setcookie('global_usage', 'true', time() + (60 * 60 * 24 * 365), '/');
+                setcookie('user_language', $requestedLang, time() + (60 * 60 * 24 * 365), '/');
+            }
+
+            // Guardar en la sesión el idioma elegido
+            $_SESSION['lang'] = $requestedLang;
+
             echo json_encode(['success' => true, 'lang' => $requestedLang]);
             exit;
         }
@@ -704,34 +807,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lang'])) {
     exit;
 }
 
-// Manejo del idioma
-if (isset($_SESSION['lang'])) {
-    // Si hay un idioma en la sesión, usarlo
-    $requestedLang = $_SESSION['lang'];
-    foreach ($languages as $lang) {
-        if ($lang['code'] === $requestedLang) {
-            $currentLang = $lang;
-            break;
-        }
-    }
-} else {
-    // Si no hay idioma en la sesión, detectar automáticamente desde el navegador
-    $acceptedLanguages = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-    foreach ($acceptedLanguages as $acceptedLang) {
-        $langCode = substr($acceptedLang, 0, 2); // Obtener solo el código del idioma
-        foreach ($languages as $lang) {
-            if ($lang['code'] === $langCode) {
-                $currentLang = $lang;
-                break 2; // Salir de ambos bucles al encontrar el idioma
-            }
-        }
-    }
+// Obtener el idioma actual (desde la cookie o el subdominio)
+$currentLang = getCurrentLanguage();
 
-    // Si no se encuentra un idioma compatible, usar el predeterminado
-    $_SESSION['lang'] = $currentLang['code'];
-}
-
-// Cargar traducciones del idioma actual
+// Cargar las traducciones del idioma actual
 $translations = [];
 $jsonFile = __DIR__ . '/languages/' . $currentLang['code'] . '.json';
 if (file_exists($jsonFile)) {
@@ -763,7 +842,7 @@ function __($key) {
     return $key;
 }
 
-// Set locale for date formatting
+// Set locale for date formatting (solo si es necesario)
 setlocale(LC_TIME, $currentLang['code'] . '_' . strtoupper($currentLang['code']) . '.UTF-8');
 
 ?>

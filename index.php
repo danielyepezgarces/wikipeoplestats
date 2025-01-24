@@ -1,7 +1,6 @@
 <?php
 
 include 'languages.php';
-include 'settings.php';
 
 $wikiproject = getProject($currentDomain);
 $wikidomain = getOriginalDomain($currentDomain);
