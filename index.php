@@ -91,7 +91,7 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     <meta name="keywords" content="<?php echo __('site_keywords'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='assets\css\fonts\styles.css' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="libs/font-awesome/all.min.css">
+    <link rel="stylesheet" href="https://www.wikipeoplestats.org/libs/font-awesome/all.min.css">
     <script src="assets\js\tailwind.js"></script>
     <script>
         tailwind.config = {
