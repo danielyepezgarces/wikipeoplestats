@@ -81,7 +81,7 @@
             <div class="flex items-center space-x-4">
                 <!-- Language Selector Button for Desktop -->
                 <button onclick="toggleLanguagePopup()" class="hidden md:flex items-center space-x-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-                    <span><?php echo $currentLang['flag']; ?></span>
+               <i class="fa-solid fa-user-gear"></i>
                 </button>
 
                 <!-- Dark/Light Mode Toggle for Desktop -->

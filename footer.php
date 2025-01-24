@@ -69,8 +69,8 @@
         <div class="flex items-center justify-center md:hidden mt-6 space-x-[10px]">
             <!-- Language Selector -->
             <button onclick="toggleLanguagePopup()" class="flex items-center space-x-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-                <span><?php echo $currentLang['flag']; ?></span>
-            </button>
+    <i class="fa-solid fa-user-gear"></i>
+</button>
 
             <!-- Dark/Light Mode Toggle -->
             <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
