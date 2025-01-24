@@ -2,9 +2,6 @@
 // languages.php
 session_start(); // Inicia la sesión
 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 $languages = [
     ['code' => 'aa', 'name' => 'Afar', 'flag' => '🇪🇷', 'text_direction' => 'ltr'],
