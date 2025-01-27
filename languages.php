@@ -680,48 +680,59 @@ $wikis = [
 $defaultLang = "en";
 $currentLang = $defaultLang;
 
-// Función para obtener el proyecto según el dominio
 function getProject($currentDomain) {
+    echo "Current Domain: " . $currentDomain . "\n"; // Mostrar el dominio actual
     $parts = explode('.', $currentDomain);
+    echo "Domain parts: " . print_r($parts, true) . "\n"; // Mostrar las partes del dominio
     
     if (count($parts) < 3) {
+        echo "Invalid domain format: less than 3 parts.\n";
         return "unknown"; // Si no tiene subdominio, no es válido
     }
 
-    $lang = $parts[0]; // Asumimos que el primer segmento del dominio es el idioma
-    $projectType = $parts[1]; // El segundo segmento sería el tipo de proyecto (por ejemplo, wikipedia, wikiquote, etc.)
-
+    $lang = $parts[0];
+    $projectType = $parts[1];
+    echo "Language: " . $lang . ", Project Type: " . $projectType . "\n"; // Mostrar los valores de idioma y tipo de proyecto
+    
     // Verificar si el dominio es www.wikipeoplestats.org
     if ($currentDomain === 'www.wikipeoplestats.org') {
+        echo "Returning project 'all'\n";
         return 'all'; // Si es 'wikipeoplestats', retornamos el proyecto 'all'
     }
 
     // Verificar si el idioma es válido
     global $languages;
     foreach ($languages as $language) {
+        echo "Checking language: " . $language['code'] . "\n"; // Mostrar cada código de idioma que se compara
         if ($language['code'] === $lang) {
             // Si el dominio es de tipo "wikipeoplestats", asignamos al proyecto de Wikipedia
             if ($projectType === 'wikipeoplestats') {
+                echo "Returning project: " . $lang . 'wiki' . "\n";
                 return $lang . 'wiki';
             }
 
             // Si es un proyecto de "quote"
             if ($projectType === 'quote') {
+                echo "Returning project: " . $lang . 'wikiquote' . "\n";
                 return $lang . 'wikiquote';
             }
 
             // Si es un proyecto de "source"
             if ($projectType === 'source') {
+                echo "Returning project: " . $lang . 'wikisource' . "\n";
                 return $lang . 'wikisource';
             }
 
             // Para otros proyectos, regresamos el proyecto predeterminado
+            echo "Returning default project 'wikidata'\n";
             return "wikidata"; // De lo contrario, asignamos un proyecto genérico
         }
     }
 
+    echo "Language not found, returning default 'wikidata'\n";
     return "wikidata"; // Si no se encuentra el idioma, asumimos que es "wikidata"
 }
+
 
 // Función para obtener el dominio original (esencial si necesitas redirigir)
 function getOriginalDomain($currentDomain) {
