@@ -681,10 +681,10 @@ $defaultLang = "en";
 $currentLang = $defaultLang;
 
 function getProject($currentDomain) {
-    echo "Current Domain: " . $currentDomain . "\n"; // Mostrar el dominio actual
+    echo "Current Domain: '" . $currentDomain . "'\n"; // Asegurarnos de ver si el dominio llega vacío o mal formado
     $parts = explode('.', $currentDomain);
     echo "Domain parts: " . print_r($parts, true) . "\n"; // Mostrar las partes del dominio
-    
+
     if (count($parts) < 3) {
         echo "Invalid domain format: less than 3 parts.\n";
         return "unknown"; // Si no tiene subdominio, no es válido
@@ -732,6 +732,7 @@ function getProject($currentDomain) {
     echo "Language not found, returning default 'wikidata'\n";
     return "wikidata"; // Si no se encuentra el idioma, asumimos que es "wikidata"
 }
+
 
 
 // Función para obtener el dominio original (esencial si necesitas redirigir)
