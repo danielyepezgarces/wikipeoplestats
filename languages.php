@@ -679,6 +679,8 @@ $wikis = [
 // Idioma predeterminado
 $defaultLang = "en";
 $currentLang = $defaultLang;
+$currentDomain = $_SERVER['HTTP_HOST']; // Obtener el dominio del host de la solicitud HTTP
+
 
 function getProject($currentDomain) {
     echo "Current Domain: '" . $currentDomain . "'\n"; // Asegurarnos de ver si el dominio llega vacío o mal formado
