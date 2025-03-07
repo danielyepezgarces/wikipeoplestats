@@ -245,21 +245,6 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     </div>
 </div>
 
-<?php if (!empty($events)) : ?>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        <?php foreach ($events as $event) : ?>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo $event['name']; ?></h3>
-                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['start_date']; ?></p>
-                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['end_date']; ?></p>
-                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['location']; ?></p>
-                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['description']; ?></p>
-                <p class="text-lg text-gray-700 dark:text-gray-300"><a href="<?php echo $event['url']; ?>">Más información</a></p>
-            </div>
-        <?php endforeach; ?>
-    </div>
-<?php endif; ?>
-
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $statsCredits; ?>
 </p>
