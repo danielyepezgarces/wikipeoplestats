@@ -266,8 +266,8 @@ if ($currentDateTime < $startDateTime) {
     </div>
 </div>
 
-<div class="mt-6 text-center">
-    <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
+<div class="mt-6 text-center bg-gray-200 dark:bg-gray-700 p-4 rounded">
+    <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold">
         <?php echo $eventStatus; ?>
     </p>
 
@@ -427,39 +427,6 @@ function purgeCache() {
     // Llamada inicial para mostrar el primer texto
     updateProjectText();
 </script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    let countdownDateStr = "<?php echo $countdownDate; ?>"; 
-    if (!countdownDateStr) return;
 
-    let countdownDate = new Date(countdownDateStr); // Se mantiene en formato UTC
-    let countdownTimestamp = countdownDate.getTime(); 
-
-    function updateCountdown() {
-        let now = new Date().getTime();
-        let timeLeft = countdownTimestamp - now;
-        let statusEl = document.getElementById("event-status");
-
-        if (timeLeft <= 0) {
-            statusEl.innerText = "Este evento ya finalizó.";
-            document.getElementById("countdown").style.display = "none";
-            return;
-        }
-
-        let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-        let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-        document.getElementById("days").innerText = days.toString().padStart(2, '0');
-        document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
-        document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
-        document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
-    }
-
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-});
-</script>
 </body>
 </html>
