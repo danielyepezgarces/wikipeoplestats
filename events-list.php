@@ -4,6 +4,7 @@ $events = [
     [
         'slug' => 'tiempo_feminista_para_editar_wikipedia',
         'name' => 'Tiempo Feminista para Editar Wikipedia',
+        'event_image' => 'https://upload.wikimedia.org/wikipedia/commons/5/50/Banner_naranja_-_Gr%C3%A1fica_-_Tiempo_Feminista_2025_07.png',
         'start_date' => '2025-03-01',
         'end_date' => '2025-03-31',
         'location' => 'Online',
