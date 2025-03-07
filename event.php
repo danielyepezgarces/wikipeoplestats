@@ -284,9 +284,10 @@ try {
             <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Participantes</h3>
-                <p class="text-sm text-gray-700 dark:text-gray-300">
-                <?php echo number_format($participantsCount); ?>
-                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:underline"
+   onclick="openModal()">
+    <?php echo number_format($participantsCount); ?>
+</p>
             </div>
         </div>
     </div>
@@ -378,8 +379,19 @@ try {
 <?php include 'supporters.php'; ?>
 <?php include 'footer.php'; ?>
 
-
 </main>
+
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+        <div class="bg-white p-8 rounded-lg w-11/12 sm:w-96 shadow-lg">
+            <button id="closeModal" class="absolute top-2 right-2 text-gray-600 text-2xl">&times;</button>
+            <h2 class="text-2xl font-bold text-center mb-4">Lista de Participantes</h2>
+            
+            <!-- Lista de Participantes -->
+            <div id="participantList" class="space-y-4">
+                <!-- Los participantes se insertarán aquí mediante JavaScript -->
+            </div>
+        </div>
+</div>
 
 <!-- Toast Container -->
 <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white text-sm px-4 py-2 rounded shadow-lg hidden dark:bg-green-600">
@@ -534,5 +546,50 @@ function purgeCache() {
 });
 
 </script>
+<script>
+        // Obtener el botón y el modal
+        const openModalBtn = document.getElementById('openModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const modal = document.getElementById('modal');
+        const participantList = document.getElementById('participantList');
+
+        // Función para abrir el modal
+        openModalBtn.addEventListener('click', function() {
+            modal.classList.remove('hidden');
+            fetchParticipants();
+        });
+
+        // Función para cerrar el modal
+        closeModalBtn.addEventListener('click', function() {
+            modal.classList.add('hidden');
+        });
+
+        // Simular la obtención de los participantes
+        function fetchParticipants() {
+            // Esto es solo un ejemplo con datos simulados. En un caso real, usarías `fetch` para obtener los datos de la API.
+            const participants = [
+                { user_name: 'Rufin Wakilongo', user_registered_at: '14:06, 15 July 2023' },
+                { user_name: 'Cedrickarungu921', user_registered_at: '14:06, 15 July 2023' },
+                { user_name: 'Abigael wonder kamuha', user_registered_at: '14:06, 15 July 2023' },
+                { user_name: 'Kanane Jospin', user_registered_at: '14:17, 15 July 2023' },
+                { user_name: 'Hermannkass', user_registered_at: '14:19, 15 July 2023' },
+                { user_name: 'Fanny shamamba', user_registered_at: '14:24, 15 July 2023' },
+            ];
+
+            // Limpiar la lista antes de agregar nuevos datos
+            participantList.innerHTML = '';
+
+            // Agregar los participantes al modal
+            participants.forEach(participant => {
+                const participantElement = document.createElement('div');
+                participantElement.classList.add('flex', 'justify-between', 'items-center', 'p-4', 'border-b');
+                participantElement.innerHTML = `
+                    <span class="font-medium">${participant.user_name}</span>
+                    <span class="text-gray-500">${participant.user_registered_at}</span>
+                `;
+                participantList.appendChild(participantElement);
+            });
+        }
+    </script>
 </body>
 </html>
