@@ -4,8 +4,8 @@ $events = [
     [
         'slug' => 'tiempo_feminista_para_editar_wikipedia',
         'name' => 'Tiempo Feminista para Editar Wikipedia',
-        'start_date' => '2025-04-15',
-        'end_date' => '2025-04-15',
+        'start_date' => '2025-03-01',
+        'end_date' => '2025-03-31',
         'location' => 'Online',
         'description' => 'Edit-a-thon focused on feminist topics',
         'url' => 'https://feministeditathon.org'
