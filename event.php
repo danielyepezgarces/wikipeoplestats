@@ -153,6 +153,15 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     </h1>
     
     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+    <!-- Imagen del evento -->
+    <?php if (!empty($currentEvent['event_image'])) : ?>
+        <div class="relative aspect-[16/4] mb-6 rounded-lg overflow-hidden">
+            <img src="<?php echo htmlspecialchars($currentEvent['event_image']) ?>" 
+                 alt="<?php echo htmlspecialchars($currentEvent['name']) ?>" 
+                 class="w-full h-full object-cover"
+                 loading="lazy">
+        </div>
+    <?php endif; ?>
         <!-- Fechas -->
         <div class="flex-1 flex items-center space-x-4 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
             <i class="fas fa-calendar-alt text-xl text-blue-500"></i>
