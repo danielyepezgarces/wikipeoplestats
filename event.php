@@ -119,17 +119,26 @@ $currentProjectTranslated = __($currentProject);
 // Obtener el mensaje principal
 $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 
-$eventStatus = '';
+$currentDateTime = new DateTime(); // Fecha y hora actual del servidor
+$currentDate = $currentDateTime->format("Y-m-d"); // Extraer solo la fecha
 
-if ($currentDate < $startDate) {
+// Convertir fechas a DateTime con hora mínima y máxima
+$startDateTime = new DateTime($startDate . " 00:00:00");
+$endDateTime = new DateTime($endDate . " 23:59:59");
+
+$eventStatus = '';
+$countdownDate = null;
+
+if ($currentDateTime < $startDateTime) {
     $eventStatus = 'Este evento no ha comenzado';
-    $countdownDate = $startDate;
-} elseif ($currentDate >= $startDate && $currentDate <= $endDate) {
+    $countdownDate = $startDateTime->format("Y-m-d\T00:00:00\Z"); // Formato UTC
+} elseif ($currentDateTime >= $startDateTime && $currentDateTime <= $endDateTime) {
     $eventStatus = 'Este evento finaliza en:';
-    $countdownDate = $endDate;
+    $countdownDate = $endDateTime->format("Y-m-d\T23:59:59\Z"); // Formato UTC
 } else {
     $eventStatus = 'Este evento ya finalizó';
 }
+
 
 ?>
 
@@ -258,10 +267,11 @@ if ($currentDate < $startDate) {
 </div>
 
 <div class="mt-6 text-center">
-    <p class="text-gray-900 dark:text-gray-100 text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
+    <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
         <?php echo $eventStatus; ?>
     </p>
-    <?php if (isset($countdownDate)) : ?>
+
+    <?php if ($countdownDate) : ?>
         <div id="countdown" class="grid grid-cols-4 gap-4 mt-4">
             <div class="text-center">
                 <span class="text-3xl font-bold" id="days">00</span>
@@ -418,42 +428,38 @@ function purgeCache() {
     updateProjectText();
 </script>
 <script>
-function updateCountdown() {
-    const countdownElement = document.getElementById("countdown");
-    if (!countdownElement) return;
+document.addEventListener("DOMContentLoaded", function () {
+    let countdownDateStr = "<?php echo $countdownDate; ?>"; 
+    if (!countdownDateStr) return;
 
-    const daysElement = document.getElementById("days");
-    const hoursElement = document.getElementById("hours");
-    const minutesElement = document.getElementById("minutes");
-    const secondsElement = document.getElementById("seconds");
+    let countdownDate = new Date(countdownDateStr); // Se mantiene en formato UTC
+    let countdownTimestamp = countdownDate.getTime(); 
 
-    if (!daysElement || !hoursElement || !minutesElement || !secondsElement) return;
+    function updateCountdown() {
+        let now = new Date().getTime();
+        let timeLeft = countdownTimestamp - now;
+        let statusEl = document.getElementById("event-status");
 
-    const countdownDate = new Date("<?php echo $countdownDate; ?>").getTime();
-    const now = new Date().getTime();
-    const timeLeft = countdownDate - now;
+        if (timeLeft <= 0) {
+            statusEl.innerText = "Este evento ya finalizó.";
+            document.getElementById("countdown").style.display = "none";
+            return;
+        }
 
-    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+        let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-    daysElement.innerText = days;
-    hoursElement.innerText = hours;
-    minutesElement.innerText = minutes;
-    secondsElement.innerText = seconds;
-
-    if (timeLeft < 0) {
-        clearInterval(countdownInterval);
-        countdownElement.innerHTML = "El evento ha finalizado";
+        document.getElementById("days").innerText = days.toString().padStart(2, '0');
+        document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
+        document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
+        document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
     }
-}
 
-<?php if (isset($countdownDate)) : ?>
-    let countdownInterval;
     updateCountdown();
-    countdownInterval = setInterval(updateCountdown, 1000);
-<?php endif; ?>
+    setInterval(updateCountdown, 1000);
+});
 </script>
 </body>
 </html>
