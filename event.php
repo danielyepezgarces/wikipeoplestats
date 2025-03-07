@@ -143,7 +143,7 @@ $participantsCount = 0;
 
 try {
     // URL base de la API
-    $participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/133/participants';
+    $participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/1333/participants';
     
     // Parámetro para la consulta
     $params = ['include_private' => 'false'];
