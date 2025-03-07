@@ -194,9 +194,6 @@ try {
     }
 }
 
-// Mostrar el resultado final
-echo "Número de participantes: " . $participantsCount;
-
 ?>
 
 <!DOCTYPE html>
