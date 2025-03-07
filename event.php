@@ -139,7 +139,6 @@ if ($currentDateTime < $startDateTime) {
     $eventStatus = 'Este evento ya finalizó';
 }
 
-
 ?>
 
 <!DOCTYPE html>
