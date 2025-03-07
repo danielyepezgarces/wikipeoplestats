@@ -139,6 +139,22 @@ if ($currentDateTime < $startDateTime) {
     $eventStatus = 'Este evento ya finalizó';
 }
 
+
+// Fetch participants count
+$participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/133/participants';
+$params = ['include_private' => 'false'];
+$participantsApiUrl = $participantsUrl . '?' . http_build_query($params);
+
+$ch = curl_init($participantsApiUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "User-Agent: WikiPeopleStats/1.0"
+]);
+
+$participantsResponse = curl_exec($ch);
+$participantsData = json_decode($participantsResponse, true);
+$participantsCount = $participantsData['total'] ?? 0;
+curl_close($ch);
 ?>
 
 <!DOCTYPE html>
@@ -220,6 +236,17 @@ if ($currentDateTime < $startDateTime) {
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Descripción</h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     <?php echo htmlspecialchars($currentEvent['description']) ?>
+                </p>
+            </div>
+        </div>
+
+                <!-- Participantes -->
+                <div class="flex-1 flex items-start space-x-4 p-4">
+            <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
+            <div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Participantes</h3>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                <?php echo number_format($participantsCount); ?>
                 </p>
             </div>
         </div>
