@@ -170,6 +170,12 @@ try {
             throw new Exception('Error fetching participants data: ' . curl_error($ch));
         }
 
+        // Imprimir la respuesta completa para depuración
+        echo "<pre>";
+        echo "Respuesta de la API: \n";
+        print_r($participantsResponse); // Imprime la respuesta cruda
+        echo "</pre>";
+
         // Decodificar la respuesta JSON
         $participantsData = json_decode($participantsResponse, true);
         
@@ -199,7 +205,8 @@ try {
 
 // Mostrar el resultado final
 echo "Número de participantes: " . $participantsCount;
-    
+
+
 ?>
 
 <!DOCTYPE html>
