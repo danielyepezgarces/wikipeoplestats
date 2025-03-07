@@ -139,41 +139,66 @@ if ($currentDateTime < $startDateTime) {
     $eventStatus = 'Este evento ya finalizó';
 }
 
-
 $participantsData = ['participants' => []];
 $participantsCount = 0;
 
-// Fetch participants count with error handling
 try {
+    // URL base de la API
     $participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/133/participants';
+    
+    // Parámetro para la consulta
     $params = ['include_private' => 'false'];
     $participantsApiUrl = $participantsUrl . '?' . http_build_query($params);
 
+    // Inicializar cURL
     $ch = curl_init($participantsApiUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         "User-Agent: WikiPeopleStats/1.0"
     ]);
 
-    $participantsResponse = curl_exec($ch);
-    if ($participantsResponse === false) {
-        throw new Exception('Error fetching participants data: ' . curl_error($ch));
-    }
-    
-    $participantsData = json_decode($participantsResponse, true);
-    if (isset($participantsData['participants']) && is_array($participantsData['participants'])) {
-        $participantsCount = count($participantsData['participants']);
+    // Variable para manejar la paginación
+    $nextUrl = $participantsApiUrl;
+
+    // Bucle para manejar la paginación si es necesario
+    while ($nextUrl) {
+        curl_setopt($ch, CURLOPT_URL, $nextUrl);
+        
+        // Realizar la solicitud cURL
+        $participantsResponse = curl_exec($ch);
+        if ($participantsResponse === false) {
+            throw new Exception('Error fetching participants data: ' . curl_error($ch));
+        }
+
+        // Decodificar la respuesta JSON
+        $participantsData = json_decode($participantsResponse, true);
+        
+        // Validación de errores en el JSON
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Error decoding JSON: ' . json_last_error_msg());
+        }
+
+        // Verificar que la clave 'participants' exista y sea un array
+        if (isset($participantsData['participants']) && is_array($participantsData['participants'])) {
+            $participantsCount += count($participantsData['participants']);
+        }
+
+        // Verificar si hay más páginas de participantes
+        $nextUrl = isset($participantsData['next']) ? $participantsData['next'] : null;
     }
 } catch (Exception $e) {
+    // Manejo de errores y registro en el log
     error_log($e->getMessage());
-    // Optionally show a user-friendly message
     $participantsCount = 'Error al obtener participantes';
 } finally {
+    // Cerrar la sesión cURL
     if (isset($ch)) {
         curl_close($ch);
     }
 }
 
+// Mostrar el resultado final
+echo "Número de participantes: " . $participantsCount;
     
 ?>
 
