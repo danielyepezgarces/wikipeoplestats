@@ -427,6 +427,47 @@ function purgeCache() {
     // Llamada inicial para mostrar el primer texto
     updateProjectText();
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    let countdownDateStr = "<?php echo $countdownDate; ?>"; 
+    let countdownEl = document.getElementById("countdown");
+    let statusEl = document.getElementById("event-status");
 
+    if (!countdownDateStr) {
+        if (statusEl) statusEl.innerText = "Este evento ya finalizó.";
+        if (countdownEl) countdownEl.style.display = "none";
+        return;
+    }
+
+    let countdownDate = new Date(countdownDateStr);
+    let countdownTimestamp = countdownDate.getTime();
+
+    function updateCountdown() {
+        let now = new Date().getTime();
+        let timeLeft = countdownTimestamp - now;
+
+        if (timeLeft <= 0) {
+            if (statusEl) statusEl.innerText = "Este evento ya finalizó.";
+            if (countdownEl) countdownEl.style.display = "none";
+            return;
+        }
+
+        let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        // Verificar que los elementos existen antes de modificar su contenido
+        document.getElementById("days")?.innerText = days.toString().padStart(2, '0');
+        document.getElementById("hours")?.innerText = hours.toString().padStart(2, '0');
+        document.getElementById("minutes")?.innerText = minutes.toString().padStart(2, '0');
+        document.getElementById("seconds")?.innerText = seconds.toString().padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+});
+
+</script>
 </body>
 </html>
