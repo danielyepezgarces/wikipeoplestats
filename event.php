@@ -419,6 +419,9 @@ function purgeCache() {
 </script>
 <script>
 function updateCountdown() {
+    const countdownElement = document.getElementById("countdown");
+    if (!countdownElement) return;
+
     const countdownDate = new Date("<?php echo $countdownDate; ?>").getTime();
     const now = new Date().getTime();
     const timeLeft = countdownDate - now;
@@ -435,13 +438,14 @@ function updateCountdown() {
 
     if (timeLeft < 0) {
         clearInterval(countdownInterval);
-        document.getElementById("countdown").innerHTML = "El evento ha finalizado";
+        countdownElement.innerHTML = "El evento ha finalizado";
     }
 }
 
 <?php if (isset($countdownDate)) : ?>
+    let countdownInterval;
     updateCountdown();
-    const countdownInterval = setInterval(updateCountdown, 1000);
+    countdownInterval = setInterval(updateCountdown, 1000);
 <?php endif; ?>
 </script>
 </body>
