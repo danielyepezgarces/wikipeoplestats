@@ -153,7 +153,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 
 $participantsResponse = curl_exec($ch);
 $participantsData = json_decode($participantsResponse, true);
-$participantsCount = $participantsData['total'] ?? 0;
+$participantsCount = count($participantsData['participants']) ?? 0;
 curl_close($ch);
 ?>
 
