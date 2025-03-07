@@ -148,11 +148,6 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 
 <main class="container mx-auto px-4 py-8">
 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-    <h1 class="text-2xl text-center font-bold mb-6 text-gray-900 dark:text-gray-100">
-        <?php echo htmlspecialchars($currentEvent['name']); ?>
-    </h1>
-    
-    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
     <!-- Imagen del evento -->
     <?php if (!empty($currentEvent['event_image'])) : ?>
         <div class="relative aspect-[16/4] mb-6 rounded-lg overflow-hidden">
@@ -162,6 +157,12 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
                  loading="lazy">
         </div>
     <?php endif; ?>
+    
+    <h1 class="text-2xl text-center font-bold mb-6 text-gray-900 dark:text-gray-100">
+        <?php echo htmlspecialchars($currentEvent['name']); ?>
+    </h1>
+    
+    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
         <!-- Fechas -->
         <div class="flex-1 flex items-center space-x-4 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
             <i class="fas fa-calendar-alt text-xl text-blue-500"></i>
