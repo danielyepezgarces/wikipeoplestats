@@ -1,32 +1,55 @@
 <?php
 
 include 'languages.php';
+include 'events-list.php'; // Include the events list
 
-$wikiproject = getProject($currentDomain);
+$uri = $_SERVER['REQUEST_URI'];
+$eventSlug = basename($uri);
+
+// Buscar el evento correspondiente
+$currentEvent = null;
+foreach ($events as $event) {
+    if ($event['slug'] === $eventSlug) {
+        $currentEvent = $event;
+        break;
+    }
+}
+
+if (!$currentEvent) {
+    header('Location: /events');
+    exit;
+}
+
+// Obtener parámetros de la URL
+$wikiproject = $_GET['project'] ?? getProject($currentDomain);
+$startDate = $_GET['start'] ?? null;
+$endDate = $_GET['end'] ?? null;
 $wikidomain = getOriginalDomain($currentDomain);
+
+// Construir URL de la API
+$apiUrl = "https://api.wikipeoplestats.org/v1/genders/stats/{$wikiproject}";
+if ($startDate) {
+    $apiUrl .= "/{$startDate}";
+    if ($endDate) {
+        $apiUrl .= "/{$endDate}";
+    }
+}
 
 // Inicializar cURL
 $ch = curl_init();
-
-// Configurar la URL y las opciones de cURL
-$url = "https://api.wikipeoplestats.org/v1/stats/{$wikiproject}";
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_URL, $apiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "User-Agent: WikiPeopleStats/1.0"
 ]);
 
 $response = curl_exec($ch);
-curl_close($ch);
 
 // Verificar si hubo un error
 if (curl_errno($ch)) {
     die("Error al acceder a la API: " . curl_error($ch));
 }
 
-// Cerrar cURL
 curl_close($ch);
 
 // Decodificar la respuesta JSON
@@ -60,6 +83,21 @@ if (isset($data) && is_array($data) && !isset($data['error'])) {
     }
 } else {
     $statsCredits = __('coming_soon_tracking_wiki');
+}
+
+// Mapear eventos
+$events = [];
+if (isset($data['events']) && is_array($data['events'])) {
+    foreach ($data['events'] as $event) {
+        $events[] = [
+            'name' => $event['name'] ?? 'Evento sin nombre',
+            'start_date' => $event['start_date'] ?? $startDate,
+            'end_date' => $event['end_date'] ?? $endDate,
+            'location' => $event['location'] ?? 'Ubicación no especificada',
+            'description' => $event['description'] ?? 'Sin descripción',
+            'url' => $event['url'] ?? '#'
+        ];
+    }
 }
 
 // Calcular los ratios
@@ -150,7 +188,20 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     </div>
 </div>
 
-
+<?php if (!empty($events)) : ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        <?php foreach ($events as $event) : ?>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap"><?php echo $event['name']; ?></h3>
+                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['start_date']; ?></p>
+                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['end_date']; ?></p>
+                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['location']; ?></p>
+                <p class="text-lg text-gray-700 dark:text-gray-300"><?php echo $event['description']; ?></p>
+                <p class="text-lg text-gray-700 dark:text-gray-300"><a href="<?php echo $event['url']; ?>">Más información</a></p>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 
 <p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <?php echo $statsCredits; ?>
