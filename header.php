@@ -26,7 +26,7 @@
     <a href="/search/genders" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('genders'); ?></a>
     <a href="#" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('countries'); ?></a>
     <a href="/search/users" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('users'); ?></a>
-
+    <a href="/events" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"><?php echo __('events'); ?></a>
     <div class="relative group">
         <button class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2">
             <?php echo __('rankings'); ?>
@@ -114,6 +114,10 @@
         </a>
         <a href="/search/users" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
             <i class="fas fa-users mr-2"></i><?php echo __('users'); ?>
+        </a>
+
+        <a href="/events" class="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center">
+            <i class="fas fa-calendar mr-2"></i><?php echo __('events'); ?>
         </a>
 
         <!-- Dropdown for Rankings -->
