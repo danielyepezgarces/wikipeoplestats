@@ -139,7 +139,6 @@ if ($currentDateTime < $startDateTime) {
     $eventStatus = 'Este evento ya finalizó';
 }
 
-$participantsData = ['participants' => []];
 $participantsCount = 0;
 
 try {
@@ -157,7 +156,7 @@ try {
         "User-Agent: WikiPeopleStats/1.0"
     ]);
 
-    // Variable para manejar la paginación
+    // Variable para manejar la paginación (si la API soporta paginación)
     $nextUrl = $participantsApiUrl;
 
     // Bucle para manejar la paginación si es necesario
@@ -184,10 +183,8 @@ try {
             throw new Exception('Error decoding JSON: ' . json_last_error_msg());
         }
 
-        // Verificar que la clave 'participants' exista y sea un array
-        if (isset($participantsData['participants']) && is_array($participantsData['participants'])) {
-            $participantsCount += count($participantsData['participants']);
-        }
+        // Aquí ya no necesitamos verificar 'participants', ya que la respuesta es directamente un array
+        $participantsCount = count($participantsData); // Contamos la cantidad de participantes en la respuesta
 
         // Verificar si hay más páginas de participantes
         $nextUrl = isset($participantsData['next']) ? $participantsData['next'] : null;
@@ -205,7 +202,6 @@ try {
 
 // Mostrar el resultado final
 echo "Número de participantes: " . $participantsCount;
-
 
 ?>
 
