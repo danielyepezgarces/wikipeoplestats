@@ -148,35 +148,46 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 
 <main class="container mx-auto px-4 py-8">
 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
-    <h1 class="text-3xl text-center font-bold mb-4 text-gray-900 dark:text-gray-100">
+    <h1 class="text-3xl text-center font-bold mb-8 text-gray-900 dark:text-gray-100">
         <?php echo htmlspecialchars($currentEvent['name']); ?>
     </h1>
     
-    <div class="space-y-6 max-w-2xl mx-auto">
-        <div class="text-center">
-            <p class="text-xl text-gray-700 dark:text-gray-300">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center p-4 border-r border-gray-200 dark:border-gray-700">
+            <i class="fas fa-calendar-alt text-3xl text-blue-500 mb-3"></i>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Fechas</h3>
+            <p class="text-lg text-gray-700 dark:text-gray-300">
                 <?php echo date('d M Y', strtotime($currentEvent['start_date'])) ?>
                 <?php if ($currentEvent['start_date'] !== $currentEvent['end_date']) : ?>
                     - <?php echo date('d M Y', strtotime($currentEvent['end_date'])) ?>
                 <?php endif; ?>
             </p>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">
+        </div>
+        
+        <div class="text-center p-4 border-r border-gray-200 dark:border-gray-700">
+            <i class="fas fa-map-marker-alt text-3xl text-green-500 mb-3"></i>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Ubicación</h3>
+            <p class="text-lg text-gray-700 dark:text-gray-300">
                 <?php echo htmlspecialchars($currentEvent['location']) ?>
             </p>
         </div>
-
-        <div class="text-lg text-gray-700 dark:text-gray-300">
-            <?php echo htmlspecialchars($currentEvent['description']) ?>
+        
+        <div class="text-center p-4">
+            <i class="fas fa-info-circle text-3xl text-purple-500 mb-3"></i>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Descripción</h3>
+            <p class="text-lg text-gray-700 dark:text-gray-300">
+                <?php echo htmlspecialchars($currentEvent['description']) ?>
+            </p>
         </div>
-
-        <div class="text-center">
-            <a href="<?php echo htmlspecialchars($currentEvent['url']) ?>" 
-               target="_blank"
-               class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                <i class="fas fa-external-link-alt mr-2"></i>
-                Sitio oficial del evento
-            </a>
-        </div>
+    </div>
+    
+    <div class="text-center mt-8">
+        <a href="<?php echo htmlspecialchars($currentEvent['url']) ?>" 
+           target="_blank"
+           class="inline-flex items-center px-8 py-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-lg">
+            <i class="fas fa-external-link-alt mr-3"></i>
+            Sitio oficial del evento
+        </a>
     </div>
 </div>
 
