@@ -150,14 +150,14 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8 w-full">
     <!-- Imagen del evento -->
     <?php if (!empty($currentEvent['event_image'])) : ?>
-        <div class="relative aspect-[16/4] mb-6 rounded-lg overflow-hidden">
+        <div class="relative aspect-[16/3] mb-6 rounded-lg overflow-hidden">
             <img src="<?php echo htmlspecialchars($currentEvent['event_image']) ?>" 
                  alt="<?php echo htmlspecialchars($currentEvent['name']) ?>" 
                  class="w-full h-full object-cover"
                  loading="lazy">
         </div>
     <?php endif; ?>
-    
+
     <h1 class="text-2xl text-center font-bold mb-6 text-gray-900 dark:text-gray-100">
         <?php echo htmlspecialchars($currentEvent['name']); ?>
     </h1>
