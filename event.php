@@ -140,7 +140,7 @@ if ($currentDateTime < $startDateTime) {
 }
 
 
-// Fetch participants count
+// Fetch participants count with error handling
 $participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/133/participants';
 $params = ['include_private' => 'false'];
 $participantsApiUrl = $participantsUrl . '?' . http_build_query($params);
@@ -151,10 +151,24 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "User-Agent: WikiPeopleStats/1.0"
 ]);
 
-$participantsResponse = curl_exec($ch);
-$participantsData = json_decode($participantsResponse, true);
-$participantsCount = count($participantsData['participants']) ?? 0;
-curl_close($ch);
+// Initialize with default value
+$participantsCount = 0;
+
+try {
+    $participantsResponse = curl_exec($ch);
+    if ($participantsResponse === false) {
+        throw new Exception('Error fetching participants data: ' . curl_error($ch));
+    }
+    
+    $participantsData = json_decode($participantsResponse, true);
+    if (isset($participantsData['participants']) && is_array($participantsData['participants'])) {
+        $participantsCount = count($participantsData['participants']);
+    }
+} catch (Exception $e) {
+    error_log($e->getMessage());
+} finally {
+    curl_close($ch);
+}
 ?>
 
 <!DOCTYPE html>
