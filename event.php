@@ -1,4 +1,6 @@
 <?php
+error_reporting( -1 );
+ini_set( 'display_errors', 1 );
 
 include 'languages.php';
 include 'events-list.php'; // Include the events list
