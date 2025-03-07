@@ -422,6 +422,13 @@ function updateCountdown() {
     const countdownElement = document.getElementById("countdown");
     if (!countdownElement) return;
 
+    const daysElement = document.getElementById("days");
+    const hoursElement = document.getElementById("hours");
+    const minutesElement = document.getElementById("minutes");
+    const secondsElement = document.getElementById("seconds");
+
+    if (!daysElement || !hoursElement || !minutesElement || !secondsElement) return;
+
     const countdownDate = new Date("<?php echo $countdownDate; ?>").getTime();
     const now = new Date().getTime();
     const timeLeft = countdownDate - now;
@@ -431,10 +438,10 @@ function updateCountdown() {
     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-    document.getElementById("days").innerText = days;
-    document.getElementById("hours").innerText = hours;
-    document.getElementById("minutes").innerText = minutes;
-    document.getElementById("seconds").innerText = seconds;
+    daysElement.innerText = days;
+    hoursElement.innerText = hours;
+    minutesElement.innerText = minutes;
+    secondsElement.innerText = seconds;
 
     if (timeLeft < 0) {
         clearInterval(countdownInterval);
