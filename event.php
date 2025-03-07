@@ -152,39 +152,48 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
         <?php echo htmlspecialchars($currentEvent['name']); ?>
     </h1>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="text-center p-4 border-r border-gray-200 dark:border-gray-700">
-            <i class="fas fa-calendar-alt text-2xl text-blue-500 mb-2"></i>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Fechas</h3>
-            <p class="text-base text-gray-700 dark:text-gray-300">
-                <?php echo date('d M Y', strtotime($currentEvent['start_date'])) ?>
-                <?php if ($currentEvent['start_date'] !== $currentEvent['end_date']) : ?>
-                    - <?php echo date('d M Y', strtotime($currentEvent['end_date'])) ?>
-                <?php endif; ?>
-            </p>
+    <div class="space-y-4">
+        <!-- Fechas -->
+        <div class="flex items-center space-x-4 p-4 border-b border-gray-200 dark:border-gray-700">
+            <i class="fas fa-calendar-alt text-xl text-blue-500"></i>
+            <div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Fechas</h3>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <?php echo date('d M Y', strtotime($currentEvent['start_date'])) ?>
+                    <?php if ($currentEvent['start_date'] !== $currentEvent['end_date']) : ?>
+                        - <?php echo date('d M Y', strtotime($currentEvent['end_date'])) ?>
+                    <?php endif; ?>
+                </p>
+            </div>
         </div>
         
-        <div class="text-center p-4 border-r border-gray-200 dark:border-gray-700">
-            <i class="fas fa-map-marker-alt text-2xl text-green-500 mb-2"></i>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Ubicación</h3>
-            <p class="text-base text-gray-700 dark:text-gray-300">
-                <?php echo htmlspecialchars($currentEvent['location']) ?>
-            </p>
+        <!-- Ubicación -->
+        <div class="flex items-center space-x-4 p-4 border-b border-gray-200 dark:border-gray-700">
+            <i class="fas fa-map-marker-alt text-xl text-green-500"></i>
+            <div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Ubicación</h3>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <?php echo htmlspecialchars($currentEvent['location']) ?>
+                </p>
+            </div>
         </div>
         
-        <div class="text-center p-4">
-            <i class="fas fa-info-circle text-2xl text-purple-500 mb-2"></i>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Descripción</h3>
-            <p class="text-base text-gray-700 dark:text-gray-300">
-                <?php echo htmlspecialchars($currentEvent['description']) ?>
-            </p>
+        <!-- Descripción -->
+        <div class="flex items-start space-x-4 p-4">
+            <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
+            <div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Descripción</h3>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                    <?php echo htmlspecialchars($currentEvent['description']) ?>
+                </p>
+            </div>
         </div>
     </div>
     
     <div class="text-center mt-6">
         <a href="<?php echo htmlspecialchars($currentEvent['url']) ?>" 
            target="_blank"
-           class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-base">
+           class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
             <i class="fas fa-external-link-alt mr-2"></i>
             Sitio oficial del evento
         </a>
