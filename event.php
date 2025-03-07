@@ -152,9 +152,9 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
         <?php echo htmlspecialchars($currentEvent['name']); ?>
     </h1>
     
-    <div class="space-y-4">
+    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
         <!-- Fechas -->
-        <div class="flex items-center space-x-4 p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex-1 flex items-center space-x-4 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
             <i class="fas fa-calendar-alt text-xl text-blue-500"></i>
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Fechas</h3>
@@ -168,7 +168,7 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
         </div>
         
         <!-- Ubicación -->
-        <div class="flex items-center space-x-4 p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex-1 flex items-center space-x-4 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
             <i class="fas fa-map-marker-alt text-xl text-green-500"></i>
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Ubicación</h3>
@@ -179,7 +179,7 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
         </div>
         
         <!-- Descripción -->
-        <div class="flex items-start space-x-4 p-4">
+        <div class="flex-1 flex items-start space-x-4 p-4">
             <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Descripción</h3>
@@ -199,7 +199,6 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
         </a>
     </div>
 </div>
-
 <div class="grid grid-cols-1 md:grid-cols-5 gap-8 mt-8">
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
         <i class="fas fa-users text-3xl text-blue-500 mb-2"></i>
