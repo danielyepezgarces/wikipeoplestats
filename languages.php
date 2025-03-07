@@ -695,7 +695,7 @@ function getProject($currentDomain) {
 
     // Check if the domain is www.wikipeoplestats.org
     if ($currentDomain === 'www.wikipeoplestats.org') {
-        return 'all'; // If it's 'wikipeoplestats', return the project 'all'
+        return 'wikidatawiki'; // If it's 'wikipeoplestats', return the project 'all'
     }
 
     // Check if the language is valid
