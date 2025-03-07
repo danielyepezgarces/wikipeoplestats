@@ -1,10 +1,11 @@
 <?php
 // languages.php
-session_start(); // Inicia la sesión
+session_start(); 
 
 header("Access-Control-Allow-Origin: *");
 
 $languages = [
+    // Wikis mapped
     ['code' => 'aa', 'name' => 'Afar', 'flag' => '🇪🇷', 'text_direction' => 'ltr'],
     ['code' => 'ab', 'name' => 'Аҧсуа', 'flag' => '🇬🇪', 'text_direction' => 'ltr'],
     ['code' => 'ace', 'name' => 'Acehnese', 'flag' => '🇮🇩', 'text_direction' => 'ltr'],
@@ -676,71 +677,74 @@ $wikis = [
     ['code' => 'zu', 'wiki' => 'zuwiki', 'creation_date' => '2007-01-01'],
 ];
 
-// Idioma predeterminado
+// Values default
 $defaultLang = "en";
 $currentLang = $defaultLang;
-$currentDomain = $_SERVER['HTTP_HOST']; // Obtener el dominio del host de la solicitud HTTP
+$currentDomain = $_SERVER['HTTP_HOST']; 
 
 
 function getProject($currentDomain) {
     $parts = explode('.', $currentDomain);
 
     if (count($parts) < 3) {
-        return "unknown"; // Si no tiene subdominio, no es válido
+        return "unknown"; // If it doesn't have a subdomain, it's invalid
     }
 
     $lang = $parts[0];
     $projectType = $parts[1];
 
-    // Verificar si el dominio es www.wikipeoplestats.org
+    // Check if the domain is www.wikipeoplestats.org
     if ($currentDomain === 'www.wikipeoplestats.org') {
-        return 'all'; // Si es 'wikipeoplestats', retornamos el proyecto 'all'
+        return 'all'; // If it's 'wikipeoplestats', return the project 'all'
     }
 
-    // Verificar si el idioma es válido
+    // Check if the language is valid
     global $languages;
     foreach ($languages as $language) {
         if ($language['code'] === $lang) {
-            // Si el dominio es de tipo "wikipeoplestats", asignamos al proyecto de Wikipedia
+            // If the domain is of type "wikipeoplestats", assign to the Wikipedia project
             if ($projectType === 'wikipeoplestats') {
                 return $lang . 'wiki';
             }
 
-            // Si es un proyecto de "quote"
+            // If it's a "quote" project
             if ($projectType === 'quote') {
                 return $lang . 'wikiquote';
             }
 
-            // Si es un proyecto de "source"
+            // If it's a "source" project
             if ($projectType === 'source') {
                 return $lang . 'wikisource';
             }
 
-            // Para otros proyectos, regresamos el proyecto predeterminado
-            return "wikidata"; // De lo contrario, asignamos un proyecto genérico
+            // For other projects, return the default project
+            return "wikidata"; // Otherwise, assign a generic project
         }
     }
 
-    return "wikidata"; // Si no se encuentra el idioma, asumimos que es "wikidata"
+    return "wikidata"; // If the language is not found, assume it's "wikidata"
 }
 
-
-// Función para obtener el dominio original (esencial si necesitas redirigir)
 function getOriginalDomain($currentDomain) {
-    $parts = explode('.', $currentDomain);
-    $lang = $parts[0]; // El idioma es el primer segmento del dominio
-    $projectType = $parts[1]; // El proyecto es el segundo segmento
-
-    // Retornar el dominio original dependiendo del tipo de proyecto
-    if ($projectType === 'wikipeoplestats') {
-        return $lang . '.wikipedia.org'; // Para Wikipedia
-    } elseif ($projectType === 'quote') {
-        return $lang . '.wikiquote.org'; // Para Wikiquote
-    } elseif ($projectType === 'source') {
-        return $lang . '.wikisource.org'; // Para Wikisource
+    // Check if the domain is www.wikipeoplestats.org
+    if ($currentDomain === 'www.wikipeoplestats.org') {
+        return 'www.wikidata.org'; // Return www.wikidata.org for this specific case
     }
 
-    // Si no es un proyecto conocido, retornamos el dominio de Wikidata
+    $parts = explode('.', $currentDomain);
+    $lang = $parts[0]; // The language is the first segment of the domain
+    $projectType = $parts[1]; // The project is the second segment
+
+    // Return the original domain based on the project type
+    if ($projectType === 'wikipeoplestats') {
+        return $lang . '.wikipedia.org'; // For Wikipedia
+    } elseif ($projectType === 'quote') {
+        return $lang . '.wikiquote.org'; // For Wikiquote
+    } elseif ($projectType === 'source') {
+        return $lang . '.wikisource.org'; // For Wikisource
+    }
+
+    // If it's not a known project, return the Wikidata domain
     return 'wikidata.org';
 }
 
