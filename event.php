@@ -119,6 +119,18 @@ $currentProjectTranslated = __($currentProject);
 // Obtener el mensaje principal
 $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 
+$eventStatus = '';
+
+if ($currentDate < $startDate) {
+    $eventStatus = 'Este evento no ha comenzado';
+    $countdownDate = $startDate;
+} elseif ($currentDate >= $startDate && $currentDate <= $endDate) {
+    $eventStatus = 'Este evento finaliza en:';
+    $countdownDate = $endDate;
+} else {
+    $eventStatus = 'Este evento ya finalizó';
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -245,9 +257,31 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     </div>
 </div>
 
-<p class="mt-6 text-gray-900 dark:text-gray-100 text-center text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
-    <?php echo $statsCredits; ?>
-</p>
+<div class="mt-6 text-center">
+    <p class="text-gray-900 dark:text-gray-100 text-lg font-semibold bg-gray-200 dark:bg-gray-700 p-4 rounded">
+        <?php echo $eventStatus; ?>
+    </p>
+    <?php if (isset($countdownDate)) : ?>
+        <div id="countdown" class="grid grid-cols-4 gap-4 mt-4">
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="days">00</span>
+                <span class="text-sm">Días</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="hours">00</span>
+                <span class="text-sm">Horas</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="minutes">00</span>
+                <span class="text-sm">Minutos</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="seconds">00</span>
+                <span class="text-sm">Segundos</span>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
 
 <div class="mt-8 text-center">
 <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" id="cacheMessage">
@@ -383,6 +417,32 @@ function purgeCache() {
     // Llamada inicial para mostrar el primer texto
     updateProjectText();
 </script>
+<script>
+function updateCountdown() {
+    const countdownDate = new Date("<?php echo $countdownDate; ?>").getTime();
+    const now = new Date().getTime();
+    const timeLeft = countdownDate - now;
 
+    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+    document.getElementById("days").innerText = days;
+    document.getElementById("hours").innerText = hours;
+    document.getElementById("minutes").innerText = minutes;
+    document.getElementById("seconds").innerText = seconds;
+
+    if (timeLeft < 0) {
+        clearInterval(countdownInterval);
+        document.getElementById("countdown").innerHTML = "El evento ha finalizado";
+    }
+}
+
+<?php if (isset($countdownDate)) : ?>
+    updateCountdown();
+    const countdownInterval = setInterval(updateCountdown, 1000);
+<?php endif; ?>
+</script>
 </body>
 </html>
