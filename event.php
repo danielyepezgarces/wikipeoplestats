@@ -21,7 +21,7 @@ if (!$currentEvent) {
 }
 
 // Obtener parámetros de la URL
-$wikiproject = $_GET['project'] ?? getProject($currentDomain);
+$wikiproject = getProject($currentDomain);
 $startDate = $_GET['start'] ?? null;
 $endDate = $_GET['end'] ?? null;
 $wikidomain = getOriginalDomain($currentDomain);
