@@ -13,6 +13,7 @@ require_once 'events-list.php';
     <link href="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']; ?>/assets/css/fonts/styles.css" rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']; ?>/libs/font-awesome/all.min.css">
     <script src="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']; ?>/assets/js/tailwind.js"></script>
+    <script src="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']; ?>/assets/js/main.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
