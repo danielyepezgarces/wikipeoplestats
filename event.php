@@ -315,12 +315,6 @@ $participantsCount = count($allParticipants);
     </div>
 </div>
 
-<div class="mt-6 text-center">
-    <button onclick="showParticipantsModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-        <?php echo __('view_participants'); ?>
-    </button>
-</div>
-
 <div id="participantsModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-black bg-opacity-50"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -381,12 +375,6 @@ $participantsCount = count($allParticipants);
         document.getElementById('participantsModal').classList.add('hidden');
     }
 </script>
-
-<div class="mt-6 text-center">
-    <button onclick="showParticipantsModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-        <?php echo __('view_participants'); ?>
-    </button>
-</div>
 
 <div class="mt-6 text-center bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold">
