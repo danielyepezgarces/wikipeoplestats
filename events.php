@@ -25,6 +25,7 @@ $events = include 'events-list.php';
         }
     </script>
 </head>
+<body>
 <!-- Hero Section -->
 <?php
 require_once 'header.php';
