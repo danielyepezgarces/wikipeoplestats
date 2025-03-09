@@ -31,8 +31,6 @@ $wikidomain = getOriginalDomain($currentDomain);
 // Construir URL de la API
 $apiUrl = "https://api.wikipeoplestats.org/v1/events/stats/{$wikiproject}/{$currentEvent['id']}";
 
-echo $apiUrl;
-
 // Inicializar cURL
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $apiUrl);
