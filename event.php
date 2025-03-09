@@ -617,32 +617,5 @@ function purgeCache() {
 });
 
 </script>
-<script>
-    const eventEndDate = new Date('<?php echo $currentEvent['end_date']; ?>').getTime();
-
-    function updateCountdown() {
-        const now = new Date().getTime();
-        const timeLeft = eventEndDate - now;
-
-        if (timeLeft <= 0) {
-            clearInterval(countdownInterval);
-            document.getElementById('countdown').innerHTML = 'Event has ended';
-            return;
-        }
-
-        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-        document.getElementById('days').innerText = days.toString().padStart(2, '0');
-        document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
-        document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
-        document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
-    }
-
-    const countdownInterval = setInterval(updateCountdown, 1000);
-    updateCountdown();
-</script>
 </body>
 </html>
