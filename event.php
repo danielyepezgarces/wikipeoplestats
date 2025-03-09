@@ -252,7 +252,7 @@ $participantsCount = count($allParticipants);
         </div>
         
         <!-- Descripción -->
-        <div class="flex-1 flex items-start space-x-4 p-4">
+        <div class="flex-1 flex items-center space-x-4 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
             <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1"><?php echo __('event_description'); ?></h3>
@@ -262,9 +262,9 @@ $participantsCount = count($allParticipants);
             </div>
         </div>
 
-                <!-- Participantes -->
+        <!-- Participantes -->
                 <div class="flex-1 flex items-start space-x-4 p-4">
-            <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
+            <i class="fas fa-users text-xl text-purple-500 mt-1"></i>
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1"><?php echo __('event_participants'); ?></h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:underline"
