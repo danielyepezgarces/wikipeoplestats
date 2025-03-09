@@ -51,5 +51,6 @@
   "total_editors": "Всего редакторов",
   "trusted_by_wikimedia_chapters": "Нам доверяют главы Викимедиа",
   "wikimedia_chapters_trust_tool": "Главы Викимедиа в этом списке доверяют и используют инструмент",
-  "sticky_header_title": "Фиксированный заголовок с Tailwind CSS и i18n"
+  "sticky_header_title": "Фиксированный заголовок с Tailwind CSS и i18n",
+  "participants_list": "Список участников"
 }

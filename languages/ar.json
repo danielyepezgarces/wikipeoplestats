@@ -50,5 +50,6 @@
   "total_editors": "إجمالي المحررين",
   "trusted_by_wikimedia_chapters": "موثوق به من قبل فصول ويكيميديا",
   "wikimedia_chapters_trust_tool": "تثق فصول ويكيميديا في هذه القائمة بالأداة وتستخدمها",
-  "sticky_header_title": "رأس ثابت باستخدام Tailwind CSS و i18n"
+  "sticky_header_title": "رأس ثابت باستخدام Tailwind CSS و i18n",
+  "participants_list": "قائمة المشاركين"
 }

@@ -50,5 +50,6 @@
   "total_editors": "編集者合計",
   "trusted_by_wikimedia_chapters": "ウィキメディアの支部によって信頼されています",
   "wikimedia_chapters_trust_tool": "このリストのウィキメディアの章は、このツールを信頼して使用します",
-  "sticky_header_title": "Tailwind CSS と i18n の固定ヘッダー"
+  "sticky_header_title": "Tailwind CSS と i18n の固定ヘッダー",
+  "participants_list": "参加者リスト"
 }

@@ -50,5 +50,6 @@
   "total_editors": "Editor totali",
   "trusted_by_wikimedia_chapters": "Scelto dai capitoli di Wikimedia",
   "wikimedia_chapters_trust_tool": "I capitoli di Wikimedia su questo elenco si fidano e utilizzano lo strumento",
-  "sticky_header_title": "Intestazione fissa con Tailwind CSS e i18n"
+  "sticky_header_title": "Intestazione fissa con Tailwind CSS e i18n",
+  "participants_list": "Lista dei partecipanti"
 }
