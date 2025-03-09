@@ -121,7 +121,6 @@ $startDateTime = new DateTime($startDate . " 00:00:00");
 $endDateTime = new DateTime($endDate . " 23:59:59");
 
 $eventStatus = '';
-$countdownDate = null;
 
 if ($currentDateTime < $startDateTime) {
     $eventStatus = 'Este evento no ha comenzado';
