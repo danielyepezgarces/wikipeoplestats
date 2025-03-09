@@ -1,16 +1,34 @@
 <?php
-require_once 'header.php';
-
 $events = include 'events-list.php';
 ?>
-
+<!DOCTYPE html>
+<html lang="<?php echo htmlspecialchars($currentLang['code']); ?>" dir="<?php echo htmlspecialchars($currentLang['text_direction']); ?>">
+    <head>
+    <meta charset="UTF-8">
+    <title><?php echo __('sitename'); ?></title>
+    <meta name="description" content="<?php echo __('site_description'); ?>">
+    <meta name="keywords" content="<?php echo __('site_keywords'); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']; ?>/assets/css/fonts/styles.css" rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']; ?>/libs/font-awesome/all.min.css">
+    <script src="<?php echo $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']; ?>/assets/js/tailwind.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {"50":"#eff6ff","100":"#dbeafe","200":"#bfdbfe","300":"#93c5fd","400":"#60a5fa","500":"#3b82f6","600":"#2563eb","700":"#1d4ed8","800":"#1e40af","900":"#1e3a8a","950":"#172554"}
+                    }
+                }
+            }
+        }
+    </script>
+</head>
 <!-- Hero Section -->
-<section class="bg-blue-500 text-white py-16">
-    <div class="container mx-auto px-4 text-center">
-        <h1 class="text-4xl font-bold mb-4"><?php echo __('events_title'); ?></h1>
-        <p class="text-xl mb-8"><?php echo __('events_subtitle'); ?></p>
-    </div>
-</section>
+<?php
+require_once 'header.php';
+?>
 
 <!-- Events Grid Section -->
 <section class="container mx-auto px-4 py-12">
@@ -60,3 +78,5 @@ $events = include 'events-list.php';
 <?php
 require_once 'footer.php';
 ?>
+</body>
+</html>
