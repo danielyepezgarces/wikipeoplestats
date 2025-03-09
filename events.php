@@ -39,7 +39,7 @@ require_once 'header.php';
 <section class="container mx-auto px-4 py-12">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <?php foreach ($events as $event): ?>
-            <?php if ($event['project'] === $wikiproject): // Filtrar eventos por proyecto ?>
+            <?php if (in_array($wikiproject, $event['wikis'])): // Filtrar eventos por proyecto ?>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                     <?php if (!empty($event['event_image'])): ?>
                         <img src="<?php echo htmlspecialchars($event['event_image']); ?>" 
@@ -70,6 +70,7 @@ require_once 'header.php';
         <?php endforeach; ?>
     </div>
 </section>
+
 
 <!-- Call to Action Section -->
 <section class="bg-gray-100 dark:bg-gray-700 py-16">
