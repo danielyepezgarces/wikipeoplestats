@@ -27,7 +27,7 @@ require_once 'events-list.php';
         }
     </script>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300">
 <!-- Hero Section -->
 <?php
 require_once 'header.php';
