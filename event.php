@@ -320,7 +320,7 @@ $participantsCount = count($allParticipants);
 </div>
 
 <div id="participantsModal" class="fixed inset-0 z-50 hidden">
-    <div class="fixed inset-0 bg-black bg-opacity-50"></div>
+    <div class="fixed inset-0 backdrop-blur-sm bg-opacity-50"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
             <div class="flex justify-between items-center p-4 border-b">
