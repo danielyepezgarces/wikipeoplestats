@@ -110,6 +110,9 @@ $currentProjectTranslated = __($currentProject);
 // Obtener el mensaje principal
 $message = sprintf(__('main_home_content'), $currentProjectTranslated);
 
+$startDate = isset($currentEvent['start_date']) ? $currentEvent['start_date'] : null;
+$endDate = isset($currentEvent['end_date']) ? $currentEvent['end_date'] : null;
+
 $currentDateTime = new DateTime(); // Fecha y hora actual del servidor
 $currentDate = $currentDateTime->format("Y-m-d"); // Extraer solo la fecha
 
