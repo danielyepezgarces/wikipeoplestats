@@ -230,7 +230,7 @@ $participantsCount = count($allParticipants);
         <div class="flex-1 flex items-center space-x-4 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
             <i class="fas fa-calendar-alt text-xl text-blue-500"></i>
             <div>
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Fechas</h3>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100"><?php echo __('event_dates'); ?></h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     <?php echo date('d M Y', strtotime($currentEvent['start_date'])) ?>
                     <?php if ($currentEvent['start_date'] !== $currentEvent['end_date']) : ?>
@@ -244,7 +244,7 @@ $participantsCount = count($allParticipants);
         <div class="flex-1 flex items-center space-x-4 p-4 border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700">
             <i class="fas fa-map-marker-alt text-xl text-green-500"></i>
             <div>
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Ubicación</h3>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100"><?php echo __('event_location'); ?></h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     <?php echo htmlspecialchars($currentEvent['location']) ?>
                 </p>
@@ -255,7 +255,7 @@ $participantsCount = count($allParticipants);
         <div class="flex-1 flex items-start space-x-4 p-4">
             <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
             <div>
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Descripción</h3>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1"><?php echo __('event_description'); ?></h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     <?php echo htmlspecialchars($currentEvent['description']) ?>
                 </p>
@@ -266,7 +266,7 @@ $participantsCount = count($allParticipants);
                 <div class="flex-1 flex items-start space-x-4 p-4">
             <i class="fas fa-info-circle text-xl text-purple-500 mt-1"></i>
             <div>
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Participantes</h3>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1"><?php echo __('event_participants'); ?></h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:underline"
    onclick="showParticipantsModal()">
     <?php echo number_format($participantsCount); ?>
@@ -280,7 +280,7 @@ $participantsCount = count($allParticipants);
            target="_blank"
            class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
             <i class="fas fa-external-link-alt mr-2"></i>
-            Sitio oficial del evento
+            <?php echo __('event_url'); ?>
         </a>
     </div>
 </div>
@@ -315,8 +315,31 @@ $participantsCount = count($allParticipants);
     </div>
 </div>
 
-<div id="countdown" class="text-2xl font-bold text-center mt-4">
-    <span id="days"></span>d <span id="hours"></span>h <span id="minutes"></span>m <span id="seconds"></span>s
+<div class="mt-6 text-center bg-gray-200 dark:bg-gray-700 p-4 rounded">
+    <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold">
+        <?php echo $eventStatus; ?>
+    </p>
+
+    <?php if ($countdownDate) : ?>
+        <div id="countdown" class="grid grid-cols-4 gap-4 mt-4">
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="days">00</span>
+                <span class="text-sm">Días</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="hours">00</span>
+                <span class="text-sm">Horas</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="minutes">00</span>
+                <span class="text-sm">Minutos</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="seconds">00</span>
+                <span class="text-sm">Segundos</span>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
 <div id="participantsModal" class="fixed inset-0 z-50 hidden">
