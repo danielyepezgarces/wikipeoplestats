@@ -1,4 +1,6 @@
 <?php
+require_once 'languages.php';
+
 $events = include 'events-list.php';
 ?>
 <!DOCTYPE html>
