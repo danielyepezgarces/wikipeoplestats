@@ -1,7 +1,4 @@
 <?php
-echo "<!-- Countdown Date: " . $countdownDate . " -->";
-?>
-<?php
 error_reporting( -1 );
 ini_set( 'display_errors', 1 );
 
@@ -131,6 +128,9 @@ if ($currentDateTime < $startDateTime) {
 } else {
     $eventStatus = 'Este evento ya finalizó';
 }
+
+echo "<!-- Countdown Date: " . $countdownDate . " -->";
+
 
 $participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/1333/participants';
 $params = ['include_private' => 'false', 'limit' => 20];
