@@ -114,8 +114,8 @@ $currentDateTime = new DateTime(); // Fecha y hora actual del servidor
 $currentDate = $currentDateTime->format("Y-m-d"); // Extraer solo la fecha
 
 // Convertir fechas a DateTime con hora mínima y máxima
-$startDateTime = new DateTime($startDate . " 00:00:00");
-$endDateTime = new DateTime($endDate . " 23:59:59");
+$startDateTime = DateTime::createFromFormat("Y-m-d H:i:s", "$startDate 00:00:00");
+$endDateTime = DateTime::createFromFormat("Y-m-d H:i:s", "$endDate 23:59:59");
 
 $eventStatus = '';
 
@@ -127,9 +127,11 @@ if ($currentDateTime < $startDateTime) {
     $countdownDate = $endDateTime->format("Y-m-d\T23:59:59\Z"); // Formato UTC
 } else {
     $eventStatus = 'Este evento ya finalizó';
+    $countdownDate = null; // Evita mostrar la fecha actual incorrectamente
 }
 
-echo "<!-- Countdown Date: " . $countdownDate . " -->";
+// Depuración
+var_dump($eventStatus, $countdownDate);
 
 
 $participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/1333/participants';
