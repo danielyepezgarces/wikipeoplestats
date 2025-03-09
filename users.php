@@ -1,7 +1,7 @@
 <?php
 include 'languages.php'; // Cargar idiomas y traducciones
 
-$project = isset($_GET['project']) ? $_GET['project'] : '';
+$project = getProject($currentDomain);
 $username = isset($_GET['username']) ? $_GET['username'] : '';
 $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : '';
 $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : '';
