@@ -86,9 +86,9 @@ $message = sprintf(__('main_home_content'), $currentProjectTranslated);
     <meta name="description" content="<?php echo __('site_description'); ?>">
     <meta name="keywords" content="<?php echo __('site_keywords'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href='<?php echo $_SERVER['HTTP_HOST']; ?>/assets/css/fonts/styles.css' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="https://<?php echo $_SERVER['HTTP_HOST']; ?>/libs/font-awesome/all.min.css">
-    <script src="<?php echo $_SERVER['HTTP_HOST']; ?>/assets/js/tailwind.js"></script>
+    <link href='/assets/css/fonts/styles.css' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/libs/font-awesome/all.min.css">
+    <script src="/assets/js/tailwind.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
