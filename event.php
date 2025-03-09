@@ -29,16 +29,7 @@ $endDate = $_GET['end'] ?? null;
 $wikidomain = getOriginalDomain($currentDomain);
 
 // Construir URL de la API
-$apiUrl = "https://api.wikipeoplestats.org/v1/genders/stats/{$wikiproject}";
-$startDate = $currentEvent['start_date'] ?? null;
-$endDate = $currentEvent['end_date'] ?? null;
-
-if ($startDate) {
-    $apiUrl .= "/{$startDate}";
-    if ($endDate) {
-        $apiUrl .= "/{$endDate}";
-    }
-}
+$apiUrl = "https://api.wikipeoplestats.org/v1/events/stats/{$wikiproject}/{$currentEvent['id']}";
 
 // Inicializar cURL
 $ch = curl_init();
