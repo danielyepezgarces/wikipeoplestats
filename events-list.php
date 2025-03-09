@@ -10,6 +10,7 @@ $events = [
         'end_date' => '2025-03-31',
         'location' => 'Online',
         'description' => 'Edit-a-thon focused on feminist topics',
+        'wikis' => ['eswiki', 'ptwiki', 'wikidatawiki'],
         'url' => 'https://feministeditathon.org'
     ],
     [
@@ -21,6 +22,7 @@ $events = [
         'end_date' => '2025-03-31',
         'location' => 'Online',
         'description' => 'Annual gathering of Wikipedia contributors',
+        'wikis' => ['astwiki', 'cawiki', 'eswiki', 'glwiki', 'wikidatawiki'],
         'url' => 'https://wikiconference.org/2025'
     ]
 ];
