@@ -608,3 +608,6 @@ updateCountdown();
 </script>
 </body>
 </html>
+<?php
+echo "<!-- Countdown Date: " . $countdownDate . " -->";
+?>
