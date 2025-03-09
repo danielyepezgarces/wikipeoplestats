@@ -27,7 +27,7 @@ RewriteBase /
 
 <IfModule mod_rewrite.c>
     # Add these new rules for events
-    RewriteRule ^events/$ /events.php [L,QSA]
+    RewriteRule ^events/?$ events.php [L,QSA]
     RewriteRule ^event/([a-zA-Z0-9_-]+)/?$ /event.php?slug=$1 [L,QSA]
 
     # Reescritura de rutas del dominio principal
