@@ -133,10 +133,6 @@ if ($currentDateTime < $startDateTime) {
     $countdownDate = null; // Evita mostrar la fecha actual incorrectamente
 }
 
-// Depuración
-var_dump($eventStatus, $countdownDate);
-
-
 $participantsUrl = 'https://meta.wikimedia.org/w/rest.php/campaignevents/v0/event_registration/1333/participants';
 $params = ['include_private' => 'false', 'limit' => 20];
 $lastParticipantId = null;
