@@ -96,5 +96,8 @@
     "member_type": "Member Type",
     "creation_date": "Creation Date",
     "join_group": "Join Group",
-    "view_details": "View Details"
+    "view_details": "View Details",
+    "participants_list": "Participants List",
+    "event_registered_at": "Time registered",
+    "registered_at": "Registered At"
   }

@@ -339,14 +339,18 @@ $participantsCount = count($allParticipants);
                         <thead>
                             <tr>
                                 <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo __('username'); ?></th>
-                                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo __('registered_at'); ?></th>
+                                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo __('event_registered_at'); ?></th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             <?php foreach ($allParticipants as $participant): ?>
                                 <?php if (isset($participant['user_name']) && $participant['user_name'] !== null): ?>
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($participant['user_name']); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                            <a href="https://meta.wikimedia.org<?php echo htmlspecialchars($participant['user_page']['path']); ?>" target="_blank" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                                                <?php echo htmlspecialchars($participant['user_name']); ?>
+                                            </a>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                                             <?php 
                                                 if (isset($participant['user_registered_at'])) {

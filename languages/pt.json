@@ -52,5 +52,6 @@
   "trusted_by_wikimedia_chapters": "Confiado pelos capítulos da Wikimedia",
   "wikimedia_chapters_trust_tool": "Os capítulos da Wikimedia nesta lista confiam e usam a ferramenta",
   "sticky_header_title": "Cabeçalho fixo com Tailwind CSS e i18n",
-  "participants_list": "Lista de participantes"
+  "participants_list": "Lista de participantes",
+  "registered_at": "Registrado Em"
 }
