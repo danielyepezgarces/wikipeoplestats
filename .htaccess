@@ -48,5 +48,8 @@ RewriteBase /
 <Files "config.php">
     Redirect 404 /config.php
 </Files>
-
+<Files "events-list.php">
+Order Deny,Allow
+Deny from all
+</Files>
 
