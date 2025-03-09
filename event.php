@@ -268,7 +268,7 @@ $participantsCount = count($allParticipants);
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Participantes</h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:underline"
-   onclick="showParticipantsPopup()">
+   onclick="showParticipantsModal()">
     <?php echo number_format($participantsCount); ?>
 </p>
             </div>
@@ -316,7 +316,46 @@ $participantsCount = count($allParticipants);
 </div>
 
 <div class="mt-6 text-center">
-    <button onclick="showParticipantsPopup()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+    <button onclick="showParticipantsModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+        <?php echo __('view_participants'); ?>
+    </button>
+</div>
+
+<div id="participantsModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black bg-opacity-50"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100"><?php echo __('participants_list'); ?></h2>
+                <button onclick="closeParticipantsModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-2">
+                <?php foreach ($allParticipants as $participant): ?>
+                    <?php if (isset($participant['user_name']) && $participant['user_name'] !== null): ?>
+                        <div class="text-gray-700 dark:text-gray-300"><?php echo htmlspecialchars($participant['user_name']); ?></div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showParticipantsModal() {
+        document.getElementById('participantsModal').classList.remove('hidden');
+    }
+
+    function closeParticipantsModal() {
+        document.getElementById('participantsModal').classList.add('hidden');
+    }
+</script>
+
+<div class="mt-6 text-center">
+    <button onclick="showParticipantsModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
         <?php echo __('view_participants'); ?>
     </button>
 </div>
