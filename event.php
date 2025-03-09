@@ -315,33 +315,6 @@ $participantsCount = count($allParticipants);
     </div>
 </div>
 
-<div class="mt-6 text-center bg-gray-200 dark:bg-gray-700 p-4 rounded">
-    <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold">
-        <?php echo $eventStatus; ?>
-    </p>
-
-    <?php if ($countdownDate) : ?>
-        <div id="countdown" class="grid grid-cols-4 gap-4 mt-4">
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="days">00</span>
-                <span class="text-sm">Días</span>
-            </div>
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="hours">00</span>
-                <span class="text-sm">Horas</span>
-            </div>
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="minutes">00</span>
-                <span class="text-sm">Minutos</span>
-            </div>
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="seconds">00</span>
-                <span class="text-sm">Segundos</span>
-            </div>
-        </div>
-    <?php endif; ?>
-</div>
-
 <div id="participantsModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 backdrop-blur-sm bg-opacity-50"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -407,6 +380,27 @@ $participantsCount = count($allParticipants);
     <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold">
         <?php echo $eventStatus; ?>
     </p>
+
+    <?php if ($countdownDate) : ?>
+        <div id="countdown" class="grid grid-cols-4 gap-4 mt-4">
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="days">00</span>
+                <span class="text-sm">Días</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="hours">00</span>
+                <span class="text-sm">Horas</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="minutes">00</span>
+                <span class="text-sm">Minutos</span>
+            </div>
+            <div class="text-center">
+                <span class="text-3xl font-bold" id="seconds">00</span>
+                <span class="text-sm">Segundos</span>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <?php if ($countdownDate) : ?>
         <script>
