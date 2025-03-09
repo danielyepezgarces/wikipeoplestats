@@ -333,12 +333,36 @@ $participantsCount = count($allParticipants);
                     </svg>
                 </button>
             </div>
-            <div class="p-4 space-y-2">
-                <?php foreach ($allParticipants as $participant): ?>
-                    <?php if (isset($participant['user_name']) && $participant['user_name'] !== null): ?>
-                        <div class="text-gray-700 dark:text-gray-300"><?php echo htmlspecialchars($participant['user_name']); ?></div>
-                    <?php endif; ?>
-                <?php endforeach; ?>
+            <div class="p-4">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Username</th>
+                                <th class="px-6 py-3 bg-gray-50 dark:bg-gray-700 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Registered At</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            <?php foreach ($allParticipants as $participant): ?>
+                                <?php if (isset($participant['user_name']) && $participant['user_name'] !== null): ?>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100"><?php echo htmlspecialchars($participant['user_name']); ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                            <?php 
+                                                if (isset($participant['user_registered_at'])) {
+                                                    $date = DateTime::createFromFormat('YmdHis', $participant['user_registered_at']);
+                                                    echo $date ? $date->format('Y-m-d H:i:s') : 'N/A';
+                                                } else {
+                                                    echo 'N/A';
+                                                }
+                                            ?>
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -359,30 +383,6 @@ $participantsCount = count($allParticipants);
         <?php echo __('view_participants'); ?>
     </button>
 </div>
-
-<script>
-    function showParticipantsPopup() {
-        const popup = window.open('', 'participants_popup', 'width=600,height=400');
-        popup.document.write(`
-            <html>
-                <head>
-                    <title><?php echo __('participants_list'); ?></title>
-                </head>
-                <body class="p-4">
-                    <h1 class="text-2xl font-bold mb-4"><?php echo __('participants_list'); ?></h1>
-                    <div class="space-y-2">
-                        <?php foreach ($allParticipants as $participant): ?>
-                            <?php if (isset($participant['user_name']) && $participant['user_name'] !== null): ?>
-                                <div class="text-gray-700"><?php echo htmlspecialchars($participant['user_name']); ?></div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </div>
-                </body>
-            </html>
-        `);
-        popup.document.close();
-    }
-</script>
 
 <div class="mt-6 text-center bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold">
