@@ -567,46 +567,44 @@ function purgeCache() {
     updateProjectText();
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    let countdownDateStr = "<?php echo $countdownDate; ?>"; 
-    let countdownEl = document.getElementById("countdown");
-    let statusEl = document.getElementById("event-status");
+// Smooth countdown animation
+const countdownDate = new Date("<?php echo $countdownDate; ?>").getTime();
 
-    if (!countdownDateStr) {
-        if (statusEl) statusEl.innerText = "Este evento ya finalizó.";
-        if (countdownEl) countdownEl.style.display = "none";
+function updateCountdown() {
+    const now = new Date().getTime();
+    const timeLeft = countdownDate - now;
+
+    if (timeLeft <= 0) {
+        document.getElementById('countdown').innerHTML = 'Event has ended';
         return;
     }
 
-    let countdownDate = new Date("<?php echo $countdownDate; ?>").getTime();
-    let countdownTimestamp = countdownDate.getTime();
+    // Calculate days, hours, minutes, seconds
+    const totalSeconds = Math.floor(timeLeft / 1000);
+    const days = Math.floor(totalSeconds / (3600 * 24));
+    const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
 
-    function updateCountdown() {
-        let now = new Date().getTime();
-        let timeLeft = countdownTimestamp - now;
+    // Add Tailwind scale animation
+    const elements = ['days', 'hours', 'minutes', 'seconds'];
+    elements.forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('scale-110');
+        setTimeout(() => el.classList.remove('scale-110'), 100);
+    });
 
-        if (timeLeft <= 0) {
-            if (statusEl) statusEl.innerText = "Este evento ya finalizó.";
-            if (countdownEl) countdownEl.style.display = "none";
-            return;
-        }
+    // Update numbers
+    document.getElementById('days').innerText = days.toString().padStart(2, '0');
+    document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+    document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+    document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
 
-        let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-        let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+    requestAnimationFrame(updateCountdown);
+}
 
-        // Verificar que los elementos existen antes de modificar su contenido
-        document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
-        document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
-        document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
-        document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
-    }
-
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-});
-
+// Start the countdown
+updateCountdown();
 </script>
 </body>
 </html>
