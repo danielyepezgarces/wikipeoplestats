@@ -13,11 +13,13 @@ $events = [
         'url' => 'https://feministeditathon.org'
     ],
     [
-        'slug' => 'wikiconference_2025',
-        'name' => 'WikiConference 2025',
-        'start_date' => '2025-03-15',
-        'end_date' => '2025-03-17',
-        'location' => 'San Francisco, CA',
+        'id' => 1351,
+        'slug' => 'campaña_mujeres_en_tiempos_de_guerra_2025',
+        'name' => 'Campaña mujeres en tiempos de guerra 2025',
+        'event_image' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/2025_Cabecera_campa%C3%B1a_mujeres_en_tiempos_de_guerra.png/950px-2025_Cabecera_campa%C3%B1a_mujeres_en_tiempos_de_guerra.png',
+        'start_date' => '2025-03-14',
+        'end_date' => '2025-03-31',
+        'location' => 'Online',
         'description' => 'Annual gathering of Wikipedia contributors',
         'url' => 'https://wikiconference.org/2025'
     ]
