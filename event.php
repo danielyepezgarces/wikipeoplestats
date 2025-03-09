@@ -268,7 +268,7 @@ $participantsCount = count($allParticipants);
             <div>
                 <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">Participantes</h3>
                 <p class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:underline"
-   onclick="showParticipantsModal()">
+   onclick="showParticipantsPopup()">
     <?php echo number_format($participantsCount); ?>
 </p>
             </div>
@@ -316,22 +316,34 @@ $participantsCount = count($allParticipants);
 </div>
 
 <div class="mt-6 text-center">
-    <button onclick="showParticipantsModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+    <button onclick="showParticipantsPopup()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
         <?php echo __('view_participants'); ?>
     </button>
 </div>
 
-<div id="participantsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
-    <div class="bg-white p-8 rounded-lg w-11/12 sm:w-96 shadow-lg">
-        <button onclick="closeParticipantsModal()" class="absolute top-2 right-2 text-gray-600 text-2xl">&times;</button>
-        <h2 class="text-2xl font-bold text-center mb-4"><?php echo __('participants_list'); ?></h2>
-        <div id="participantsList">
-            <?php foreach ($allParticipants as $participant): ?>
-                <div class="mb-2"><?php echo htmlspecialchars($participant['username']); ?></div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</div>
+<script>
+    function showParticipantsPopup() {
+        const popup = window.open('', 'participants_popup', 'width=600,height=400');
+        popup.document.write(`
+            <html>
+                <head>
+                    <title><?php echo __('participants_list'); ?></title>
+                </head>
+                <body class="p-4">
+                    <h1 class="text-2xl font-bold mb-4"><?php echo __('participants_list'); ?></h1>
+                    <div class="space-y-2">
+                        <?php foreach ($allParticipants as $participant): ?>
+                            <?php if (isset($participant['user_name']) && $participant['user_name'] !== null): ?>
+                                <div class="text-gray-700"><?php echo htmlspecialchars($participant['user_name']); ?></div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </body>
+            </html>
+        `);
+        popup.document.close();
+    }
+</script>
 
 <div class="mt-6 text-center bg-gray-200 dark:bg-gray-700 p-4 rounded">
     <p id="event-status" class="text-gray-900 dark:text-gray-100 text-lg font-semibold">
