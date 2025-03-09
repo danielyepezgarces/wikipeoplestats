@@ -97,5 +97,9 @@
   "creation_date": "Fecha de creacion",
   "join_group": "Unirse al grupo",
   "view_details": "Ver detalles",
-  "participants_list": "Lista de participantes"
+  "participants_list": "Lista de participantes",
+  "event_dates": "Fechas",
+  "event_location": "Ubicación",
+  "event_description": "Descripción",
+  "event_participants": "Participantes"
 }
