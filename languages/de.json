@@ -52,7 +52,5 @@
   "trusted_by_wikimedia_chapters": "Von den Wikimedia-Kapiteln vertraut",
   "wikimedia_chapters_trust_tool": "Wikimedia-Kapitel auf dieser Liste vertrauen und verwenden das Tool",
   "sticky_header_title": "Feststehender Header mit Tailwind CSS und i18n",
-  "participants_list": "Teilnehmerliste",
-  "event_registered_at": "Zeit registriert",
-  "registered_at": "Registriert Am"
+  "participants_list": "Teilnehmerliste"
 }

@@ -315,6 +315,10 @@ $participantsCount = count($allParticipants);
     </div>
 </div>
 
+<div id="countdown" class="text-2xl font-bold text-center mt-4">
+    <span id="days"></span>d <span id="hours"></span>h <span id="minutes"></span>m <span id="seconds"></span>s
+</div>
+
 <div id="participantsModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-black bg-opacity-50"></div>
     <div class="fixed inset-0 flex items-center justify-center p-4">
@@ -382,24 +386,32 @@ $participantsCount = count($allParticipants);
     </p>
 
     <?php if ($countdownDate) : ?>
-        <div id="countdown" class="grid grid-cols-4 gap-4 mt-4">
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="days">00</span>
-                <span class="text-sm">Días</span>
-            </div>
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="hours">00</span>
-                <span class="text-sm">Horas</span>
-            </div>
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="minutes">00</span>
-                <span class="text-sm">Minutos</span>
-            </div>
-            <div class="text-center">
-                <span class="text-3xl font-bold" id="seconds">00</span>
-                <span class="text-sm">Segundos</span>
-            </div>
-        </div>
+        <script>
+            // Establece la fecha objetivo desde la variable PHP
+            const targetDate = new Date("<?php echo $countdownDate; ?>").getTime();
+
+            // Actualiza el conteo regresivo cada segundo
+            const countdownFunction = setInterval(() => {
+                const now = new Date().getTime();
+                const timeLeft = targetDate - now;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownFunction);
+                    document.getElementById('countdown').innerHTML = 'Event has ended';
+                    return;
+                }
+
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                document.getElementById('days').innerText = days.toString().padStart(2, '0');
+                document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
+            }, 1000);
+        </script>
     <?php endif; ?>
 </div>
 
@@ -577,10 +589,10 @@ function purgeCache() {
         let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
         // Verificar que los elementos existen antes de modificar su contenido
-        document.getElementById("days")?.innerText = days.toString().padStart(2, '0');
-        document.getElementById("hours")?.innerText = hours.toString().padStart(2, '0');
-        document.getElementById("minutes")?.innerText = minutes.toString().padStart(2, '0');
-        document.getElementById("seconds")?.innerText = seconds.toString().padStart(2, '0');
+        document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+        document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+        document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+        document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
     }
 
     updateCountdown();
@@ -606,8 +618,10 @@ function purgeCache() {
         const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-        document.getElementById('countdown').innerHTML =
-            `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        document.getElementById('days').innerText = days.toString().padStart(2, '0');
+        document.getElementById('hours').innerText = hours.toString().padStart(2, '0');
+        document.getElementById('minutes').innerText = minutes.toString().padStart(2, '0');
+        document.getElementById('seconds').innerText = seconds.toString().padStart(2, '0');
     }
 
     const countdownInterval = setInterval(updateCountdown, 1000);

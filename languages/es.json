@@ -97,7 +97,5 @@
   "creation_date": "Fecha de creacion",
   "join_group": "Unirse al grupo",
   "view_details": "Ver detalles",
-  "participants_list": "Lista de participantes",
-  "registered_at": "Registrado En",
-  "event_registered_at": "Hora de Registro"
+  "participants_list": "Lista de participantes"
 }
