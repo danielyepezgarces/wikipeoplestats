@@ -38,8 +38,13 @@ require_once 'header.php';
 <!-- Events Grid Section -->
 <section class="container mx-auto px-4 py-12">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <?php foreach ($events as $event): ?>
-            <?php if (in_array($wikiproject, $event['wikis'])): // Filtrar eventos por proyecto ?>
+        <?php 
+        $hasEvents = false; // Variable para verificar si hay eventos disponibles
+        
+        foreach ($events as $event): 
+            if (in_array($wikiproject, $event['wikis'])): 
+                $hasEvents = true; // Se encontró al menos un evento
+        ?>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                     <?php if (!empty($event['event_image'])): ?>
                         <img src="<?php echo htmlspecialchars($event['event_image']); ?>" 
@@ -66,8 +71,16 @@ require_once 'header.php';
                         </a>
                     </div>
                 </div>
-            <?php endif; ?>
-        <?php endforeach; ?>
+        <?php 
+            endif; 
+        endforeach; 
+        ?>
+
+        <?php if (!$hasEvents): // Mostrar mensaje si no hay eventos disponibles ?>
+            <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500 dark:text-gray-400 text-xl">
+                <?php echo __('No hay eventos disponibles para este proyecto en este momento.'); ?>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
 
