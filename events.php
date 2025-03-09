@@ -1,7 +1,6 @@
 <?php
 require_once 'languages.php';
-
-$events = include 'events-list.php';
+require_once 'events-list.php';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo htmlspecialchars($currentLang['code']); ?>" dir="<?php echo htmlspecialchars($currentLang['text_direction']); ?>">
