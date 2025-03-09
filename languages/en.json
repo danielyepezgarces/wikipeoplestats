@@ -102,5 +102,6 @@
     "event_dates": "Dates",
     "event_location": "Location",
     "event_description": "Description",
-    "event_participants": "Participants"
+    "event_participants": "Participants",
+    "no_events_available": "No events available for this project at the moment."
   }

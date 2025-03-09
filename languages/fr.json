@@ -97,5 +97,6 @@
   "creation_date": "Date de création",
   "join_group": "Rejoindre le groupe",
   "view_details": "Voir les détails",
-  "participants_list": "Liste des participants"
+  "participants_list": "Liste des participants",
+  "no_events_available": "Aucun événement disponible pour ce projet à ce moment."
 }

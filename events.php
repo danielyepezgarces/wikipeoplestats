@@ -78,7 +78,7 @@ require_once 'header.php';
 
         <?php if (!$hasEvents): // Mostrar mensaje si no hay eventos disponibles ?>
             <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500 dark:text-gray-400 text-xl">
-                <?php echo __('No hay eventos disponibles para este proyecto en este momento.'); ?>
+                <?php echo __('no_events_available'); ?>
             </div>
         <?php endif; ?>
     </div>

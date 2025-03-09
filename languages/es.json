@@ -102,5 +102,6 @@
   "event_dates": "Fechas",
   "event_location": "Ubicación",
   "event_description": "Descripción",
-  "event_participants": "Participantes"
+  "event_participants": "Participantes",
+  "no_events_available": "No hay eventos disponibles para este proyecto en este momento."
 }

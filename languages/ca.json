@@ -50,5 +50,12 @@
   "total_editors": "Total d'editors",
   "trusted_by_wikimedia_chapters": "Amb la confiança dels capítols de Wikimedia",
   "wikimedia_chapters_trust_tool": "Els capítols de Wikimedia d'aquesta llista confien i utilitzen l'eina",
-  "sticky_header_title": "Capçalera adhesiva amb Tailwind CSS i i18n"
+  "sticky_header_title": "Capçalera adhesiva amb Tailwind CSS i i18n",
+  "event_registered_at": "Hora de registre",
+  "event_dates": "Dates",
+  "event_location": "Lloc",
+  "event_description": "Descripció",
+  "event_participants": "Participants",
+  "participants_list": "Llista de participants",
+  "no_events_available": "No hi ha capitat disponibles per a aquest projecte en aquest moment."
 }
