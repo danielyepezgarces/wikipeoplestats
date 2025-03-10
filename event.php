@@ -123,13 +123,13 @@ $endDateTime = DateTime::createFromFormat("Y-m-d H:i:s", "$endDate 23:59:59");
 $eventStatus = '';
 
 if ($currentDateTime < $startDateTime) {
-    $eventStatus = 'Este evento no ha comenzado';
+    $eventStatus = __('event_status_not_started');
     $countdownDate = $startDateTime->format("Y-m-d\T00:00:00\Z"); // Formato UTC
 } elseif ($currentDateTime >= $startDateTime && $currentDateTime <= $endDateTime) {
-    $eventStatus = 'Este evento finaliza en:';
+    $eventStatus = __('event_status_in_progress');
     $countdownDate = $endDateTime->format("Y-m-d\T23:59:59\Z"); // Formato UTC
 } else {
-    $eventStatus = 'Este evento ya finalizó';
+    $eventStatus = __('event_status_ended');
     $countdownDate = null; // Evita mostrar la fecha actual incorrectamente
 }
 

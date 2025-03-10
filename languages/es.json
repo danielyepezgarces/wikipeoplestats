@@ -103,5 +103,8 @@
   "event_location": "Ubicación",
   "event_description": "Descripción",
   "event_participants": "Participantes",
-  "no_events_available": "No hay eventos disponibles para este proyecto en este momento."
+  "no_events_available": "No hay eventos disponibles para este proyecto en este momento.",
+  "event_status_not_started": "Este evento comienza en:",
+  "event_status_in_progress": "Este evento finaliza en:",
+  "event_status_ended": "Este evento ya finalizó"
 }
