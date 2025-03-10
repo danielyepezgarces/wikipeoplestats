@@ -95,5 +95,11 @@
   "member_type": "Dalībnieka veids",
   "creation_date": "Izveidošanas datums",
   "join_group": "Pievienoties grupai",
-  "view_details": "Skatīt detaļas"
+  "view_details": "Skatīt detaļas",
+  "event_registered_at": "Reģistrēšanas laiks",
+  "event_dates": "Datums",
+  "event_location": "Izveidošanas vieta",
+  "event_description": "Apraksts",
+  "event_participants": "Uzrakstīt laiku",
+  "no_events_available": "Nav pieejamos veiksmi bieži."
 }

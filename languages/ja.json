@@ -50,5 +50,12 @@
   "total_editors": "編集者合計",
   "trusted_by_wikimedia_chapters": "ウィキメディアの支部によって信頼されています",
   "wikimedia_chapters_trust_tool": "このリストのウィキメディアの章は、このツールを信頼して使用します",
-  "sticky_header_title": "Tailwind CSS と i18n の固定ヘッダー"
+  "sticky_header_title": "Tailwind CSS と i18n の固定ヘッダー",
+  "event_registered_at": "登録時間",
+  "event_dates": "日付",
+  "event_location": "場所",
+  "event_description": "説明",
+  "event_participants": "参加者",
+  "participants_list": "参加者リスト",
+  "no_events_available": "このプロジェクトのイベントは現在利用できません。"
 }

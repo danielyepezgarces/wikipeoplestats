@@ -50,5 +50,11 @@
   "total_editors": "Total Editor",
   "trusted_by_wikimedia_chapters": "Dipercaya oleh bab - bab Wikimedia",
   "wikimedia_chapters_trust_tool": "Bab - bab Wikimedia dalam daftar ini mempercayai dan menggunakan alat ini",
-  "sticky_header_title": "Sticky Header dengan Tailwind CSS dan i18n"
+  "sticky_header_title": "Sticky Header dengan Tailwind CSS dan i18n",
+  "event_registered_at": "Rejestrasi Waktu",
+  "event_dates": "Tanggal",
+  "event_location": "Lokasi",
+  "event_description": "Deskripsi",
+  "event_participants": "Peserta",
+  "no_events_available": "Tidak ada acara yang tersedia"
 }
