@@ -65,7 +65,7 @@ require_once 'header.php';
                             <?php echo htmlspecialchars($event['description']); ?>
                         </p>
                         
-                        <a href="/event.php?slug=<?php echo htmlspecialchars($event['slug']); ?>" 
+                        <a href="/event/<?php echo htmlspecialchars($event['slug']); ?>" 
                            class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
                             <?php echo __('view_details'); ?>
                         </a>
