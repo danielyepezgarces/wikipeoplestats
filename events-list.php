@@ -15,7 +15,7 @@ $events = [
     ],
     [
         'id' => 1351,
-        'slug' => 'campaña_mujeres_en_tiempos_de_guerra_2025',
+        'slug' => 'campana_mujeres_en_tiempos_de_guerra_2025',
         'name' => 'Campaña mujeres en tiempos de guerra 2025',
         'event_image' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/2025_Cabecera_campa%C3%B1a_mujeres_en_tiempos_de_guerra.png/950px-2025_Cabecera_campa%C3%B1a_mujeres_en_tiempos_de_guerra.png',
         'start_date' => '2025-03-14',
