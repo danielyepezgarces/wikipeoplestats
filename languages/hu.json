@@ -95,5 +95,11 @@
     "member_type": "Tag típusa",
     "creation_date": "Létrehozás dátuma",
     "join_group": "Csatlakozás a csoporthoz",
-    "view_details": "Részletek megtekintése"
+    "view_details": "Részletek megtekintése",
+    "event_registered_at": "Regisztráció időpontja",
+    "event_dates": "Dátum",
+    "event_location": "Helyszín",
+    "event_description": "Leírás",
+    "event_participants": "Csatlakozók",
+    "no_events_available": "Jelenleg nincsenek események ebben a csoporthoz."
   }

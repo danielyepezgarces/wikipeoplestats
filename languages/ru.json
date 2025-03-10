@@ -52,5 +52,11 @@
   "trusted_by_wikimedia_chapters": "Нам доверяют главы Викимедиа",
   "wikimedia_chapters_trust_tool": "Главы Викимедиа в этом списке доверяют и используют инструмент",
   "sticky_header_title": "Фиксированный заголовок с Tailwind CSS и i18n",
-  "participants_list": "Список участников"
+  "participants_list": "Список участников",
+  "event_registered_at": "Время регистрации",
+  "event_dates": "Дата",
+  "event_location": "Место",
+  "event_description": "Описание",
+  "event_participants": "Участники",
+  "no_events_available": "Нет доступных событий для этого проекта в настоящее время."
 }

@@ -377,19 +377,19 @@ $participantsCount = count($allParticipants);
 
     <?php if ($countdownDate) : ?>
         <div id="countdown" class="grid grid-cols-4 gap-4 mt-4">
-            <div class="text-center">
+            <div class="text-center flex flex-col items-center md:block">
                 <span class="text-3xl font-bold" id="days">00</span>
                 <span class="text-sm">Días</span>
             </div>
-            <div class="text-center">
+            <div class="text-center flex flex-col items-center md:block">
                 <span class="text-3xl font-bold" id="hours">00</span>
                 <span class="text-sm">Horas</span>
             </div>
-            <div class="text-center">
+            <div class="text-center flex flex-col items-center md:block">
                 <span class="text-3xl font-bold" id="minutes">00</span>
                 <span class="text-sm">Minutos</span>
             </div>
-            <div class="text-center">
+            <div class="text-center flex flex-col items-center md:block">
                 <span class="text-3xl font-bold" id="seconds">00</span>
                 <span class="text-sm">Segundos</span>
             </div>

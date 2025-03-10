@@ -50,5 +50,12 @@
   "total_editors": "Всього редакторів",
   "trusted_by_wikimedia_chapters": "Нам довіряють відділи Вікімедіа",
   "wikimedia_chapters_trust_tool": "Розділи Вікімедіа в цьому списку довіряють і використовують інструмент",
-  "sticky_header_title": "Липка шапка з Tailwind CSS та i18n"
+  "sticky_header_title": "Липка шапка з Tailwind CSS та i18n",
+  "event_registered_at": "Час реєстрації",
+  "event_dates": "Дата",
+  "event_location": "Місце",
+  "event_description": "Опис",
+  "event_participants": "Учасники",
+  "participants_list": "Список учасників",
+  "no_events_available": "Немає доступних подій для цього проекту зараз."
 }

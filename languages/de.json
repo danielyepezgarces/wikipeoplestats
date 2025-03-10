@@ -52,5 +52,11 @@
   "trusted_by_wikimedia_chapters": "Von den Wikimedia-Kapiteln vertraut",
   "wikimedia_chapters_trust_tool": "Wikimedia-Kapitel auf dieser Liste vertrauen und verwenden das Tool",
   "sticky_header_title": "Feststehender Header mit Tailwind CSS und i18n",
-  "participants_list": "Teilnehmerliste"
+  "participants_list": "Teilnehmerliste",
+  "event_registered_at": "Registrierungszeitpunkt",
+  "event_dates": "Datum",
+  "event_location": "Ort",
+  "event_description": "Beschreibung",
+  "event_participants": "Teilnehmer",
+  "no_events_available": "Aktuell keine Veranstaltungen für diesen Projekt verfügbar."
 }

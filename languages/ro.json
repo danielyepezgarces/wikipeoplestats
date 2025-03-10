@@ -95,5 +95,12 @@
     "member_type": "Tip membru",
     "creation_date": "Data creării",
     "join_group": "Alătură-te grupului",
-    "view_details": "Vizualizează detalii"
+    "view_details": "Vizualizează detalii",
+    "event_registered_at": "Ora de înregistrare",
+    "event_dates": "Date",
+    "event_location": "Loc",
+    "event_description": "Descriere",
+    "event_participants": "Participanti",
+    "participants_list": "Lista participanti",
+    "no_events_available": "Nu sunt disponibile evenimente pentru acest proiect în acest moment."
   }

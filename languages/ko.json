@@ -52,5 +52,11 @@
   "trusted_by_wikimedia_chapters": "위키미디어 지부가 신뢰하는 사이트",
   "wikimedia_chapters_trust_tool": "이 목록에 있는 위키미디어 장은 도구를 신뢰하고 사용합니다",
   "sticky_header_title": "Tailwind CSS 및 i18n을 사용한 고정 헤더",
-  "participants_list": "참가자 목록"
+  "participants_list": "참가자 목록",
+  "event_registered_at": "등록 시간",
+  "event_dates": "날짜",
+  "event_location": "장소",
+  "event_description": "설명",
+  "event_participants": "참가자",
+  "no_events_available": "이 프로젝트에 대한 이벤트가 현재 없습니다."
 }
