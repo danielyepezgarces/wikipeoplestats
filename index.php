@@ -211,7 +211,7 @@ function hideToast() {
 }
 
 function purgeCache() {
-    fetch("https://api.wikipeoplestats.org/v1/stats/<?php echo $wikiproject; ?>?action=purge", {
+    fetch("https://api.wikipeoplestats.org/v1/genders/stats/<?php echo $wikiproject; ?>?action=purge", {
         method: 'GET',
         headers: {
             "User-Agent": "WikiStatsPeople/1.0"
