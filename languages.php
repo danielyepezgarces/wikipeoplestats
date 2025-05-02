@@ -687,7 +687,7 @@ function getProject($currentDomain) {
     $parts = explode('.', $currentDomain);
 
     if (count($parts) < 3) {
-        return "unknown"; // If it doesn't have a subdomain, it's invalid
+        return "wikidatawiki"; // If it doesn't have a subdomain, it's invalid
     }
 
     $lang = $parts[0];
