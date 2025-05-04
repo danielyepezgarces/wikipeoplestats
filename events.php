@@ -84,15 +84,60 @@ require_once 'header.php';
     </div>
 </section>
 
+<!-- Past Events Section -->
+<section class="container mx-auto px-4 py-12">
+    <h2 class="text-2xl font-bold mb-8 text-center"><?php echo __('past_events'); ?></h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <?php 
+        $hasPastEvents = false; // Variable to check if there are past events available
+        $currentDate = date('Y-m-d'); // Get current date
+        
+        foreach ($events as $event): 
+            // Check if event is past (end date is before current date) and belongs to current wiki project
+            if (strtotime($event['end_date']) < strtotime($currentDate) && in_array($wikiproject, $event['wikis'])): 
+                $hasPastEvents = true; // Found at least one past event
+        ?>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden opacity-80">
+                    <?php if (!empty($event['event_image'])): ?>
+                        <img src="<?php echo htmlspecialchars($event['event_image']); ?>" 
+                             alt="<?php echo htmlspecialchars($event['name']); ?>" 
+                             class="w-full h-48 object-cover">
+                    <?php endif; ?>
+                    
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-xl font-bold"><?php echo htmlspecialchars($event['name']); ?></h2>
+                            <span class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded">
+                                <?php echo __('past'); ?>
+                            </span>
+                        </div>
+                        
+                        <div class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                            <p><?php echo date('M j', strtotime($event['start_date'])); ?> - 
+                               <?php echo date('M j, Y', strtotime($event['end_date'])); ?></p>
+                            <p><?php echo htmlspecialchars($event['location']); ?></p>
+                        </div>
+                        
+                        <p class="text-gray-700 dark:text-gray-200 mb-4">
+                            <?php echo htmlspecialchars($event['description']); ?>
+                        </p>
+                        
+                        <a href="/event/<?php echo htmlspecialchars($event['slug']); ?>" 
+                           class="inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">
+                            <?php echo __('view_recap'); ?>
+                        </a>
+                    </div>
+                </div>
+        <?php 
+            endif; 
+        endforeach; 
+        ?>
 
-<!-- Call to Action Section -->
-<section class="bg-gray-100 dark:bg-gray-700 py-16">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-4"><?php echo __('events_cta_title'); ?></h2>
-        <p class="text-xl mb-8"><?php echo __('events_cta_subtitle'); ?></p>
-        <a href="/event.php" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors">
-            <?php echo __('join_event'); ?>
-        </a>
+        <?php if (!$hasPastEvents): // Show message if no past events are available ?>
+            <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500 dark:text-gray-400 text-xl">
+                <?php echo __('no_past_events'); ?>
+            </div>
+        <?php endif; ?>
     </div>
 </section>
 
