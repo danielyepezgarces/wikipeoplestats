@@ -95,5 +95,19 @@
     "member_type": "Nario tipas",
     "creation_date": "Sukūrimo data",
     "join_group": "Prisijungti prie grupės",
-    "view_details": "Peržiūrėti detales"
+    "view_details": "Peržiūrėti detales",
+    "participants_list": "Nariai",
+    "event_registered_at": "Registracijos laikas",
+    "event_dates": "Data",
+    "event_location": "Lokacija",
+    "event_description": "Aprašymas",
+    "event_participants": "Nariai",
+    "no_events_available": "Nėra įvykių šiam projektui šiuo metu.",
+    "event_status_not_started": "Šis įvykas prasideda:",
+    "event_status_in_progress": "Šis įvykas baigiasi:",
+    "event_status_ended": "Šis įvykas jau baigėsi",
+    "active_events": "Aktyvūs įvykiai",
+    "no_active_events": "Nėra aktyvūs įvykiai šiam projektui šiuo metu.",
+    "past_events": "Priešingi įvykiai",
+    "no_past_events": "Nėra priešingi įvykiai šiam projektui šiuo metu."
   }

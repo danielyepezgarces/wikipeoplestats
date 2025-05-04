@@ -107,5 +107,8 @@
   "event_status_not_started": "Este evento comienza en:",
   "event_status_in_progress": "Este evento finaliza en:",
   "event_status_ended": "Este evento ya finalizó",
-  "past_events": "Eventos pasados"
+  "active_events": "Eventos activos",
+  "no_active_events": "No hay eventos activos para este proyecto en este momento.",
+  "past_events": "Eventos pasados",
+  "no_past_events": "No hay eventos pasados para este proyecto en este momento."
 }
