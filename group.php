@@ -64,6 +64,11 @@ $errorMessage = sprintf(
     __('homepage_stats_credits'),
     $group_name
 ) . ' - ' . __('homepage_stats_last_update') . ': ' . htmlspecialchars($lastUpdated);
+
+
+$protocol = isset($_SERVER['HTTPS']) && 
+$_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+$base_url = $protocol . $_SERVER['HTTP_HOST'] . '/';
 ?>
 
 <!DOCTYPE html>
@@ -75,9 +80,9 @@ $errorMessage = sprintf(
     <meta name="description" content="<?php echo $group_description; ?>">
     
     <!-- Fuentes y estilos -->
-    <link href="assets/css/fonts/styles.css" rel="stylesheet">
-    <link rel="stylesheet" href="libs/font-awesome/all.min.css">
-    <script src="assets/js/tailwind.js"></script>
+    <link href="<?php echo $base_url;  ?>/assets/css/fonts/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo $base_url; ?>/libs/font-awesome/all.min.css">
+    <script src="<?php echo $base_url; ?>/assets/js/tailwind.js"></script>
     
     <!-- Gráficos -->
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/apexcharts/3.54.0/apexcharts.min.js"></script>
