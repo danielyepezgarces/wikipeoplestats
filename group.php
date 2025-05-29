@@ -83,6 +83,8 @@ $base_url = $protocol . $_SERVER['HTTP_HOST'] . '/';
     <link href="<?php echo $base_url;  ?>/assets/css/fonts/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo $base_url; ?>/libs/font-awesome/all.min.css">
     <script src="<?php echo $base_url; ?>/assets/js/tailwind.js"></script>
+    <script src="<?php echo $base_url; ?>/assets/js/main.js"></script>
+
     
     <!-- Gráficos -->
     <script src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/apexcharts/3.54.0/apexcharts.min.js"></script>
