@@ -142,7 +142,7 @@ $base_url = $protocol . $_SERVER['HTTP_HOST'] . '/';
             
             <!-- Avatar del grupo -->
             <div class="flex justify-center -mt-16">
-                <div class="group-avatar rounded-full p-2 shadow-xl bg-gray-100 dark:bg-gray-700 border-4 border-white dark:border-gray-800">
+                <div class="group-avatar rounded-full p-2 shadow-xl bg-gray-100 dark:bg-gray-700 border-4 border-white dark:border-gray-800 z-10">
                     <img src="<?php echo $avatar_image; ?>" 
                          alt="<?php echo __('group_avatar_alt', ['group' => $group_name]); ?>"
                          class="w-full h-full rounded-full object-cover">
