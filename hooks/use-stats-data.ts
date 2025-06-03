@@ -43,14 +43,14 @@ export function useStatsData(startDate?: string, endDate?: string) {
         const project = domainContext.currentProject || "wikidatawiki"
 
         // Fetch stats data
-        let statsUrl = `https://api.wikipeoplestats.org/v1/stats/${project}`
+        let statsUrl = `https://api.wikipeoplestats.org/v1/genders/stats/${project}`
         if (startDate || endDate) {
           statsUrl += `/${startDate || ""}/${endDate || ""}`
         }
 
         const [statsResponse, graphResponse] = await Promise.all([
           fetch(statsUrl),
-          fetch(`https://api.wikipeoplestats.org/v1/graph/${project}/${startDate || ""}/${endDate || ""}`),
+          fetch(`https://api.wikipeoplestats.org/v1/genders/graph/${project}/${startDate || ""}/${endDate || ""}`),
         ])
 
         if (statsResponse.ok) {
