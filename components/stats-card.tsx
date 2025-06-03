@@ -2,11 +2,11 @@ import type React from "react"
 import { Card, CardContent } from "@/components/ui/card"
 
 interface StatsCardProps {
-  icon: React.ReactNode
+  icon: React.ReactElement // <-- explicitly a ReactElement
   title: string
   value: number
   percentage?: number
-  iconColor: string
+  iconColor: string // this will be a Tailwind color class like "text-blue-500"
 }
 
 export function StatsCard({ icon, title, value, percentage, iconColor }: StatsCardProps) {
@@ -17,9 +17,12 @@ export function StatsCard({ icon, title, value, percentage, iconColor }: StatsCa
   return (
     <Card className="bg-white dark:bg-gray-800">
       <CardContent className="relative p-6 text-center overflow-hidden">
-        {/* Decorative icon above the content */}
-        <div className="flex justify-center mb-1">
-          <span className={`text-[48px] opacity-30 ${iconColor}`}>{icon}</span>
+        {/* Icon above the text */}
+        <div className="flex justify-center mb-2">
+          {React.cloneElement(icon, {
+            className: `w-12 h-12 opacity-30 ${iconColor}`,
+            strokeWidth: 1.5,
+          })}
         </div>
 
         {/* Main content */}
