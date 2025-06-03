@@ -72,7 +72,7 @@ export default function HomePage() {
         const host = window.location.host
         const project = getProject(host)
 
-        const response = await fetch(`https://api.wikipeoplestats.org/v1/stats/${project}`)
+        const response = await fetch(`/api/stats/${project}`)
         if (response.ok) {
           const data = await response.json()
           setStats(data)

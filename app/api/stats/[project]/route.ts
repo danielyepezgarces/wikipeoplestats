@@ -5,9 +5,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { project } = await params
     const { searchParams } = new URL(request.url)
     const action = searchParams.get("action")
+    const startDate = searchParams.get("start_date")
+    const endDate = searchParams.get("end_date")
 
-    // Mantener el endpoint original
-    const url = `https://api.wikipeoplestats.org/v1/stats/${project}${action ? `?action=${action}` : ""}`
+    // Construir la URL base
+    let url = `https://api.wikipeoplestats.org/v1/genders/stats/${project}`
+
+    // Añadir fechas si están presentes
+    if (startDate || endDate) {
+      url += `/${startDate || ""}/${endDate || ""}`
+    }
+
+    // Añadir action si está presente
+    if (action) {
+      url += url.includes("?") ? `&action=${action}` : `?action=${action}`
+    }
 
     const response = await fetch(url, {
       headers: {
@@ -24,7 +36,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json(data)
   } catch (error) {
     console.error("Error fetching stats:", error)
-    return NextResponse.json({ error: "Failed to fetch statistics" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Failed to fetch statistics",
+        totalPeople: 0,
+        totalWomen: 0,
+        totalMen: 0,
+        otherGenders: 0,
+        lastUpdated: new Date().toISOString(),
+      },
+      { status: 500 },
+    )
   }
 }
 
