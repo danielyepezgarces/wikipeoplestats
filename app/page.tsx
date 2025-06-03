@@ -72,7 +72,13 @@ export default function HomePage() {
         const host = window.location.host
         const project = getProject(host)
 
-        const response = await fetch(`/api/stats/${project}`)
+        const response = await fetch(`https://api.wikipeoplestats.org/v1/genders/stats/${project}`, {
+          headers: {
+            "User-Agent": "WikiPeopleStats/1.0",
+          },
+          cache: "no-cache", // Para asegurar datos frescos
+        })
+
         if (response.ok) {
           const data = await response.json()
           setStats(data)
@@ -93,7 +99,12 @@ export default function HomePage() {
       const host = window.location.host
       const project = getProject(host)
 
-      const response = await fetch(`/api/stats/${project}`, { method: "POST" })
+      const response = await fetch(`https://api.wikipeoplestats.org/v1/genders/stats/${project}?action=purge`, {
+        method: "GET",
+        headers: {
+          "User-Agent": "WikiPeopleStats/1.0",
+        },
+      })
 
       if (response.ok) {
         toast({
