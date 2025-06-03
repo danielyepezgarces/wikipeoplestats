@@ -31,14 +31,18 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
   // Load Highcharts dynamically
   useEffect(() => {
     const loadHighcharts = async () => {
-      const HighchartsModule = await import("highcharts")
-      const HighchartsExporting = await import("highcharts/modules/exporting")
-      const HighchartsOfflineExporting = await import("highcharts/modules/offline-exporting")
+      try {
+        const HighchartsModule = await import("highcharts")
+        const HighchartsExporting = await import("highcharts/modules/exporting")
+        const HighchartsOfflineExporting = await import("highcharts/modules/offline-exporting")
 
-      HighchartsExporting.default(HighchartsModule.default)
-      HighchartsOfflineExporting.default(HighchartsModule.default)
+        HighchartsExporting.default(HighchartsModule.default)
+        HighchartsOfflineExporting.default(HighchartsModule.default)
 
-      setHighcharts(HighchartsModule.default)
+        setHighcharts(HighchartsModule.default)
+      } catch (error) {
+        console.error("Error loading Highcharts:", error)
+      }
     }
 
     loadHighcharts()
@@ -53,15 +57,28 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
   }
 
   const formatDate = (item: GraphDataPoint): string => {
-    return item.day
-      ? `${item.year}-${String(item.month).padStart(2, "0")}-${String(item.day).padStart(2, "0")}`
-      : `${item.year}-${String(item.month).padStart(2, "0")}`
+    // Si tiene día, mostrar fecha completa
+    if (item.day) {
+      return `${item.year}-${String(item.month).padStart(2, "0")}-${String(item.day).padStart(2, "0")}`
+    }
+    // Si no tiene día, mostrar solo año-mes
+    return `${item.year}-${String(item.month).padStart(2, "0")}`
   }
 
   const createChart = () => {
-    if (!Highcharts || !chartRef.current || data.length === 0) return
+    if (!Highcharts || !chartRef.current || data.length === 0) {
+      console.log("Cannot create chart:", {
+        hasHighcharts: !!Highcharts,
+        hasRef: !!chartRef.current,
+        dataLength: data.length,
+      })
+      return
+    }
+
+    console.log("Creating chart with data:", data)
 
     const categories = data.map(formatDate)
+    const isDarkMode = document.documentElement.classList.contains("dark")
 
     const chartOptions = {
       chart: {
@@ -70,11 +87,12 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
         style: {
           fontFamily: "Inter, sans-serif",
         },
+        height: 400,
       },
       title: {
         text: `${t("gender_statistics")} - ${projectName}`,
         style: {
-          color: document.documentElement.classList.contains("dark") ? "#ffffff" : "#1f2937",
+          color: isDarkMode ? "#ffffff" : "#1f2937",
           fontSize: "18px",
           fontWeight: "600",
         },
@@ -82,7 +100,7 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
       subtitle: {
         text: isCumulative ? t("cumulative_view") : t("normal_view"),
         style: {
-          color: document.documentElement.classList.contains("dark") ? "#d1d5db" : "#6b7280",
+          color: isDarkMode ? "#d1d5db" : "#6b7280",
         },
       },
       xAxis: {
@@ -90,36 +108,38 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
         title: {
           text: t("timeline_graph"),
           style: {
-            color: document.documentElement.classList.contains("dark") ? "#d1d5db" : "#374151",
+            color: isDarkMode ? "#d1d5db" : "#374151",
           },
         },
         labels: {
           style: {
-            color: document.documentElement.classList.contains("dark") ? "#d1d5db" : "#374151",
+            color: isDarkMode ? "#d1d5db" : "#374151",
           },
+          rotation: data.length > 20 ? -45 : 0, // Rotar etiquetas si hay muchos datos
         },
-        gridLineColor: document.documentElement.classList.contains("dark") ? "#374151" : "#e5e7eb",
+        gridLineColor: isDarkMode ? "#374151" : "#e5e7eb",
       },
       yAxis: {
         title: {
           text: t("quantity_graph"),
           style: {
-            color: document.documentElement.classList.contains("dark") ? "#d1d5db" : "#374151",
+            color: isDarkMode ? "#d1d5db" : "#374151",
           },
         },
         labels: {
           style: {
-            color: document.documentElement.classList.contains("dark") ? "#d1d5db" : "#374151",
+            color: isDarkMode ? "#d1d5db" : "#374151",
           },
         },
-        gridLineColor: document.documentElement.classList.contains("dark") ? "#374151" : "#e5e7eb",
+        gridLineColor: isDarkMode ? "#374151" : "#e5e7eb",
+        min: 0,
       },
       tooltip: {
         shared: true,
-        backgroundColor: document.documentElement.classList.contains("dark") ? "#1f2937" : "#ffffff",
-        borderColor: document.documentElement.classList.contains("dark") ? "#374151" : "#d1d5db",
+        backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+        borderColor: isDarkMode ? "#374151" : "#d1d5db",
         style: {
-          color: document.documentElement.classList.contains("dark") ? "#ffffff" : "#1f2937",
+          color: isDarkMode ? "#ffffff" : "#1f2937",
         },
         formatter: function (this: any) {
           let tooltip = `<b>${this.x}</b><br/>`
@@ -131,23 +151,30 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
       },
       legend: {
         itemStyle: {
-          color: document.documentElement.classList.contains("dark") ? "#d1d5db" : "#374151",
+          color: isDarkMode ? "#d1d5db" : "#374151",
         },
         itemHoverStyle: {
-          color: document.documentElement.classList.contains("dark") ? "#ffffff" : "#1f2937",
+          color: isDarkMode ? "#ffffff" : "#1f2937",
         },
       },
       plotOptions: {
         line: {
           marker: {
-            enabled: false,
+            enabled: data.length <= 50, // Solo mostrar marcadores si hay pocos datos
+            radius: 3,
             states: {
               hover: {
                 enabled: true,
+                radius: 5,
               },
             },
           },
-          lineWidth: 3,
+          lineWidth: 2,
+          states: {
+            hover: {
+              lineWidth: 3,
+            },
+          },
         },
       },
       series: [
@@ -206,14 +233,13 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
       },
     }
 
+    // Destruir gráfico anterior si existe
+    if (chart) {
+      chart.destroy()
+    }
+
     const newChart = Highcharts.chart(chartRef.current, chartOptions)
     setChart(newChart)
-
-    return () => {
-      if (newChart) {
-        newChart.destroy()
-      }
-    }
   }
 
   const downloadChartWithWatermark = (chart: any, format: string) => {
@@ -260,6 +286,7 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
 
   useEffect(() => {
     if (Highcharts && data.length > 0) {
+      console.log("Creating chart with Highcharts and data:", data.length, "points")
       createChart()
     }
 
@@ -296,6 +323,9 @@ export function HighchartsWrapper({ data, currentLang, projectName }: Highcharts
         </div>
       </div>
       <div ref={chartRef} className="w-full h-96" />
+      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+        {data.length} {t("data_points")} • {data[0]?.day ? t("daily_data") : t("monthly_data")}
+      </div>
     </div>
   )
 }
