@@ -3,3 +3,4 @@ config.php
 assets/datatables
 .user.ini
 translator.py
+.env
