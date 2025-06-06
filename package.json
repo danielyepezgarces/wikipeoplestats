@@ -43,9 +43,12 @@
     "cmdk": "1.0.4",
     "date-fns": "latest",
     "embla-carousel-react": "8.5.1",
+    "highcharts": "latest",
     "input-otp": "1.4.1",
+    "jose": "^5.2.3",
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
+    "next-auth": "^5.0.0-beta.15",
     "next-themes": "latest",
     "react": "^19",
     "react-day-picker": "latest",
@@ -57,8 +60,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",
-    "zod": "^3.24.1",
-    "highcharts": "latest"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22",
