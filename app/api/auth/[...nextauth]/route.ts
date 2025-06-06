@@ -1,12 +1,29 @@
 import NextAuth from "next-auth"
-import WikipediaProvider from "next-auth/providers/wikipedia"
+import type { AuthOptions } from "next-auth"
+import { OAuth } from "next-auth/providers"
 
 const handler = NextAuth({
   providers: [
-    WikipediaProvider({
+    OAuth({
+      id: "wikipedia",
+      name: "Wikipedia",
+      type: "oauth",
+      authorization: {
+        url: "https://meta.wikimedia.org/w/rest.php/oauth2/authorize",
+        params: { scope: "" }
+      },
+      token: "https://meta.wikimedia.org/w/rest.php/oauth2/access_token",
+      userinfo: "https://meta.wikimedia.org/w/rest.php/oauth2/resource/profile",
       clientId: process.env.WIKIPEDIA_CLIENT_ID!,
       clientSecret: process.env.WIKIPEDIA_CLIENT_SECRET!,
-    }),
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.username,
+          username: profile.username,
+        }
+      },
+    })
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
