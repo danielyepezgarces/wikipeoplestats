@@ -1,69 +1,98 @@
-// pages/api/auth/verify.ts
-import { NextApiRequest, NextApiResponse } from 'next'
-import { JWTManager } from '@/lib/jwt'
-import { Database } from '@/lib/database'
+import { NextRequest, NextResponse } from 'next/server'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Configurar CORS para subdominios
-  res.setHeader('Access-Control-Allow-Origin', `https://${req.headers.origin}`)
-  res.setHeader('Access-Control-Allow-Credentials', 'true')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end()
-  }
-  
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Método no permitido' })
-  }
+export async function GET(request: NextRequest) {
+  console.log('🔍 Verificando autenticación...')
   
   try {
-    const authHeader = req.headers.authorization
-    const token = authHeader?.replace('Bearer ', '') || req.cookies.auth_token
+    // Configurar CORS para subdominios
+    const origin = request.headers.get('origin')
+    const response = new NextResponse()
+    
+    if (origin && origin.includes('wikipeoplestats.org')) {
+      response.headers.set('Access-Control-Allow-Origin', origin)
+      response.headers.set('Access-Control-Allow-Credentials', 'true')
+      response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
+      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    }
+    
+    // Obtener token de cookies o header
+    const authHeader = request.headers.get('authorization')
+    const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth_token')?.value
+    
+    console.log('📋 Token encontrado:', !!token)
     
     if (!token) {
-      return res.status(401).json({ error: 'Token no proporcionado' })
+      return NextResponse.json(
+        { error: 'Token no proporcionado' },
+        { status: 401, headers: response.headers }
+      )
     }
     
-    const payload = JWTManager.verifyToken(token)
-    if (!payload) {
-      return res.status(401).json({ error: 'Token inválido' })
+    // Verificar token (simulado por ahora)
+    if (!token.startsWith('simulated_jwt_token_')) {
+      return NextResponse.json(
+        { error: 'Token inválido' },
+        { status: 401, headers: response.headers }
+      )
     }
     
-    // Verificar sesión en base de datos
-    const session = await Database.getSessionByToken(JWTManager.hashToken(token))
-    if (!session) {
-      return res.status(401).json({ error: 'Sesión no encontrada' })
+    // Obtener información del usuario de las cookies
+    const userInfoCookie = request.cookies.get('user_info')?.value
+    let userData = null
+    
+    if (userInfoCookie) {
+      try {
+        userData = JSON.parse(decodeURIComponent(userInfoCookie))
+      } catch (e) {
+        console.error('Error parsing user info:', e)
+      }
     }
     
-    // Obtener usuario actualizado
-    const user = await Database.getUserById(payload.userId)
-    if (!user) {
-      return res.status(401).json({ error: 'Usuario no encontrado' })
+    if (!userData) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 401, headers: response.headers }
+      )
     }
     
-    // Actualizar uso de sesión
-    await Database.updateSessionUsage(session.id)
+    console.log('✅ Usuario verificado:', userData.name)
     
-    res.json({
+    return NextResponse.json({
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.wikimedia_role,
-        chapter: user.chapter_assigned,
-        wikipediaUsername: user.wikipedia_username,
-        avatarUrl: user.avatar_url,
-        lastLogin: user.last_login
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        chapter: userData.chapter,
+        wikipediaUsername: userData.wikipediaUsername,
+        avatarUrl: userData.avatarUrl,
+        lastLogin: new Date().toISOString()
       },
       session: {
-        id: session.id,
-        expiresAt: session.expires_at
+        id: 'session_' + Date.now(),
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       }
-    })
+    }, { headers: response.headers })
+    
   } catch (error) {
-    console.error('Error verificando token:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    console.error('❌ Error verificando token:', error)
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    )
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const response = new NextResponse(null, { status: 200 })
+  
+  if (origin && origin.includes('wikipeoplestats.org')) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
+    response.headers.set('Access-Control-Allow-Credentials', 'true')
+    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  }
+  
+  return response
 }

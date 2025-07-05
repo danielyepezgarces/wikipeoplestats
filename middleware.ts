@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -7,7 +6,7 @@ export function middleware(request: NextRequest) {
   const hostname = request.nextUrl.hostname
   
   // Permitir CORS para subdominios de wikipeoplestats.org
-  if (origin && origin.endsWith('.wikipeoplestats.org')) {
+  if (origin && origin.includes('wikipeoplestats.org')) {
     const response = NextResponse.next()
     response.headers.set('Access-Control-Allow-Origin', origin)
     response.headers.set('Access-Control-Allow-Credentials', 'true')

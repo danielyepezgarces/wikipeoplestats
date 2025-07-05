@@ -1,4 +1,3 @@
-// hooks/use-auth.ts
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -24,7 +23,12 @@ export function useAuth() {
   
   const verifyAuth = async () => {
     try {
-      const response = await fetch(`https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/verify`, {
+      setIsLoading(true)
+      
+      // Intentar verificar con el dominio de auth
+      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
+      
+      const response = await fetch(`${authDomain}/api/auth/verify`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
@@ -34,8 +38,10 @@ export function useAuth() {
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
+        console.log('✅ Usuario autenticado:', data.user.name)
       } else {
         setUser(null)
+        console.log('❌ Usuario no autenticado')
       }
     } catch (error) {
       console.error('Error verificando autenticación:', error)
@@ -45,20 +51,29 @@ export function useAuth() {
     }
   }
   
-  const login = () => {
+  const login = (redirectUrl?: string) => {
     const currentDomain = window.location.hostname
-    window.location.href = `https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/login?origin=${currentDomain}`
+    const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
+    
+    if (redirectUrl) {
+      window.location.href = redirectUrl
+    } else {
+      window.location.href = `${authDomain}/api/auth/login?origin=${encodeURIComponent(currentDomain)}`
+    }
   }
   
   const logout = async () => {
     try {
-      await fetch(`https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/logout`, {
+      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
+      
+      await fetch(`${authDomain}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       })
       
       setUser(null)
       router.push('/')
+      console.log('✅ Logout exitoso')
     } catch (error) {
       console.error('Error cerrando sesión:', error)
     }

@@ -1,32 +1,40 @@
-// pages/api/auth/logout.ts
-import { NextApiRequest, NextApiResponse } from 'next'
-import { JWTManager } from '@/lib/jwt'
-import { Database } from '@/lib/database'
+import { NextRequest, NextResponse } from 'next/server'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' })
-  }
+export async function POST(request: NextRequest) {
+  console.log('🔍 Procesando logout...')
   
   try {
-    const token = req.cookies.auth_token
+    const domain = process.env.NEXT_PUBLIC_DOMAIN || '.wikipeoplestats.org'
     
-    if (token) {
-      const payload = JWTManager.verifyToken(token)
-      if (payload) {
-        await Database.deleteSession(payload.sessionId)
-      }
-    }
+    const response = NextResponse.json({ message: 'Sesión cerrada exitosamente' })
     
     // Limpiar cookies
-    res.setHeader('Set-Cookie', [
-      `auth_token=; Domain=.${process.env.DOMAIN}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`,
-      `user_info=; Domain=.${process.env.DOMAIN}; Path=/; Secure; SameSite=Lax; Max-Age=0`
-    ])
+    response.cookies.set('auth_token', '', {
+      domain: domain,
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 0
+    })
     
-    res.json({ message: 'Sesión cerrada' })
+    response.cookies.set('user_info', '', {
+      domain: domain,
+      path: '/',
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 0
+    })
+    
+    console.log('✅ Cookies limpiadas')
+    
+    return response
+    
   } catch (error) {
-    console.error('Error cerrando sesión:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    console.error('❌ Error cerrando sesión:', error)
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    )
   }
 }

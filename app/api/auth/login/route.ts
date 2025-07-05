@@ -1,7 +1,4 @@
-// app/api/auth/login/route.ts - Versión corregida
 import { NextRequest, NextResponse } from 'next/server'
-import { WikipediaOAuth } from '@/lib/oauth'
-import { Database } from '@/lib/database'
 
 export async function GET(request: NextRequest) {
   console.log('🔍 Iniciando proceso de login...')
@@ -11,72 +8,24 @@ export async function GET(request: NextRequest) {
     console.log('📋 Paso 1: Verificando parámetros...')
     const searchParams = request.nextUrl.searchParams
     const origin = searchParams.get('origin')
-    const originDomain = origin || 'www.wikipeoplestats.org'
+    const originDomain = origin || request.headers.get('referer') || 'www.wikipeoplestats.org'
     console.log('✅ Origin domain:', originDomain)
 
-    // Paso 2: Verificar si las clases existen
-    console.log('📋 Paso 2: Verificando importaciones...')
+    // Paso 2: Crear URL de autorización de Wikipedia
+    console.log('📋 Paso 2: Creando URL de autorización...')
     
-    if (!WikipediaOAuth) {
-      console.error('❌ WikipediaOAuth no está disponible')
-      return NextResponse.json(
-        { error: 'WikipediaOAuth no está disponible' },
-        { status: 500 }
-      )
-    }
+    const callbackUrl = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(originDomain)}`
+    
+    // Construir URL de autorización de Wikipedia OAuth
+    const authUrl = new URL('https://meta.wikimedia.org/wiki/Special:OAuth/authorize')
+    authUrl.searchParams.set('oauth_consumer_key', process.env.WIKIPEDIA_CLIENT_ID || '')
+    authUrl.searchParams.set('oauth_callback', callbackUrl)
+    
+    console.log('✅ URL de autorización creada:', authUrl.toString())
 
-    if (!Database) {
-      console.error('❌ Database no está disponible')
-      return NextResponse.json(
-        { error: 'Database no está disponible' },
-        { status: 500 }
-      )
-    }
-
-    // Paso 3: Instanciar cliente OAuth
-    console.log('📋 Paso 3: Creando cliente OAuth...')
-    let oauthClient
-    try {
-      oauthClient = new WikipediaOAuth()
-      console.log('✅ Cliente OAuth creado')
-    } catch (error) {
-      console.error('❌ Error creando cliente OAuth:', error)
-      return NextResponse.json(
-        { error: 'Error creating OAuth client', details: error instanceof Error ? error.message : 'Error desconocido' },
-        { status: 500 }
-      )
-    }
-
-    // Paso 4: Obtener URL de autorización
-    console.log('📋 Paso 4: Obteniendo URL de autorización...')
-    let authData
-    try {
-      authData = await oauthClient.getAuthorizationUrl(originDomain)
-      console.log('✅ URL de autorización obtenida:', authData.url)
-    } catch (error) {
-      console.error('❌ Error obteniendo URL de autorización:', error)
-      return NextResponse.json(
-        { error: 'Error getting authorization URL', details: error instanceof Error ? error.message : 'Error desconocido' },
-        { status: 500 }
-      )
-    }
-
-    // Paso 5: Guardar tokens
-    console.log('📋 Paso 5: Guardando tokens...')
-    try {
-      await Database.storeOAuthToken(authData.token, authData.tokenSecret, originDomain)
-      console.log('✅ Tokens guardados')
-    } catch (error) {
-      console.error('❌ Error guardando tokens:', error)
-      return NextResponse.json(
-        { error: 'Error storing tokens', details: error instanceof Error ? error.message : 'Error desconocido' },
-        { status: 500 }
-      )
-    }
-
-    // Paso 6: Redirigir
-    console.log('📋 Paso 6: Redirigiendo...')
-    return NextResponse.redirect(authData.url)
+    // Paso 3: Redirigir a Wikipedia
+    console.log('📋 Paso 3: Redirigiendo a Wikipedia...')
+    return NextResponse.redirect(authUrl.toString())
 
   } catch (error) {
     console.error('❌ Error general:', error)
