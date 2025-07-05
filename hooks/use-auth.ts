@@ -1,47 +1,90 @@
-"use client"
-
-import { useState, useEffect } from "react"
+// hooks/use-auth.ts
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface User {
+  id: string
   name: string
-  email: string
+  email?: string
   role: string
   chapter?: string
+  wikipediaUsername: string
+  avatarUrl?: string
+  lastLogin?: string
 }
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+  
   useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('wikipeoplestats_user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (error) {
-        console.error('Error parsing stored user:', error)
-        localStorage.removeItem('wikipeoplestats_user')
-      }
-    }
-    setLoading(false)
+    verifyAuth()
   }, [])
-
-  const login = (userData: User) => {
-    setUser(userData)
-    localStorage.setItem('wikipeoplestats_user', JSON.stringify(userData))
+  
+  const verifyAuth = async () => {
+    try {
+      const response = await fetch(`https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/verify`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setUser(data.user)
+      } else {
+        setUser(null)
+      }
+    } catch (error) {
+      console.error('Error verificando autenticación:', error)
+      setUser(null)
+    } finally {
+      setIsLoading(false)
+    }
   }
-
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('wikipeoplestats_user')
+  
+  const login = () => {
+    const currentDomain = window.location.hostname
+    window.location.href = `https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/login?origin=${currentDomain}`
   }
-
+  
+  const logout = async () => {
+    try {
+      await fetch(`https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      })
+      
+      setUser(null)
+      router.push('/')
+    } catch (error) {
+      console.error('Error cerrando sesión:', error)
+    }
+  }
+  
+  const hasPermission = (permission: string) => {
+    if (!user) return false
+    
+    const permissions = {
+      super_admin: ['all'],
+      community_admin: ['manage_chapter', 'manage_users', 'moderate'],
+      community_moderator: ['moderate', 'view_reports'],
+      community_partner: ['view_stats']
+    }
+    
+    const userPermissions = permissions[user.role as keyof typeof permissions] || []
+    return userPermissions.includes(permission) || userPermissions.includes('all')
+  }
+  
   return {
     user,
+    isLoading,
+    isAuthenticated: !!user,
     login,
     logout,
-    loading,
-    isAuthenticated: !!user
+    hasPermission,
+    refetch: verifyAuth
   }
 }

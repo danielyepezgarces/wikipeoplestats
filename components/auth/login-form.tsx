@@ -1,106 +1,119 @@
 "use client"
 
-import { useState } from "react"
-import { Eye, EyeOff, User, Lock } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
+import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToast } from "@/hooks/use-toast"
+import { Loader2, Globe, Users, Shield, BookOpen, AlertCircle, X } from "lucide-react"
 
 interface LoginFormProps {
-  onLogin: (user: { email: string; name: string; role: string; chapter?: string }) => void
+  onLogin: (user: {
+    id: string
+    email?: string
+    name: string
+    role: string
+    chapter?: string
+    wikipediaUsername: string
+    avatarUrl?: string
+  }) => void
   onClose: () => void
 }
 
 export function LoginForm({ onLogin, onClose }: LoginFormProps) {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const { user, isAuthenticated, login, isLoading } = useAuth()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [currentChapter, setCurrentChapter] = useState<string>("Global")
 
-  // Demo users para Wikimedia Chapters
-  const demoUsers = [
-    { 
-      email: "superadmin@wikimedia.org", 
-      password: "super123", 
-      name: "Daniel Yepez Garces", 
-      role: "super_admin",
-      chapter: "Wikimedia Foundation"
-    },
-    { 
-      email: "admin@wikimedia.es", 
-      password: "admin123", 
-      name: "Carlos Ruiz", 
-      role: "community_admin",
-      chapter: "Wikimedia España"
-    },
-    { 
-      email: "moderator@wikimedia.mx", 
-      password: "mod123", 
-      name: "Ana López", 
-      role: "community_moderator",
-      chapter: "Wikimedia México"
-    },
-    { 
-      email: "partner@wikimedia.ar", 
-      password: "partner123", 
-      name: "Diego Fernández", 
-      role: "community_partner",
-      chapter: "Wikimedia Argentina"
-    },
-  ]
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    const user = demoUsers.find(
-      u => u.email === formData.email && u.password === formData.password
-    )
-
-    if (user) {
+  useEffect(() => {
+    // Si ya está autenticado, pasar los datos al componente padre
+    if (isAuthenticated && user) {
+      onLogin({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        chapter: user.chapter,
+        wikipediaUsername: user.wikipediaUsername,
+        avatarUrl: user.avatarUrl,
+      })
       toast({
         title: "Acceso autorizado",
-        description: `Bienvenido/a, ${user.name}!`,
+        description: `¡Bienvenido/a, ${user.name}!`,
       })
-      onLogin(user)
-    } else {
+      return
+    }
+
+    // Detectar chapter basado en el subdominio
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname
+      const subdomain = hostname.split(".")[0]
+
+      const chapterMap: Record<string, string> = {
+        es: "Wikimedia España",
+        mx: "Wikimedia México",
+        ar: "Wikimedia Argentina",
+        global: "Wikimedia Global",
+      }
+
+      setCurrentChapter(chapterMap[subdomain] || "Wikimedia Global")
+    }
+
+    // Manejar errores de autenticación
+    const errorParam = searchParams?.get("error")
+    if (errorParam) {
+      const errorMessages: Record<string, string> = {
+        authorization_failed: "La autorización con Wikipedia falló. Por favor, inténtalo de nuevo.",
+        token_expired: "El token de autorización ha expirado. Por favor, inicia sesión nuevamente.",
+        authentication_failed: "Error en la autenticación. Por favor, verifica tus credenciales.",
+      }
+      const errorMessage = errorMessages[errorParam] || "Error desconocido en la autenticación."
+      setError(errorMessage)
       toast({
         title: "Error de autenticación",
-        description: "Email o contraseña incorrectos",
+        description: errorMessage,
         variant: "destructive",
       })
     }
+  }, [isAuthenticated, user, onLogin, searchParams, toast])
 
-    setLoading(false)
-  }
+  const handleLogin = async () => {
+    setIsLoggingIn(true)
+    setError(null)
 
-  const handleDemoLogin = (user: typeof demoUsers[0]) => {
-    setFormData({ email: user.email, password: user.password })
-    onLogin(user)
-    toast({
-      title: "Acceso demo",
-      description: `Conectado como ${user.name} (${getRoleDisplayName(user.role)})`,
-    })
+    try {
+      await login()
+      toast({
+        title: "Redirigiendo...",
+        description: "Te estamos conectando con Wikipedia",
+      })
+    } catch (err) {
+      const errorMessage = "Error al iniciar sesión. Por favor, inténtalo de nuevo."
+      setError(errorMessage)
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      })
+      setIsLoggingIn(false)
+    }
   }
 
   const getRoleDisplayName = (role: string) => {
     switch (role) {
-      case 'super_admin':
-        return 'Super Administrador'
-      case 'community_admin':
-        return 'Administrador de Comunidad'
-      case 'community_moderator':
-        return 'Moderador de Comunidad'
-      case 'community_partner':
-        return 'Socio/Afiliado de Comunidad'
+      case "super_admin":
+        return "Super Administrador"
+      case "community_admin":
+        return "Administrador de Comunidad"
+      case "community_moderator":
+        return "Moderador de Comunidad"
+      case "community_partner":
+        return "Socio/Afiliado de Comunidad"
       default:
         return role
     }
@@ -108,17 +121,32 @@ export function LoginForm({ onLogin, onClose }: LoginFormProps) {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'super_admin':
-        return 'bg-red-500'
-      case 'community_admin':
-        return 'bg-orange-500'
-      case 'community_moderator':
-        return 'bg-blue-500'
-      case 'community_partner':
-        return 'bg-green-500'
+      case "super_admin":
+        return "bg-red-500"
+      case "community_admin":
+        return "bg-orange-500"
+      case "community_moderator":
+        return "bg-blue-500"
+      case "community_partner":
+        return "bg-green-500"
       default:
-        return 'bg-gray-500'
+        return "bg-gray-500"
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Verificando autenticación...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -126,96 +154,122 @@ export function LoginForm({ onLogin, onClose }: LoginFormProps) {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl font-bold">Acceso al Sistema</CardTitle>
+            <div className="flex items-center space-x-2">
+              <div className="bg-blue-600 p-2 rounded-lg">
+                <Globe className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-bold">WikiPeopleStats</CardTitle>
+                <CardDescription className="text-sm">{currentChapter}</CardDescription>
+              </div>
+            </div>
             <Button variant="ghost" size="icon" onClick={onClose}>
-              ×
+              <X className="h-4 w-4" />
             </Button>
           </div>
-          <CardDescription>
-            Sistema de gestión para Wikimedia Chapters
-          </CardDescription>
+          <CardDescription>Sistema de gestión para Wikimedia Chapters</CardDescription>
         </CardHeader>
+
         <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Ingresa tu email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Ingresa tu contraseña"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="pl-10 pr-10"
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Verificando..." : "Iniciar Sesión"}
-            </Button>
-          </form>
+          {/* Login Button */}
+          <Button
+            onClick={handleLogin}
+            disabled={isLoggingIn}
+            className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Conectando con Wikipedia...
+              </>
+            ) : (
+              <>
+                <BookOpen className="mr-2 h-5 w-5" />
+                Iniciar sesión con Wikipedia
+              </>
+            )}
+          </Button>
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Cuentas Demo</span>
+              <span className="bg-background px-2 text-muted-foreground">Información del Sistema</span>
             </div>
           </div>
 
-          <div className="space-y-2">
-            {demoUsers.map((user) => (
-              <Button
-                key={user.email}
-                variant="outline"
-                size="sm"
-                className="w-full justify-start"
-                onClick={() => handleDemoLogin(user)}
-              >
-                <div className="flex items-center space-x-2 w-full">
-                  <div className={`w-3 h-3 rounded-full ${getRoleColor(user.role)}`} />
-                  <div className="flex-1 text-left">
-                    <div className="font-medium">{user.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {getRoleDisplayName(user.role)} • {user.chapter}
-                    </div>
-                  </div>
+          {/* Info Section */}
+          <div className="space-y-3">
+            <div className="grid gap-2">
+              <div className="flex items-start space-x-2">
+                <Users className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-xs text-gray-800">Gestión de Comunidad</p>
+                  <p className="text-xs text-gray-600">Administra usuarios y permisos</p>
                 </div>
-              </Button>
-            ))}
+              </div>
+
+              <div className="flex items-start space-x-2">
+                <Shield className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-xs text-gray-800">Acceso Seguro</p>
+                  <p className="text-xs text-gray-600">OAuth con Wikipedia</p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-2">
+                <Globe className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-xs text-gray-800">Multi-Chapter</p>
+                  <p className="text-xs text-gray-600">Acceso a múltiples chapters</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="text-xs text-center text-muted-foreground">
-            Sistema demo para Wikimedia Chapters. Usa cualquiera de las cuentas de arriba.
+          {/* Roles Info */}
+          <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+            <h4 className="font-medium text-xs text-gray-800 text-center">Roles disponibles</h4>
+            <div className="space-y-1">
+              {[
+                { role: "super_admin", name: "Super Administrador", description: "Acceso total" },
+                { role: "community_admin", name: "Admin de Comunidad", description: "Gestión del chapter" },
+                { role: "community_moderator", name: "Moderador", description: "Moderación" },
+                { role: "community_partner", name: "Socio/Afiliado", description: "Visualización" },
+              ].map((item) => (
+                <div key={item.role} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 rounded-full ${getRoleColor(item.role)}`} />
+                    <span className="font-medium">{item.name}</span>
+                  </div>
+                  <span className="text-gray-600">{item.description}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-xs text-center text-muted-foreground space-y-1">
+            <p>Al iniciar sesión, aceptas los términos de uso del sistema</p>
+            <p>
+              Powered by{" "}
+              <a
+                href="https://www.mediawiki.org/wiki/OAuth"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                MediaWiki OAuth
+              </a>
+            </p>
           </div>
         </CardContent>
       </Card>
