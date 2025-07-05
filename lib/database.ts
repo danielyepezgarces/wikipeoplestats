@@ -18,13 +18,10 @@ export async function getConnection(): Promise<mysql.Connection> {
 }
 
 export interface User {
-  id: string
-  name: string
+  id: number
+  wikimedia_id: string
+  username: string
   email?: string
-  wikipedia_id: string
-  wikipedia_username: string
-  wikimedia_role: 'super_admin' | 'community_admin' | 'community_moderator' | 'community_partner'
-  chapter_assigned?: string
   avatar_url?: string
   is_active: boolean
   created_at: string
@@ -32,9 +29,17 @@ export interface User {
   last_login?: string
 }
 
+export interface UserRole {
+  id: number
+  user_id: number
+  role: string
+  chapter_id?: number
+  created_at: string
+}
+
 export interface Session {
-  id: string
-  user_id: string
+  id: number
+  user_id: number
   token_hash: string
   expires_at: string
   origin_domain: string
@@ -45,155 +50,77 @@ export interface Session {
 }
 
 export class Database {
-  static async createUser(userData: Partial<User>): Promise<User> {
-    const conn = await getConnection()
-    const [result] = await conn.execute(
-      `INSERT INTO users (name, email, wikipedia_id, wikipedia_username, wikimedia_role, chapter_assigned, avatar_url, last_login) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [
-        userData.name,
-        userData.email,
-        userData.wikipedia_id,
-        userData.wikipedia_username,
-        userData.wikimedia_role || 'community_partner',
-        userData.chapter_assigned,
-        userData.avatar_url
-      ]
-    )
-    
-    const insertResult = result as mysql.ResultSetHeader
-    return this.getUserById(insertResult.insertId.toString())
-  }
-  
-  static async getUserById(id: string): Promise<User | null> {
+  // ✅ Verifica si ya existe el usuario
+  static async getUserByWikipediaId(wikimediaId: string): Promise<User | null> {
     const conn = await getConnection()
     const [rows] = await conn.execute(
-      'SELECT * FROM users WHERE id = ? AND is_active = 1',
-      [id]
+      'SELECT * FROM users WHERE wikimedia_id = ? AND is_active = 1',
+      [wikimediaId]
     )
-    
     const users = rows as User[]
     return users[0] || null
   }
-  
-  static async getUserByWikipediaId(wikipediaId: string): Promise<User | null> {
+
+  // ✅ Inserta un usuario nuevo
+  static async createUser(data: { wikimedia_id: string; username: string; email?: string; avatar_url?: string }): Promise<User> {
     const conn = await getConnection()
-    const [rows] = await conn.execute(
-      'SELECT * FROM users WHERE wikipedia_id = ? AND is_active = 1',
-      [wikipediaId]
+    const [result] = await conn.execute(
+      `INSERT INTO users (wikimedia_id, username, email, avatar_url, created_at, updated_at, is_active) 
+       VALUES (?, ?, ?, ?, NOW(), NOW(), 1)`,
+      [data.wikimedia_id, data.username, data.email, data.avatar_url]
     )
-    
+    const insertResult = result as mysql.ResultSetHeader
+    return this.getUserById(insertResult.insertId)
+  }
+
+  static async getUserById(id: number): Promise<User | null> {
+    const conn = await getConnection()
+    const [rows] = await conn.execute('SELECT * FROM users WHERE id = ?', [id])
     const users = rows as User[]
     return users[0] || null
   }
-  
-  static async updateUserLogin(userId: string): Promise<void> {
+
+  static async updateUserLogin(userId: number): Promise<void> {
+    const conn = await getConnection()
+    await conn.execute('UPDATE users SET last_login = NOW(), updated_at = NOW() WHERE id = ?', [userId])
+  }
+
+  static async assignDefaultRole(userId: number, role: string = 'reader'): Promise<void> {
     const conn = await getConnection()
     await conn.execute(
-      'UPDATE users SET last_login = NOW() WHERE id = ?',
-      [userId]
+      `INSERT INTO user_roles (user_id, role, created_at) VALUES (?, ?, NOW())`,
+      [userId, role]
     )
   }
-  
-  static async createSession(sessionData: Partial<Session>): Promise<Session> {
+
+  // 🔐 Sesiones
+  static async createSession(data: Partial<Session>): Promise<Session> {
     const conn = await getConnection()
     const [result] = await conn.execute(
-      `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, created_at, last_used) 
+       VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
-        sessionData.user_id,
-        sessionData.token_hash,
-        sessionData.expires_at,
-        sessionData.origin_domain,
-        sessionData.user_agent,
-        sessionData.ip_address
+        data.user_id,
+        data.token_hash,
+        data.expires_at,
+        data.origin_domain,
+        data.user_agent,
+        data.ip_address
       ]
     )
-    
     const insertResult = result as mysql.ResultSetHeader
-    return this.getSessionById(insertResult.insertId.toString())
+    return this.getSessionById(insertResult.insertId)
   }
-  
-  static async getSessionById(id: string): Promise<Session | null> {
+
+  static async getSessionById(id: number): Promise<Session | null> {
     const conn = await getConnection()
-    const [rows] = await conn.execute(
-      'SELECT * FROM sessions WHERE id = ?',
-      [id]
-    )
-    
+    const [rows] = await conn.execute('SELECT * FROM sessions WHERE id = ?', [id])
     const sessions = rows as Session[]
     return sessions[0] || null
   }
-  
-  static async getSessionByToken(tokenHash: string): Promise<Session | null> {
-    const conn = await getConnection()
-    const [rows] = await conn.execute(
-      'SELECT * FROM sessions WHERE token_hash = ? AND expires_at > NOW()',
-      [tokenHash]
-    )
-    
-    const sessions = rows as Session[]
-    return sessions[0] || null
-  }
-  
-  static async updateSessionUsage(sessionId: string): Promise<void> {
-    const conn = await getConnection()
-    await conn.execute(
-      'UPDATE sessions SET last_used = NOW() WHERE id = ?',
-      [sessionId]
-    )
-  }
-  
-  static async deleteSession(sessionId: string): Promise<void> {
-    const conn = await getConnection()
-    await conn.execute(
-      'DELETE FROM sessions WHERE id = ?',
-      [sessionId]
-    )
-  }
-  
+
   static async deleteExpiredSessions(): Promise<void> {
     const conn = await getConnection()
-    await conn.execute(
-      'DELETE FROM sessions WHERE expires_at < NOW()'
-    )
-  }
-  
-  static async storeOAuthToken(token: string, tokenSecret: string, originDomain: string): Promise<void> {
-    const conn = await getConnection()
-    await conn.execute(
-      'INSERT INTO oauth_tokens (request_token, request_token_secret, origin_domain, expires_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))',
-      [token, tokenSecret, originDomain]
-    )
-  }
-  
-  static async getOAuthToken(token: string): Promise<{ request_token_secret: string; origin_domain: string } | null> {
-    const conn = await getConnection()
-    const [rows] = await conn.execute(
-      'SELECT request_token_secret, origin_domain FROM oauth_tokens WHERE request_token = ? AND expires_at > NOW()',
-      [token]
-    )
-    
-    const tokens = rows as any[]
-    return tokens[0] || null
-  }
-  
-  static async deleteOAuthToken(token: string): Promise<void> {
-    const conn = await getConnection()
-    await conn.execute(
-      'DELETE FROM oauth_tokens WHERE request_token = ?',
-      [token]
-    )
-  }
-  
-  static async getChapterBySubdomain(subdomain: string) {
-    const conn = await getConnection()
-    const [rows] = await conn.execute(
-      'SELECT * FROM chapters WHERE subdomain = ? AND is_active = 1',
-      [subdomain]
-    )
-    
-    const chapters = rows as any[]
-    return chapters[0] || null
+    await conn.execute('DELETE FROM sessions WHERE expires_at < NOW()')
   }
 }
