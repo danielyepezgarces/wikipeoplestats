@@ -92,14 +92,15 @@ export class Database {
     )
   }
 
-  static async assignDefaultRole(userId: number, role: string = 'reader'): Promise<void> {
+  static async assignDefaultRole(userId: number, roleId: number = 1): Promise<void> {
     const conn = await getConnection()
     await conn.execute(
-      `INSERT INTO user_roles (user_id, role, created_at)
-       VALUES (?, ?, NOW())`,
-      [userId, role]
+      `INSERT INTO user_roles (user_id, role_id, created_at)
+     VALUES (?, ?, NOW())`,
+      [userId, roleId]
     )
   }
+
 
   static async createSession(data: Partial<Session>): Promise<Session> {
     const conn = await getConnection()
