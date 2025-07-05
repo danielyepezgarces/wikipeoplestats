@@ -1,14 +1,15 @@
 "use client"
 
 import { useAuth } from '@/hooks/use-auth'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Globe, Users, Shield, BookOpen, AlertCircle } from 'lucide-react'
 
-export default function LoginPage() {
+// Componente separado para manejar los search params
+function LoginContent() {
   const { isAuthenticated, login, isLoading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -188,5 +189,30 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Componente de loading para Suspense
+function LoginLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardContent className="flex items-center justify-center p-8">
+          <div className="flex items-center space-x-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Cargando...</span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// Componente principal con Suspense
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginContent />
+    </Suspense>
   )
 }
