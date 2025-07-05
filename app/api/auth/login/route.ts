@@ -12,10 +12,12 @@ export async function GET(request: NextRequest) {
     const origin = searchParams.get('origin')
     const originDomain = origin || request.headers.get('referer') || 'www.wikipeoplestats.org'
 
-    const oauthCallback = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(originDomain)}`
-    console.log('📋 Callback URL:', oauthCallback)
+    // Prepare both the required 'oob' and our actual callback
+    const oauthCallback = "oob" // Wikimedia requires this exact value
+    const realCallback = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(originDomain)}`
+    console.log('📋 Callback URLs:', { oauthCallback, realCallback })
 
-    // Preparar firma OAuth
+    // OAuth configuration
     const oauthClient = oauth({
       consumer: {
         key: process.env.WIKIPEDIA_CLIENT_ID || '',
@@ -30,7 +32,10 @@ export async function GET(request: NextRequest) {
     const requestData = {
       url: 'https://meta.wikimedia.org/w/index.php?title=Special:OAuth/initiate',
       method: 'POST',
-      data: { oauth_callback: oauthCallback },
+      data: { 
+        oauth_callback: oauthCallback,
+        wikipeoplestats_callback: realCallback // Passing our real callback separately
+      },
     }
 
     const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData))
@@ -39,62 +44,40 @@ export async function GET(request: NextRequest) {
       headers: {
         Authorization: authHeader.Authorization,
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'WikiPeopleStats/1.0', // Add user agent
+        'User-Agent': 'WikiPeopleStats/1.0',
       },
-      responseType: 'text',
     })
 
-    console.log('🔧 Respuesta cruda:', response.data)
-
-    // Try different parsing methods
-    let oauthToken: string | null = null
-    let oauthSecret: string | null = null
-
-    // Method 1: Try URLSearchParams
-    try {
-      const tokenData = new URLSearchParams(response.data)
-      oauthToken = tokenData.get('oauth_token')
-      oauthSecret = tokenData.get('oauth_token_secret')
-      console.log('🔍 Intento de parseo con URLSearchParams:', { oauthToken, oauthSecret })
-    } catch (e) {
-      console.log('⚠️ URLSearchParams no funcionó, probando otro método')
-    }
-
-    // Method 2: Try manual parsing if first method failed
-    if (!oauthToken || !oauthSecret) {
-      const matches = response.data.match(/oauth_token=([^&]+)/)
-      if (matches) oauthToken = matches[1]
-      const secretMatches = response.data.match(/oauth_token_secret=([^&]+)/)
-      if (secretMatches) oauthSecret = secretMatches[1]
-      console.log('🔍 Intento de parseo con regex:', { oauthToken, oauthSecret })
-    }
+    // Parse the response
+    const responseParams = new URLSearchParams(response.data)
+    const oauthToken = responseParams.get('oauth_token')
+    const oauthSecret = responseParams.get('oauth_token_secret')
 
     if (!oauthToken || !oauthSecret) {
-      console.error('❌ Formato de respuesta inesperado:', response.data)
-      throw new Error(`No se pudo obtener el oauth_token o el oauth_token_secret. Respuesta: ${response.data}`)
+      throw new Error(`Failed to get tokens. Response: ${response.data}`)
     }
 
-    console.log('✅ Token obtenido correctamente:', oauthToken)
+    console.log('✅ Tokens obtained:', { oauthToken, oauthSecret })
 
-    // Preparar redirección a Wikimedia con oauth_token
-    const authUrl = `https://meta.wikimedia.org/wiki/Special:OAuth/authorize?oauth_token=${oauthToken}`
+    // Redirect to authorization page
+    const authUrl = `https://meta.wikimedia.org/wiki/Special:OAuth/authorize?oauth_token=${oauthToken}&wikipeoplestats_callback=${encodeURIComponent(realCallback)}`
     const redirectResponse = NextResponse.redirect(authUrl)
 
-    // Guardar el oauth_token_secret temporalmente en cookies (seguro, httpOnly)
+    // Store both tokens securely
     redirectResponse.cookies.set('oauth_token_secret', oauthSecret, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
       path: '/',
-      maxAge: 300, // 5 minutos
+      maxAge: 300,
     })
 
     return redirectResponse
 
   } catch (error) {
-    console.error('❌ Error general:', error)
+    console.error('❌ OAuth Error:', error)
     return NextResponse.json({
-      error: 'Error al iniciar OAuth',
+      error: 'OAuth initialization failed',
       details: error instanceof Error ? error.message : String(error),
     }, { status: 500 })
   }
