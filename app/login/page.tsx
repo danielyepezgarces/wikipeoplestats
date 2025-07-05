@@ -1,17 +1,21 @@
 "use client"
-
 import { useAuth } from '@/hooks/use-auth'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-
+import { Wikipedia } from '@/components/ui/button'
 export default function LoginPage() {
   const { isAuthenticated, login, isLoading } = useAuth()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
-  
+
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard')
+      // Recuperar el parámetro 'origin' de la URL después del login
+      const urlParams = new URLSearchParams(window.location.search)
+      const origin = urlParams.get('origin') || '/dashboard'
+
+      // Redirigir al usuario de vuelta al dominio original
+      window.location.href = origin
     }
   }, [isAuthenticated, router])
 
@@ -28,7 +32,7 @@ export default function LoginPage() {
           'access_denied': 'Acceso denegado por el usuario'
         }
         setError(errorMessages[errorParam as keyof typeof errorMessages] || 'Error desconocido')
-        
+
         // Limpiar el parámetro de error de la URL
         window.history.replaceState({}, '', window.location.pathname)
       }
@@ -37,7 +41,9 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     setError(null)
-    login()
+    // Redirigir al usuario al proceso de login incluyendo el parámetro 'origin'
+    const origin = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''
+    login(`https://auth.wikipeoplestats.org/login?origin=${origin}`)
   }
 
   return (
@@ -56,7 +62,7 @@ export default function LoginPage() {
             Accede con tu cuenta de Wikipedia
           </p>
         </div>
-        
+
         <div className="bg-white py-8 px-6 shadow-xl rounded-lg">
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
@@ -72,14 +78,14 @@ export default function LoginPage() {
               </div>
             </div>
           )}
-          
+
           <div className="space-y-6">
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-6">
-                Para acceder a WikiPeopleStats, necesitas autenticarte con tu cuenta de Wikipedia. 
+                Para acceder a WikiPeopleStats, necesitas autenticarte con tu cuenta de Wikipedia.
                 Esto nos permite verificar tu identidad y roles en la comunidad.
               </p>
-              
+
               <button
                 onClick={handleLogin}
                 className="w-full flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -90,7 +96,7 @@ export default function LoginPage() {
                 Continuar con Wikipedia
               </button>
             </div>
-            
+
             <div className="text-center">
               <p className="text-xs text-gray-500">
                 Al iniciar sesión, aceptas los términos de servicio y la política de privacidad
@@ -98,13 +104,13 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="text-center">
           <p className="text-sm text-gray-600">
             ¿No tienes una cuenta de Wikipedia?{' '}
-            <a 
-              href="https://meta.wikimedia.org/wiki/Special:CreateAccount" 
-              target="_blank" 
+            <a
+              href="https://meta.wikimedia.org/wiki/Special:CreateAccount"
+              target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-blue-600 hover:text-blue-500"
             >

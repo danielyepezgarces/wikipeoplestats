@@ -1,7 +1,8 @@
-// app/api/auth/login/route.ts - Versión de debugging
+// app/api/auth/login/route.ts - Versión corregida
 import { NextRequest, NextResponse } from 'next/server'
+import { WikipediaOAuth } from '@/lib/oauth'
+import { Database } from '@/lib/database'
 
-// Función para manejar solicitudes GET
 export async function GET(request: NextRequest) {
   console.log('🔍 Iniciando proceso de login...')
   
@@ -16,30 +17,18 @@ export async function GET(request: NextRequest) {
     // Paso 2: Verificar si las clases existen
     console.log('📋 Paso 2: Verificando importaciones...')
     
-    let WikipediaOAuth, Database
-    
-    try {
-      console.log('🔍 Importando WikipediaOAuth...')
-      const oauthModule = await import('@/lib/oauth')
-      WikipediaOAuth = oauthModule.WikipediaOAuth
-      console.log('✅ WikipediaOAuth importado')
-    } catch (error) {
-      console.error('❌ Error importando WikipediaOAuth:', error)
+    if (!WikipediaOAuth) {
+      console.error('❌ WikipediaOAuth no está disponible')
       return NextResponse.json(
-        { error: 'Error importing WikipediaOAuth', details: error.message },
+        { error: 'WikipediaOAuth no está disponible' },
         { status: 500 }
       )
     }
 
-    try {
-      console.log('🔍 Importando Database...')
-      const dbModule = await import('@/lib/database')
-      Database = dbModule.Database
-      console.log('✅ Database importado')
-    } catch (error) {
-      console.error('❌ Error importando Database:', error)
+    if (!Database) {
+      console.error('❌ Database no está disponible')
       return NextResponse.json(
-        { error: 'Error importing Database', details: error.message },
+        { error: 'Database no está disponible' },
         { status: 500 }
       )
     }
@@ -53,7 +42,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('❌ Error creando cliente OAuth:', error)
       return NextResponse.json(
-        { error: 'Error creating OAuth client', details: error.message },
+        { error: 'Error creating OAuth client', details: error instanceof Error ? error.message : 'Error desconocido' },
         { status: 500 }
       )
     }
@@ -67,7 +56,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('❌ Error obteniendo URL de autorización:', error)
       return NextResponse.json(
-        { error: 'Error getting authorization URL', details: error.message },
+        { error: 'Error getting authorization URL', details: error instanceof Error ? error.message : 'Error desconocido' },
         { status: 500 }
       )
     }
@@ -80,7 +69,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error('❌ Error guardando tokens:', error)
       return NextResponse.json(
-        { error: 'Error storing tokens', details: error.message },
+        { error: 'Error storing tokens', details: error instanceof Error ? error.message : 'Error desconocido' },
         { status: 500 }
       )
     }
@@ -102,7 +91,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Función simple para probar conectividad
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -113,7 +101,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json({
       error: 'Error en POST',
-      details: error.message
+      details: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 })
   }
 }
