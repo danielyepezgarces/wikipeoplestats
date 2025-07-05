@@ -2,6 +2,7 @@ export const runtime = 'nodejs'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
+import crypto from 'node:crypto';
 
 export async function GET(request: NextRequest) {
   console.log('🔍 Starting Wikimedia OAuth 2.0 login...')
