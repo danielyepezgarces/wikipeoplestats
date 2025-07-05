@@ -21,7 +21,7 @@ const WikipediaFAIcon = ({ className = "h-5 w-5" }) => (
 )
 
 const WikiPeopleStats = () => (
-  <div className="flex items-center hover:scale-105 transition-transform">
+  <div className="flex items-center justify-center hover:scale-105 transition-transform">
     <a
       className="text-2xl font-bold text-blue-600 dark:text-white"
       href="/"
