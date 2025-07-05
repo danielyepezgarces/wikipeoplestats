@@ -84,13 +84,28 @@ function LoginContent() {
   </svg>
 )
 
+const WikiPeopleStats = () => (
+  <div className="flex items-center hover:scale-105 transition-transform">
+    <a
+      className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+      href="/"
+      style={{ fontFamily: 'Montserrat, sans-serif' }}
+    >
+      WikiPeopleStats
+    </a>
+    <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded-md uppercase">
+      Beta
+    </span>
+  </div>
+)
+
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-20 w-20 bg-blue-600 rounded-full flex items-center justify-center">
-            <WikipediaFAIcon />
+            <WikiPeopleStats />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h2>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Accede con tu cuenta de Wikipedia</p>
@@ -122,7 +137,7 @@ function LoginContent() {
             <Button
               onClick={handleLogin}
               disabled={isLoggingIn}
-              className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700"
+              className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
             >
               {isLoggingIn ? (
                 <>
