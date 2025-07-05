@@ -207,7 +207,7 @@ export async function GET(request: NextRequest) {
       user = await Database.createUser({
         wikimedia_id: userInfo.id,
         username: userInfo.username,
-        email: userInfo.email  ?? undefined,
+        email: userInfo.email ?? undefined,
         avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`
       })
     }
@@ -237,8 +237,9 @@ export async function GET(request: NextRequest) {
       username: user.username,
       email: user.email
     })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('🔥 Unhandled error in auth callback:', error)
-    return new NextResponse('Internal Server Error', { status: 500 })
+    const message = error instanceof Error ? error.message : String(error)
+    return new NextResponse(`Internal Server Error: ${message}`, { status: 500 })
   }
 }
