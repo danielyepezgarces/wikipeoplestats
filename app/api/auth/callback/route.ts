@@ -46,7 +46,6 @@ function redirectToErrorPage(origin: string, errorType: string): NextResponse {
 
 // Función para generar avatar dinámico
 function generateUserAvatar(username: string): string {
-  // Usando UI Avatars con opciones personalizadas
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}` +
     `&background=random` +
     `&color=fff` +
@@ -70,7 +69,7 @@ function createOAuthClient() {
   })
 }
 
-// Obtener access token de Wikipedia
+// CORRECCIÓN 1: Obtener access token de Wikipedia
 async function getAccessToken(oauth_token: string, oauth_token_secret: string, oauth_verifier: string): Promise<AccessToken | null> {
   console.log('🔑 Obteniendo access token de Wikipedia...')
   
@@ -80,8 +79,7 @@ async function getAccessToken(oauth_token: string, oauth_token_secret: string, o
     url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/token`,
     method: 'POST',
     data: {
-      oauth_token,
-      oauth_verifier
+      oauth_verifier // Solo enviamos el verifier
     }
   }
   
@@ -91,46 +89,61 @@ async function getAccessToken(oauth_token: string, oauth_token_secret: string, o
   }))
   
   try {
+    // CORRECCIÓN: Enviar datos como form-data en el body
+    const formData = new URLSearchParams()
+    formData.append('oauth_verifier', oauth_verifier)
+    
     const response = await fetch(requestData.url, {
       method: 'POST',
       headers: {
-        ...authHeader,
+        'Authorization': authHeader.Authorization, // CORRECCIÓN: Solo la propiedad Authorization
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'WikiPeopleStats/1.0'
-      }
+        'User-Agent': 'WikiPeopleStats/1.0 (https://wikipeoplestats.org; contact@wikipeoplestats.org)'
+      },
+      body: formData.toString()
     })
     
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Error al obtener access token:', errorText)
+      console.error('Error al obtener access token:', response.status, errorText)
       return null
     }
     
     const responseText = await response.text()
+    console.log('Respuesta del access token:', responseText)
+    
     const params = new URLSearchParams(responseText)
     
-    return {
+    const accessToken = {
       oauth_token: params.get('oauth_token') || '',
       oauth_token_secret: params.get('oauth_token_secret') || ''
     }
+    
+    if (!accessToken.oauth_token || !accessToken.oauth_token_secret) {
+      console.error('Access token incompleto:', accessToken)
+      return null
+    }
+    
+    return accessToken
   } catch (error) {
     console.error('Error en la solicitud de access token:', error)
     return null
   }
 }
 
-// Obtener información del usuario de Wikipedia
+// CORRECCIÓN 2: Obtener información del usuario de Wikipedia
 async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: string): Promise<UserInfo | null> {
   console.log('👤 Obteniendo información del usuario de Wikipedia...')
   
   const oauthClient = createOAuthClient()
   
-  // Usamos directamente el endpoint extendido que incluye toda la información
+  // CORRECCIÓN: Agregar assertuser y mejorar el endpoint
   const userInfoRequest = {
     url: `https://meta.wikimedia.org/w/api.php?` +
          `action=query&` +
          `meta=userinfo&` +
-         `uiprop=id|name|email|editcount|registrationdate&` +
+         `uiprop=id|name|email|editcount|registrationdate|groups|rights&` +
+         `assertuser=user&` + // IMPORTANTE: Verificar que el usuario está autenticado
          `format=json`,
     method: 'GET'
   }
@@ -143,18 +156,32 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
   try {
     const response = await fetch(userInfoRequest.url, {
       headers: {
-        ...authHeader,
-        'User-Agent': 'WikiPeopleStats/1.0',
+        'Authorization': authHeader.Authorization, // CORRECCIÓN: Solo Authorization
+        'User-Agent': 'WikiPeopleStats/1.0 (https://wikipeoplestats.org; contact@wikipeoplestats.org)',
         'Accept': 'application/json'
       }
     })
     
     if (!response.ok) {
-      console.error('Error al obtener información del usuario:', await response.text())
+      const errorText = await response.text()
+      console.error('Error HTTP al obtener información del usuario:', response.status, errorText)
       return null
     }
     
     const data = await response.json()
+    console.log('Respuesta completa de userinfo:', JSON.stringify(data, null, 2))
+    
+    // CORRECCIÓN: Verificar errores de la API
+    if (data.error) {
+      console.error('Error de la API de Wikipedia:', data.error)
+      return null
+    }
+    
+    // CORRECCIÓN: Verificar si el usuario está autenticado
+    if (data.query?.userinfo?.anon !== undefined) {
+      console.error('Usuario no autenticado - respuesta anónima recibida')
+      return null
+    }
     
     // Verificar estructura de respuesta
     if (!data?.query?.userinfo) {
@@ -164,8 +191,14 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
     
     const userinfo = data.query.userinfo
     
+    // CORRECCIÓN: Verificar que tenemos datos mínimos
+    if (!userinfo.id || !userinfo.name) {
+      console.error('Datos de usuario incompletos:', userinfo)
+      return null
+    }
+    
     return {
-      id: userinfo.id.toString(), // Asegurar que sea string
+      id: userinfo.id.toString(),
       username: userinfo.name,
       email: userinfo.email || null,
       editCount: userinfo.editcount || 0,
@@ -177,18 +210,52 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
   }
 }
 
+// CORRECCIÓN 3: Función alternativa para debug
+async function debugWikipediaAuth(oauth_token: string, oauth_token_secret: string): Promise<void> {
+  console.log('🔍 Debugging autenticación de Wikipedia...')
+  
+  const oauthClient = createOAuthClient()
+  
+  // Probar endpoint básico primero
+  const testRequest = {
+    url: 'https://meta.wikimedia.org/w/api.php?action=query&meta=userinfo&format=json',
+    method: 'GET'
+  }
+  
+  const authHeader = oauthClient.toHeader(oauthClient.authorize(testRequest, {
+    key: oauth_token,
+    secret: oauth_token_secret
+  }))
+  
+  console.log('Headers generados:', authHeader)
+  
+  try {
+    const response = await fetch(testRequest.url, {
+      headers: {
+        'Authorization': authHeader.Authorization,
+        'User-Agent': 'WikiPeopleStats/1.0 (https://wikipeoplestats.org; contact@wikipeoplestats.org)',
+        'Accept': 'application/json'
+      }
+    })
+    
+    const data = await response.json()
+    console.log('Respuesta de debug:', JSON.stringify(data, null, 2))
+    
+  } catch (error) {
+    console.error('Error en debug:', error)
+  }
+}
+
 // Crear sesión de usuario en nuestro sistema
 async function createUserSession(userInfo: UserInfo): Promise<{ token: string; userData: any } | null> {
   console.log('🔐 Creando sesión de usuario...')
   
   try {
-    // Aquí deberías integrar con tu base de datos
-    // Ejemplo simplificado:
     const userData = {
       id: userInfo.id,
       username: userInfo.username,
       email: userInfo.email,
-      role: 'contributor', // Rol por defecto
+      role: 'contributor',
       wikipediaData: {
         editCount: userInfo.editCount,
         registrationDate: userInfo.registrationDate
@@ -196,7 +263,6 @@ async function createUserSession(userInfo: UserInfo): Promise<{ token: string; u
       avatarUrl: generateUserAvatar(userInfo.username)
     }
     
-    // Generar token JWT
     const token = jwt.sign(
       { 
         userId: userData.id,
@@ -221,7 +287,6 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
   
   const response = NextResponse.redirect(`https://${origin}/dashboard`)
   
-  // Configurar cookies
   response.cookies.set('auth_token', token, {
     domain: COOKIE_DOMAIN,
     path: '/',
@@ -268,11 +333,20 @@ export async function GET(request: NextRequest) {
       return redirectToErrorPage(origin, 'session_expired')
     }
     
+    console.log('🔑 Tokens OAuth:', { oauth_token, oauth_token_secret })
+    
     // Paso 1: Obtener access token
     const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
     if (!accessToken) {
       console.error('❌ Error al obtener access token')
       return redirectToErrorPage(origin, 'token_exchange_failed')
+    }
+    
+    console.log('✅ Access token obtenido')
+    
+    // CORRECCIÓN: Agregar debug si es necesario
+    if (process.env.NODE_ENV === 'development') {
+      await debugWikipediaAuth(accessToken.oauth_token, accessToken.oauth_token_secret)
     }
     
     // Paso 2: Obtener información del usuario
@@ -282,6 +356,8 @@ export async function GET(request: NextRequest) {
       return redirectToErrorPage(origin, 'user_info_failed')
     }
     
+    console.log('✅ Información del usuario obtenida:', userInfo.username)
+    
     // Paso 3: Crear sesión de usuario
     const sessionData = await createUserSession(userInfo)
     if (!sessionData) {
@@ -289,9 +365,12 @@ export async function GET(request: NextRequest) {
       return redirectToErrorPage(origin, 'session_creation_failed')
     }
     
-    // Paso 4: Redirigir al dashboard con las cookies configuradas
+    // Paso 4: Limpiar cookies temporales
+    const response = createAuthResponse(origin, sessionData.token, sessionData.userData)
+    response.cookies.delete('oauth_token_secret')
+    
     console.log('✅ Autenticación exitosa para usuario:', userInfo.username)
-    return createAuthResponse(origin, sessionData.token, sessionData.userData)
+    return response
     
   } catch (error) {
     console.error('❌ Error en el proceso de callback:', error)
