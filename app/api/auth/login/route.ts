@@ -9,11 +9,10 @@ export async function GET(request: NextRequest) {
     const origin = searchParams.get('origin')
     const originDomain = origin || request.headers.get('referer') || 'www.wikipeoplestats.org'
 
-    console.log('📋 Paso 1: Solicitando request token...')
-
     const oauthCallback = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(originDomain)}`
 
-    // Construir cabeceras OAuth (firma manual o usa una librería como oauth-1.0a)
+    console.log('📋 Paso 1: Solicitando request token...')
+
     const oauth = require('oauth-1.0a')
     const axios = require('axios')
 
@@ -34,31 +33,49 @@ export async function GET(request: NextRequest) {
       data: { oauth_callback: oauthCallback }
     }
 
-    const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData))
+    const authHeader = oauthClient.toHeader(
+      oauthClient.authorize(requestData)
+    )
 
     const response = await axios.post(requestData.url, null, {
       headers: {
-        Authorization: authHeader.Authorization
-      }
+        Authorization: authHeader.Authorization,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      responseType: 'text', // ✅ MUY IMPORTANTE
     })
+
+    console.log('🔧 Respuesta cruda:', response.data)
 
     const tokenData = new URLSearchParams(response.data)
     const oauthToken = tokenData.get('oauth_token')
     const oauthSecret = tokenData.get('oauth_token_secret')
 
+    if (!oauthToken || !oauthSecret) {
+      throw new Error('No se pudo obtener el oauth_token o el oauth_secret')
+    }
+
     console.log('✅ Token obtenido:', oauthToken)
 
-    // TODO: Guardar oauthToken y oauthSecret en cookies/sesión para usar en el callback
+    // 🔐 Guardar el oauth_token_secret en una cookie temporal segura
+    const responseRedirect = NextResponse.redirect(
+      `https://meta.wikimedia.org/wiki/Special:OAuth/authorize?oauth_token=${oauthToken}`
+    )
 
-    const authUrl = `https://meta.wikimedia.org/wiki/Special:OAuth/authorize?oauth_token=${oauthToken}`
+    responseRedirect.cookies.set('oauth_token_secret', oauthSecret, {
+      httpOnly: true,
+      secure: true,
+      path: '/',
+      maxAge: 300, // 5 minutos
+    })
 
-    return NextResponse.redirect(authUrl)
+    return responseRedirect
 
   } catch (error) {
     console.error('❌ Error:', error)
     return NextResponse.json({
       error: 'Error al iniciar OAuth',
-      details: error instanceof Error ? error.message : 'Error desconocido'
+      details: error instanceof Error ? error.message : 'Error desconocido',
     }, { status: 500 })
   }
 }
