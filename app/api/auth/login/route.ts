@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
-// Solo importa estas dos si no están ya en el scope global del proyecto
 const oauth = require('oauth-1.0a')
 const axios = require('axios')
 
@@ -40,18 +39,39 @@ export async function GET(request: NextRequest) {
       headers: {
         Authorization: authHeader.Authorization,
         'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'WikiPeopleStats/1.0', // Add user agent
       },
       responseType: 'text',
     })
 
     console.log('🔧 Respuesta cruda:', response.data)
 
-    const tokenData = new URLSearchParams(response.data)
-    const oauthToken = tokenData.get('oauth_token')
-    const oauthSecret = tokenData.get('oauth_token_secret')
+    // Try different parsing methods
+    let oauthToken: string | null = null
+    let oauthSecret: string | null = null
+
+    // Method 1: Try URLSearchParams
+    try {
+      const tokenData = new URLSearchParams(response.data)
+      oauthToken = tokenData.get('oauth_token')
+      oauthSecret = tokenData.get('oauth_token_secret')
+      console.log('🔍 Intento de parseo con URLSearchParams:', { oauthToken, oauthSecret })
+    } catch (e) {
+      console.log('⚠️ URLSearchParams no funcionó, probando otro método')
+    }
+
+    // Method 2: Try manual parsing if first method failed
+    if (!oauthToken || !oauthSecret) {
+      const matches = response.data.match(/oauth_token=([^&]+)/)
+      if (matches) oauthToken = matches[1]
+      const secretMatches = response.data.match(/oauth_token_secret=([^&]+)/)
+      if (secretMatches) oauthSecret = secretMatches[1]
+      console.log('🔍 Intento de parseo con regex:', { oauthToken, oauthSecret })
+    }
 
     if (!oauthToken || !oauthSecret) {
-      throw new Error('No se pudo obtener el oauth_token o el oauth_token_secret')
+      console.error('❌ Formato de respuesta inesperado:', response.data)
+      throw new Error(`No se pudo obtener el oauth_token o el oauth_token_secret. Respuesta: ${response.data}`)
     }
 
     console.log('✅ Token obtenido correctamente:', oauthToken)
