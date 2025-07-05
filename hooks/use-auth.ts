@@ -47,12 +47,12 @@ export function useAuth() {
   
   const login = () => {
     const currentDomain = window.location.hostname
-    window.location.href = `https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/login?origin=${currentDomain}`
+    window.location.href = `https://${process.env.AUTH_DOMAIN}/api/auth/login?origin=${currentDomain}`
   }
   
   const logout = async () => {
     try {
-      await fetch(`https://${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/auth/logout`, {
+      await fetch(`https://${process.env.AUTH_DOMAIN}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include'
       })
