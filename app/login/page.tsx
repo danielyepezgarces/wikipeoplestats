@@ -8,49 +8,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Globe, Users, Shield, BookOpen, AlertCircle } from 'lucide-react'
 
-// Componente separado para manejar los search params
 function LoginContent() {
   const { isAuthenticated, login, isLoading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
+  const [debugInfo, setDebugInfo] = useState<string | null>(null)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Si ya está autenticado, redirigir al dashboard
       router.push('/dashboard')
     }
   }, [isAuthenticated, router])
 
   useEffect(() => {
-    // Manejar errores de autenticación
     const errorParam = searchParams?.get('error')
+    const messageParam = searchParams?.get('message')
+    const debugParam = searchParams?.get('debug')
+
     if (errorParam) {
-      const errorMessages = {
-        'authorization_failed': 'Falló la autorización con Wikipedia',
-        'token_expired': 'El token de autenticación ha expirado',
-        'authentication_failed': 'Error en la autenticación',
-        'access_denied': 'Acceso denegado por el usuario'
+      setError(decodeURIComponent(messageParam || 'Error desconocido'))
+    }
+
+    if (debugParam) {
+      try {
+        const decoded = decodeURIComponent(debugParam)
+        setDebugInfo(decoded)
+        console.warn('🔍 DEBUG:', JSON.parse(decoded)) // mostrar en consola también
+      } catch (e) {
+        setDebugInfo(debugParam)
       }
-      setError(errorMessages[errorParam as keyof typeof errorMessages] || 'Error desconocido')
     }
   }, [searchParams])
 
   const handleLogin = async () => {
     setError(null)
+    setDebugInfo(null)
     setIsLoggingIn(true)
-    
+
     try {
-      // Obtener el dominio actual
       const currentDomain = window.location.hostname
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-      
-      // Redirigir al proceso de login
       login(`${authDomain}/api/auth/login?origin=${encodeURIComponent(currentDomain)}`)
     } catch (err) {
-      const errorMessage = "Error al iniciar sesión. Por favor, inténtalo de nuevo."
-      setError(errorMessage)
+      setError("Error al iniciar sesión. Por favor, inténtalo de nuevo.")
       setIsLoggingIn(false)
     }
   }
@@ -77,12 +79,8 @@ function LoginContent() {
           <div className="mx-auto h-20 w-20 bg-blue-600 rounded-full flex items-center justify-center">
             <Globe className="h-10 w-10 text-white" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Iniciar Sesión
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Accede con tu cuenta de Wikipedia
-          </p>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Iniciar Sesión</h2>
+          <p className="mt-2 text-sm text-gray-600">Accede con tu cuenta de Wikipedia</p>
         </div>
 
         <Card className="bg-white shadow-xl">
@@ -100,7 +98,14 @@ function LoginContent() {
               </Alert>
             )}
 
-            {/* Login Button */}
+            {/* Debug JSON */}
+            {debugInfo && (
+              <div className="p-2 bg-gray-100 rounded text-xs overflow-x-auto max-h-48">
+                <strong>Debug info:</strong>
+                <pre className="whitespace-pre-wrap break-all">{debugInfo}</pre>
+              </div>
+            )}
+
             <Button
               onClick={handleLogin}
               disabled={isLoggingIn}
@@ -119,16 +124,14 @@ function LoginContent() {
               )}
             </Button>
 
+            {/* Info Section */}
             <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-white px-2 text-muted-foreground">Información del Sistema</span>
               </div>
             </div>
 
-            {/* Info Section */}
             <div className="space-y-3">
               <div className="grid gap-2">
                 <div className="flex items-start space-x-2">
@@ -160,7 +163,7 @@ function LoginContent() {
             <div className="text-xs text-center text-muted-foreground space-y-1">
               <p>Al iniciar sesión, aceptas los términos de uso del sistema</p>
               <p>
-                Powered by{" "}
+                Powered by{' '}
                 <a
                   href="https://www.mediawiki.org/wiki/OAuth"
                   target="_blank"
@@ -192,7 +195,6 @@ function LoginContent() {
   )
 }
 
-// Componente de loading para Suspense
 function LoginLoading() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -208,7 +210,6 @@ function LoginLoading() {
   )
 }
 
-// Componente principal con Suspense
 export default function LoginPage() {
   return (
     <Suspense fallback={<LoginLoading />}>
