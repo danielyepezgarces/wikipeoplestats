@@ -94,16 +94,15 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 flex flex-col items-center justify-center p-4">
+      <div className="text-center mb-8">
+        <WikiPeopleStats />
+      </div>
+      
       <div className="max-w-md w-full space-y-6 px-4">
-        <div className="text-center space-y-6">
-          <div className="mx-auto flex items-center justify-center mb-8">
-            <WikiPeopleStats />
-          </div>
-          <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Accede a tu panel de administración</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Usa tu cuenta de Wikipedia para autenticarte</p>
-          </div>
+        <div className="text-center space-y-3">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Accede a tu panel de administración</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Usa tu cuenta de Wikipedia para autenticarte</p>
         </div>
 
         <Card className="bg-white dark:bg-gray-800 shadow-xl">
