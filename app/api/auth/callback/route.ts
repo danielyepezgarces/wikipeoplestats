@@ -103,7 +103,7 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
 async function getWikipediaUserInfoBasic(oauth_token: string, oauth_token_secret: string): Promise<{ user: UserInfo | null, debug?: any }> {
   const oauthClient = createOAuthClient()
   const request = {
-    url: 'https://meta.wikimedia.org/w/api.php?action=query&meta=userinfo&uiprop=id|name|email&format=json',
+    url: 'https://meta.wikimedia.org/w/api.php?action=query&meta=userinfo&uiprop=id|name|email&formatversion=2&format=json',
     method: 'GET'
   }
   const authHeader = oauthClient.toHeader(oauthClient.authorize(request, {
