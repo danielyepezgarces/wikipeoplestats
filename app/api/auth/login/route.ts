@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     })
 
     const requestData = {
-      url: 'https://meta.wikimedia.org/w/rest.php/oauth/initiate',
+      url: 'https://meta.wikimedia.org/w/index.php?title=Special:OAuth/initiate',
       method: 'POST',
       data: { oauth_callback: oauthCallback }
     }
