@@ -100,11 +100,6 @@ function LoginContent() {
       </div>
       
       <div className="max-w-md w-full space-y-6 px-4 flex-1 flex flex-col justify-center">
-        <div className="text-center space-y-3">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Accede a tu panel de administración</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Usa tu cuenta de Wikipedia para autenticarte</p>
-        </div>
-
         <Card className="bg-white dark:bg-gray-800 shadow-xl">
           <CardHeader className="space-y-1">
             <CardTitle className="text-center text-lg font-semibold text-gray-900 dark:text-white">
