@@ -5,7 +5,6 @@ import { Database } from '@/lib/database'
 
 const oauth = require('oauth-1.0a')
 
-// Configuración base
 const WIKIMEDIA_OAUTH_URL = 'https://meta.wikimedia.org/w/index.php'
 const DEFAULT_ORIGIN = 'www.wikipeoplestats.org'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
@@ -48,7 +47,7 @@ function createOAuthClient() {
       secret: process.env.WIKIPEDIA_CLIENT_SECRET || ''
     },
     signature_method: 'HMAC-SHA1',
-    hash_function: (base_string: string, key: string) => {
+    hash_function(base_string: string, key: string) {
       return crypto.createHmac('sha1', key).update(base_string).digest('base64')
     }
   })
@@ -62,10 +61,9 @@ async function getAccessToken(oauth_token: string, oauth_token_secret: string, o
     data: { oauth_token, oauth_verifier }
   }
 
-  const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData, {
-    key: oauth_token,
-    secret: oauth_token_secret
-  }))
+  const authHeader = oauthClient.toHeader(
+    oauthClient.authorize(requestData, { key: oauth_token, secret: oauth_token_secret })
+  )
 
   try {
     const response = await fetch(requestData.url, {
@@ -77,7 +75,10 @@ async function getAccessToken(oauth_token: string, oauth_token_secret: string, o
       }
     })
 
-    if (!response.ok) return null
+    if (!response.ok) {
+      console.error('❌ Token exchange failed:', await response.text())
+      return null
+    }
 
     const text = await response.text()
     const params = new URLSearchParams(text)
@@ -86,7 +87,8 @@ async function getAccessToken(oauth_token: string, oauth_token_secret: string, o
       oauth_token: params.get('oauth_token') || '',
       oauth_token_secret: params.get('oauth_token_secret') || ''
     }
-  } catch {
+  } catch (error) {
+    console.error('❌ Error in getAccessToken:', error)
     return null
   }
 }
@@ -98,10 +100,9 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
     method: 'POST'
   }
 
-  const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData, {
-    key: oauth_token,
-    secret: oauth_token_secret
-  }))
+  const authHeader = oauthClient.toHeader(
+    oauthClient.authorize(requestData, { key: oauth_token, secret: oauth_token_secret })
+  )
 
   try {
     const response = await fetch(requestData.url, {
@@ -112,7 +113,10 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
       }
     })
 
-    if (!response.ok) return null
+    if (!response.ok) {
+      console.error('❌ Failed to get user identity:', await response.text())
+      return null
+    }
 
     const jwtEncoded = await response.text()
     const decoded: any = jwt.decode(jwtEncoded)
@@ -126,18 +130,15 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
       editCount: decoded.editcount || 0,
       registrationDate: decoded.registration || ''
     }
-  } catch {
+  } catch (error) {
+    console.error('❌ Error in getUserIdentity:', error)
     return null
   }
 }
 
-function generateToken(user: { id: number, username: string, email: string | null }) {
+function generateToken(user: { id: number; username: string; email: string | null }) {
   return jwt.sign(
-    {
-      userId: user.id,
-      username: user.username,
-      email: user.email
-    },
+    { userId: user.id, username: user.username, email: user.email },
     JWT_SECRET,
     { expiresIn: '30d' }
   )
@@ -168,67 +169,55 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
   return response
 }
 
-// --- MAIN ---
+// MAIN
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
-  const oauth_token = searchParams.get('oauth_token')
-  const oauth_verifier = searchParams.get('oauth_verifier')
-  const origin = searchParams.get('origin') || DEFAULT_ORIGIN
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const oauth_token = searchParams.get('oauth_token')
+    const oauth_verifier = searchParams.get('oauth_verifier')
+    const origin = searchParams.get('origin') || DEFAULT_ORIGIN
 
-  if (!oauth_token || !oauth_verifier) {
-    return redirectToErrorPage(origin, 'missing_parameters')
-  }
-
-  const oauth_token_secret = request.cookies.get('oauth_token_secret')?.value
-  if (!oauth_token_secret) {
-    return redirectToErrorPage(origin, 'session_expired')
-  }
-
-  const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
-  if (!accessToken) {
-    return redirectToErrorPage(origin, 'token_exchange_failed')
-  }
-
-  const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
-  if (!userInfo) {
-    return redirectToErrorPage(origin, 'user_info_failed')
-  }
-
-  // Buscar usuario por Wikipedia ID
-  let user = await Database.getUserByWikipediaId(userInfo.id)
-
-  // Si no existe, lo crea
-  if (!user) {
-    try {
-      user = await Database.createUser({
-        wikipedia_id: userInfo.id,
-        wikipedia_username: userInfo.username,
-        email: userInfo.email,
-        is_active: true
-      })
-    } catch (error) {
-      console.error('❌ Error creating user:', error)
-      return redirectToErrorPage(origin, 'session_creation_failed')
+    if (!oauth_token || !oauth_verifier) {
+      return redirectToErrorPage(origin, 'missing_parameters')
     }
-  }
 
-  // Actualiza última conexión
-  try {
-    await Database.updateUserLogin(user.id.toString())
-  } catch (err) {
-    console.warn('⚠️ Could not update last login:', err)
-  }
+    const oauth_token_secret = request.cookies.get('oauth_token_secret')?.value
+    if (!oauth_token_secret) {
+      return redirectToErrorPage(origin, 'session_expired')
+    }
 
-  // Genera token
-  const token = generateToken({
-    id: user.id,
-    username: user.wikipedia_username,
-    email: user.email ?? null
-  })
+    console.log('🔑 Getting access token...')
+    const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
+    if (!accessToken) return redirectToErrorPage(origin, 'token_exchange_failed')
 
-  // Crea sesión
-  try {
-    const session = await Database.createSession({
+    console.log('👤 Getting user info...')
+    const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
+    if (!userInfo) return redirectToErrorPage(origin, 'user_info_failed')
+
+    console.log('🔍 Looking for existing user...')
+    let user = await Database.getUserByWikipediaId(userInfo.id)
+
+    if (!user) {
+      console.log('🆕 Creating new user...')
+      user = await Database.createUser({
+        wikimedia_id: userInfo.id,
+        username: userInfo.username,
+        email: userInfo.email,
+        avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`
+      })
+    }
+
+    console.log('🕓 Updating last login...')
+    await Database.updateUserLogin(user.id)
+
+    console.log('🔐 Creating session...')
+    const token = generateToken({
+      id: user.id,
+      username: user.username,
+      email: user.email || null
+    })
+
+    await Database.createSession({
       user_id: user.id,
       token_hash: token,
       expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
@@ -237,15 +226,14 @@ export async function GET(request: NextRequest) {
       ip_address: request.headers.get('x-forwarded-for') || ''
     })
 
-    if (!session) throw new Error('Null session returned')
+    console.log('✅ Auth successful. Redirecting...')
+    return createAuthResponse(origin, token, {
+      id: user.id,
+      username: user.username,
+      email: user.email
+    })
   } catch (error) {
-    console.error('❌ Could not create session:', error)
-    return redirectToErrorPage(origin, 'session_creation_failed')
+    console.error('🔥 Unhandled error in auth callback:', error)
+    return new NextResponse('Internal Server Error', { status: 500 })
   }
-
-  return createAuthResponse(origin, token, {
-    id: user.id,
-    username: user.wikipedia_username,
-    email: user.email
-  })
 }
