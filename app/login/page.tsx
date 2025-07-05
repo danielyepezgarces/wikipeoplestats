@@ -95,11 +95,11 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 flex flex-col items-center p-4">
-      <div className="text-center mt-12 mb-8">
-        <WikiPeopleStats />
-      </div>
-      
+
       <div className="max-w-md w-full space-y-6 px-4 flex-1 flex flex-col justify-center">
+        <div className="text-center mt-6">
+          <WikiPeopleStats />
+        </div>
         <Card className="bg-white dark:bg-gray-800 shadow-xl">
           <CardHeader className="space-y-1">
             <CardTitle className="text-center text-lg font-semibold text-gray-900 dark:text-white">
