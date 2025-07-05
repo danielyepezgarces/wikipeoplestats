@@ -16,7 +16,7 @@ import { useI18n } from "@/hooks/use-i18n"
 import { useDomainContext } from "@/hooks/use-domain-context"
 import { useToast } from "@/hooks/use-toast"
 
-export const dynamic = 'force-dynamic'
+
 
 
 export default function SearchGendersPage() {

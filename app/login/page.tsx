@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Users, Shield, Globe, AlertCircle } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
+
 
 
 const WikipediaFAIcon = ({ className = "h-5 w-5" }) => (

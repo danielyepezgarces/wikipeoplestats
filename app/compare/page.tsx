@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation"
 
 // Add this export to prevent static generation
-export const dynamic = 'force-dynamic'
+
 
 type CompareType = "wikis" | "users" | "countries"
 
