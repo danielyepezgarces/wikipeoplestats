@@ -4,11 +4,15 @@ export async function GET(request: NextRequest) {
   console.log('🔍 Verificando autenticación...')
   
   try {
-    // Configurar CORS para subdominios
+    // Configurar CORS para subdominios y localhost en desarrollo
     const origin = request.headers.get('origin')
     const response = new NextResponse()
     
-    if (origin && origin.includes('wikipeoplestats.org')) {
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
+    const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
+    
+    if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
       response.headers.set('Access-Control-Allow-Origin', origin)
       response.headers.set('Access-Control-Allow-Credentials', 'true')
       response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -87,7 +91,11 @@ export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get('origin')
   const response = new NextResponse(null, { status: 200 })
   
-  if (origin && origin.includes('wikipeoplestats.org')) {
+  const isDevelopment = process.env.NODE_ENV === 'development'
+  const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
+  const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
+  
+  if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
     response.headers.set('Access-Control-Allow-Origin', origin)
     response.headers.set('Access-Control-Allow-Credentials', 'true')
     response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
