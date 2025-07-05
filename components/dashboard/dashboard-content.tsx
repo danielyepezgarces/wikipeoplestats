@@ -232,7 +232,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
               <div className="flex items-center space-x-3">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className={`${getRoleColor(user.role)} text-white text-sm`}>
-                    {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block">
