@@ -19,10 +19,15 @@ import {
   UserPlus,
   GlobeIcon,
   Code,
+  LogIn,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import { LanguageSelector } from "./language-selector"
+import { LoginForm } from "./auth/login-form"
+import { UserMenu } from "./auth/user-menu"
+import { DashboardLayout } from "./dashboard/dashboard-layout"
+import { useAuth } from "@/hooks/use-auth"
 import { useI18n } from "@/hooks/use-i18n"
 
 interface HeaderProps {
@@ -33,11 +38,28 @@ interface HeaderProps {
 export function Header({ currentLang, onLanguageChange }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
+  const [showLoginForm, setShowLoginForm] = useState(false)
+  const [showDashboard, setShowDashboard] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { t } = useI18n(currentLang)
+  const { user, login, logout, isAuthenticated } = useAuth()
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen)
+  }
+
+  const handleLogin = (userData: { email: string; name: string; role: string }) => {
+    login(userData)
+    setShowLoginForm(false)
+  }
+
+  const handleLogout = () => {
+    logout()
+    setShowDashboard(false)
+  }
+
+  const handleDashboard = () => {
+    setShowDashboard(true)
   }
 
   return (
@@ -183,6 +205,21 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
                 {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
 
+              {/* Auth Section */}
+              {isAuthenticated && user ? (
+                <UserMenu user={user} onLogout={handleLogout} onDashboard={handleDashboard} />
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowLoginForm(true)}
+                  className="hidden md:flex items-center space-x-2"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span>Login</span>
+                </Button>
+              )}
+
               {/* Mobile Menu Button */}
               <Button variant="ghost" size="icon" onClick={toggleMobileMenu} className="md:hidden">
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -320,17 +357,68 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
                 <Code className="mr-2 h-5 w-5" />
                 {t("source_code")}
               </a>
+
+              {/* Mobile Auth Section */}
+              {isAuthenticated && user ? (
+                <div className="border-t pt-4 mt-4">
+                  <div className="px-3 py-2">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start px-3 py-2"
+                    onClick={handleDashboard}
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start px-3 py-2"
+                    onClick={handleLogout}
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
+                <div className="border-t pt-4 mt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start px-3 py-2"
+                    onClick={() => setShowLoginForm(true)}
+                  >
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Login
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
+      {/* Modals */}
       <LanguageSelector
         isOpen={showLanguageSelector}
         onClose={() => setShowLanguageSelector(false)}
         currentLang={currentLang}
         onLanguageChange={onLanguageChange}
       />
+
+      {showLoginForm && (
+        <LoginForm
+          onLogin={handleLogin}
+          onClose={() => setShowLoginForm(false)}
+        />
+      )}
+
+      {showDashboard && user && (
+        <DashboardLayout
+          user={user}
+          onClose={() => setShowDashboard(false)}
+        />
+      )}
     </>
   )
 }
