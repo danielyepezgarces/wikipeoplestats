@@ -4,6 +4,7 @@ import { WikipediaOAuth } from '@/lib/oauth'
 import { Database } from '@/lib/database'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log("Método recibido:", req.method) // <-- Añade esto
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Método no permitido' })
   }
