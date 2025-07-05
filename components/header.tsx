@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Moon,
   Sun,
@@ -24,7 +25,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes"
 import { LanguageSelector } from "./language-selector"
-import { LoginForm } from "./auth/login-form"
 import { UserMenu } from "./auth/user-menu"
 import { DashboardLayout } from "./dashboard/dashboard-layout"
 import { useAuth } from "@/hooks/use-auth"
@@ -38,28 +38,16 @@ interface HeaderProps {
 export function Header({ currentLang, onLanguageChange }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
-  const [showLoginForm, setShowLoginForm] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   const { t } = useI18n(currentLang)
-  const { user, login, logout, isAuthenticated } = useAuth()
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen)
-  }
-
-  const handleLogin = (userData: { email: string; name: string; role: string }) => {
-    login(userData)
-    setShowLoginForm(false)
-  }
+  const { user, logout, isAuthenticated } = useAuth()
+  const router = useRouter()
 
   const handleLogout = () => {
     logout()
     setShowDashboard(false)
-  }
-
-  const handleDashboard = () => {
-    setShowDashboard(true)
   }
 
   return (
@@ -67,7 +55,7 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
       <header className="sticky top-0 z-50 w-full bg-gray-100 dark:bg-gray-800 shadow-md">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center transition-transform transform hover:scale-105">
+            <div className="flex items-center hover:scale-105 transition-transform">
               <Link
                 href="/"
                 className="text-2xl font-bold text-primary-600 dark:text-primary-400"
@@ -75,127 +63,51 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
               >
                 {t("sitename")}
               </Link>
-              <span
-                className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded-md uppercase"
-                style={{ lineHeight: 1 }}
-              >
+              <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-blue-500 rounded-md uppercase">
                 Beta
               </span>
             </div>
 
-            {/* Desktop Menu */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
-              <Link
-                href="/search/genders"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"
-              >
-                {t("genders")}
-              </Link>
-              <Link
-                href="#"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"
-              >
-                {t("countries")}
-              </Link>
-              <Link
-                href="/search/users"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"
-              >
-                {t("users")}
-              </Link>
-              <Link
-                href="/events"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"
-              >
-                {t("events")}
-              </Link>
+              <Link href="/search/genders" className="nav-link">{t("genders")}</Link>
+              <Link href="#" className="nav-link">{t("countries")}</Link>
+              <Link href="/search/users" className="nav-link">{t("users")}</Link>
+              <Link href="/events" className="nav-link">{t("events")}</Link>
 
-              <div className="relative group">
-                <button className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2">
-                  {t("rankings")}
-                </button>
-                <ul className="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-900 shadow-lg rounded-md border border-gray-200 dark:border-gray-700">
-                  <li>
-                    <Link
-                      href="/rankings/wikis"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      {t("ranking_wikis")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/rankings/users"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      {t("ranking_users")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/rankings/countries"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      {t("ranking_countries")}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+              <Dropdown label={t("rankings")} items={[
+                { href: "/rankings/wikis", label: t("ranking_wikis") },
+                { href: "/rankings/users", label: t("ranking_users") },
+                { href: "/rankings/countries", label: t("ranking_countries") },
+              ]} />
 
-              <div className="relative group">
-                <button className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2">
-                  {t("compare")}
-                </button>
-                <ul className="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-900 shadow-lg rounded-md border border-gray-200 dark:border-gray-700">
-                  <li>
-                    <Link
-                      href="/compare/wikis"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      {t("compare_wikis")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/compare/users"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      {t("compare_users")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/compare/countries"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      {t("compare_countries")}
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+              <Dropdown label={t("compare")} items={[
+                { href: "/compare/wikis", label: t("compare_wikis") },
+                { href: "/compare/users", label: t("compare_users") },
+                { href: "/compare/countries", label: t("compare_countries") },
+              ]} />
 
               <a
                 href="https://github.com/danielyepezgarces/wikipeoplestats"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors py-2"
+                className="nav-link"
               >
                 {t("source_code")}
               </a>
             </nav>
 
+            {/* Right Controls */}
             <div className="flex items-center space-x-4">
-              {/* Language Selector Button for Desktop */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowLanguageSelector(true)}
-                className="hidden md:flex items-center space-x-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600"
+                className="hidden md:flex items-center"
               >
                 <Globe className="h-4 w-4" />
               </Button>
 
-              {/* Dark/Light Mode Toggle for Desktop */}
               <Button
                 variant="outline"
                 size="icon"
@@ -205,14 +117,13 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
                 {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
 
-              {/* Auth Section */}
               {isAuthenticated && user ? (
-                <UserMenu user={user} onLogout={handleLogout} onDashboard={handleDashboard} />
+                <UserMenu user={user} onLogout={handleLogout} onDashboard={() => setShowDashboard(true)} />
               ) : (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowLoginForm(true)}
+                  onClick={() => router.push("/login")}
                   className="hidden md:flex items-center space-x-2"
                 >
                   <LogIn className="h-4 w-4" />
@@ -221,180 +132,59 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
               )}
 
               {/* Mobile Menu Button */}
-              <Button variant="ghost" size="icon" onClick={toggleMobileMenu} className="md:hidden">
+              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden">
                 {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
             </div>
           </div>
 
-          {/* Mobile Menu */}
-          <div
-            className={`md:hidden ${mobileMenuOpen ? "block" : "hidden"} transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 shadow-lg rounded-md`}
-          >
-            <div className="px-4 pt-4 pb-3 space-y-2">
-              <Link
-                href="/"
-                className="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
-              >
-                <Home className="mr-2 h-5 w-5" />
-                {t("home")}
-              </Link>
-              <Link
-                href="/search/genders"
-                className="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
-              >
-                <Users className="mr-2 h-5 w-5" />
-                {t("genders")}
-              </Link>
-              <Link
-                href="#"
-                className="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
-              >
-                <Flag className="mr-2 h-5 w-5" />
-                {t("countries")}
-              </Link>
-              <Link
-                href="/search/users"
-                className="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
-              >
-                <Users className="mr-2 h-5 w-5" />
-                {t("users")}
-              </Link>
-              <Link
-                href="/events"
-                className="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
-              >
-                <Calendar className="mr-2 h-5 w-5" />
-                {t("events")}
-              </Link>
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden bg-white dark:bg-gray-800 shadow-lg rounded-md mt-2 space-y-2 px-4 py-4">
+              <MobileLink href="/" icon={<Home />} label={t("home")} />
+              <MobileLink href="/search/genders" icon={<Users />} label={t("genders")} />
+              <MobileLink href="#" icon={<Flag />} label={t("countries")} />
+              <MobileLink href="/search/users" icon={<Users />} label={t("users")} />
+              <MobileLink href="/events" icon={<Calendar />} label={t("events")} />
 
-              {/* Dropdown for Rankings */}
-              <details className="relative">
-                <summary className="flex items-center justify-between px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                  <span className="flex items-center">
-                    <Book className="mr-2 h-5 w-5" />
-                    {t("rankings")}
-                  </span>
-                  <ChevronDown className="h-5 w-5" />
-                </summary>
-                <ul className="bg-white dark:bg-gray-800 shadow-lg rounded-md">
-                  <li>
-                    <Link
-                      href="/rankings/wikis"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                    >
-                      <Book className="mr-2 h-4 w-4" />
-                      {t("ranking_wikis")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/rankings/users"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      {t("ranking_users")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/rankings/countries"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                    >
-                      <Flag className="mr-2 h-4 w-4" />
-                      {t("ranking_countries")}
-                    </Link>
-                  </li>
-                </ul>
-              </details>
+              <MobileDropdown label={t("rankings")} items={[
+                { href: "/rankings/wikis", icon: <Book />, label: t("ranking_wikis") },
+                { href: "/rankings/users", icon: <User />, label: t("ranking_users") },
+                { href: "/rankings/countries", icon: <Flag />, label: t("ranking_countries") },
+              ]} />
 
-              {/* Dropdown for Compare */}
-              <details className="relative">
-                <summary className="flex items-center justify-between px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                  <span className="flex items-center">
-                    <BookOpen className="mr-2 h-5 w-5" />
-                    {t("compare")}
-                  </span>
-                  <ChevronDown className="h-5 w-5" />
-                </summary>
-                <ul className="bg-white dark:bg-gray-800 shadow-lg rounded-md">
-                  <li>
-                    <Link
-                      href="/compare/wikis"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                    >
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      {t("compare_wikis")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/compare/users"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                    >
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      {t("compare_users")}
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/compare/countries"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
-                    >
-                      <GlobeIcon className="mr-2 h-4 w-4" />
-                      {t("compare_countries")}
-                    </Link>
-                  </li>
-                </ul>
-              </details>
+              <MobileDropdown label={t("compare")} items={[
+                { href: "/compare/wikis", icon: <BookOpen />, label: t("compare_wikis") },
+                { href: "/compare/users", icon: <UserPlus />, label: t("compare_users") },
+                { href: "/compare/countries", icon: <GlobeIcon />, label: t("compare_countries") },
+              ]} />
 
-              <a
+              <MobileLink
                 href="https://github.com/danielyepezgarces/wikipeoplestats"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block px-3 py-2 rounded-md text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center"
-              >
-                <Code className="mr-2 h-5 w-5" />
-                {t("source_code")}
-              </a>
+                icon={<Code />}
+                label={t("source_code")}
+                external
+              />
 
-              {/* Mobile Auth Section */}
               {isAuthenticated && user ? (
-                <div className="border-t pt-4 mt-4">
-                  <div className="px-3 py-2">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-2"
-                    onClick={handleDashboard}
-                  >
-                    Dashboard
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-2"
-                    onClick={handleLogout}
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Logout
-                  </Button>
+                <div className="pt-4 border-t">
+                  <div className="text-sm text-gray-700 dark:text-gray-300">{user.name}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">{user.email}</div>
+                  <Button variant="ghost" className="w-full justify-start" onClick={() => setShowDashboard(true)}>Dashboard</Button>
+                  <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>Logout</Button>
                 </div>
               ) : (
-                <div className="border-t pt-4 mt-4">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start px-3 py-2"
-                    onClick={() => setShowLoginForm(true)}
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
-                  </Button>
-                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => router.push("/login")}
+                >
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Button>
               )}
             </div>
-          </div>
+          )}
         </div>
       </header>
 
@@ -406,19 +196,100 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
         onLanguageChange={onLanguageChange}
       />
 
-      {showLoginForm && (
-        <LoginForm
-          onLogin={handleLogin}
-          onClose={() => setShowLoginForm(false)}
-        />
-      )}
-
       {showDashboard && user && (
-        <DashboardLayout
-          user={user}
-          onClose={() => setShowDashboard(false)}
-        />
+        <DashboardLayout user={user} onClose={() => setShowDashboard(false)} />
       )}
     </>
+  )
+}
+
+// Dropdown for desktop
+function Dropdown({
+  label,
+  items,
+}: {
+  label: string
+  items: { href: string; label: string }[]
+}) {
+  return (
+    <div className="relative group">
+      <button className="nav-link">{label}</button>
+      <ul className="absolute left-0 hidden group-hover:block bg-white dark:bg-gray-900 shadow-lg rounded-md border border-gray-200 dark:border-gray-700 z-50">
+        {items.map(({ href, label }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+// Mobile link
+function MobileLink({
+  href,
+  icon,
+  label,
+  external = false,
+}: {
+  href: string
+  icon: JSX.Element
+  label: string
+  external?: boolean
+}) {
+  return external ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+    >
+      {icon}
+      <span>{label}</span>
+    </a>
+  ) : (
+    <Link href={href} className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+      {icon}
+      <span>{label}</span>
+    </Link>
+  )
+}
+
+// Mobile dropdown
+function MobileDropdown({
+  label,
+  items,
+}: {
+  label: string
+  items: { href: string; icon: JSX.Element; label: string }[]
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center justify-between w-full text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+      >
+        <span>{label}</span>
+        <ChevronDown className="h-5 w-5" />
+      </button>
+      {open && (
+        <ul className="mt-2 pl-4 space-y-1">
+          {items.map(({ href, label, icon }) => (
+            <li key={href}>
+              <Link href={href} className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400">
+                {icon}
+                <span>{label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
