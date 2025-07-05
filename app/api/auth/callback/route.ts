@@ -5,6 +5,7 @@ import { Database } from '@/lib/database'
 
 const oauth = require('oauth-1.0a')
 
+// Configuración base
 const WIKIMEDIA_OAUTH_URL = 'https://meta.wikimedia.org/w/index.php'
 const DEFAULT_ORIGIN = 'www.wikipeoplestats.org'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
@@ -130,7 +131,7 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
   }
 }
 
-function generateToken(user: { id: number; username: string; email: string | null }) {
+function generateToken(user: { id: number, username: string, email: string | null }) {
   return jwt.sign(
     {
       userId: user.id,
@@ -212,7 +213,11 @@ export async function GET(request: NextRequest) {
   }
 
   // Actualiza última conexión
-  await Database.updateUserLogin(user.id)
+  try {
+    await Database.updateUserLogin(user.id.toString())
+  } catch (err) {
+    console.warn('⚠️ Could not update last login:', err)
+  }
 
   // Genera token
   const token = generateToken({
@@ -223,7 +228,7 @@ export async function GET(request: NextRequest) {
 
   // Crea sesión
   try {
-    await Database.createSession({
+    const session = await Database.createSession({
       user_id: user.id,
       token_hash: token,
       expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
@@ -231,6 +236,8 @@ export async function GET(request: NextRequest) {
       user_agent: request.headers.get('user-agent') || '',
       ip_address: request.headers.get('x-forwarded-for') || ''
     })
+
+    if (!session) throw new Error('Null session returned')
   } catch (error) {
     console.error('❌ Could not create session:', error)
     return redirectToErrorPage(origin, 'session_creation_failed')
