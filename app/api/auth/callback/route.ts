@@ -225,11 +225,15 @@ export async function GET(request: NextRequest) {
     await Database.createSession({
       user_id: user.id,
       token_hash: token,
-      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+        .toISOString()
+        .slice(0, 19)
+        .replace('T', ' '),
       origin_domain: origin,
       user_agent: request.headers.get('user-agent') || '',
-      ip_address: request.headers.get('x-forwarded-for') || request.ip || ''
+      ip_address: request.headers.get('x-forwarded-for') || ''
     })
+
 
     console.log('✅ Auth successful. Redirecting...')
     return createAuthResponse(origin, token, {
