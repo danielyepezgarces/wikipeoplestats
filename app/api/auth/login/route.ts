@@ -1,55 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 
 export async function GET(request: NextRequest) {
   console.log('🔍 Iniciando proceso de login...')
-  
+
   try {
-    // Paso 1: Verificar parámetros
-    console.log('📋 Paso 1: Verificando parámetros...')
     const searchParams = request.nextUrl.searchParams
     const origin = searchParams.get('origin')
     const originDomain = origin || request.headers.get('referer') || 'www.wikipeoplestats.org'
-    console.log('✅ Origin domain:', originDomain)
 
-    // Paso 2: Crear URL de autorización de Wikipedia
-    console.log('📋 Paso 2: Creando URL de autorización...')
-    
-    const callbackUrl = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(originDomain)}`
-    
-    // Construir URL de autorización de Wikipedia OAuth
-    const authUrl = new URL('https://meta.wikimedia.org/wiki/Special:OAuth/authorize')
-    authUrl.searchParams.set('oauth_consumer_key', process.env.WIKIPEDIA_CLIENT_ID || '')
-    authUrl.searchParams.set('oauth_callback', callbackUrl)
-    
-    console.log('✅ URL de autorización creada:', authUrl.toString())
+    console.log('📋 Paso 1: Solicitando request token...')
 
-    // Paso 3: Redirigir a Wikipedia
-    console.log('📋 Paso 3: Redirigiendo a Wikipedia...')
-    return NextResponse.redirect(authUrl.toString())
+    const oauthCallback = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(originDomain)}`
 
-  } catch (error) {
-    console.error('❌ Error general:', error)
-    return NextResponse.json(
-      { 
-        error: 'Error interno del servidor',
-        details: error instanceof Error ? error.message : 'Error desconocido',
-        stack: error instanceof Error ? error.stack : 'No stack trace'
+    // Construir cabeceras OAuth (firma manual o usa una librería como oauth-1.0a)
+    const oauth = require('oauth-1.0a')
+    const axios = require('axios')
+
+    const oauthClient = oauth({
+      consumer: {
+        key: process.env.WIKIPEDIA_CLIENT_ID || '',
+        secret: process.env.WIKIPEDIA_CLIENT_SECRET || '',
       },
-      { status: 500 }
-    )
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    return NextResponse.json({ 
-      message: 'POST funcionando correctamente',
-      receivedData: body 
+      signature_method: 'HMAC-SHA1',
+      hash_function(base_string, key) {
+        return crypto.createHmac('sha1', key).update(base_string).digest('base64')
+      }
     })
+
+    const requestData = {
+      url: 'https://meta.wikimedia.org/w/rest.php/oauth/initiate',
+      method: 'POST',
+      data: { oauth_callback: oauthCallback }
+    }
+
+    const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData))
+
+    const response = await axios.post(requestData.url, null, {
+      headers: {
+        Authorization: authHeader.Authorization
+      }
+    })
+
+    const tokenData = new URLSearchParams(response.data)
+    const oauthToken = tokenData.get('oauth_token')
+    const oauthSecret = tokenData.get('oauth_token_secret')
+
+    console.log('✅ Token obtenido:', oauthToken)
+
+    // TODO: Guardar oauthToken y oauthSecret en cookies/sesión para usar en el callback
+
+    const authUrl = `https://meta.wikimedia.org/wiki/Special:OAuth/authorize?oauth_token=${oauthToken}`
+
+    return NextResponse.redirect(authUrl)
+
   } catch (error) {
+    console.error('❌ Error:', error)
     return NextResponse.json({
-      error: 'Error en POST',
+      error: 'Error al iniciar OAuth',
       details: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 })
   }
