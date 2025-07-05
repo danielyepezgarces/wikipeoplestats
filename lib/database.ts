@@ -1,4 +1,3 @@
-// lib/database.ts
 import mysql from 'mysql2/promise'
 
 let connection: mysql.Connection | null = null
@@ -50,7 +49,6 @@ export interface Session {
 }
 
 export class Database {
-  // ✅ Verifica si ya existe el usuario
   static async getUserByWikipediaId(wikimediaId: string): Promise<User | null> {
     const conn = await getConnection()
     const [rows] = await conn.execute(
@@ -61,16 +59,24 @@ export class Database {
     return users[0] || null
   }
 
-  // ✅ Inserta un usuario nuevo
-  static async createUser(data: { wikimedia_id: string; username: string; email?: string; avatar_url?: string }): Promise<User> {
+  static async createUser(data: {
+    wikimedia_id: string
+    username: string
+    email?: string
+    avatar_url?: string
+  }): Promise<User> {
     const conn = await getConnection()
     const [result] = await conn.execute(
-      `INSERT INTO users (wikimedia_id, username, email, avatar_url, created_at, updated_at, is_active) 
+      `INSERT INTO users (wikimedia_id, username, email, avatar_url, created_at, updated_at, is_active)
        VALUES (?, ?, ?, ?, NOW(), NOW(), 1)`,
       [data.wikimedia_id, data.username, data.email, data.avatar_url]
     )
     const insertResult = result as mysql.ResultSetHeader
-    return this.getUserById(insertResult.insertId)
+    const user = await this.getUserById(insertResult.insertId)
+    if (!user) {
+      throw new Error('User creation failed')
+    }
+    return user
   }
 
   static async getUserById(id: number): Promise<User | null> {
@@ -82,22 +88,25 @@ export class Database {
 
   static async updateUserLogin(userId: number): Promise<void> {
     const conn = await getConnection()
-    await conn.execute('UPDATE users SET last_login = NOW(), updated_at = NOW() WHERE id = ?', [userId])
+    await conn.execute(
+      'UPDATE users SET last_login = NOW(), updated_at = NOW() WHERE id = ?',
+      [userId]
+    )
   }
 
   static async assignDefaultRole(userId: number, role: string = 'reader'): Promise<void> {
     const conn = await getConnection()
     await conn.execute(
-      `INSERT INTO user_roles (user_id, role, created_at) VALUES (?, ?, NOW())`,
+      `INSERT INTO user_roles (user_id, role, created_at)
+       VALUES (?, ?, NOW())`,
       [userId, role]
     )
   }
 
-  // 🔐 Sesiones
   static async createSession(data: Partial<Session>): Promise<Session> {
     const conn = await getConnection()
     const [result] = await conn.execute(
-      `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, created_at, last_used) 
+      `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, created_at, last_used)
        VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         data.user_id,
@@ -108,8 +117,13 @@ export class Database {
         data.ip_address
       ]
     )
+
     const insertResult = result as mysql.ResultSetHeader
-    return this.getSessionById(insertResult.insertId)
+    const session = await this.getSessionById(insertResult.insertId)
+    if (!session) {
+      throw new Error('Session creation failed')
+    }
+    return session
   }
 
   static async getSessionById(id: number): Promise<Session | null> {
