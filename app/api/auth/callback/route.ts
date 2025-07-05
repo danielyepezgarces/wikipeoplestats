@@ -137,12 +137,12 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
   
   const oauthClient = createOAuthClient()
   
-  // CORRECCIÓN: Agregar assertuser y mejorar el endpoint
+  // CORRECCIÓN: Remover email de la solicitud - causa problemas de permisos
   const userInfoRequest = {
     url: `https://meta.wikimedia.org/w/api.php?` +
          `action=query&` +
          `meta=userinfo&` +
-         `uiprop=id|name|email|editcount|registrationdate|groups|rights&` +
+         `uiprop=id|name|editcount|registrationdate|groups|rights&` +
          `assertuser=user&` + // IMPORTANTE: Verificar que el usuario está autenticado
          `format=json`,
     method: 'GET'
@@ -200,12 +200,81 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
     return {
       id: userinfo.id.toString(),
       username: userinfo.name,
-      email: userinfo.email || null,
+      email: null, // CORRECCIÓN: Siempre null ya que no solicitamos email
       editCount: userinfo.editcount || 0,
       registrationDate: userinfo.registrationdate || ''
     }
   } catch (error) {
     console.error('Error al obtener información del usuario:', error)
+    return null
+  }
+}
+
+// CORRECCIÓN 3: Función alternativa más básica para casos problemáticos
+async function getWikipediaUserInfoBasic(oauth_token: string, oauth_token_secret: string): Promise<UserInfo | null> {
+  console.log('👤 Obteniendo información básica del usuario de Wikipedia...')
+  
+  const oauthClient = createOAuthClient()
+  
+  // Solicitud mínima sin assertuser ni propiedades adicionales
+  const userInfoRequest = {
+    url: `https://meta.wikimedia.org/w/api.php?` +
+         `action=query&` +
+         `meta=userinfo&` +
+         `uiprop=id|name|editcount|registrationdate&` +
+         `format=json`,
+    method: 'GET'
+  }
+  
+  const authHeader = oauthClient.toHeader(oauthClient.authorize(userInfoRequest, {
+    key: oauth_token,
+    secret: oauth_token_secret
+  }))
+  
+  try {
+    const response = await fetch(userInfoRequest.url, {
+      headers: {
+        'Authorization': authHeader.Authorization,
+        'User-Agent': 'WikiPeopleStats/1.0 (https://wikipeoplestats.org; contact@wikipeoplestats.org)',
+        'Accept': 'application/json'
+      }
+    })
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Error HTTP al obtener información básica:', response.status, errorText)
+      return null
+    }
+    
+    const data = await response.json()
+    console.log('Respuesta básica de userinfo:', JSON.stringify(data, null, 2))
+    
+    if (data.error) {
+      console.error('Error de la API:', data.error)
+      return null
+    }
+    
+    if (!data?.query?.userinfo) {
+      console.error('Estructura de respuesta inválida:', data)
+      return null
+    }
+    
+    const userinfo = data.query.userinfo
+    
+    if (!userinfo.id || !userinfo.name) {
+      console.error('Datos de usuario incompletos:', userinfo)
+      return null
+    }
+    
+    return {
+      id: userinfo.id.toString(),
+      username: userinfo.name,
+      email: null,
+      editCount: userinfo.editcount || 0,
+      registrationDate: userinfo.registrationdate || ''
+    }
+  } catch (error) {
+    console.error('Error al obtener información básica:', error)
     return null
   }
 }
@@ -349,10 +418,17 @@ export async function GET(request: NextRequest) {
       await debugWikipediaAuth(accessToken.oauth_token, accessToken.oauth_token_secret)
     }
     
-    // Paso 2: Obtener información del usuario
-    const userInfo = await getWikipediaUserInfo(accessToken.oauth_token, accessToken.oauth_token_secret)
+    // Paso 2: Obtener información del usuario con fallback
+    let userInfo = await getWikipediaUserInfo(accessToken.oauth_token, accessToken.oauth_token_secret)
+    
+    // Si falla, intentar con la versión básica
     if (!userInfo) {
-      console.error('❌ Error al obtener información del usuario')
+      console.log('⚠️ Función principal falló, intentando con versión básica...')
+      userInfo = await getWikipediaUserInfoBasic(accessToken.oauth_token, accessToken.oauth_token_secret)
+    }
+    
+    if (!userInfo) {
+      console.error('❌ Error al obtener información del usuario con ambos métodos')
       return redirectToErrorPage(origin, 'user_info_failed')
     }
     
