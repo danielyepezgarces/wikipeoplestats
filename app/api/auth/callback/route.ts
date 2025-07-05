@@ -1,3 +1,5 @@
+// FILEPATH: c:/Users/conta/OneDrive/Documentos/GitHub/wikipeoplestats/app/api/auth/callback/route.ts
+
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import jwt from 'jsonwebtoken'
@@ -163,13 +165,16 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
     secure: true,
     sameSite: 'lax',
     maxAge,
-    encode: encodeURIComponent
   })
 
   return response
 }
 
-// MAIN
+/**
+ * Handles the OAuth callback GET request.
+ * Exchanges request token for access token, fetches user info,
+ * creates or updates user in DB, creates session, and sets cookies.
+ */
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
@@ -202,7 +207,7 @@ export async function GET(request: NextRequest) {
       user = await Database.createUser({
         wikimedia_id: userInfo.id,
         username: userInfo.username,
-        email: userInfo.email,
+        email: userInfo.email  ?? undefined,
         avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`
       })
     }
@@ -223,7 +228,7 @@ export async function GET(request: NextRequest) {
       expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
       origin_domain: origin,
       user_agent: request.headers.get('user-agent') || '',
-      ip_address: request.headers.get('x-forwarded-for') || ''
+      ip_address: request.headers.get('x-forwarded-for') || request.ip || ''
     })
 
     console.log('✅ Auth successful. Redirecting...')
