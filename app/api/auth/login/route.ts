@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 
+// Solo importa estas dos si no están ya en el scope global del proyecto
+const oauth = require('oauth-1.0a')
+const axios = require('axios')
+
 export async function GET(request: NextRequest) {
-  console.log('🔍 Iniciando proceso de login...')
+  console.log('🔍 Iniciando proceso de login OAuth con Wikimedia...')
 
   try {
     const searchParams = request.nextUrl.searchParams
@@ -10,39 +14,34 @@ export async function GET(request: NextRequest) {
     const originDomain = origin || request.headers.get('referer') || 'www.wikipeoplestats.org'
 
     const oauthCallback = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(originDomain)}`
+    console.log('📋 Callback URL:', oauthCallback)
 
-    console.log('📋 Paso 1: Solicitando request token...')
-
-    const oauth = require('oauth-1.0a')
-    const axios = require('axios')
-
+    // Preparar firma OAuth
     const oauthClient = oauth({
       consumer: {
         key: process.env.WIKIPEDIA_CLIENT_ID || '',
         secret: process.env.WIKIPEDIA_CLIENT_SECRET || '',
       },
       signature_method: 'HMAC-SHA1',
-      hash_function(base_string, key) {
+      hash_function(base_string: string, key: string) {
         return crypto.createHmac('sha1', key).update(base_string).digest('base64')
-      }
+      },
     })
 
     const requestData = {
       url: 'https://meta.wikimedia.org/w/index.php?title=Special:OAuth/initiate',
       method: 'POST',
-      data: { oauth_callback: oauthCallback }
+      data: { oauth_callback: oauthCallback },
     }
 
-    const authHeader = oauthClient.toHeader(
-      oauthClient.authorize(requestData)
-    )
+    const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData))
 
     const response = await axios.post(requestData.url, null, {
       headers: {
         Authorization: authHeader.Authorization,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      responseType: 'text', // ✅ MUY IMPORTANTE
+      responseType: 'text',
     })
 
     console.log('🔧 Respuesta cruda:', response.data)
@@ -52,30 +51,31 @@ export async function GET(request: NextRequest) {
     const oauthSecret = tokenData.get('oauth_token_secret')
 
     if (!oauthToken || !oauthSecret) {
-      throw new Error('No se pudo obtener el oauth_token o el oauth_secret')
+      throw new Error('No se pudo obtener el oauth_token o el oauth_token_secret')
     }
 
-    console.log('✅ Token obtenido:', oauthToken)
+    console.log('✅ Token obtenido correctamente:', oauthToken)
 
-    // 🔐 Guardar el oauth_token_secret en una cookie temporal segura
-    const responseRedirect = NextResponse.redirect(
-      `https://meta.wikimedia.org/wiki/Special:OAuth/authorize?oauth_token=${oauthToken}`
-    )
+    // Preparar redirección a Wikimedia con oauth_token
+    const authUrl = `https://meta.wikimedia.org/wiki/Special:OAuth/authorize?oauth_token=${oauthToken}`
+    const redirectResponse = NextResponse.redirect(authUrl)
 
-    responseRedirect.cookies.set('oauth_token_secret', oauthSecret, {
+    // Guardar el oauth_token_secret temporalmente en cookies (seguro, httpOnly)
+    redirectResponse.cookies.set('oauth_token_secret', oauthSecret, {
       httpOnly: true,
       secure: true,
+      sameSite: 'lax',
       path: '/',
       maxAge: 300, // 5 minutos
     })
 
-    return responseRedirect
+    return redirectResponse
 
   } catch (error) {
-    console.error('❌ Error:', error)
+    console.error('❌ Error general:', error)
     return NextResponse.json({
       error: 'Error al iniciar OAuth',
-      details: error instanceof Error ? error.message : 'Error desconocido',
+      details: error instanceof Error ? error.message : String(error),
     }, { status: 500 })
   }
 }
