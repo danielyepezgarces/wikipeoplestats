@@ -75,7 +75,7 @@ function LoginContent() {
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
       login(`${authDomain}/api/auth/login?origin=${encodeURIComponent(currentDomain)}`)
     } catch (err) {
-      setError("Error al iniciar sesión. Por favor, inténtalo de nuevo.")
+      setError("Error al conectar con el servidor. Por favor, inténtalo de nuevo.")
       setIsLoggingIn(false)
     }
   }
@@ -100,17 +100,17 @@ function LoginContent() {
           <div className="mx-auto flex items-center justify-center">
             <WikiPeopleStats />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Bienvenido a WikiPeopleStats</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Accede con tu cuenta de Wikipedia para comenzar</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Accede a tu panel de administración</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Usa tu cuenta de Wikipedia para autenticarte</p>
         </div>
 
         <Card className="bg-white dark:bg-gray-800 shadow-xl">
           <CardHeader className="space-y-1">
             <CardTitle className="text-center text-lg font-semibold text-gray-900 dark:text-white">
-              Plataforma para Comunidades Wikimedia
+              Panel de Administración Wikimedia
             </CardTitle>
             <CardDescription className="text-center text-gray-500 dark:text-gray-400">
-              Administra usuarios, permisos y capítulos en un solo lugar
+              Gestiona usuarios, permisos y capítulos desde una interfaz unificada
             </CardDescription>
           </CardHeader>
 
@@ -124,7 +124,7 @@ function LoginContent() {
 
             {debugInfo && (
               <div className="p-2 bg-gray-200 dark:bg-gray-700 rounded text-xs overflow-x-auto max-h-48">
-                <strong>Debug info:</strong>
+                <strong>Información de depuración:</strong>
                 <pre className="whitespace-pre-wrap break-all">{debugInfo}</pre>
               </div>
             )}
@@ -142,7 +142,7 @@ function LoginContent() {
               ) : (
                 <>
                   <WikipediaFAIcon className="text-white" />
-                  <span className="ml-2">Continuar con Wikipedia</span>
+                  <span className="ml-2">Autenticar con Wikipedia</span>
                 </>
               )}
             </Button>
@@ -152,7 +152,7 @@ function LoginContent() {
                 <span className="w-full border-t border-gray-300 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground">Información del Sistema</span>
+                <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground">Características</span>
               </div>
             </div>
 
@@ -161,29 +161,29 @@ function LoginContent() {
                 <div className="flex items-start space-x-2">
                   <Users className="h-4 w-4 text-blue-600 mt-0.5" />
                   <div>
-                    <p className="font-medium text-xs">Gestión de Comunidad</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Administra usuarios y permisos</p>
+                    <p className="font-medium text-xs">Gestión Completa</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Administra usuarios y roles de forma centralizada</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-2">
                   <Shield className="h-4 w-4 text-green-600 mt-0.5" />
                   <div>
-                    <p className="font-medium text-xs">Acceso Seguro</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">OAuth con Wikipedia</p>
+                    <p className="font-medium text-xs">Seguridad Garantizada</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Autenticación oficial OAuth de MediaWiki</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-2">
                   <Globe className="h-4 w-4 text-purple-600 mt-0.5" />
                   <div>
-                    <p className="font-medium text-xs">Multi-Chapter</p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Acceso a múltiples chapters</p>
+                    <p className="font-medium text-xs">Alcance Global</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Conecta con múltiples organizaciones Wikimedia</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="text-xs text-center text-gray-500 dark:text-gray-400 space-y-1">
-              <p>Al continuar, aceptas los términos de uso del sistema.</p>
+              <p>Al continuar, aceptas los términos de uso de la plataforma.</p>
               <p>
                 Autenticación proporcionada por{' '}
                 <a
@@ -200,14 +200,14 @@ function LoginContent() {
         </Card>
 
         <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-          ¿No tienes cuenta en Wikipedia?{' '}
+          ¿Necesitas una cuenta de Wikipedia?{' '}
           <a
             href="https://meta.wikimedia.org/wiki/Special:CreateAccount"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-blue-600 hover:text-blue-500"
           >
-            Crea una aquí
+            Regístrate aquí
           </a>
         </div>
       </div>
@@ -221,7 +221,7 @@ function LoginLoading() {
       <Card className="w-full max-w-md">
         <CardContent className="flex items-center justify-center p-8">
           <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-          <span className="ml-2 text-gray-800 dark:text-gray-200">Cargando...</span>
+          <span className="ml-2 text-gray-800 dark:text-gray-200">Cargando sistema...</span>
         </CardContent>
       </Card>
     </div>
