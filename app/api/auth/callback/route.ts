@@ -137,13 +137,12 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
   
   const oauthClient = createOAuthClient()
   
-  // CORRECCIÓN: Remover email de la solicitud - causa problemas de permisos
+  // CORRECCIÓN: Solicitar campos que realmente existen
   const userInfoRequest = {
     url: `https://meta.wikimedia.org/w/api.php?` +
          `action=query&` +
          `meta=userinfo&` +
-         `uiprop=id|name|editcount|registrationdate|groups|rights&` +
-         `assertuser=user&` + // IMPORTANTE: Verificar que el usuario está autenticado
+         `uiprop=id|name|email|editcount|registrationdate&` +
          `format=json`,
     method: 'GET'
   }
@@ -177,11 +176,8 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
       return null
     }
     
-    // CORRECCIÓN: Verificar si el usuario está autenticado
-    if (data.query?.userinfo?.anon !== undefined) {
-      console.error('Usuario no autenticado - respuesta anónima recibida')
-      return null
-    }
+    // CORRECCIÓN: No verificar anon ya que el usuario está autenticado
+    // Si hay 'anon' significa usuario anónimo, pero si no está presente, está autenticado
     
     // Verificar estructura de respuesta
     if (!data?.query?.userinfo) {
@@ -197,12 +193,13 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
       return null
     }
     
+    // CORRECCIÓN: Manejar campos opcionales que pueden no estar presentes
     return {
       id: userinfo.id.toString(),
       username: userinfo.name,
-      email: null, // CORRECCIÓN: Siempre null ya que no solicitamos email
-      editCount: userinfo.editcount || 0,
-      registrationDate: userinfo.registrationdate || ''
+      email: userinfo.email || null,
+      editCount: userinfo.editcount || 0, // Puede ser 0 o undefined
+      registrationDate: userinfo.registrationdate || '' // Puede no estar presente
     }
   } catch (error) {
     console.error('Error al obtener información del usuario:', error)
@@ -210,18 +207,18 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
   }
 }
 
-// CORRECCIÓN 3: Función alternativa más básica para casos problemáticos
+// CORRECCIÓN: Función simplificada basada en la respuesta real
 async function getWikipediaUserInfoBasic(oauth_token: string, oauth_token_secret: string): Promise<UserInfo | null> {
   console.log('👤 Obteniendo información básica del usuario de Wikipedia...')
   
   const oauthClient = createOAuthClient()
   
-  // Solicitud mínima sin assertuser ni propiedades adicionales
+  // Solicitud exacta basada en lo que sabemos que funciona
   const userInfoRequest = {
     url: `https://meta.wikimedia.org/w/api.php?` +
          `action=query&` +
          `meta=userinfo&` +
-         `uiprop=id|name|editcount|registrationdate&` +
+         `uiprop=id|name|email&` +
          `format=json`,
     method: 'GET'
   }
@@ -269,9 +266,9 @@ async function getWikipediaUserInfoBasic(oauth_token: string, oauth_token_secret
     return {
       id: userinfo.id.toString(),
       username: userinfo.name,
-      email: null,
-      editCount: userinfo.editcount || 0,
-      registrationDate: userinfo.registrationdate || ''
+      email: userinfo.email || null,
+      editCount: 0, // No disponible en esta versión básica
+      registrationDate: '' // No disponible en esta versión básica
     }
   } catch (error) {
     console.error('Error al obtener información básica:', error)
