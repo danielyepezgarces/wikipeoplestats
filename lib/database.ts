@@ -21,7 +21,6 @@ export interface User {
   wikimedia_id: string
   username: string
   email?: string
-  avatar_url?: string
   is_active: boolean
   created_at: string
   updated_at: string
@@ -63,13 +62,12 @@ export class Database {
     wikimedia_id: string
     username: string
     email?: string
-    avatar_url?: string
   }): Promise<User> {
     const conn = await getConnection()
     const [result] = await conn.execute(
-      `INSERT INTO users (wikimedia_id, username, email, avatar_url, created_at, updated_at, is_active)
-       VALUES (?, ?, ?, ?, NOW(), NOW(), 1)`,
-      [data.wikimedia_id, data.username, data.email, data.avatar_url]
+      `INSERT INTO users (wikimedia_id, username, email, created_at, updated_at, is_active)
+       VALUES (?, ?, ?, NOW(), NOW(), 1)`,
+      [data.wikimedia_id, data.username, data.email]
     )
     const insertResult = result as mysql.ResultSetHeader
     const user = await this.getUserById(insertResult.insertId)
