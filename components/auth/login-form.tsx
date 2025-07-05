@@ -27,7 +27,7 @@ export function LoginForm({ onLogin, onClose }: LoginFormProps) {
     { 
       email: "superadmin@wikimedia.org", 
       password: "super123", 
-      name: "María González", 
+      name: "Daniel Yepez Garces", 
       role: "super_admin",
       chapter: "Wikimedia Foundation"
     },
