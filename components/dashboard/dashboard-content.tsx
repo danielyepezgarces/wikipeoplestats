@@ -514,7 +514,7 @@ function DashboardContent({ user }: DashboardContentProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {stats.map((stat, index) => (
                 <Card key={index}>
-                  <CardContent className="p-6">
+                  <CardContent className="pt-6 p-6">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
