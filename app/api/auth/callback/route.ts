@@ -125,19 +125,23 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
   
   const oauthClient = createOAuthClient()
   
-  // 1. Obtener identidad básica
-  const identityRequest = {
-    url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/identify`,
+  // Usamos directamente el endpoint extendido que incluye toda la información
+  const userInfoRequest = {
+    url: `https://meta.wikimedia.org/w/api.php?` +
+         `action=query&` +
+         `meta=userinfo&` +
+         `uiprop=id|name|email|editcount|registrationdate&` +
+         `format=json`,
     method: 'GET'
   }
   
-  const authHeader = oauthClient.toHeader(oauthClient.authorize(identityRequest, {
+  const authHeader = oauthClient.toHeader(oauthClient.authorize(userInfoRequest, {
     key: oauth_token,
     secret: oauth_token_secret
   }))
   
   try {
-    const response = await fetch(identityRequest.url, {
+    const response = await fetch(userInfoRequest.url, {
       headers: {
         ...authHeader,
         'User-Agent': 'WikiPeopleStats/1.0',
@@ -146,48 +150,26 @@ async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: str
     })
     
     if (!response.ok) {
-      console.error('Error al obtener identidad:', await response.text())
+      console.error('Error al obtener información del usuario:', await response.text())
       return null
     }
     
-    const identityData = await response.json()
+    const data = await response.json()
     
-    // 2. Obtener información extendida del usuario
-    const userInfoRequest = {
-      url: `https://meta.wikimedia.org/w/api.php?` +
-           `action=query&` +
-           `meta=userinfo&` +
-           `uiprop=email|editcount|registration&` +
-           `format=json`,
-      method: 'GET'
-    }
-    
-    const userAuthHeader = oauthClient.toHeader(oauthClient.authorize(userInfoRequest, {
-      key: oauth_token,
-      secret: oauth_token_secret
-    }))
-    
-    const userResponse = await fetch(userInfoRequest.url, {
-      headers: {
-        ...userAuthHeader,
-        'User-Agent': 'WikiPeopleStats/1.0',
-        'Accept': 'application/json'
-      }
-    })
-    
-    if (!userResponse.ok) {
-      console.error('Error al obtener información del usuario:', await userResponse.text())
+    // Verificar estructura de respuesta
+    if (!data?.query?.userinfo) {
+      console.error('Estructura de respuesta inválida:', data)
       return null
     }
     
-    const userData = await userResponse.json()
+    const userinfo = data.query.userinfo
     
     return {
-      id: identityData.sub,
-      username: identityData.username,
-      email: userData.query.userinfo.email || null,
-      editCount: userData.query.userinfo.editcount || 0,
-      registrationDate: userData.query.userinfo.registration || ''
+      id: userinfo.id.toString(), // Asegurar que sea string
+      username: userinfo.name,
+      email: userinfo.email || null,
+      editCount: userinfo.editcount || 0,
+      registrationDate: userinfo.registrationdate || ''
     }
   } catch (error) {
     console.error('Error al obtener información del usuario:', error)
