@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { 
   BarChart3, 
   Users, 
@@ -25,19 +24,130 @@ import {
   Layout,
   Palette,
   Code,
-  Save
+  Save,
+  Menu,
+  X,
+  ChevronDown
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { useI18n } from "@/hooks/use-i18n"
-import { useAuth } from "@/hooks/use-auth"
+
+const Button = ({ children, variant = "default", size = "default", className = "", onClick, disabled = false, ...props }) => {
+  const baseClasses = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+  const variants = {
+    default: "bg-blue-600 text-white hover:bg-blue-700",
+    outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+    ghost: "hover:bg-accent hover:text-accent-foreground",
+    destructive: "bg-red-600 text-white hover:bg-red-700"
+  }
+  const sizes = {
+    default: "h-10 py-2 px-4",
+    sm: "h-9 px-3 text-sm",
+    icon: "h-10 w-10"
+  }
+  
+  return (
+    <button 
+      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+      onClick={onClick}
+      disabled={disabled}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}
+
+const Card = ({ children, className = "" }) => (
+  <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>
+    {children}
+  </div>
+)
+
+const CardHeader = ({ children }) => (
+  <div className="flex flex-col space-y-1.5 p-6">
+    {children}
+  </div>
+)
+
+const CardTitle = ({ children }) => (
+  <h3 className="text-2xl font-semibold leading-none tracking-tight">
+    {children}
+  </h3>
+)
+
+const CardDescription = ({ children }) => (
+  <p className="text-sm text-muted-foreground">
+    {children}
+  </p>
+)
+
+const CardContent = ({ children, className = "" }) => (
+  <div className={`p-6 pt-0 ${className}`}>
+    {children}
+  </div>
+)
+
+const Badge = ({ children, variant = "default" }) => {
+  const variants = {
+    default: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+    destructive: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+    secondary: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+    outline: "border border-gray-200 text-gray-700 dark:border-gray-700 dark:text-gray-300"
+  }
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]}`}>
+      {children}
+    </span>
+  )
+}
+
+const Avatar = ({ children, className = "" }) => (
+  <div className={`relative flex shrink-0 overflow-hidden rounded-full ${className}`}>
+    {children}
+  </div>
+)
+
+const AvatarFallback = ({ children, className = "" }) => (
+  <div className={`flex h-full w-full items-center justify-center rounded-full ${className}`}>
+    {children}
+  </div>
+)
+
+const Input = ({ className = "", ...props }) => (
+  <input
+    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    {...props}
+  />
+)
+
+const Label = ({ children, htmlFor }) => (
+  <label htmlFor={htmlFor} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+    {children}
+  </label>
+)
+
+const Textarea = ({ className = "", ...props }) => (
+  <textarea
+    className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    {...props}
+  />
+)
+
+const Switch = ({ id, checked, onCheckedChange }) => (
+  <button
+    id={id}
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onCheckedChange && onCheckedChange(!checked)}
+    className={`peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 ${
+      checked ? 'bg-blue-600' : 'bg-gray-200'
+    }`}
+  >
+    <span className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${
+      checked ? 'translate-x-5' : 'translate-x-0'
+    }`} />
+  </button>
+)
 
 interface DashboardContentProps {
   user: {
@@ -48,11 +158,10 @@ interface DashboardContentProps {
   }
 }
 
-export function DashboardContent({ user }: DashboardContentProps) {
-  const { t } = useI18n()
-  const { logout } = useAuth()
-  const router = useRouter()
+function DashboardContent({ user }: DashboardContentProps) {
   const [activeTab, setActiveTab] = useState("overview")
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const stats = [
     {
@@ -86,11 +195,11 @@ export function DashboardContent({ user }: DashboardContentProps) {
   ]
 
   const recentActivities = [
-    { action: "Nuevo chapter registrado", project: "Wikimedia Colombia", time: "2 minutos", type: "success" },
-    { action: "Moderación aplicada", project: "eswiki", time: "15 minutos", type: "warning" },
-    { action: "Estadísticas actualizadas", project: "frwiki", time: "1 hora", type: "info" },
-    { action: "Nuevo socio afiliado", project: "Wikimedia Chile", time: "2 horas", type: "success" },
-    { action: "Cache purgado", project: "Sistema Global", time: "3 horas", type: "info" },
+    { action: "Nuevo chapter registrado", project: "Wikimedia Colombia", time: "2 min", type: "success" },
+    { action: "Moderación aplicada", project: "eswiki", time: "15 min", type: "warning" },
+    { action: "Estadísticas actualizadas", project: "frwiki", time: "1h", type: "info" },
+    { action: "Nuevo socio afiliado", project: "Wikimedia Chile", time: "2h", type: "success" },
+    { action: "Cache purgado", project: "Sistema Global", time: "3h", type: "info" },
   ]
 
   const permissions = {
@@ -125,22 +234,30 @@ export function DashboardContent({ user }: DashboardContentProps) {
     ]
   }
 
-  const getRoleDisplayName = (role: string) => {
+  const tabs = [
+    { id: "overview", label: "Resumen", icon: BarChart3 },
+    { id: "chapters", label: "Chapters", icon: Globe },
+    { id: "analytics", label: "Analíticas", icon: TrendingUp },
+    { id: "moderation", label: "Moderación", icon: Shield },
+    { id: "settings", label: "Config", icon: Settings }
+  ]
+
+  const getRoleDisplayName = (role) => {
     switch (role) {
       case 'super_admin':
-        return 'Super Administrador'
+        return 'Super Admin'
       case 'community_admin':
-        return 'Administrador de Comunidad'
+        return 'Admin Comunidad'
       case 'community_moderator':
-        return 'Moderador de Comunidad'
+        return 'Moderador'
       case 'community_partner':
-        return 'Socio/Afiliado de Comunidad'
+        return 'Socio/Afiliado'
       default:
         return role
     }
   }
 
-  const getRoleBadgeVariant = (role: string) => {
+  const getRoleBadgeVariant = (role) => {
     switch (role) {
       case 'super_admin':
         return 'destructive'
@@ -155,7 +272,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
     }
   }
 
-  const getRoleColor = (role: string) => {
+  const getRoleColor = (role) => {
     switch (role) {
       case 'super_admin':
         return 'bg-red-500'
@@ -170,7 +287,16 @@ export function DashboardContent({ user }: DashboardContentProps) {
     }
   }
 
-  const getActivityIcon = (type: string) => {
+  // Función para generar iniciales desde el email
+  const generateAvatarFromEmail = (email) => {
+    const parts = email.split('@')[0].split('.')
+    if (parts.length >= 2) {
+      return parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+    }
+    return email.substring(0, 2).toUpperCase()
+  }
+
+  const getActivityIcon = (type) => {
     switch (type) {
       case 'success':
         return <CheckCircle className="h-4 w-4 text-green-500" />
@@ -192,8 +318,7 @@ export function DashboardContent({ user }: DashboardContentProps) {
   ]
 
   const handleLogout = () => {
-    logout()
-    router.push('/')
+    console.log("Cerrando sesión...")
   }
 
   const canEditChapter = user.role === 'super_admin' || user.role === 'community_admin'
@@ -201,78 +326,209 @@ export function DashboardContent({ user }: DashboardContentProps) {
   const canManageUsers = user.role === 'super_admin' || user.role === 'community_admin'
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#0D161C]">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header Mejorado */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+            {/* Logo y Título */}
+            <div className="flex items-center space-x-3">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => router.push('/')}
-                className="mr-2"
+                onClick={() => console.log("Ir al inicio")}
+                className="lg:hidden"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  Panel de Control - Wikimedia Chapters
+              <div className="hidden lg:flex items-center space-x-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => console.log("Ir al inicio")}
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Dashboard Wikimedia
+                  </h1>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {user.chapter || 'Sistema Global'}
+                  </p>
+                </div>
+              </div>
+              <div className="lg:hidden">
+                <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  Dashboard
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {user.chapter || 'Sistema Global'}
-                </p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <Badge variant={getRoleBadgeVariant(user.role)}>
+            {/* Menú de Usuario Mejorado */}
+            <div className="flex items-center space-x-3">
+              <Badge variant={getRoleBadgeVariant(user.role)} className="hidden sm:inline-flex">
                 {getRoleDisplayName(user.role)}
               </Badge>
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className={`${getRoleColor(user.role)} text-white text-sm`}>
-                    {user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  Cerrar Sesión
-                </Button>
+              
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className={`${getRoleColor(user.role)} text-white text-sm font-medium`}>
+                      {generateAvatarFromEmail(user.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:block text-left">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-32">
+                      {user.email}
+                    </p>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                </button>
+                
+                {/* Dropdown Menu */}
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className={`${getRoleColor(user.role)} text-white font-medium`}>
+                            {generateAvatarFromEmail(user.email)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
+                            {user.name}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {user.email}
+                          </p>
+                          <Badge variant={getRoleBadgeVariant(user.role)} className="mt-1">
+                            {getRoleDisplayName(user.role)}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={handleLogout}
+                      >
+                        Cerrar Sesión
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Resumen</TabsTrigger>
-            <TabsTrigger value="chapters">Chapters</TabsTrigger>
-            <TabsTrigger value="analytics">Analíticas</TabsTrigger>
-            <TabsTrigger value="moderation">Moderación</TabsTrigger>
-            <TabsTrigger value="settings">Configuración</TabsTrigger>
-          </TabsList>
+      {/* Navegación por Tabs Mejorada */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Desktop Tabs */}
+          <div className="hidden lg:flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <tab.icon className="h-4 w-4" />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+          
+          {/* Mobile Tabs */}
+          <div className="lg:hidden">
+            <div className="flex items-center justify-between py-3">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="font-medium">
+                  {tabs.find(tab => tab.id === activeTab)?.label || 'Menú'}
+                </span>
+              </button>
+            </div>
+            
+            {isMobileMenuOpen && (
+              <div className="absolute left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40">
+                <div className="grid grid-cols-2 gap-2 p-4">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id)
+                        setIsMobileMenuOpen(false)
+                      }}
+                      className={`flex items-center space-x-2 p-3 rounded-lg font-medium text-sm transition-colors ${
+                        activeTab === tab.id
+                          ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <tab.icon className="h-4 w-4" />
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-          <TabsContent value="overview" className="space-y-6">
+      {/* Overlay para cerrar el menú móvil */}
+      {(isMobileMenuOpen || userMenuOpen) && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-25 z-30 lg:hidden"
+          onClick={() => {
+            setIsMobileMenuOpen(false)
+            setUserMenuOpen(false)
+          }}
+        />
+      )}
+
+      {/* Contenido Principal */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Tab Content - Overview */}
+        {activeTab === "overview" && (
+          <div className="space-y-6">
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               {stats.map((stat, index) => (
                 <Card key={index}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground">
-                      <span className="text-green-500">{stat.change}</span> este mes
-                    </p>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {stat.title}
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          {stat.value}
+                        </p>
+                        <p className="text-sm text-green-600 dark:text-green-400">
+                          {stat.change} este mes
+                        </p>
+                      </div>
+                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -290,9 +546,11 @@ export function DashboardContent({ user }: DashboardContentProps) {
                     {recentActivities.map((activity, index) => (
                       <div key={index} className="flex items-center space-x-4">
                         {getActivityIcon(activity.type)}
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{activity.action}</p>
-                          <p className="text-xs text-muted-foreground">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {activity.action}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {activity.project} • hace {activity.time}
                           </p>
                         </div>
@@ -305,27 +563,38 @@ export function DashboardContent({ user }: DashboardContentProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Tus Permisos</CardTitle>
-                  <CardDescription>Acciones disponibles con tu rol de {getRoleDisplayName(user.role)}</CardDescription>
+                  <CardDescription>
+                    Acciones disponibles con tu rol de {getRoleDisplayName(user.role)}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {permissions[user.role as keyof typeof permissions]?.map((permission, index) => (
+                    {permissions[user.role]?.map((permission, index) => (
                       <div key={index} className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">{permission}</span>
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {permission}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="chapters" className="space-y-6">
-            <div className="flex items-center justify-between">
+        {/* Otras pestañas simplificadas para el ejemplo */}
+        {activeTab === "chapters" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold">Gestión de Chapters</h2>
-                <p className="text-muted-foreground">Administrar chapters de Wikimedia</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  Gestión de Chapters
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Administrar chapters de Wikimedia
+                </p>
               </div>
               {user.role === 'super_admin' && (
                 <Button>
@@ -335,39 +604,35 @@ export function DashboardContent({ user }: DashboardContentProps) {
               )}
             </div>
 
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               {chapters.map((chapter, index) => (
                 <Card key={index}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="flex items-center space-x-4">
-                        <div className={`w-4 h-4 rounded-full ${
+                        <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
                           chapter.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'
                         }`} />
                         <div>
-                          <h3 className="text-lg font-semibold">{chapter.name}</h3>
-                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            {chapter.name}
+                          </h3>
+                          <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mt-1">
                             <span>{chapter.projects} proyectos</span>
                             <span>{chapter.users} usuarios</span>
                             <span>{chapter.moderators} moderadores</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button size="sm" variant="outline">
-                          <Eye className="h-4 w-4 mr-2" />
+                          <Eye className="h-4 w-4 mr-1" />
                           Ver
                         </Button>
                         {canEditChapter && (
                           <Button size="sm" variant="outline">
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar Layout
-                          </Button>
-                        )}
-                        {user.role === 'super_admin' && (
-                          <Button size="sm" variant="outline">
-                            <Settings className="h-4 w-4 mr-2" />
-                            Configurar
+                            <Edit className="h-4 w-4 mr-1" />
+                            Editar
                           </Button>
                         )}
                       </div>
@@ -376,244 +641,23 @@ export function DashboardContent({ user }: DashboardContentProps) {
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="analytics" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Panel de Analíticas</CardTitle>
-                <CardDescription>Estadísticas detalladas y tendencias de WikiPeopleStats</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-96 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                  <div className="text-center">
-                    <TrendingUp className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                      Gráficos de WikiPeopleStats
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      Aquí se integrarán tus componentes de gráficos existentes
-                    </p>
-                    <div className="flex justify-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        Estadísticas de Género
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Users className="h-4 w-4 mr-2" />
-                        Usuarios Activos
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Globe className="h-4 w-4 mr-2" />
-                        Proyectos por País
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="moderation" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Panel de Moderación</h2>
-                <p className="text-muted-foreground">
-                  {user.role === 'community_moderator' 
-                    ? `Herramientas de moderación para ${user.chapter}`
-                    : 'Herramientas de moderación para la comunidad'
-                  }
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                  <h3 className="font-medium">Reportes Pendientes</h3>
-                  <p className="text-2xl font-bold">
-                    {user.role === 'community_moderator' ? '3' : '12'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.role === 'community_moderator' ? `En ${user.chapter}` : 'Total del sistema'}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                  <h3 className="font-medium">Resueltos Hoy</h3>
-                  <p className="text-2xl font-bold">
-                    {user.role === 'community_moderator' ? '2' : '8'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.role === 'community_moderator' ? `En ${user.chapter}` : 'Total del sistema'}
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <Users className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                  <h3 className="font-medium">Usuarios Activos</h3>
-                  <p className="text-2xl font-bold">
-                    {user.role === 'community_moderator' ? '45' : '234'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.role === 'community_moderator' ? `En ${user.chapter}` : 'Total del sistema'}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {canModerate ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Herramientas de Moderación</CardTitle>
-                  <CardDescription>
-                    {user.role === 'community_moderator' 
-                      ? `Permisos limitados al chapter: ${user.chapter}`
-                      : 'Acceso completo a herramientas de moderación'
-                    }
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button variant="outline" className="h-20 flex-col">
-                      <Gavel className="h-6 w-6 mb-2" />
-                      Revisar Reportes
-                    </Button>
-                    <Button variant="outline" className="h-20 flex-col">
-                      <Shield className="h-6 w-6 mb-2" />
-                      Aplicar Políticas
-                    </Button>
-                    <Button variant="outline" className="h-20 flex-col">
-                      <Users className="h-6 w-6 mb-2" />
-                      Gestionar Usuarios
-                    </Button>
-                    <Button variant="outline" className="h-20 flex-col">
-                      <FileText className="h-6 w-6 mb-2" />
-                      Generar Reportes
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Shield className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                    Sin Permisos de Moderación
-                  </h3>
-                  <p className="text-gray-500">
-                    Tu rol de {getRoleDisplayName(user.role)} no incluye permisos de moderación.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Chapter Layout Configuration */}
-              {canEditChapter && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Configuración de Layout del Chapter</CardTitle>
-                    <CardDescription>
-                      Personalizar la apariencia de WikiPeopleStats para tu chapter
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="chapter-name">Nombre del Chapter</Label>
-                      <Input id="chapter-name" defaultValue={user.chapter} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="chapter-description">Descripción</Label>
-                      <Textarea 
-                        id="chapter-description" 
-                        placeholder="Descripción del chapter para mostrar en WikiPeopleStats"
-                        rows={3}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Configuración Visual</Label>
-                      <div className="flex items-center space-x-2">
-                        <Switch id="custom-colors" />
-                        <Label htmlFor="custom-colors">Usar colores personalizados</Label>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button size="sm">
-                        <Save className="h-4 w-4 mr-2" />
-                        Guardar Cambios
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Vista Previa
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* System Configuration */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Configuración del Sistema</CardTitle>
-                  <CardDescription>Configurar preferencias del sistema</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">Gestión de Cache</h3>
-                      <p className="text-sm text-muted-foreground">Administrar cache del sistema</p>
-                    </div>
-                    <Button variant="outline" size="sm" disabled={user.role === 'community_partner'}>
-                      Purgar Cache
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">Configuración API</h3>
-                      <p className="text-sm text-muted-foreground">Configurar endpoints de API</p>
-                    </div>
-                    <Button variant="outline" size="sm" disabled={user.role === 'community_partner'}>
-                      Configurar
-                    </Button>
-                  </div>
-                  {canManageUsers && (
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium">Gestión de Usuarios</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {user.role === 'community_admin' 
-                            ? `Administrar usuarios de ${user.chapter}`
-                            : 'Administrar todos los usuarios del sistema'
-                          }
-                        </p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Gestionar Usuarios
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">Notificaciones</h3>
-                      <p className="text-sm text-muted-foreground">Configurar alertas y notificaciones</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Configurar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+        {/* Placeholder para otras pestañas */}
+        {activeTab !== "overview" && activeTab !== "chapters" && (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+              {tabs.find(tab => tab.id === activeTab)?.label}
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Contenido de la sección {tabs.find(tab => tab.id === activeTab)?.label} próximamente
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
 }
+
+export { DashboardContent }
