@@ -1,16 +1,13 @@
-// pages/api/auth/login.ts
-import { NextApiRequest, NextApiResponse } from 'next'
+// app/api/auth/login/route.ts
+import { NextResponse } from 'next/server'
 import { WikipediaOAuth } from '@/lib/oauth'
 import { Database } from '@/lib/database'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Método no permitido' })
-  }
-  
+export async function GET(request: Request) {
   try {
-    const { origin } = req.query
-    const originDomain = origin as string || 'www.wikipeoplestats.org'
+    const { searchParams } = new URL(request.url)
+    const origin = searchParams.get('origin')
+    const originDomain = origin || 'www.wikipeoplestats.org'
     
     const oauthClient = new WikipediaOAuth()
     const { url, token, tokenSecret } = await oauthClient.getAuthorizationUrl(originDomain)
@@ -18,10 +15,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Guardar token temporal
     await Database.storeOAuthToken(token, tokenSecret, originDomain)
     
-    // Redirigir a Wikipedia
-    res.redirect(url)
+    // Redirigir
+    return NextResponse.redirect(url)
   } catch (error) {
     console.error('Error en login:', error)
-    res.status(500).json({ error: 'Error interno del servidor' })
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    )
   }
 }
