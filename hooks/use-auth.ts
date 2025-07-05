@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/router' // ← importante usar 'next/router' y no 'next/navigation'
 
 interface User {
   id: string
@@ -16,32 +16,24 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-  
-  useEffect(() => {
-    verifyAuth()
-  }, [])
-  
+
+  // Función para verificar autenticación
   const verifyAuth = async () => {
     try {
-      setIsLoading(true)
-      
-      // Intentar verificar con el dominio de auth
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-      
-      const response = await fetch(`${authDomain}/api/auth/verify`, {
+
+      const res = await fetch(`${authDomain}/api/auth/verify`, {
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       })
-      
-      if (response.ok) {
-        const data = await response.json()
+
+      if (res.ok) {
+        const data = await res.json()
         setUser(data.user)
-        console.log('✅ Usuario autenticado:', data.user.name)
       } else {
         setUser(null)
-        console.log('❌ Usuario no autenticado')
       }
     } catch (error) {
       console.error('Error verificando autenticación:', error)
@@ -50,49 +42,56 @@ export function useAuth() {
       setIsLoading(false)
     }
   }
-  
+
+  // Llamar verifyAuth al montar y cada vez que cambia la ruta
+  useEffect(() => {
+    verifyAuth()
+
+    const handleRouteChange = () => {
+      verifyAuth()
+    }
+
+    router.events.on('routeChangeComplete', handleRouteChange)
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [])
+
   const login = (redirectUrl?: string) => {
     const currentDomain = window.location.hostname
     const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-    
-    if (redirectUrl) {
-      window.location.href = redirectUrl
-    } else {
-      window.location.href = `${authDomain}/api/auth/login?origin=${encodeURIComponent(currentDomain)}`
-    }
+    window.location.href = redirectUrl || `${authDomain}/api/auth/login?origin=${encodeURIComponent(currentDomain)}`
   }
-  
+
   const logout = async () => {
     try {
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-      
       await fetch(`${authDomain}/api/auth/logout`, {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
       })
-      
       setUser(null)
       router.push('/')
-      console.log('✅ Logout exitoso')
     } catch (error) {
       console.error('Error cerrando sesión:', error)
     }
   }
-  
+
   const hasPermission = (permission: string) => {
     if (!user) return false
-    
+
     const permissions = {
       super_admin: ['all'],
-      community_admin: ['manage_chapter', 'manage_users', 'moderate'],
-      community_moderator: ['moderate', 'view_reports'],
-      community_partner: ['view_stats']
+      chapter_admin: ['manage_chapter', 'manage_users', 'moderate'],
+      chapter_moderator: ['moderate', 'view_reports'],
+      chapter_partner: ['view_stats'],
     }
-    
+
     const userPermissions = permissions[user.role as keyof typeof permissions] || []
     return userPermissions.includes(permission) || userPermissions.includes('all')
   }
-  
+
   return {
     user,
     isLoading,
@@ -100,6 +99,6 @@ export function useAuth() {
     login,
     logout,
     hasPermission,
-    refetch: verifyAuth
+    refetch: verifyAuth,
   }
 }
