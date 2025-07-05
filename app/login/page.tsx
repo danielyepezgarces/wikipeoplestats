@@ -3,12 +3,10 @@
 import { useAuth } from '@/hooks/use-auth'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
   const { isAuthenticated, login, isLoading } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
   
   useEffect(() => {
@@ -18,18 +16,24 @@ export default function LoginPage() {
   }, [isAuthenticated, router])
 
   useEffect(() => {
-    // Manejar errores de autenticación
-    const errorParam = searchParams.get('error')
-    if (errorParam) {
-      const errorMessages = {
-        'authorization_failed': 'Falló la autorización con Wikipedia',
-        'token_expired': 'El token de autenticación ha expirado',
-        'authentication_failed': 'Error en la autenticación',
-        'access_denied': 'Acceso denegado por el usuario'
+    // Manejar errores de autenticación usando URLSearchParams del lado del cliente
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const errorParam = urlParams.get('error')
+      if (errorParam) {
+        const errorMessages = {
+          'authorization_failed': 'Falló la autorización con Wikipedia',
+          'token_expired': 'El token de autenticación ha expirado',
+          'authentication_failed': 'Error en la autenticación',
+          'access_denied': 'Acceso denegado por el usuario'
+        }
+        setError(errorMessages[errorParam as keyof typeof errorMessages] || 'Error desconocido')
+        
+        // Limpiar el parámetro de error de la URL
+        window.history.replaceState({}, '', window.location.pathname)
       }
-      setError(errorMessages[errorParam as keyof typeof errorMessages] || 'Error desconocido')
     }
-  }, [searchParams])
+  }, [])
 
   const handleLogin = () => {
     setError(null)
