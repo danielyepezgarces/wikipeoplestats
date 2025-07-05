@@ -13,6 +13,9 @@ import { useDomainContext } from "@/hooks/use-domain-context"
 import { useStatsData } from "@/hooks/use-stats-data"
 import { getOriginalDomain } from "@/lib/languages"
 
+export const dynamic = 'force-dynamic'
+
+
 interface UsersPageProps {
   params: Promise<{
     params?: string[]
