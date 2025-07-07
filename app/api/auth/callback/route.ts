@@ -178,18 +178,7 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
  */
 export async function GET(request: NextRequest) {
   try {
-    const hostname = request.nextUrl.hostname
-    const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
-    const isDevelopment = process.env.NODE_ENV === 'development'
-    
-    // Verificación de dominio para callback
-    if (!isDevelopment && hostname !== AUTH_DOMAIN) {
-      console.log(`❌ OAuth callback accessed from unauthorized domain: ${hostname}`)
-      return redirectToErrorPage(DEFAULT_ORIGIN, 'domain_restricted')
-    }
-
-    console.log(`🔐 OAuth callback received from authorized domain: ${hostname}`)
-
+  
     const searchParams = request.nextUrl.searchParams
     const oauth_token = searchParams.get('oauth_token')
     const oauth_verifier = searchParams.get('oauth_verifier')
@@ -204,15 +193,12 @@ export async function GET(request: NextRequest) {
       return redirectToErrorPage(origin, 'session_expired')
     }
 
-    console.log('🔑 Getting access token...')
     const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
     if (!accessToken) return redirectToErrorPage(origin, 'token_exchange_failed')
 
-    console.log('👤 Getting user info...')
     const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
     if (!userInfo) return redirectToErrorPage(origin, 'user_info_failed')
 
-    console.log('🔍 Looking for existing user...')
     let user = await Database.getUserByWikipediaId(userInfo.id)
 
     if (!user) {
@@ -225,10 +211,8 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    console.log('🕓 Updating last login...')
     await Database.updateUserLogin(user.id)
 
-    console.log('🔐 Creating session...')
     const token = generateToken({
       id: user.id,
       username: user.username,
@@ -247,17 +231,12 @@ export async function GET(request: NextRequest) {
       ip_address: request.headers.get('x-forwarded-for') || ''
     })
 
-    // Log de seguridad
-    console.log(`🔐 Successful authentication for user ${user.username} from ${hostname} redirecting to ${origin}`)
-
-    console.log('✅ Auth successful. Redirecting...')
     return createAuthResponse(origin, token, {
       id: user.id,
       username: user.username,
       email: user.email
     })
   } catch (error: unknown) {
-    console.error('🔥 Unhandled error in auth callback:', error)
     const message = error instanceof Error ? error.message : String(error)
     return new NextResponse(`Internal Server Error: ${message}`, { status: 500 })
   }

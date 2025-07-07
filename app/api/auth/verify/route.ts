@@ -5,35 +5,9 @@ import { RoleManager } from '@/lib/role-manager'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 export async function GET(request: NextRequest) {
-  console.log('🔍 Verificando autenticación...')
 
   try {
-    const origin = request.headers.get('origin')
-    const hostname = request.nextUrl.hostname
-    const response = new NextResponse()
-
-    // Verificación adicional de dominio (doble capa de seguridad)
-    const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
-    const isDevelopment = process.env.NODE_ENV === 'development'
-    
-    if (!isDevelopment && hostname !== AUTH_DOMAIN) {
-      console.log(`❌ Verify endpoint accessed from unauthorized domain: ${hostname}`)
-      return NextResponse.json(
-        { error: 'Unauthorized domain' }, 
-        { status: 403 }
-      )
-    }
-
-    // CORS headers (ya manejado por middleware, pero por seguridad)
-    const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
-    const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
-
-    if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
-      response.headers.set('Access-Control-Allow-Origin', origin!)
-      response.headers.set('Access-Control-Allow-Credentials', 'true')
-      response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
-      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    }
+    const response = new NextResponse(null, { status: 200 })
 
     // Obtener el token desde cookies o header
     const authHeader = request.headers.get('authorization')
@@ -63,10 +37,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 401, headers: response.headers })
     }
 
-    console.log('✅ Usuario verificado:', userWithRoles.username)
 
-    // Log de seguridad
-    console.log(`🔐 Auth verification successful for user ${userWithRoles.username} from ${hostname}`)
 
     return NextResponse.json({
       user: {
