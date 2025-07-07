@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const hostname = request.nextUrl.hostname
-    const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
+    const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace(/^https?:\/\//, '').replace(/\/$/, '') || 'auth.wikipeoplestats.org'
     const isDevelopment = process.env.NODE_ENV === 'development'
     
     // Verificación de dominio para login
