@@ -7,6 +7,8 @@ export async function GET(request: NextRequest) {
   console.log('🔍 Starting Wikimedia OAuth login...')
 
   try {
+    console.log('🌐 Hostname:', hostname)
+    console.log('🔒 AUTH_DOMAIN:', AUTH_DOMAIN)
     const hostname = request.nextUrl.hostname
     const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace(/^https?:\/\//, '').replace(/\/$/, '') || 'auth.wikipeoplestats.org'
     const isDevelopment = process.env.NODE_ENV === 'development'
