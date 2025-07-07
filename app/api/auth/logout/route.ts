@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
+  console.log('🔍 Procesando logout...')
   
   try {
     const domain = process.env.NEXT_PUBLIC_DOMAIN || '.wikipeoplestats.org'
@@ -24,7 +25,9 @@ export async function POST(request: NextRequest) {
       sameSite: 'lax',
       maxAge: 0
     })
-        
+    
+    console.log('✅ Cookies limpiadas')
+    
     return response
     
   } catch (error) {

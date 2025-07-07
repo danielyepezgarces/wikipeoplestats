@@ -5,8 +5,11 @@ interface User {
   id: string
   name: string
   email?: string
+  role: string
+  chapter?: string
+  wikipediaUsername: string
+  avatarUrl?: string
   lastLogin?: string
-  // NO incluimos roles aquí - se verifican solo en servidor
 }
 
 export function useAuth() {
@@ -22,6 +25,7 @@ export function useAuth() {
     try {
       setIsLoading(true)
       
+      // Intentar verificar con el dominio de auth
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
       
       const response = await fetch(`${authDomain}/api/auth/verify`, {
@@ -71,36 +75,19 @@ export function useAuth() {
       console.error('Error cerrando sesión:', error)
     }
   }
-
-  // Verificar permisos haciendo llamada al servidor
-  const checkPermission = async (permission: string, chapterId?: number): Promise<boolean> => {
+  
+  const hasPermission = (permission: string) => {
     if (!user) return false
-
-    try {
-      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-      const url = new URL(`${authDomain}/api/auth/check-permission`)
-      url.searchParams.set('permission', permission)
-      if (chapterId) {
-        url.searchParams.set('chapterId', chapterId.toString())
-      }
-
-      const response = await fetch(url.toString(), {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        return data.hasPermission
-      }
-      
-      return false
-    } catch (error) {
-      console.error('Error checking permission:', error)
-      return false
+    
+    const permissions = {
+      super_admin: ['all'],
+      chapter_admin: ['manage_chapter', 'manage_users', 'moderate'],
+      chapter_moderator: ['moderate', 'view_reports'],
+      chapter_partner: ['view_stats']
     }
+    
+    const userPermissions = permissions[user.role as keyof typeof permissions] || []
+    return userPermissions.includes(permission) || userPermissions.includes('all')
   }
   
   return {
@@ -109,7 +96,7 @@ export function useAuth() {
     isAuthenticated: !!user,
     login,
     logout,
-    checkPermission, // Reemplaza hasPermission y hasRole
+    hasPermission,
     refetch: verifyAuth
   }
 }

@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
-import { RoleManager } from '@/lib/role-manager'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 export async function GET(request: NextRequest) {
+  console.log('🔍 Verificando autenticación...')
 
   try {
-    const response = new NextResponse(null, { status: 200 })
+    const origin = request.headers.get('origin')
+    const response = new NextResponse()
+
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
+    const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
+
+    if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
+      response.headers.set('Access-Control-Allow-Origin', origin!)
+      response.headers.set('Access-Control-Allow-Credentials', 'true')
+      response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
+      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    }
 
     // Obtener el token desde cookies o header
     const authHeader = request.headers.get('authorization')
@@ -18,34 +28,42 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Token no proporcionado' }, { status: 401, headers: response.headers })
     }
 
-    // Verificar el token JWT
+    // Verificar el token JWT real
     let payload: any
     try {
-      payload = jwt.verify(token, JWT_SECRET)
+      payload = jwt.verify(token, process.env.JWT_SECRET!)
     } catch (err) {
       console.warn('❌ Token inválido:', err)
       return NextResponse.json({ error: 'Token inválido' }, { status: 401, headers: response.headers })
     }
 
-    const userId = payload.userId
+    // Leer información de usuario desde cookie (user_info)
+    const userInfoCookie = request.cookies.get('user_info')?.value
+    let userData = null
 
-    // Obtener información completa del usuario con roles desde la DB
-    const userWithRoles = await RoleManager.getUserWithRoles(userId)
-    
-    if (!userWithRoles) {
-      console.warn('❌ Usuario no encontrado en la base de datos')
+    if (userInfoCookie) {
+      try {
+        userData = JSON.parse(decodeURIComponent(userInfoCookie))
+      } catch (e) {
+        console.error('⚠️ Error al parsear user_info:', e)
+      }
+    }
+
+    if (!userData) {
+      console.warn('❌ No se encontró la información del usuario en cookies')
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 401, headers: response.headers })
     }
 
-
+    console.log('✅ Usuario verificado:', userData.username)
 
     return NextResponse.json({
       user: {
-        id: userWithRoles.id,
-        name: userWithRoles.username,
-        email: userWithRoles.email,
-        // NO incluimos roles en la respuesta del cliente
-        // Los roles se verifican solo en el servidor
+        id: userData.id,
+        name: userData.username,
+        email: userData.email,
+        role: userData.role,
+        avatarUrl: userData.avatarUrl,
+        wikipediaStats: userData.wikipediaData,
         lastLogin: new Date().toISOString()
       },
       session: {

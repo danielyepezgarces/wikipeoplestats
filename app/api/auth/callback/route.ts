@@ -32,8 +32,7 @@ function redirectToErrorPage(origin: string, errorType: string): NextResponse {
     token_exchange_failed: 'Failed to authenticate with Wikipedia',
     user_info_failed: 'Failed to get user info from Wikipedia',
     session_creation_failed: 'Failed to create session',
-    authentication_failed: 'Authentication error',
-    domain_restricted: 'Authentication callback accessed from unauthorized domain'
+    authentication_failed: 'Authentication error'
   }
 
   const errorUrl = new URL(`https://${origin}/login`)
@@ -178,7 +177,6 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
  */
 export async function GET(request: NextRequest) {
   try {
-  
     const searchParams = request.nextUrl.searchParams
     const oauth_token = searchParams.get('oauth_token')
     const oauth_verifier = searchParams.get('oauth_verifier')
@@ -193,12 +191,15 @@ export async function GET(request: NextRequest) {
       return redirectToErrorPage(origin, 'session_expired')
     }
 
+    console.log('🔑 Getting access token...')
     const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
     if (!accessToken) return redirectToErrorPage(origin, 'token_exchange_failed')
 
+    console.log('👤 Getting user info...')
     const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
     if (!userInfo) return redirectToErrorPage(origin, 'user_info_failed')
 
+    console.log('🔍 Looking for existing user...')
     let user = await Database.getUserByWikipediaId(userInfo.id)
 
     if (!user) {
@@ -211,8 +212,10 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    console.log('🕓 Updating last login...')
     await Database.updateUserLogin(user.id)
 
+    console.log('🔐 Creating session...')
     const token = generateToken({
       id: user.id,
       username: user.username,
@@ -231,12 +234,15 @@ export async function GET(request: NextRequest) {
       ip_address: request.headers.get('x-forwarded-for') || ''
     })
 
+
+    console.log('✅ Auth successful. Redirecting...')
     return createAuthResponse(origin, token, {
       id: user.id,
       username: user.username,
       email: user.email
     })
   } catch (error: unknown) {
+    console.error('🔥 Unhandled error in auth callback:', error)
     const message = error instanceof Error ? error.message : String(error)
     return new NextResponse(`Internal Server Error: ${message}`, { status: 500 })
   }
