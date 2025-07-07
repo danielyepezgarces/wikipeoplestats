@@ -1,23 +1,10 @@
 // app/api/admin/roles/remove/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAnyRole } from '@/lib/auth-middleware'
 import { RoleManager } from '@/lib/role-manager'
-import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 export async function POST(request: NextRequest) {
   try {
-    // Verificar autenticación
-    const authHeader = request.headers.get('authorization')
-    const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth_token')?.value
-
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const payload = jwt.verify(token, JWT_SECRET) as any
-    const adminUserId = payload.userId
-
     // Obtener datos de la petición
     const { userId, roleId, chapterId } = await request.json()
 
@@ -28,17 +15,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar permisos del admin
-    const canManage = await RoleManager.canManageRoles(adminUserId, chapterId)
-    if (!canManage) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
-    }
+    // Verificar permisos del admin (solo server-side)
+    const auth = await requireAnyRole(request, ['super_admin', 'chapter_admin'], chapterId)
 
     // Remover el rol
-    await RoleManager.removeRole(userId, roleId, chapterId, adminUserId)
+    await RoleManager.removeRole(userId, roleId, chapterId, auth.userId)
 
     return NextResponse.json({
       success: true,
@@ -51,7 +32,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message },
-        { status: 400 }
+        { status: error.message.includes('permissions') ? 403 : 400 }
       )
     }
 

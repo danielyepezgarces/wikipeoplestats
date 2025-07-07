@@ -5,16 +5,8 @@ interface User {
   id: string
   name: string
   email?: string
-  role: string
-  chapter?: string
-  wikipediaUsername: string
-  avatarUrl?: string
   lastLogin?: string
-  roles?: Array<{
-    role: string
-    chapter_id: number
-    chapter_slug?: string
-  }>
+  // NO incluimos roles aquí - se verifican solo en servidor
 }
 
 export function useAuth() {
@@ -79,30 +71,36 @@ export function useAuth() {
       console.error('Error cerrando sesión:', error)
     }
   }
-  
-  const hasPermission = (permission: string) => {
-    if (!user) return false
-    
-    const permissions = {
-      super_admin: ['all'],
-      chapter_admin: ['manage_chapter', 'manage_users', 'moderate'],
-      chapter_moderator: ['moderate', 'view_reports'],
-      chapter_partner: ['view_stats']
-    }
-    
-    const userPermissions = permissions[user.role as keyof typeof permissions] || []
-    return userPermissions.includes(permission) || userPermissions.includes('all')
-  }
 
-  // Verificar si tiene un rol específico
-  const hasRole = (roleName: string, chapterId?: number) => {
-    if (!user?.roles) return false
-    
-    return user.roles.some(role => {
-      const roleMatch = role.role === roleName
-      const chapterMatch = chapterId ? role.chapter_id === chapterId : true
-      return roleMatch && chapterMatch
-    })
+  // Verificar permisos haciendo llamada al servidor
+  const checkPermission = async (permission: string, chapterId?: number): Promise<boolean> => {
+    if (!user) return false
+
+    try {
+      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
+      const url = new URL(`${authDomain}/api/auth/check-permission`)
+      url.searchParams.set('permission', permission)
+      if (chapterId) {
+        url.searchParams.set('chapterId', chapterId.toString())
+      }
+
+      const response = await fetch(url.toString(), {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        return data.hasPermission
+      }
+      
+      return false
+    } catch (error) {
+      console.error('Error checking permission:', error)
+      return false
+    }
   }
   
   return {
@@ -111,8 +109,7 @@ export function useAuth() {
     isAuthenticated: !!user,
     login,
     logout,
-    hasPermission,
-    hasRole,
+    checkPermission, // Reemplaza hasPermission y hasRole
     refetch: verifyAuth
   }
 }

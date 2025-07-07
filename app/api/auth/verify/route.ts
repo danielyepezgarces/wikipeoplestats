@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
+import { RoleManager } from '@/lib/role-manager'
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 export async function GET(request: NextRequest) {
   console.log('🔍 Verificando autenticación...')
@@ -28,42 +31,34 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Token no proporcionado' }, { status: 401, headers: response.headers })
     }
 
-    // Verificar el token JWT real
+    // Verificar el token JWT
     let payload: any
     try {
-      payload = jwt.verify(token, process.env.JWT_SECRET!)
+      payload = jwt.verify(token, JWT_SECRET)
     } catch (err) {
       console.warn('❌ Token inválido:', err)
       return NextResponse.json({ error: 'Token inválido' }, { status: 401, headers: response.headers })
     }
 
-    // Leer información de usuario desde cookie (user_info)
-    const userInfoCookie = request.cookies.get('user_info')?.value
-    let userData = null
+    const userId = payload.userId
 
-    if (userInfoCookie) {
-      try {
-        userData = JSON.parse(decodeURIComponent(userInfoCookie))
-      } catch (e) {
-        console.error('⚠️ Error al parsear user_info:', e)
-      }
-    }
-
-    if (!userData) {
-      console.warn('❌ No se encontró la información del usuario en cookies')
+    // Obtener información completa del usuario con roles desde la DB
+    const userWithRoles = await RoleManager.getUserWithRoles(userId)
+    
+    if (!userWithRoles) {
+      console.warn('❌ Usuario no encontrado en la base de datos')
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 401, headers: response.headers })
     }
 
-    console.log('✅ Usuario verificado:', userData.username)
+    console.log('✅ Usuario verificado:', userWithRoles.username)
 
     return NextResponse.json({
       user: {
-        id: userData.id,
-        name: userData.username,
-        email: userData.email,
-        role: userData.role,
-        avatarUrl: userData.avatarUrl,
-        wikipediaStats: userData.wikipediaData,
+        id: userWithRoles.id,
+        name: userWithRoles.username,
+        email: userWithRoles.email,
+        // NO incluimos roles en la respuesta del cliente
+        // Los roles se verifican solo en el servidor
         lastLogin: new Date().toISOString()
       },
       session: {
