@@ -11,6 +11,16 @@ export function middleware(request: NextRequest) {
   const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
   const isDevelopment = process.env.NODE_ENV === 'development'
   
+  // Debugging - remover en producción
+  console.log(`🔍 Request details:`, {
+    pathname,
+    hostname,
+    origin,
+    referer,
+    AUTH_DOMAIN,
+    isDevelopment
+  })
+  
   // ========================================
   // 🔒 RESTRICCIÓN DE APIs DE AUTENTICACIÓN
   // ========================================
@@ -26,14 +36,19 @@ export function middleware(request: NextRequest) {
       }
     }
     
-    // En producción, SOLO permitir desde auth.wikipeoplestats.org
+    // CORRECCIÓN: Verificar que el hostname sea exactamente el AUTH_DOMAIN
     if (hostname !== AUTH_DOMAIN) {
-      console.log(`❌ Auth API blocked: ${hostname} is not ${AUTH_DOMAIN}`)
+      console.log(`❌ Auth API blocked: hostname "${hostname}" is not "${AUTH_DOMAIN}"`)
       return new NextResponse(
         JSON.stringify({ 
           error: 'Forbidden', 
           message: 'Authentication APIs can only be accessed from the authorized domain',
-          code: 'DOMAIN_RESTRICTED'
+          code: 'DOMAIN_RESTRICTED',
+          debug: {
+            hostname,
+            expectedDomain: AUTH_DOMAIN,
+            pathname
+          }
         }), 
         { 
           status: 403,
@@ -54,13 +69,19 @@ export function middleware(request: NextRequest) {
         ...(isDevelopment ? ['http://localhost:3000', 'http://localhost:7080', 'http://127.0.0.1:3000'] : [])
       ]
       
+      console.log(`🔍 Checking origin: "${requestOrigin}" against allowed origins:`, allowedOrigins)
+      
       if (!allowedOrigins.some(allowed => requestOrigin.startsWith(allowed))) {
         console.log(`❌ Auth API blocked by origin: ${requestOrigin}`)
         return new NextResponse(
           JSON.stringify({ 
             error: 'Forbidden', 
             message: 'Invalid origin for authentication request',
-            code: 'ORIGIN_RESTRICTED'
+            code: 'ORIGIN_RESTRICTED',
+            debug: {
+              requestOrigin,
+              allowedOrigins
+            }
           }), 
           { 
             status: 403,
