@@ -11,55 +11,92 @@ export function middleware(request: NextRequest) {
   const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace(/https?:\/\//, '') || 'auth.wikipeoplestats.org'
   const isDevelopment = process.env.NODE_ENV === 'development'
   
-  // Debugging - remover en producción
-  console.log(`🔍 Request details:`, {
-    pathname,
-    hostname,
-    origin,
-    referer,
-    AUTH_DOMAIN,
-    isDevelopment,
-    rawAuthDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN
-  })
-  
   // ========================================
   // 🔒 RESTRICCIÓN DE APIs DE AUTENTICACIÓN
   // ========================================
   if (pathname.startsWith('/api/auth/')) {
-    console.log(`🔍 Auth API request: ${pathname} from ${hostname}`)
     
-    // En desarrollo, permitir localhost
-    if (isDevelopment) {
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1')
-      if (isLocalhost) {
-        console.log('✅ Development: localhost allowed')
-        return addCorsHeaders(NextResponse.next(), origin, isDevelopment)
-      }
-    }
+    // Definir rutas críticas que SOLO pueden ser accedidas desde el dominio de auth
+    const restrictedAuthPaths = [
+      '/api/auth/admin',
+      '/api/auth/setup',
+      '/api/auth/reset-database',
+      '/api/auth/config'
+    ]
     
-    // CORRECCIÓN: Verificar que el hostname sea exactamente el AUTH_DOMAIN
-    if (hostname !== AUTH_DOMAIN) {
-      console.log(`❌ Auth API blocked: hostname "${hostname}" is not "${AUTH_DOMAIN}"`)
-      return new NextResponse(
-        JSON.stringify({ 
-          error: 'Forbidden', 
-          message: 'Authentication APIs can only be accessed from the authorized domain',
-          code: 'DOMAIN_RESTRICTED',
-          debug: {
-            hostname,
-            expectedDomain: AUTH_DOMAIN,
-            pathname
-          }
-        }), 
-        { 
-          status: 403,
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Blocked-Reason': 'Domain restriction',
-            'X-Allowed-Domain': AUTH_DOMAIN
-          }
+    // Verificar si es una ruta crítica
+    const isRestrictedPath = restrictedAuthPaths.some(path => pathname.startsWith(path))
+    
+    if (isRestrictedPath) {
+      console.log(`🔐 Restricted auth path: ${pathname}`)
+      
+      // En desarrollo, permitir localhost para rutas críticas
+      if (isDevelopment) {
+        const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1')
+        if (isLocalhost) {
+          return addCorsHeaders(NextResponse.next(), origin, isDevelopment)
         }
-      )
+      }
+      
+      // Rutas críticas SOLO desde el dominio de auth
+      if (hostname !== AUTH_DOMAIN) {
+        return new NextResponse(
+          JSON.stringify({ 
+            error: 'Forbidden', 
+            message: 'This authentication endpoint is restricted to the authorized domain',
+            code: 'RESTRICTED_AUTH_PATH',
+            debug: {
+              hostname,
+              expectedDomain: AUTH_DOMAIN,
+              pathname
+            }
+          }), 
+          { 
+            status: 403,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Blocked-Reason': 'Restricted auth path',
+              'X-Allowed-Domain': AUTH_DOMAIN
+            }
+          }
+        )
+      }
+    } else {
+      // Rutas normales de auth: verificar que sea un subdominio válido de wikipeoplestats.org
+      const isValidSubdomain = hostname.endsWith('.wikipeoplestats.org') || 
+                               hostname === 'wikipeoplestats.org' ||
+                               hostname === AUTH_DOMAIN
+      
+      // En desarrollo, permitir localhost
+      if (isDevelopment) {
+        const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1')
+        if (isLocalhost) {
+          return addCorsHeaders(NextResponse.next(), origin, isDevelopment)
+        }
+      }
+      
+      if (!isValidSubdomain) {
+        return new NextResponse(
+          JSON.stringify({ 
+            error: 'Forbidden', 
+            message: 'Authentication APIs can only be accessed from wikipeoplestats.org domains',
+            code: 'DOMAIN_RESTRICTED',
+            debug: {
+              hostname,
+              expectedDomain: '*.wikipeoplestats.org',
+              pathname
+            }
+          }), 
+          { 
+            status: 403,
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Blocked-Reason': 'Domain restriction',
+              'X-Allowed-Domain': '*.wikipeoplestats.org'
+            }
+          }
+        )
+      }
     }
     
     // Verificación adicional del Origin/Referer para requests AJAX
@@ -67,12 +104,20 @@ export function middleware(request: NextRequest) {
       const requestOrigin = origin || new URL(referer || '').origin
       const allowedOrigins = [
         `https://${AUTH_DOMAIN}`,
+        'https://www.wikipeoplestats.org',
+        'https://es.wikipeoplestats.org',
+        'https://en.wikipeoplestats.org',
+        // Permitir cualquier subdominio de wikipeoplestats.org
+        ...(origin && origin.includes('wikipeoplestats.org') ? [origin] : []),
         ...(isDevelopment ? ['http://localhost:3000', 'http://localhost:7080', 'http://127.0.0.1:3000'] : [])
       ]
       
       console.log(`🔍 Checking origin: "${requestOrigin}" against allowed origins:`, allowedOrigins)
       
-      if (!allowedOrigins.some(allowed => requestOrigin.startsWith(allowed))) {
+      const isOriginAllowed = allowedOrigins.some(allowed => requestOrigin === allowed) ||
+                             requestOrigin.match(/^https:\/\/[^.]+\.wikipeoplestats\.org$/)
+      
+      if (!isOriginAllowed) {
         console.log(`❌ Auth API blocked by origin: ${requestOrigin}`)
         return new NextResponse(
           JSON.stringify({ 
@@ -81,7 +126,7 @@ export function middleware(request: NextRequest) {
             code: 'ORIGIN_RESTRICTED',
             debug: {
               requestOrigin,
-              allowedOrigins
+              allowedPatterns: ['https://*.wikipeoplestats.org']
             }
           }), 
           { 
@@ -95,7 +140,6 @@ export function middleware(request: NextRequest) {
       }
     }
     
-    console.log(`✅ Auth API allowed: ${pathname}`)
     return addCorsHeaders(NextResponse.next(), origin, isDevelopment)
   }
   
