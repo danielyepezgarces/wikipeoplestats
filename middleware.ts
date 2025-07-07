@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const referer = request.headers.get('referer')
   
   // Configuración de dominios permitidos
-  const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
+  const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace(/https?:\/\//, '') || 'auth.wikipeoplestats.org'
   const isDevelopment = process.env.NODE_ENV === 'development'
   
   // Debugging - remover en producción
@@ -18,7 +18,8 @@ export function middleware(request: NextRequest) {
     origin,
     referer,
     AUTH_DOMAIN,
-    isDevelopment
+    isDevelopment,
+    rawAuthDomain: process.env.NEXT_PUBLIC_AUTH_DOMAIN
   })
   
   // ========================================
