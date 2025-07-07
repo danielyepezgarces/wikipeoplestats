@@ -25,6 +25,7 @@ export interface User {
   created_at: string
   updated_at: string
   last_login?: string
+  avatar_url?: string
 }
 
 export interface UserRole {
@@ -62,12 +63,13 @@ export class Database {
     wikimedia_id: string
     username: string
     email?: string
+    avatar_url?: string
   }): Promise<User> {
     const conn = await getConnection()
     const [result] = await conn.execute(
-      `INSERT INTO users (wikimedia_id, username, email, created_at, updated_at, is_active)
-       VALUES (?, ?, ?, NOW(), NOW(), 1)`,
-      [data.wikimedia_id, data.username, data.email]
+      `INSERT INTO users (wikimedia_id, username, email, avatar_url, created_at, updated_at, is_active)
+       VALUES (?, ?, ?, ?, NOW(), NOW(), 1)`,
+      [data.wikimedia_id, data.username, data.email, data.avatar_url]
     )
     const insertResult = result as mysql.ResultSetHeader
     const user = await this.getUserById(insertResult.insertId)
@@ -91,16 +93,6 @@ export class Database {
       [userId]
     )
   }
-
-  static async assignDefaultRole(userId: number, roleId: number = 1): Promise<void> {
-    const conn = await getConnection()
-    await conn.execute(
-      `INSERT INTO user_roles (user_id, role_id, created_at)
-     VALUES (?, ?, NOW())`,
-      [userId, roleId]
-    )
-  }
-
 
   static async createSession(data: Partial<Session>): Promise<Session> {
     const conn = await getConnection()
@@ -135,5 +127,40 @@ export class Database {
   static async deleteExpiredSessions(): Promise<void> {
     const conn = await getConnection()
     await conn.execute('DELETE FROM sessions WHERE expires_at < NOW()')
+  }
+
+  // Nuevos métodos para gestión de roles
+  static async getUserRoles(userId: number): Promise<UserRole[]> {
+    const conn = await getConnection()
+    const [rows] = await conn.execute(`
+      SELECT 
+        ur.user_id,
+        ur.role_id,
+        ur.chapter_id,
+        r.name as role_name,
+        c.slug as chapter_slug
+      FROM user_roles ur
+      JOIN roles r ON ur.role_id = r.id
+      LEFT JOIN chapters c ON ur.chapter_id = c.id
+      WHERE ur.user_id = ? AND r.is_active = 1
+    `, [userId])
+    
+    return rows as UserRole[]
+  }
+
+  static async getAllRoles(): Promise<any[]> {
+    const conn = await getConnection()
+    const [rows] = await conn.execute(
+      'SELECT * FROM roles WHERE is_active = 1 ORDER BY name'
+    )
+    return rows as any[]
+  }
+
+  static async getAllChapters(): Promise<any[]> {
+    const conn = await getConnection()
+    const [rows] = await conn.execute(
+      'SELECT * FROM chapters ORDER BY slug'
+    )
+    return rows as any[]
   }
 }

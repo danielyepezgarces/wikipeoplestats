@@ -10,6 +10,11 @@ interface User {
   wikipediaUsername: string
   avatarUrl?: string
   lastLogin?: string
+  roles?: Array<{
+    role: string
+    chapter_id: number
+    chapter_slug?: string
+  }>
 }
 
 export function useAuth() {
@@ -25,7 +30,6 @@ export function useAuth() {
     try {
       setIsLoading(true)
       
-      // Intentar verificar con el dominio de auth
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
       
       const response = await fetch(`${authDomain}/api/auth/verify`, {
@@ -89,6 +93,17 @@ export function useAuth() {
     const userPermissions = permissions[user.role as keyof typeof permissions] || []
     return userPermissions.includes(permission) || userPermissions.includes('all')
   }
+
+  // Verificar si tiene un rol específico
+  const hasRole = (roleName: string, chapterId?: number) => {
+    if (!user?.roles) return false
+    
+    return user.roles.some(role => {
+      const roleMatch = role.role === roleName
+      const chapterMatch = chapterId ? role.chapter_id === chapterId : true
+      return roleMatch && chapterMatch
+    })
+  }
   
   return {
     user,
@@ -97,6 +112,7 @@ export function useAuth() {
     login,
     logout,
     hasPermission,
+    hasRole,
     refetch: verifyAuth
   }
 }
