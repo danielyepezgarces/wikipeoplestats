@@ -7,6 +7,22 @@ export async function GET(request: NextRequest) {
   console.log('🔍 Starting Wikimedia OAuth login...')
 
   try {
+    const hostname = request.nextUrl.hostname
+    const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    
+    // Verificación de dominio para login
+    if (!isDevelopment && hostname !== AUTH_DOMAIN) {
+      console.log(`❌ OAuth login accessed from unauthorized domain: ${hostname}`)
+      return NextResponse.json({
+        error: 'Domain restriction',
+        message: 'OAuth login can only be initiated from the authorized authentication domain',
+        allowedDomain: AUTH_DOMAIN
+      }, { status: 403 })
+    }
+
+    console.log(`🔐 OAuth login initiated from authorized domain: ${hostname}`)
+
     // Verify environment variables first
     if (!process.env.WIKIPEDIA_CLIENT_ID || !process.env.WIKIPEDIA_CLIENT_SECRET) {
       throw new Error('Missing Wikipedia OAuth credentials in environment variables')
@@ -89,6 +105,9 @@ export async function GET(request: NextRequest) {
       path: '/',
       maxAge: 300, // 5 minutes
     })
+
+    // Log de seguridad
+    console.log(`🔐 OAuth login redirect generated for origin: ${origin}`)
 
     return redirectResponse
 

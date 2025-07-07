@@ -32,7 +32,8 @@ function redirectToErrorPage(origin: string, errorType: string): NextResponse {
     token_exchange_failed: 'Failed to authenticate with Wikipedia',
     user_info_failed: 'Failed to get user info from Wikipedia',
     session_creation_failed: 'Failed to create session',
-    authentication_failed: 'Authentication error'
+    authentication_failed: 'Authentication error',
+    domain_restricted: 'Authentication callback accessed from unauthorized domain'
   }
 
   const errorUrl = new URL(`https://${origin}/login`)
@@ -177,6 +178,18 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
  */
 export async function GET(request: NextRequest) {
   try {
+    const hostname = request.nextUrl.hostname
+    const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    
+    // Verificación de dominio para callback
+    if (!isDevelopment && hostname !== AUTH_DOMAIN) {
+      console.log(`❌ OAuth callback accessed from unauthorized domain: ${hostname}`)
+      return redirectToErrorPage(DEFAULT_ORIGIN, 'domain_restricted')
+    }
+
+    console.log(`🔐 OAuth callback received from authorized domain: ${hostname}`)
+
     const searchParams = request.nextUrl.searchParams
     const oauth_token = searchParams.get('oauth_token')
     const oauth_verifier = searchParams.get('oauth_verifier')
@@ -234,6 +247,8 @@ export async function GET(request: NextRequest) {
       ip_address: request.headers.get('x-forwarded-for') || ''
     })
 
+    // Log de seguridad
+    console.log(`🔐 Successful authentication for user ${user.username} from ${hostname} redirecting to ${origin}`)
 
     console.log('✅ Auth successful. Redirecting...')
     return createAuthResponse(origin, token, {

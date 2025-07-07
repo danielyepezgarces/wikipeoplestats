@@ -9,9 +9,22 @@ export async function GET(request: NextRequest) {
 
   try {
     const origin = request.headers.get('origin')
+    const hostname = request.nextUrl.hostname
     const response = new NextResponse()
 
+    // Verificación adicional de dominio (doble capa de seguridad)
+    const AUTH_DOMAIN = process.env.NEXT_PUBLIC_AUTH_DOMAIN?.replace('https://', '') || 'auth.wikipeoplestats.org'
     const isDevelopment = process.env.NODE_ENV === 'development'
+    
+    if (!isDevelopment && hostname !== AUTH_DOMAIN) {
+      console.log(`❌ Verify endpoint accessed from unauthorized domain: ${hostname}`)
+      return NextResponse.json(
+        { error: 'Unauthorized domain' }, 
+        { status: 403 }
+      )
+    }
+
+    // CORS headers (ya manejado por middleware, pero por seguridad)
     const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
     const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
 
@@ -51,6 +64,9 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('✅ Usuario verificado:', userWithRoles.username)
+
+    // Log de seguridad
+    console.log(`🔐 Auth verification successful for user ${userWithRoles.username} from ${hostname}`)
 
     return NextResponse.json({
       user: {
