@@ -73,7 +73,7 @@
   "license_info": "Todo el contenido está disponible bajo la Licencia Creative Commons Atribución-CompartirIgual",
   "privacy_policy": "Política de Privacidad",
   "terms_of_use": "Términos de Uso",
-  "migration_db_notice": "Actualmente estamos migrando nuestra base de datos. Algunas funciones pueden estar temporalmente no disponibles.",
+  "migration_db_notice": "Los datos son basados en instantáneas de Wikidata y pueden estar desactualizados.",
   "gender_statistics": "Estadísticas de Género",
   "cumulative_view": "Vista Acumulativa",
   "normal_view": "Vista Normal",

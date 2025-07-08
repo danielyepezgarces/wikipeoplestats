@@ -73,5 +73,5 @@
     "license_info": "Todo o conteúdo está disponível sob a Licença Creative Commons Attribution-ShareAlike",
     "privacy_policy": "Política de Privacidade",
     "terms_of_use": "Termos de Uso",
-    "migration_db_notice": "Estamos migrando nosso banco de dados. Alguns recursos podem estar temporariamente indisponíveis."
+    "migration_db_notice": "Os dados são baseados em instantâneas de Wikidata e podem estar desatualizados."
   }
