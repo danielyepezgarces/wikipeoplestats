@@ -6,7 +6,6 @@ import { getAllChaptersWithStats } from '@/lib/queries/chapters'
 
 const authDomain = process.env.AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
 
-
 // === GET: Obtener capítulos con stats ===
 export async function GET(req: NextRequest) {
   try {
@@ -39,7 +38,7 @@ export async function POST(req: NextRequest) {
   try {
     const cookieHeader = req.headers.get('cookie') || ''
 
-    const verifyRes = await fetch(`${AUTH_DOMAIN}/api/auth/verify`, {
+    const verifyRes = await fetch(`${authDomain}/api/auth/verify`, {
       headers: { cookie: cookieHeader },
       credentials: 'include',
     })
