@@ -55,7 +55,9 @@ export async function GET(request: NextRequest) {
        WHERE ur.user_id = ?`,
       [userId]
     )
-    const roles = (roleRows as any[]).map(r => r.name)
+
+    // ✅ Eliminar duplicados usando Set
+    const roles = Array.from(new Set((roleRows as any[]).map(r => r.name)))
     const role = roles[0] || 'user'
 
     return NextResponse.json({
