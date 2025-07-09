@@ -4,7 +4,11 @@ import jwt from 'jsonwebtoken'
 import { getConnection } from '@/lib/database'
 import { getAllChaptersWithStats } from '@/lib/queries/chapters'
 
-const authDomain = process.env.AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
+let rawDomain = process.env.AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
+if (!rawDomain.startsWith('http')) {
+  rawDomain = 'https://' + rawDomain
+}
+const authDomain = rawDomain
 
 // === GET: Obtener capítulos con stats ===
 export async function GET(req: NextRequest) {
