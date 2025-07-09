@@ -3,8 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Eye, Edit, Settings } from 'lucide-react'
-import { CreateChapterForm } from '@/components/dashboard/create-chapter-form'
-import { useAuth } from '@/hooks/use-auth'
+import { CreateChapterForm } from '@/components/dashboard/admin/CreateChapterForm'
 
 interface Chapter {
   name: string
@@ -29,10 +28,7 @@ export function ChaptersSection({ chapters }: ChaptersSectionProps) {
             Manage all Wikimedia chapters globally
           </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          New Chapter
-        </Button>
+        <CreateChapterForm />
       </div>
 
       <div className="grid gap-4">
