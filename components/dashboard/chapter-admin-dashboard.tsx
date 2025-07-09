@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { 
-  BarChart3, 
-  Users, 
-  Settings, 
-  Activity, 
+import {
+  BarChart3,
+  Users,
+  Settings,
+  Activity,
   TrendingUp,
   UserCheck,
   AlertTriangle,
@@ -152,12 +152,12 @@ export function ChapterAdminDashboard({ user }: ChapterAdminDashboardProps) {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <Badge variant="default" className="hidden sm:inline-flex">
                 Chapter Admin
               </Badge>
-              
+
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -178,7 +178,7 @@ export function ChapterAdminDashboard({ user }: ChapterAdminDashboardProps) {
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 </button>
-                
+
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -202,8 +202,8 @@ export function ChapterAdminDashboard({ user }: ChapterAdminDashboardProps) {
                       </div>
                     </div>
                     <div className="p-2">
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={handleLogout}
                       >
@@ -219,23 +219,24 @@ export function ChapterAdminDashboard({ user }: ChapterAdminDashboardProps) {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="hidden lg:flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <tab.icon className="h-4 w-4" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
+          <div className="overflow-x-auto">
+            <div className="flex space-x-4 sm:space-x-6 lg:space-x-8 px-2 sm:px-0">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-2 py-3 px-2 sm:px-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
+                    }`}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
