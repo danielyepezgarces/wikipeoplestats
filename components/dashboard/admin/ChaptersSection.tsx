@@ -8,7 +8,8 @@ import { CreateChapterForm } from '@/components/dashboard/admin/CreateChapterFor
 interface Chapter {
   name: string
   users: number
-  moderators: number
+  admins: number     // 👈 Nuevo campo
+  staff: number      // 👈 Reemplaza a "moderators"
   status: 'active' | 'pending'
 }
 
@@ -37,16 +38,21 @@ export function ChaptersSection({ chapters }: ChaptersSectionProps) {
             <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center space-x-4">
-                  <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                    chapter.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'
-                  }`} />
+                  <div
+                    className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                      chapter.status === 'active'
+                        ? 'bg-green-500'
+                        : 'bg-yellow-500'
+                    }`}
+                  />
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       {chapter.name}
                     </h3>
                     <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mt-1">
                       <span>{chapter.users} users</span>
-                      <span>{chapter.moderators} moderators</span>
+                      <span>{chapter.admins} admins</span>
+                      <span>{chapter.staff} staff</span>
                     </div>
                   </div>
                 </div>
