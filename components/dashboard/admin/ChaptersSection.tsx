@@ -3,6 +3,8 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Eye, Edit, Settings } from 'lucide-react'
+import { CreateChapterForm } from '@/components/dashboard/create-chapter-form'
+import { useAuth } from '@/hooks/use-auth'
 
 interface Chapter {
   name: string
