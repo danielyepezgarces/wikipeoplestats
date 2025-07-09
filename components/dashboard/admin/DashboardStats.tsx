@@ -39,7 +39,7 @@ export function DashboardStats() {
       color: 'text-yellow-500'
     },
     {
-      title: 'Active Projects',
+      title: 'Active Wikis',
       value: stats.active_projects,
       icon: Globe,
       color: 'text-red-500'
