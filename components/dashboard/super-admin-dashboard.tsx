@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { ChaptersSection } from "@/components/dashboard/admin/ChaptersSection"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { DashboardStats } from './admin/DashboardStats'
 
 interface SuperAdminDashboardProps {
   user: {
@@ -32,13 +33,6 @@ interface Chapter {
 export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-
-  const stats = [
-    { title: "Total Chapters", value: "47", change: "+3", icon: Globe, color: "text-blue-500" },
-    { title: "Global Users", value: "2,341", change: "+127", icon: Users, color: "text-green-500" },
-    { title: "Active Projects", value: "847", change: "+12", icon: Database, color: "text-purple-500" },
-    { title: "System Health", value: "99.9%", change: "+0.1%", icon: Activity, color: "text-orange-500" }
-  ]
 
   const recentActivities = [
     { action: "New chapter registered", project: "Wikimedia Colombia", time: "2 min", type: "success" },
@@ -150,11 +144,10 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
+                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <tab.icon className="h-4 w-4" />
                 <span>{tab.label}</span>
@@ -168,22 +161,7 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === "overview" && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              {stats.map((stat, index) => (
-                <Card key={index}>
-                  <CardContent className="pt-6 p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.title}</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</p>
-                        <p className="text-sm text-green-600 dark:text-green-400">{stat.change} this month</p>
-                      </div>
-                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <DashboardStats />
 
             <Card>
               <CardHeader>
