@@ -30,6 +30,10 @@ const WIKIMEDIA_LICENSES = [
   'Public Domain',
 ]
 
+// Función para capitalizar la primera letra
+const capitalizeFirstLetter = (text: string) =>
+  text.charAt(0).toUpperCase() + text.slice(1)
+
 export function CreateChapterForm() {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
@@ -137,7 +141,9 @@ export function CreateChapterForm() {
             <Label>Admin Username</Label>
             <Input
               value={adminUsername}
-              onChange={(e) => setAdminUsername(e.target.value)}
+              onChange={(e) =>
+                setAdminUsername(capitalizeFirstLetter(e.target.value))
+              }
               required
             />
           </div>
