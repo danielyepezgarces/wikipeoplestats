@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -12,7 +12,13 @@ import {
 } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 
 const WIKIMEDIA_LICENSES = [
   'CC-BY-SA-4.0',
@@ -27,6 +33,7 @@ const WIKIMEDIA_LICENSES = [
 export function CreateChapterForm() {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState('')
   const [bannerUrl, setBannerUrl] = useState('')
   const [bannerCredits, setBannerCredits] = useState('')
@@ -35,12 +42,28 @@ export function CreateChapterForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
+  useEffect(() => {
+    if (!slugManuallyEdited) {
+      setSlug(slugify(name))
+    }
+  }, [name])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
     if (!name.trim() || !slug.trim() || !adminUsername.trim()) {
-      setError('Chapter name, slug and admin username are required.')
+      setError('Name, slug, and admin username are required.')
       return
     }
 
@@ -65,14 +88,14 @@ export function CreateChapterForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Unexpected error occurred')
+        setError(data?.error || 'Error creating chapter')
         return
       }
 
       window.location.reload()
     } catch (err) {
       console.error(err)
-      setError('Error connecting to the server')
+      setError('Unexpected error occurred')
     } finally {
       setLoading(false)
     }
@@ -93,27 +116,51 @@ export function CreateChapterForm() {
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label>Chapter Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} required />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label>Slug</Label>
-            <Input value={slug} onChange={(e) => setSlug(e.target.value)} required />
+            <Input
+              value={slug}
+              onChange={(e) => {
+                setSlug(e.target.value)
+                setSlugManuallyEdited(true)
+              }}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label>Admin Username</Label>
-            <Input value={adminUsername} onChange={(e) => setAdminUsername(e.target.value)} required />
+            <Input
+              value={adminUsername}
+              onChange={(e) => setAdminUsername(e.target.value)}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label>Avatar URL</Label>
-            <Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
+            <Input
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label>Banner URL</Label>
-            <Input value={bannerUrl} onChange={(e) => setBannerUrl(e.target.value)} />
+            <Input
+              value={bannerUrl}
+              onChange={(e) => setBannerUrl(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label>Banner Credits</Label>
-            <Input value={bannerCredits} onChange={(e) => setBannerCredits(e.target.value)} />
+            <Input
+              value={bannerCredits}
+              onChange={(e) => setBannerCredits(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label>Banner License</Label>
@@ -131,7 +178,7 @@ export function CreateChapterForm() {
             </Select>
           </div>
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <div className="text-red-500 text-sm">{error}</div>}
 
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? 'Creating...' : 'Create Chapter'}
