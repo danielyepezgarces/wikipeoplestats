@@ -37,7 +37,7 @@ export function CreateChapterForm() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [bannerUrl, setBannerUrl] = useState('')
   const [bannerCredits, setBannerCredits] = useState('')
-  const [bannerLicense, setBannerLicense] = useState('CC-BY-SA-4.0')
+  const [bannerLicense, setBannerLicense] = useState('')
   const [adminUsername, setAdminUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +69,7 @@ export function CreateChapterForm() {
 
     setLoading(true)
     try {
-      const res = await fetch('/api/chapters', {
+      const res = await fetch('/api/admin/chapters', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
