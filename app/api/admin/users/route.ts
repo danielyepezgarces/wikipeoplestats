@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
         u.id,
         u.username,
         u.email,
+        u.created_at,
         c.name AS chapter,
         GROUP_CONCAT(r.name) AS roles
       FROM users u
@@ -61,7 +62,8 @@ export async function GET(req: NextRequest) {
       username: row.username,
       email: row.email,
       chapter: row.chapter || null,
-      roles: row.roles ? row.roles.split(',') : []
+      roles: row.roles ? row.roles.split(',') : [],
+      created_at: row.created_at || null,
     }))
 
     return NextResponse.json({ users, total })
