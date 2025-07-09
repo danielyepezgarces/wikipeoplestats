@@ -1,80 +1,142 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import {
-  BarChart3, Users, Settings, Database, Activity, Globe,
-  TrendingUp, Shield, UserCheck, AlertTriangle, CheckCircle,
-  Edit, Eye, Trash2, Plus, Menu, X, ChevronDown
-} from 'lucide-react'
+  BarChart3,
+  Users,
+  Settings,
+  Database,
+  Activity,
+  Globe,
+  TrendingUp,
+  Shield,
+  UserCheck,
+  AlertTriangle,
+  CheckCircle,
+  Edit,
+  Eye,
+  Trash2,
+  Plus,
+  Menu,
+  X,
+  ChevronDown,
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { ChaptersSection } from "@/components/dashboard/admin/ChaptersSection"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { DashboardStats } from './admin/DashboardStats'
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import { ChaptersSection } from '@/components/dashboard/admin/ChaptersSection';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { DashboardStats } from './admin/DashboardStats';
 
 interface SuperAdminDashboardProps {
   user: {
-    name: string
-    email: string
-    role: string
-    chapter?: string
-  }
+    name: string;
+    email: string;
+    role: string;
+    chapter?: string;
+  };
 }
 
 interface Chapter {
-  name: string
-  users: number
-  moderators: number
-  status: 'active' | 'pending'
+  name: string;
+  users: number;
+  moderators: number;
+  status: 'active' | 'pending';
 }
 
 export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState("overview")
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const recentActivities = [
-    { action: "New chapter registered", project: "Wikimedia Colombia", time: "2 min", type: "success" },
-    { action: "System maintenance completed", project: "Global Infrastructure", time: "15 min", type: "info" },
-    { action: "Security alert resolved", project: "Authentication System", time: "1h", type: "warning" },
-    { action: "Database backup completed", project: "Data Management", time: "2h", type: "success" },
-    { action: "API rate limit adjusted", project: "Global API", time: "3h", type: "info" }
-  ]
+    {
+      action: 'New chapter registered',
+      project: 'Wikimedia Colombia',
+      time: '2 min',
+      type: 'success',
+    },
+    {
+      action: 'System maintenance completed',
+      project: 'Global Infrastructure',
+      time: '15 min',
+      type: 'info',
+    },
+    {
+      action: 'Security alert resolved',
+      project: 'Authentication System',
+      time: '1h',
+      type: 'warning',
+    },
+    {
+      action: 'Database backup completed',
+      project: 'Data Management',
+      time: '2h',
+      type: 'success',
+    },
+    {
+      action: 'API rate limit adjusted',
+      project: 'Global API',
+      time: '3h',
+      type: 'info',
+    },
+  ];
 
   const systemAlerts = [
-    { type: "warning", message: "High API usage detected in ES chapter", time: "5 min ago" },
-    { type: "info", message: "Scheduled maintenance in 2 hours", time: "1 hour ago" },
-    { type: "success", message: "All systems operational", time: "2 hours ago" }
-  ]
+    {
+      type: 'warning',
+      message: 'High API usage detected in ES chapter',
+      time: '5 min ago',
+    },
+    {
+      type: 'info',
+      message: 'Scheduled maintenance in 2 hours',
+      time: '1 hour ago',
+    },
+    {
+      type: 'success',
+      message: 'All systems operational',
+      time: '2 hours ago',
+    },
+  ];
 
   const tabs = [
-    { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "chapters", label: "Chapters", icon: Globe },
-    { id: "users", label: "Global Users", icon: Users },
-    { id: "system", label: "System", icon: Settings },
-    { id: "security", label: "Security", icon: Shield }
-  ]
+    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'chapters', label: 'Chapters', icon: Globe },
+    { id: 'users', label: 'Global Users', icon: Users },
+    { id: 'system', label: 'System', icon: Settings },
+    { id: 'security', label: 'Security', icon: Shield },
+  ];
 
   const generateAvatarFromEmail = (email: string) => {
-    const parts = email.split('@')[0].split('.')
+    const parts = email.split('@')[0].split('.');
     return parts.length >= 2
       ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
-      : email.substring(0, 2).toUpperCase()
-  }
+      : email.substring(0, 2).toUpperCase();
+  };
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-500" />
-      case 'info': return <Activity className="h-4 w-4 text-blue-500" />
-      default: return <Activity className="h-4 w-4 text-gray-500" />
+      case 'success':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      case 'info':
+        return <Activity className="h-4 w-4 text-blue-500" />;
+      default:
+        return <Activity className="h-4 w-4 text-gray-500" />;
     }
-  }
+  };
 
   const handleLogout = () => {
-    console.log("Cerrando sesión...")
-  }
+    console.log('Cerrando sesión...');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -86,11 +148,15 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
               <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Super Admin Dashboard
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Global System Management</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Global System Management
+              </p>
             </div>
 
             <div className="flex items-center space-x-3">
-              <Badge variant="destructive" className="hidden sm:inline-flex">Super Admin</Badge>
+              <Badge variant="destructive" className="hidden sm:inline-flex">
+                Super Admin
+              </Badge>
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
@@ -102,8 +168,12 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-32">{user.email}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {user.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-32">
+                      {user.email}
+                    </p>
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-500" />
                 </button>
@@ -117,14 +187,24 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
-                          <Badge variant="destructive" className="mt-1">Super Admin</Badge>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
+                            {user.name}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {user.email}
+                          </p>
+                          <Badge variant="destructive" className="mt-1">
+                            Super Admin
+                          </Badge>
                         </div>
                       </div>
                     </div>
                     <div className="p-2">
-                      <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={handleLogout}>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={handleLogout}
+                      >
                         Cerrar Sesión
                       </Button>
                     </div>
@@ -136,18 +216,35 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Tabs Wrapper */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-row overflow-x-auto space-x-4 sm:space-x-6 lg:space-x-8 px-2 sm:px-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          {/* Mobile dropdown */}
+          <div className="lg:hidden">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full border border-gray-300 dark:border-gray-700 rounded-md p-2 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+            >
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Desktop tabs */}
+          <div className="hidden lg:flex space-x-8 mt-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-3 px-2 sm:px-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${activeTab === tab.id
+                className={`flex items-center space-x-2 py-3 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200'
-                  }`}
+                }`}
               >
                 <tab.icon className="h-4 w-4" />
                 <span>{tab.label}</span>
@@ -157,26 +254,34 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
         </div>
       </div>
 
-
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === "overview" && (
+        {activeTab === 'overview' && (
           <div className="space-y-6">
             <DashboardStats />
 
             <Card>
               <CardHeader>
                 <CardTitle>System Alerts</CardTitle>
-                <CardDescription>Recent system notifications and alerts</CardDescription>
+                <CardDescription>
+                  Recent system notifications and alerts
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {systemAlerts.map((alert, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-3 rounded-lg border">
+                    <div
+                      key={index}
+                      className="flex items-center space-x-4 p-3 rounded-lg border"
+                    >
                       {getActivityIcon(alert.type)}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{alert.message}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{alert.time}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {alert.message}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {alert.time}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -186,39 +291,41 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
           </div>
         )}
 
-        {activeTab === "chapters" && <ChaptersTab />}
+        {activeTab === 'chapters' && <ChaptersTab />}
       </div>
     </div>
-  )
+  );
 }
 
 function ChaptersTab() {
-  const [chapters, setChapters] = useState<Chapter[]>([])
-  const [loading, setLoading] = useState(true)
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchChapters = async () => {
       try {
-        const res = await fetch('/api/admin/chapters', { credentials: 'include' })
-        const data = await res.json()
-        setChapters(data)
+        const res = await fetch('/api/admin/chapters', {
+          credentials: 'include',
+        });
+        const data = await res.json();
+        setChapters(data);
       } catch (error) {
-        console.error('Error loading chapters:', error)
+        console.error('Error loading chapters:', error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchChapters()
-  }, [])
+    fetchChapters();
+  }, []);
 
   if (loading) {
     return (
       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
         Cargando capítulos...
       </div>
-    )
+    );
   }
 
-  return <ChaptersSection chapters={chapters} />
+  return <ChaptersSection chapters={chapters} />;
 }
