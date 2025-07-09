@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
         (SELECT COUNT(DISTINCT user_id) FROM user_roles WHERE role_id IN (
           SELECT id FROM roles WHERE name = 'chapter_admin'
         )) AS admins,
-        (SELECT COUNT(DISTINCT project) FROM edits) AS active_projects
+        (SELECT COUNT(DISTINCT site) FROM project) AS active_projects
     `)
 
     return NextResponse.json(stats[0])
