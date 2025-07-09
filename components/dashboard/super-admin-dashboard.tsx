@@ -34,6 +34,7 @@ import { ChaptersSection } from '@/components/dashboard/admin/ChaptersSection';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DashboardStats } from './admin/DashboardStats';
+import { UsersSection } from './admin/UsersSection';
 
 interface SuperAdminDashboardProps {
   user: {
@@ -292,6 +293,9 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
         )}
 
         {activeTab === 'chapters' && <ChaptersTab />}
+
+        {activeTab === 'users' && <UsersSection />}
+
       </div>
     </div>
   );
