@@ -23,7 +23,7 @@ export function UsersSection() {
   const totalPages = Math.ceil(total / LIMIT)
 
   useEffect(() => {
-    fetch(`/api/users?page=${page}&limit=${LIMIT}`)
+    fetch(`/api/admin/users?page=${page}&limit=${LIMIT}`)
       .then((res) => res.json())
       .then((data) => {
         setUsers(data.users || [])
