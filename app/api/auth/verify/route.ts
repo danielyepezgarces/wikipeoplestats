@@ -1,97 +1,65 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextApiRequest, NextApiResponse } from 'next'
 import jwt from 'jsonwebtoken'
+import mysql from 'mysql2/promise'
 
-export async function GET(request: NextRequest) {
-  console.log('🔍 Verificando autenticación...')
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: 'wikipeoplestats',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+})
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const token = req.cookies['auth_token']
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
 
   try {
-    const origin = request.headers.get('origin')
-    const response = new NextResponse()
+    const decoded = jwt.verify(token, JWT_SECRET) as any
+    const userId = decoded.userId
 
-    const isDevelopment = process.env.NODE_ENV === 'development'
-    const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
-    const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
-
-    if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
-      response.headers.set('Access-Control-Allow-Origin', origin!)
-      response.headers.set('Access-Control-Allow-Credentials', 'true')
-      response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
-      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    // Obtener usuario
+    const [userRows] = await db.query(
+      'SELECT id, username, email, last_login FROM users WHERE id = ? LIMIT 1',
+      [userId]
+    )
+    const user = (userRows as any)[0]
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
     }
 
-    // Obtener el token desde cookies o header
-    const authHeader = request.headers.get('authorization')
-    const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth_token')?.value
+    // Obtener roles
+    const [roleRows] = await db.query(
+      `SELECT r.name FROM roles r
+       INNER JOIN user_roles ur ON ur.role_id = r.id
+       WHERE ur.user_id = ?`,
+      [userId]
+    )
+    const roles = (roleRows as any[]).map(r => r.name)
 
-    if (!token) {
-      console.warn('❌ No se encontró el token')
-      return NextResponse.json({ error: 'Token no proporcionado' }, { status: 401, headers: response.headers })
-    }
+    // Por compatibilidad con tu hook, tomar el primero como `role`
+    const primaryRole = roles[0] || 'user'
 
-    // Verificar el token JWT real
-    let payload: any
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET!)
-    } catch (err) {
-      console.warn('❌ Token inválido:', err)
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401, headers: response.headers })
-    }
-
-    // Leer información de usuario desde cookie (user_info)
-    const userInfoCookie = request.cookies.get('user_info')?.value
-    let userData = null
-
-    if (userInfoCookie) {
-      try {
-        userData = JSON.parse(decodeURIComponent(userInfoCookie))
-      } catch (e) {
-        console.error('⚠️ Error al parsear user_info:', e)
-      }
-    }
-
-    if (!userData) {
-      console.warn('❌ No se encontró la información del usuario en cookies')
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 401, headers: response.headers })
-    }
-
-    console.log('✅ Usuario verificado:', userData.username)
-
-    return NextResponse.json({
+    return res.status(200).json({
       user: {
-        id: userData.id,
-        name: userData.username,
-        email: userData.email,
-        role: userData.role,
-        avatarUrl: userData.avatarUrl,
-        wikipediaStats: userData.wikipediaData,
-        lastLogin: new Date().toISOString()
-      },
-      session: {
-        id: 'session_' + Date.now(),
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        id: user.id,
+        name: user.username,
+        email: user.email,
+        role: primaryRole,
+        roles,
+        lastLogin: user.last_login,
+        wikipediaUsername: user.username,
+        avatarUrl: `https://meta.wikimedia.org/w/index.php?title=Special:CentralAuth&target=${encodeURIComponent(user.username)}&action=render&format=json`
       }
-    }, { headers: response.headers })
-
-  } catch (error) {
-    console.error('❌ Error verificando autenticación:', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    })
+  } catch (err) {
+    console.error('❌ JWT/DB Error:', err)
+    return res.status(401).json({ error: 'Invalid token or DB error' })
   }
-}
-
-export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin')
-  const response = new NextResponse(null, { status: 200 })
-
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
-  const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
-
-  if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
-    response.headers.set('Access-Control-Allow-Origin', origin!)
-    response.headers.set('Access-Control-Allow-Credentials', 'true')
-    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  }
-
-  return response
 }
