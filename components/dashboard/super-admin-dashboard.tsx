@@ -109,7 +109,7 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'chapters', label: 'Chapters', icon: Globe },
-    { id: 'users', label: 'Global Users', icon: Users },
+    { id: 'users', label: 'Users', icon: Users },
     { id: 'system', label: 'System', icon: Settings },
     { id: 'security', label: 'Security', icon: Shield },
   ];
