@@ -33,11 +33,14 @@ export function CreateChapterForm() {
   const [bannerLicense, setBannerLicense] = useState('CC-BY-SA-4.0')
   const [adminUsername, setAdminUsername] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+
     if (!name.trim() || !slug.trim() || !adminUsername.trim()) {
-      alert('Name, slug, and admin username are required.')
+      setError('Chapter name, slug and admin username are required.')
       return
     }
 
@@ -59,12 +62,17 @@ export function CreateChapterForm() {
         }),
       })
 
-      if (!res.ok) throw new Error('Error creating chapter')
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Unexpected error occurred')
+        return
+      }
 
       window.location.reload()
     } catch (err) {
       console.error(err)
-      alert('Error creating chapter')
+      setError('Error connecting to the server')
     } finally {
       setLoading(false)
     }
@@ -122,6 +130,9 @@ export function CreateChapterForm() {
               </SelectContent>
             </Select>
           </div>
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
+
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? 'Creating...' : 'Create Chapter'}
           </Button>
