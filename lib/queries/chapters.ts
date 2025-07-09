@@ -3,7 +3,14 @@ import { getConnection } from '../database'
 export async function getAllChaptersWithStats() {
   const conn = await getConnection()
   const [rows] = await conn.query(`
-    SELECT c.id, c.name, c.slug, c.avatar_url, c.banner_url, COUNT(cm.user_id) AS users
+    SELECT 
+      c.id,
+      c.name,
+      c.slug,
+      c.avatar_url,
+      c.banner_url,
+      c.status,
+      COUNT(cm.user_id) AS users
     FROM chapters c
     LEFT JOIN chapter_membership cm ON c.id = cm.chapter_id
     GROUP BY c.id
@@ -11,6 +18,7 @@ export async function getAllChaptersWithStats() {
   `)
   return rows
 }
+
 
 export async function insertChapter({
   name,
