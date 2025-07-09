@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       avatar_url,
       banner_url,
       banner_credits,
-      banner_license,
+      banner_license = 'CC-BY-SA-4.0',
       admin_username
     } = await req.json()
 
@@ -67,6 +67,17 @@ export async function POST(req: NextRequest) {
     const conn = await getConnection()
     await conn.beginTransaction()
 
+    // Verificar que el slug no esté ya en uso
+    const [existingSlugs] = await conn.execute(
+      'SELECT id FROM chapters WHERE slug = ? LIMIT 1',
+      [slug]
+    )
+    if ((existingSlugs as any[]).length > 0) {
+      await conn.rollback()
+      return NextResponse.json({ error: 'El slug ya está en uso' }, { status: 409 })
+    }
+
+    // Verificar si el usuario existe
     const [users] = await conn.execute(
       'SELECT id FROM users WHERE username = ? LIMIT 1',
       [admin_username]
@@ -79,20 +90,23 @@ export async function POST(req: NextRequest) {
 
     const adminUserId = user.id
 
+    // Crear capítulo
     const [chapterResult] = await conn.execute(
       `INSERT INTO chapters (slug, avatar_url, banner_url, banner_credits, banner_license, created_at)
        VALUES (?, ?, ?, ?, ?, NOW())`,
-      [slug, avatar_url || null, banner_url || null, banner_credits || null, banner_license || 'CC-BY-SA-4.0']
+      [slug, avatar_url || null, banner_url || null, banner_credits || null, banner_license]
     )
     const chapterId = (chapterResult as any).insertId
 
+    // Registrar membresía
     await conn.execute(
       `INSERT INTO chapter_membership (user_id, chapter_id) VALUES (?, ?)`,
       [adminUserId, chapterId]
     )
 
+    // Asignar rol
     await conn.execute(
-      `INSERT INTO user_roles (user_id, role_id, chapter_id) VALUES (?, 3, ?)`,
+      `INSERT INTO user_roles (user_id, role_id, chapter_id) VALUES (?, 3, ?)`, // 3 = chapter_admin
       [adminUserId, chapterId]
     )
 
@@ -103,7 +117,8 @@ export async function POST(req: NextRequest) {
       chapter_id: chapterId,
       assigned_admin: admin_username
     }, { status: 201 })
-  } catch (error) {
+
+  } catch (error: any) {
     console.error('Error al crear capítulo (POST):', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
   }
