@@ -101,9 +101,9 @@ export async function POST(req: NextRequest) {
 
     // Crear capítulo
     const [chapterResult] = await conn.execute(
-      `INSERT INTO chapters (slug, avatar_url, banner_url, banner_credits, banner_license, created_at)
-       VALUES (?, ?, ?, ?, ?, NOW())`,
-      [slug, avatar_url || null, banner_url || null, banner_credits || null, finalBannerLicense]
+      `INSERT INTO chapters (slug, name, avatar_url, banner_url, banner_credits, banner_license, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+      [slug, name, avatar_url || null, banner_url || null, banner_credits || null, finalBannerLicense || null]
     )
     const chapterId = (chapterResult as any).insertId
 
