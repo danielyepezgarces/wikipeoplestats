@@ -26,10 +26,6 @@ import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import { LanguageSelector } from './language-selector';
 import { UserMenu } from './auth/user-menu';
-import { SuperAdminDashboard } from '@/components/dashboard/super-admin-dashboard'
-import { ChapterAdminDashboard } from '@/components/dashboard/chapter-admin-dashboard'
-import { ModeratorDashboard } from '@/components/dashboard/moderator-dashboard'
-import { DefaultDashboard } from '@/components/dashboard/default-dashboard'
 import { useAuth } from '@/hooks/use-auth';
 import { useI18n } from '@/hooks/use-i18n';
 
@@ -41,7 +37,6 @@ interface HeaderProps {
 export function Header({ currentLang, onLanguageChange }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { t } = useI18n(currentLang);
@@ -50,7 +45,6 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
 
   const handleLogout = () => {
     logout();
-    setShowDashboard(false);
   };
 
   return (
@@ -145,7 +139,7 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
                 <UserMenu
                   user={user}
                   onLogout={handleLogout}
-                  onDashboard={() => setShowDashboard(true)}
+                  onDashboard={() => router.push('/dashboard')}
                 />
               ) : (
                 <Button
@@ -256,7 +250,7 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
-                    onClick={() => setShowDashboard(true)}
+                    onClick={() => router.push('/dashboard')}
                   >
                     Dashboard
                   </Button>
@@ -290,24 +284,6 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
         currentLang={currentLang}
         onLanguageChange={onLanguageChange}
       />
-
-      {showDashboard && user && (
-        <>
-          {user.role === 'super_admin' && <SuperAdminDashboard user={user} />}
-          {['chapter_admin', 'community_admin'].includes(user.role) && (
-            <ChapterAdminDashboard user={user} />
-          )}
-          {['chapter_moderator', 'community_moderator'].includes(user.role) && (
-            <ModeratorDashboard user={user} />
-          )}
-          {[
-            'chapter_partner',
-            'chapter_staff',
-            'chapter_affiliate',
-            'community_partner',
-          ].includes(user.role) && <DefaultDashboard user={user} />}
-        </>
-      )}
     </>
   );
 }
