@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(chapters)
   } catch (error) {
     console.error('Error al verificar sesión (GET):', error)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+    return NextResponse.json({ error: 'Error interno del servidor', message: error.message }, { status: 500 })
   }
 }
 
@@ -130,7 +130,6 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('Error al crear capítulo (POST):', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
