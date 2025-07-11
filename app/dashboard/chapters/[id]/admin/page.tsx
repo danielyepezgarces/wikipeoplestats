@@ -1,7 +1,8 @@
 import { getCurrentUser } from '@/lib/auth'
-import { getChapterById } from '@/lib/db/chapters'
 import { redirect, notFound } from 'next/navigation'
 import { ChapterAdminClient } from './client'
+import { getChapterById } from '@/lib/db/chapters'
+
 
 export default async function ChapterAdminPage({ params }: { params: { id: string } }) {
   const user = await getCurrentUser()
