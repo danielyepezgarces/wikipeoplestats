@@ -98,26 +98,7 @@ export function ChapterAdminDashboard({ user }: ChapterAdminDashboardProps) {
     { id: "settings", label: "Settings", icon: Settings }
   ]
 
-  const generateAvatarFromEmail = (email: string) => {
-    const parts = email.split('@')[0].split('.')
-    if (parts.length >= 2) {
-      return parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
-    }
-    return email.substring(0, 2).toUpperCase()
-  }
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />
-      case 'info':
-        return <Activity className="h-4 w-4 text-blue-500" />
-      default:
-        return <Activity className="h-4 w-4 text-gray-500" />
-    }
-  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
