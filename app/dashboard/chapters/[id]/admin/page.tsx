@@ -4,27 +4,33 @@ import { getChapterById } from '@/lib/db/chapters'
 import { redirect, notFound } from 'next/navigation'
 import { EditChapterForm } from '@/components/dashboard/admin/EditChapterForm'
 import { ChapterMembersSection } from '@/components/dashboard/admin/ChapterMembersSection'
+import { SuperAdminHeader } from '@/components/dashboard/layout/SuperAdminHeader'
 
 export default async function ChapterAdminPage({ params }: { params: { id: string } }) {
-  const user = await getCurrentUser()
-  const chapterId = parseInt(params.id)
+    const user = await getCurrentUser()
+    const chapterId = parseInt(params.id)
 
-  const chapter = await getChapterById(chapterId)
-  if (!chapter) return notFound()
+    const chapter = await getChapterById(chapterId)
+    if (!chapter) return notFound()
 
-  const isSuperAdmin = user?.roles?.includes('super_admin')
-  const isChapterAdmin = user?.chapter_admin_ids?.includes(chapterId)
+    const isSuperAdmin = user?.roles?.includes('super_admin')
+    const isChapterAdmin = user?.chapter_admin_ids?.includes(chapterId)
 
-  if (!isSuperAdmin && !isChapterAdmin) {
-    redirect('/dashboard')
-  }
+    if (!isSuperAdmin && !isChapterAdmin) {
+        redirect('/dashboard')
+    }
 
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
-      <h1 className="text-2xl font-bold">Admin Panel: {chapter.name}</h1>
+    return (
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
+            <SuperAdminHeader
+                user={user}
+                handleLogout={handleLogout}
+                generateAvatarFromEmail={generateAvatarFromEmail}
+            />
+            <h1 className="text-2xl font-bold">Admin Panel: {chapter.name}</h1>
 
-      <EditChapterForm chapter={chapter} />
-      <ChapterMembersSection chapterId={chapterId} />
-    </div>
-  )
+            <EditChapterForm chapter={chapter} />
+            <ChapterMembersSection chapterId={chapterId} />
+        </div>
+    )
 }

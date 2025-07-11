@@ -1,26 +1,42 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronDown } from 'lucide-react'
+import { useAuth } from '@/hooks/use-auth'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface SuperAdminHeaderProps {
   user: {
     name: string
     email: string
+    role: string
+    chapter?: string
   }
-  handleLogout: () => void
-  generateAvatarFromEmail: (email: string) => string
+  currentLang: string
 }
 
-export function SuperAdminHeader({
-  user,
-  handleLogout,
-  generateAvatarFromEmail,
-}: SuperAdminHeaderProps) {
+export function SuperAdminHeader({ user, currentLang }: SuperAdminHeaderProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+
+  const { logout } = useAuth()
+  const { t } = useI18n(currentLang)
+
+  const handleLogout = () => {
+    logout()
+  }
+
+  const generateAvatarFromEmail = (email: string) => {
+    const parts = email.split('@')[0].split('.')
+    return parts.length >= 2
+      ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
+      : email.substring(0, 2).toUpperCase()
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
@@ -88,7 +104,7 @@ export function SuperAdminHeader({
                       className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                       onClick={handleLogout}
                     >
-                      Cerrar Sesión
+                      {t('logout') || 'Cerrar Sesión'}
                     </Button>
                   </div>
                 </div>

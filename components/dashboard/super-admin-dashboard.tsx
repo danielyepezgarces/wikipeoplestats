@@ -56,6 +56,7 @@ interface Chapter {
 export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState('en')
 
   const recentActivities = [
     {
@@ -123,31 +124,10 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
       : email.substring(0, 2).toUpperCase();
   };
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'info':
-        return <Activity className="h-4 w-4 text-blue-500" />;
-      default:
-        return <Activity className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const handleLogout = () => {
-    console.log('Cerrando sesión...');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <SuperAdminHeader
-        user={user}
-        handleLogout={handleLogout}
-        generateAvatarFromEmail={generateAvatarFromEmail}
-      />
+       <SuperAdminHeader user={user} currentLang={currentLang} />
 
       {/* Tabs Wrapper */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
