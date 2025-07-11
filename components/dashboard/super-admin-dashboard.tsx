@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  FileText,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -117,12 +118,18 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
     { id: 'security', label: 'Security', icon: Shield },
   ];
 
-  const generateAvatarFromEmail = (email: string) => {
-    const parts = email.split('@')[0].split('.');
-    return parts.length >= 2
-      ? parts[0][0].toUpperCase() + parts[1][0].toUpperCase()
-      : email.substring(0, 2).toUpperCase();
-  };
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'view':
+        return <Eye className="h-4 w-4 text-blue-500" />
+      case 'download':
+        return <FileText className="h-4 w-4 text-green-500" />
+      case 'access':
+        return <Activity className="h-4 w-4 text-purple-500" />
+      default:
+        return <Activity className="h-4 w-4 text-gray-500" />
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
