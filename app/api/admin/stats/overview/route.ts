@@ -8,6 +8,7 @@ if (!rawDomain.startsWith('http')) {
 const authDomain = rawDomain
 
 export async function GET(req: NextRequest) {
+  let conn
   try {
     const cookieHeader = req.headers.get('cookie') || ''
 
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
     }
 
-    const conn = await getConnection()
+    conn = await getConnection()
 
     const [stats] = await conn.query(`
       SELECT
@@ -42,5 +43,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error('Error en /api/stats/overview:', error)
     return NextResponse.json({ error: 'Error interno del servidor', message: error.message }, { status: 500 })
+  } finally {
+    if (conn) conn.release()
   }
 }
