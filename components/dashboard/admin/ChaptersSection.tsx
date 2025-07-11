@@ -1,15 +1,17 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Eye, Edit, Settings } from 'lucide-react'
 import { CreateChapterForm } from '@/components/dashboard/admin/CreateChapterForm'
 
 interface Chapter {
+  id: number
   name: string
   users: number
-  admins: number     // 👈 Nuevo campo
-  staff: number      // 👈 Reemplaza a "moderators"
+  admins: number
+  staff: number
   status: 'active' | 'pending'
 }
 
@@ -18,6 +20,8 @@ interface ChaptersSectionProps {
 }
 
 export function ChaptersSection({ chapters }: ChaptersSectionProps) {
+  const router = useRouter()
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -33,8 +37,8 @@ export function ChaptersSection({ chapters }: ChaptersSectionProps) {
       </div>
 
       <div className="grid gap-4">
-        {chapters.map((chapter, index) => (
-          <Card key={index}>
+        {chapters.map((chapter) => (
+          <Card key={chapter.id}>
             <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center space-x-4">
@@ -61,7 +65,11 @@ export function ChaptersSection({ chapters }: ChaptersSectionProps) {
                     <Eye className="h-4 w-4 mr-1" />
                     View
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => router.push(`/dashboard/chapters/${chapter.id}/admin`)}
+                  >
                     <Edit className="h-4 w-4 mr-1" />
                     Edit
                   </Button>
