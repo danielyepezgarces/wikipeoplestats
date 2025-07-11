@@ -1,4 +1,6 @@
 // app/dashboard/chapters/[id]/admin/page.tsx
+"use client"
+
 import { getCurrentUser } from '@/lib/auth'
 import { getChapterById } from '@/lib/db/chapters'
 import { redirect, notFound } from 'next/navigation'
