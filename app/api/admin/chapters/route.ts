@@ -1,6 +1,4 @@
-import { cookies as nextCookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 import { getConnection } from '@/lib/database'
 import { getAllChaptersWithStats } from '@/lib/queries/chapters'
 
@@ -39,9 +37,10 @@ export async function GET(req: NextRequest) {
 
 // === POST: Crear capítulo y asignar administrador ===
 export async function POST(req: NextRequest) {
+  const conn = await getConnection()
+
   try {
     const cookieHeader = req.headers.get('cookie') || ''
-
     const verifyRes = await fetch(`${authDomain}/api/auth/verify`, {
       headers: { cookie: cookieHeader },
       credentials: 'include',
@@ -73,7 +72,6 @@ export async function POST(req: NextRequest) {
 
     const finalBannerLicense = banner_url ? (banner_license || 'CC-BY-SA-4.0') : null
 
-    const conn = await getConnection()
     await conn.beginTransaction()
 
     // Verificar que el slug no esté ya en uso
@@ -130,6 +128,14 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    try {
+      await conn.rollback()
+    } catch (_) {
+      // rollback puede fallar si no hubo beginTransaction
+    }
+    console.error('Error en POST /api/chapters:', error)
+    return NextResponse.json({ error: 'Error interno del servidor', message: error.message }, { status: 500 })
+  } finally {
+    conn.release()
   }
 }
