@@ -30,15 +30,19 @@ export function ChapterAdminClient({
   const { t } = useI18n(currentLang)
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header ancho completo */}
       <SuperAdminHeader user={user} currentLang={currentLang} />
 
-      <h1 className="text-2xl font-bold">
-        {t('Admin Panel')}: {chapter.name}
-      </h1>
+      {/* Contenido limitado al centro */}
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
+        <h1 className="text-2xl font-bold">
+          {t('Admin Panel')}: {chapter.name}
+        </h1>
 
-      <EditChapterForm chapter={chapter} />
-      <ChapterMembersSection chapterId={chapterId} />
+        <EditChapterForm chapter={chapter} />
+        <ChapterMembersSection chapterId={chapterId} />
+      </div>
     </div>
   )
 }
