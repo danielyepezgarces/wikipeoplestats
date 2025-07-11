@@ -5,12 +5,15 @@ import { redirect, notFound } from 'next/navigation'
 import { EditChapterForm } from '@/components/dashboard/admin/EditChapterForm'
 import { ChapterMembersSection } from '@/components/dashboard/admin/ChapterMembersSection'
 import { SuperAdminHeader } from '@/components/dashboard/layout/SuperAdminHeader'
+import { useI18n } from '@/hooks/use-i18n'
 import { useState } from 'react'
 
 export default async function ChapterAdminPage({ params }: { params: { id: string } }) {
     const user = await getCurrentUser()
     const chapterId = parseInt(params.id)
-  const [currentLang, setCurrentLang] = useState('en')
+    const [currentLang, setCurrentLang] = useState('en')
+    const { t } = useI18n(currentLang)
+
     const chapter = await getChapterById(chapterId)
     if (!chapter) return notFound()
 
