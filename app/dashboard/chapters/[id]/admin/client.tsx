@@ -1,62 +1,50 @@
-// app/dashboard/superadmin/page.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { SuperAdminHeader } from '@/components/dashboard/layout/SuperAdminHeader'
-import { ChaptersSection } from '@/components/dashboard/admin/ChaptersSection'
-import { UsersSection } from '@/components/dashboard/admin/UsersSection'
-import { DashboardStats } from '@/components/dashboard/admin/DashboardStats'
-import { BarChart3, Globe, Users, Settings, Shield } from 'lucide-react'
+import { EditChapterForm } from '@/components/dashboard/admin/EditChapterForm'
+import { ChapterMembersSection } from '@/components/dashboard/admin/ChapterMembersSection'
+import { useI18n } from '@/hooks/use-i18n'
 
-export default function SuperAdminDashboardPage({ user }: { user: any }) {
-  const [activeTab, setActiveTab] = useState('overview')
+interface ChapterAdminClientProps {
+  user: {
+    name: string
+    email: string
+    role: string
+    chapter?: string
+  }
+  chapter: {
+    id: number
+    name: string
+    slug: string
+    status: string
+    avatar_url?: string
+    banner_url?: string
+  }
+  chapterId: number
+}
 
-  useEffect(() => {
-    const savedTab = localStorage.getItem('adminTab')
-    if (savedTab) setActiveTab(savedTab)
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('adminTab', activeTab)
-  }, [activeTab])
-
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'chapters', label: 'Chapters', icon: Globe },
-    { id: 'users', label: 'Users', icon: Users },
-    { id: 'system', label: 'System', icon: Settings },
-    { id: 'security', label: 'Security', icon: Shield },
-  ]
+export function ChapterAdminClient({
+  user,
+  chapter,
+  chapterId
+}: ChapterAdminClientProps) {
+  const [currentLang, setCurrentLang] = useState('en')
+  const { t } = useI18n(currentLang)
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <SuperAdminHeader user={user} currentLang="en" />
+      {/* Header ancho completo */}
+      <SuperAdminHeader user={user} currentLang={currentLang} />
 
-      <div className="bg-white dark:bg-gray-800 border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          <div className="hidden lg:flex space-x-8 mt-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-3 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-200'
-                }`}
-              >
-                <tab.icon className="h-4 w-4" />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Contenido limitado al centro */}
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-8">
+        <h1 className="text-2xl font-bold">
+          {t('Admin Panel')}: {chapter.name}
+        </h1>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === 'overview' && <DashboardStats />}
-        {activeTab === 'chapters' && <ChaptersSection />}
-        {activeTab === 'users' && <UsersSection />}
+        <EditChapterForm chapter={chapter} />
+        <ChapterMembersSection chapterId={chapterId} />
       </div>
     </div>
   )
