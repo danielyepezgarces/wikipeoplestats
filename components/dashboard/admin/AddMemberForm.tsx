@@ -112,7 +112,6 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: wikimediaUser.name,
-          wikimedia_id: wikimediaUser.userid, // Pass the wikimedia_id
           role_id: Number.parseInt(roleId),
           joined_at: joinedAt || null, // Pass native date string or null
         }),

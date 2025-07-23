@@ -69,17 +69,16 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
   try {
     const body = await req.json()
-    const { username, wikimedia_id, role_id, joined_at } = body // joined_at is here, banner_credits is not
+    const { username, role_id, joined_at } = body // joined_at is here, banner_credits is not
 
-    if (!username || !wikimedia_id || !role_id) {
-      return NextResponse.json({ error: "Missing username, wikimedia_id or role_id" }, { status: 400 })
+    if (!username || !role_id) {
+      return NextResponse.json({ error: "Missing username or role_id" }, { status: 400 })
     }
 
     const conn = await getConnection()
 
-    // Verificar si el usuario ya existe en la base de datos local por wikimedia_id o username
-    const [existingUsers] = await conn.query("SELECT id FROM users WHERE wikimedia_id = ? OR username = ?", [
-      wikimedia_id,
+    // Verificar si el usuario ya existe en la base de datos local username
+    const [existingUsers] = await conn.query("SELECT id FROM users WHERE username = ?", [
       username,
     ])
 
@@ -90,10 +89,10 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       // El usuario no existe, crearlo
       const [insertResult] = await conn.query(
         `
-        INSERT INTO users (username, wikimedia_id, created_at, updated_at, is_active)
-        VALUES (?, ?, NOW(), NOW(), 1)
+        INSERT INTO users (username, created_at, updated_at, is_active)
+        VALUES (?, NOW(), NOW(), 1)
         `,
-        [username, wikimedia_id],
+        [username],
       )
       userId = (insertResult as any).insertId
       userCreated = true
@@ -104,10 +103,10 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       await conn.query(
         `
         UPDATE users 
-        SET username = ?, wikimedia_id = ?, updated_at = NOW()
+        SET username = ?, updated_at = NOW()
         WHERE id = ?
         `,
-        [username, wikimedia_id, userId],
+        [username, userId],
       )
     }
 
@@ -156,7 +155,6 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         user_data: {
           id: userId,
           username: username,
-          wikimedia_id: wikimedia_id,
         },
       })
     } else {
@@ -177,7 +175,6 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       user_data: {
         id: userId,
         username: username,
-        wikimedia_id: wikimedia_id,
       },
     })
   } catch (error: any) {

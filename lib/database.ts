@@ -66,13 +66,14 @@ export class Database {
     wikimedia_id: string
     username: string
     email?: string
+    registration_date?: string
   }): Promise<User> {
     const conn = await getConnection()
     try {
       const [result] = await conn.execute(
-        `INSERT INTO users (wikimedia_id, username, email, created_at, updated_at, is_active)
-         VALUES (?, ?, ?, NOW(), NOW(), 1)`,
-        [data.wikimedia_id, data.username, data.email]
+        `INSERT INTO users (wikimedia_id, username, email, registration_date, created_at, updated_at, is_active)
+         VALUES (?, ?, ?, ?, NOW(), NOW(), 1)`,
+        [data.wikimedia_id, data.username, data.email, data.registration_date]
       )
       const insertResult = result as mysql.ResultSetHeader
       const user = await this.getUserById(insertResult.insertId)
