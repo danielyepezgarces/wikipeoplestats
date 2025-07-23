@@ -27,7 +27,8 @@ interface ChapterAdminClientProps {
 export function ChapterAdminClient({
   user,
   chapter,
-  chapterId
+  chapterId,
+  chapterSlug
 }: ChapterAdminClientProps) {
   const [currentLang, setCurrentLang] = useState('en')
   const { t } = useI18n(currentLang)
@@ -44,7 +45,7 @@ export function ChapterAdminClient({
         </h1>
 
         <EditChapterForm chapter={chapter} />
-        <ChapterMembersSection chapterId={chapterId} />
+        <ChapterMembersSection chapterSlug={chapterSlug} />
       </div>
     </div>
   )
