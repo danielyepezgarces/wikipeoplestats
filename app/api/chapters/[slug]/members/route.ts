@@ -47,6 +47,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 }
 
 // Añadir miembro al capítulo
+// Añadir miembro al capítulo
 export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
   const chapterSlug = params.slug
   const chapterId = await getChapterIdBySlug(chapterSlug)
@@ -67,16 +68,19 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
   try {
     const body = await req.json()
-    const { username, role_id } = body
+    const { username, wikimedia_id, role_id } = body
 
-    if (!username || !role_id) {
-      return NextResponse.json({ error: "Missing username or role_id" }, { status: 400 })
+    if (!username || !wikimedia_id || !role_id) {
+      return NextResponse.json({ error: "Missing username, wikimedia_id or role_id" }, { status: 400 })
     }
 
     const conn = await getConnection()
 
-    // Verificar si el usuario ya existe en la base de datos local
-    const [existingUsers] = await conn.query("SELECT id FROM users WHERE username = ?", [username])
+    // Verificar si el usuario ya existe en la base de datos local por wikimedia_id
+    const [existingUsers] = await conn.query(
+      "SELECT id FROM users WHERE wikimedia_id = ? OR username = ?", 
+      [wikimedia_id, username]
+    )
 
     let userId: number
     let userCreated = false
@@ -88,12 +92,22 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         INSERT INTO users (username, wikimedia_id, created_at, updated_at, is_active)
         VALUES (?, ?, NOW(), NOW(), 1)
         `,
-        [username, username], // Usar username como wikimedia_id por ahora
+        [username, wikimedia_id], // Usar el wikimedia_id real
       )
       userId = (insertResult as any).insertId
       userCreated = true
     } else {
       userId = (existingUsers as any[])[0].id
+      
+      // Actualizar el usuario existente con los datos más recientes
+      await conn.query(
+        `
+        UPDATE users 
+        SET username = ?, wikimedia_id = ?, updated_at = NOW()
+        WHERE id = ?
+        `,
+        [username, wikimedia_id, userId]
+      )
     }
 
     // Verificar si el usuario ya es miembro del capítulo
@@ -128,6 +142,11 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       success: true,
       created: userCreated,
       message: userCreated ? "User created and added to chapter" : "User added to chapter",
+      user_data: {
+        id: userId,
+        username: username,
+        wikimedia_id: wikimedia_id
+      }
     })
   } catch (error) {
     console.error("Error adding member:", error)
