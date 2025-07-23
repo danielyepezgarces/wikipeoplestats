@@ -58,7 +58,9 @@ interface ChartData {
 // API service functions
 const apiService = {
   async fetchChapter(slug: string): Promise<Chapter> {
-    const response = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${slug}`, {
+    const host = window.location.host
+    const project = getProject(host)
+    const response = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${slug}/${project}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
