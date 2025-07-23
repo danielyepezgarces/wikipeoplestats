@@ -22,13 +22,18 @@ const chapterRoles = [
   { id: 7, label: "Affiliate" },
 ]
 
+interface WikimediaUser {
+  userid: number
+  name: string
+}
+
 export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
   const [username, setUsername] = useState("")
   const [roleId, setRoleId] = useState("3")
   const [loading, setLoading] = useState(false)
   const [validating, setValidating] = useState(false)
 
-  const validateWikimediaUser = async (username: string): Promise<boolean> => {
+  const validateWikimediaUser = async (username: string): Promise<WikimediaUser | null> => {
     setValidating(true)
     try {
       // Validate user exists in Wikimedia Meta
@@ -44,15 +49,22 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
       const users = data.query?.users || []
 
       if (users.length === 0) {
-        return false
+        return null
       }
 
       const user = users[0]
       // Check if user exists and is not missing
-      return !user.missing && user.name === username
+      if (user.missing || user.name !== username) {
+        return null
+      }
+
+      return {
+        userid: user.userid,
+        name: user.name
+      }
     } catch (error) {
       console.error("Error validating Wikimedia user:", error)
-      return false
+      return null
     } finally {
       setValidating(false)
     }
@@ -73,8 +85,8 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
     setLoading(true)
     try {
       // First validate the user exists in Wikimedia Meta
-      const isValidUser = await validateWikimediaUser(username)
-      if (!isValidUser) {
+      const wikimediaUser = await validateWikimediaUser(username)
+      if (!wikimediaUser) {
         toast.error("User not found in Wikimedia Meta. Please check the username.")
         setLoading(false)
         return
@@ -85,7 +97,8 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: username.trim(),
+          username: wikimediaUser.name,
+          wikimedia_id: wikimediaUser.userid, // Pasar el userid de Wikimedia
           role_id: Number.parseInt(roleId),
         }),
       })
