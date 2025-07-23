@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,31 +22,26 @@ interface WikimediaUser {
 interface Role {
   id: number
   name: string
+  display: string // Added display property
 }
 
 export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
   const [username, setUsername] = useState("")
   const [roleId, setRoleId] = useState<string | null>(null)
   const [joinedAt, setJoinedAt] = useState<string | undefined>(undefined) // Changed to string for native date input
-  const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [validating, setValidating] = useState(false)
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const res = await fetch("/api/admin/roles")
-        if (!res.ok) {
-          throw new Error("Failed to fetch roles")
-        }
-        const data = await res.json()
-        setRoles(data)
-      } catch (error: any) {
-        toast.error(error.message || "Failed to load roles.")
-      }
-    }
-    fetchRoles()
-  }, [])
+  // Hardcoded roles as per user request
+  const hardcodedChapterRoles: Role[] = [
+    { id: 3, name: "chapter_admin", display: "Chapter Admin" },
+    { id: 4, name: "chapter_moderator", display: "Moderator" },
+    { id: 5, name: "chapter_staff", display: "Staff" },
+    { id: 6, name: "chapter_partner", display: "Partner" },
+    { id: 7, name: "chapter_affiliate", display: "Affiliate" },
+  ]
+
+  const [roles, setRoles] = useState<Role[]>(hardcodedChapterRoles) // Initialize with hardcoded roles
 
   const validateWikimediaUser = async (username: string): Promise<WikimediaUser | null> => {
     setValidating(true)
@@ -166,7 +161,7 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
             <SelectContent>
               {roles.map((role) => (
                 <SelectItem key={role.id} value={String(role.id)}>
-                  {role.name}
+                  {role.display}
                 </SelectItem>
               ))}
             </SelectContent>
