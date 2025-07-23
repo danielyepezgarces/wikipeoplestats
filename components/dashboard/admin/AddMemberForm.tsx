@@ -1,63 +1,112 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { PlusCircle } from 'lucide-react'
-import { toast } from 'sonner'
+import { useState } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PlusCircle, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface Props {
-  chapterId: number
+  chapterSlug: string
   onSuccess?: () => void
 }
 
 const chapterRoles = [
-  { id: 3, label: 'Chapter Admin' },
-  { id: 4, label: 'Moderator' },
-  { id: 5, label: 'Staff' },
-  { id: 6, label: 'Partner' },
-  { id: 7, label: 'Affiliate' }
+  { id: 3, label: "Chapter Admin" },
+  { id: 4, label: "Moderator" },
+  { id: 5, label: "Staff" },
+  { id: 6, label: "Partner" },
+  { id: 7, label: "Affiliate" },
 ]
 
-export function AddMemberForm({ chapterId, onSuccess }: Props) {
-  const [username, setUsername] = useState('')
-  const [roleId, setRoleId] = useState('3')
+export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
+  const [username, setUsername] = useState("")
+  const [roleId, setRoleId] = useState("3")
   const [loading, setLoading] = useState(false)
+  const [validating, setValidating] = useState(false)
+
+  const validateWikimediaUser = async (username: string): Promise<boolean> => {
+    setValidating(true)
+    try {
+      // Validate user exists in Wikimedia Meta
+      const response = await fetch(
+        `https://meta.wikimedia.org/w/api.php?action=query&list=users&ususers=${encodeURIComponent(username)}&format=json&origin=*`,
+      )
+
+      if (!response.ok) {
+        throw new Error("Failed to validate user")
+      }
+
+      const data = await response.json()
+      const users = data.query?.users || []
+
+      if (users.length === 0) {
+        return false
+      }
+
+      const user = users[0]
+      // Check if user exists and is not missing
+      return !user.missing && user.name === username
+    } catch (error) {
+      console.error("Error validating Wikimedia user:", error)
+      return false
+    } finally {
+      setValidating(false)
+    }
+  }
 
   const handleAddMember = async () => {
     if (!username.trim()) {
-      toast.error('Username is required')
+      toast.error("Username is required")
+      return
+    }
+
+    // Validate username format (basic check)
+    if (!/^[A-Za-z0-9_\s-]+$/.test(username)) {
+      toast.error("Invalid username format")
       return
     }
 
     setLoading(true)
     try {
-      const res = await fetch(`/api/chapters/${chapterId}/members`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, roleId: parseInt(roleId) })
+      // First validate the user exists in Wikimedia Meta
+      const isValidUser = await validateWikimediaUser(username)
+      if (!isValidUser) {
+        toast.error("User not found in Wikimedia Meta. Please check the username.")
+        setLoading(false)
+        return
+      }
+
+      // Add member to chapter
+      const res = await fetch(`/api/chapters/${chapterSlug}/members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          role_id: Number.parseInt(roleId),
+        }),
       })
 
       if (!res.ok) {
         const error = await res.json()
-        toast.error(error?.error || 'Failed to add member')
+        toast.error(error?.error || "Failed to add member")
       } else {
-        toast.success('Member added successfully')
-        setUsername('')
-        setRoleId('3')
+        const result = await res.json()
+        if (result.created) {
+          toast.success("Member added successfully (new user created)")
+        } else {
+          toast.success("Member added successfully")
+        }
+        setUsername("")
+        setRoleId("3")
         if (onSuccess) onSuccess()
       }
     } catch (err) {
-      toast.error('Unexpected error')
+      console.error("Error adding member:", err)
+      toast.error("Unexpected error occurred")
     } finally {
       setLoading(false)
     }
@@ -67,19 +116,20 @@ export function AddMemberForm({ chapterId, onSuccess }: Props) {
     <Card>
       <CardContent className="p-4 space-y-4">
         <div className="grid gap-2">
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="username">Wikimedia Username</Label>
           <Input
             id="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter Wikimedia username"
-            disabled={loading}
+            placeholder="Enter Wikimedia username (e.g., JohnDoe)"
+            disabled={loading || validating}
           />
+          <p className="text-xs text-gray-500 dark:text-gray-400">Username will be validated against Wikimedia Meta</p>
         </div>
 
         <div className="grid gap-2">
           <Label htmlFor="role">Role</Label>
-          <Select value={roleId} onValueChange={setRoleId} disabled={loading}>
+          <Select value={roleId} onValueChange={setRoleId} disabled={loading || validating}>
             <SelectTrigger id="role">
               <SelectValue placeholder="Select a role" />
             </SelectTrigger>
@@ -93,9 +143,13 @@ export function AddMemberForm({ chapterId, onSuccess }: Props) {
           </Select>
         </div>
 
-        <Button onClick={handleAddMember} disabled={loading}>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          {loading ? 'Adding...' : 'Add Member'}
+        <Button onClick={handleAddMember} disabled={loading || validating}>
+          {loading || validating ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <PlusCircle className="w-4 h-4 mr-2" />
+          )}
+          {validating ? "Validating..." : loading ? "Adding..." : "Add Member"}
         </Button>
       </CardContent>
     </Card>
