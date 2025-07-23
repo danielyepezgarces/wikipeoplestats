@@ -36,12 +36,13 @@ export default function ChaptersPage() {
   const { t } = useI18n(domainContext.currentLang)
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [loading, setLoading] = useState(true)
-  const host = window.location.host
-  const project = getProject(host)
-  
+
+
   useEffect(() => {
     const fetchChapters = async () => {
       try {
+        const host = window.location.host
+        const project = getProject(host)
         const res = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${project}`)
         const data = await res.json()
 
