@@ -23,7 +23,7 @@ interface ChapterPageProps {
 interface Member {
   username: string
   joined_at: string
-  member_type: string
+  role: string
 }
 
 interface Chapter {
@@ -520,7 +520,7 @@ export default function ChapterPage({ params }: ChapterPageProps) {
                         {new Date(member.joined_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {member.member_type}
+                        {member.role}
                       </td>
                     </tr>
                   ))}
