@@ -1,8 +1,7 @@
-import { getCurrentUser } from '@/lib/auth'
-import { redirect, notFound } from 'next/navigation'
-import { getChapterById, getChapterIdBySlug } from '@/lib/db/chapters'
-import { ChapterAdminClient } from '../../[id]/admin/client'
-
+import { getCurrentUser } from "@/lib/auth"
+import { redirect, notFound } from "next/navigation"
+import { getChapterById, getChapterIdBySlug } from "@/lib/db/chapters"
+import { ChapterAdminClient } from "./client"
 
 export default async function ChapterAdminPage({ params }: { params: { slug: string } }) {
   const user = await getCurrentUser()
@@ -15,18 +14,12 @@ export default async function ChapterAdminPage({ params }: { params: { slug: str
   const chapter = await getChapterById(chapterId)
   if (!chapter) return notFound()
 
-  const isSuperAdmin = user?.roles?.includes('super_admin')
+  const isSuperAdmin = user?.roles?.includes("super_admin")
   const isChapterAdmin = user?.chapter_admin_ids?.includes(chapterId)
 
   if (!isSuperAdmin && !isChapterAdmin) {
-    redirect('/dashboard')
+    redirect("/dashboard")
   }
 
-  return (
-    <ChapterAdminClient
-      user={user}
-      chapter={chapter}
-      chapterId={chapterId}
-    />
-  )
+  return <ChapterAdminClient user={user} chapter={chapter} chapterId={chapterId} />
 }
