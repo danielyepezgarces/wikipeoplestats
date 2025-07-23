@@ -3,7 +3,6 @@ import { redirect, notFound } from 'next/navigation'
 import { getChapterById, getChapterIdBySlug } from '@/lib/db/chapters'
 import { ChapterAdminClient } from '../../[id]/admin/client'
 
-
 export default async function ChapterAdminPage({ params }: { params: { slug: string } }) {
   const user = await getCurrentUser()
   const chapterId = await getChapterIdBySlug(params.slug)
@@ -27,6 +26,7 @@ export default async function ChapterAdminPage({ params }: { params: { slug: str
       user={user}
       chapter={chapter}
       chapterId={chapterId}
+      slug={params.slug} // ← Pasamos el slug aquí
     />
   )
 }
