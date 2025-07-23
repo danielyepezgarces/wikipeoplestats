@@ -3,7 +3,7 @@ import { getConnection } from "@/lib/database"
 import { getCurrentUser } from "@/lib/auth"
 import { getChapterIdBySlug } from "@/lib/db/chapters"
 
-// Obtener detalles del capítulo
+// Get chapter by slug
 export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   const chapterSlug = params.slug
   const chapterId = await getChapterIdBySlug(chapterSlug)
@@ -20,9 +20,9 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         id, 
         name, 
         slug, 
+        description, 
         status, 
-        avatar_url, 
-        banner_url,
+        banner_url, 
         banner_credits, -- Include banner_credits
         created_at, 
         updated_at
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
   }
 }
 
-// Actualizar capítulo
+// Update chapter by slug
 export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
   const chapterSlug = params.slug
   const chapterId = await getChapterIdBySlug(chapterSlug)
@@ -69,7 +69,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     }
 
     const conn = await getConnection()
-    await conn.query(
+    const [result] = await conn.query(
       `
       UPDATE chapters
       SET 
@@ -82,16 +82,21 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
         updated_at = NOW()
       WHERE id = ?
       `,
-      [name, slug, status, avatar_url, banner_url, banner_credits, chapterId],
+      [name, slug, status, avatar_url || null, banner_url || null, banner_credits || null, chapterId],
     )
-    return NextResponse.json({ success: true })
+
+    if ((result as any).affectedRows === 0) {
+      return NextResponse.json({ error: "Chapter not found or no changes made" }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, message: "Chapter updated successfully" })
   } catch (error) {
     console.error("Error updating chapter:", error)
     return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
   }
 }
 
-// Eliminar capítulo
+// Delete chapter by slug
 export async function DELETE(req: NextRequest, { params }: { params: { slug: string } }) {
   const chapterSlug = params.slug
   const chapterId = await getChapterIdBySlug(chapterSlug)
@@ -107,10 +112,15 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
 
   try {
     const conn = await getConnection()
-    await conn.query("DELETE FROM chapters WHERE id = ?", [chapterId])
-    return NextResponse.json({ success: true })
+    const [result] = await conn.query("DELETE FROM chapters WHERE id = ?", [chapterId])
+
+    if ((result as any).affectedRows === 0) {
+      return NextResponse.json({ error: "Chapter not found" }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, message: "Chapter deleted successfully" })
   } catch (error) {
     console.error("Error deleting chapter:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
   }
 }

@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PlusCircle, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "sonner" // Import toast from sonner
 
 interface Props {
   chapterSlug: string
@@ -19,20 +19,34 @@ interface WikimediaUser {
   name: string
 }
 
-const chapterRoles = [
-  { id: 3, label: "Chapter Admin" },
-  { id: 4, label: "Moderator" },
-  { id: 5, label: "Staff" },
-  { id: 6, label: "Partner" },
-  { id: 7, label: "Affiliate" },
-]
+interface Role {
+  id: number
+  name: string
+}
 
 export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
   const [username, setUsername] = useState("")
-  const [roleId, setRoleId] = useState("3")
+  const [roleId, setRoleId] = useState<string | null>(null)
   const [joinedAt, setJoinedAt] = useState<string | undefined>(undefined) // Changed to string for native date input
+  const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(false)
   const [validating, setValidating] = useState(false)
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await fetch("/api/admin/roles")
+        if (!res.ok) {
+          throw new Error("Failed to fetch roles")
+        }
+        const data = await res.json()
+        setRoles(data)
+      } catch (error: any) {
+        toast.error(error.message || "Failed to load roles.")
+      }
+    }
+    fetchRoles()
+  }, [])
 
   const validateWikimediaUser = async (username: string): Promise<WikimediaUser | null> => {
     setValidating(true)
@@ -76,6 +90,10 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
       toast.error("Username is required")
       return
     }
+    if (!roleId) {
+      toast.error("Role is required")
+      return
+    }
 
     // Validate username format (basic check)
     if (!/^[A-Za-z0-9_\s-]+$/.test(username)) {
@@ -107,22 +125,18 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
 
       if (!res.ok) {
         const error = await res.json()
-        toast.error(error?.error || "Failed to add member")
+        toast.error(error?.message || error?.error || "Failed to add member")
       } else {
         const result = await res.json()
-        if (result.created) {
-          toast.success("Member added successfully (new user created)")
-        } else {
-          toast.success("Member added successfully")
-        }
+        toast.success(result.message || "Member added successfully!")
         setUsername("")
-        setRoleId("3")
+        setRoleId(null)
         setJoinedAt(undefined) // Reset date
         if (onSuccess) onSuccess()
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error adding member:", err)
-      toast.error("Unexpected error occurred")
+      toast.error("Unexpected error occurred: " + err.message)
     } finally {
       setLoading(false)
     }
@@ -145,14 +159,14 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
 
         <div className="grid gap-2">
           <Label htmlFor="role">Role</Label>
-          <Select value={roleId} onValueChange={setRoleId} disabled={loading || validating}>
+          <Select value={roleId || ""} onValueChange={setRoleId} disabled={loading || validating}>
             <SelectTrigger id="role">
               <SelectValue placeholder="Select a role" />
             </SelectTrigger>
             <SelectContent>
-              {chapterRoles.map((role) => (
+              {roles.map((role) => (
                 <SelectItem key={role.id} value={String(role.id)}>
-                  {role.label}
+                  {role.name}
                 </SelectItem>
               ))}
             </SelectContent>

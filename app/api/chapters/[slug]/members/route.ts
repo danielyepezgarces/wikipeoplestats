@@ -111,14 +111,16 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       )
     }
 
-    // Verificar si el usuario ya es miembro del capítulo (in chapter_membership)
+    // Insert or update into chapter_membership
+    // Use INSERT ... ON DUPLICATE KEY UPDATE if you want to update joined_at if membership exists
+    // For simplicity, we'll check and insert/update separately
     const [existingMembership] = await conn.query(
       "SELECT user_id FROM chapter_membership WHERE user_id = ? AND chapter_id = ?",
       [userId, chapterId],
     )
 
     if ((existingMembership as any[]).length > 0) {
-      // If already a member, update joined_at if provided, otherwise do nothing for chapter_membership
+      // If already a member, update joined_at if provided
       if (joined_at) {
         await conn.query(`UPDATE chapter_membership SET joined_at = ? WHERE user_id = ? AND chapter_id = ?`, [
           joined_at,
@@ -240,7 +242,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
       [userId, chapterId],
     )
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: "Member removed successfully" })
   } catch (error) {
     console.error("Error deleting member:", error)
     return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
