@@ -6,12 +6,21 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PlusCircle, Loader2 } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { PlusCircle, Loader2, CalendarIcon } from "lucide-react"
 import { toast } from "sonner"
+import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 interface Props {
   chapterSlug: string
   onSuccess?: () => void
+}
+
+interface WikimediaUser {
+  userid: number
+  name: string
 }
 
 const chapterRoles = [
@@ -22,14 +31,11 @@ const chapterRoles = [
   { id: 7, label: "Affiliate" },
 ]
 
-interface WikimediaUser {
-  userid: number
-  name: string
-}
-
 export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
   const [username, setUsername] = useState("")
   const [roleId, setRoleId] = useState("3")
+  const [joinedAt, setJoinedAt] = useState<Date | undefined>(undefined)
+  const [bannerCredits, setBannerCredits] = useState("")
   const [loading, setLoading] = useState(false)
   const [validating, setValidating] = useState(false)
 
@@ -60,7 +66,7 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
 
       return {
         userid: user.userid,
-        name: user.name
+        name: user.name,
       }
     } catch (error) {
       console.error("Error validating Wikimedia user:", error)
@@ -100,6 +106,8 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
           username: wikimediaUser.name,
           wikimedia_id: wikimediaUser.userid, // Pasar el userid de Wikimedia
           role_id: Number.parseInt(roleId),
+          joined_at: joinedAt ? format(joinedAt, "yyyy-MM-dd") : null, // Pass formatted date or null
+          banner_credits: bannerCredits.trim() || null, // Pass credits or null if empty
         }),
       })
 
@@ -115,6 +123,8 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
         }
         setUsername("")
         setRoleId("3")
+        setJoinedAt(undefined)
+        setBannerCredits("")
         if (onSuccess) onSuccess()
       }
     } catch (err) {
@@ -154,6 +164,38 @@ export function AddMemberForm({ chapterSlug, onSuccess }: Props) {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="joined-at">Joined At (Optional)</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn("w-full justify-start text-left font-normal", !joinedAt && "text-muted-foreground")}
+                disabled={loading || validating}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {joinedAt ? format(joinedAt, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar mode="single" selected={joinedAt} onSelect={setJoinedAt} initialFocus />
+            </PopoverContent>
+          </Popover>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Leave empty to use current date.</p>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="banner-credits">Banner Credits (Optional)</Label>
+          <Input
+            id="banner-credits"
+            value={bannerCredits}
+            onChange={(e) => setBannerCredits(e.target.value)}
+            placeholder="Enter banner author name"
+            disabled={loading || validating}
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400">Name of the author for the chapter banner.</p>
         </div>
 
         <Button onClick={handleAddMember} disabled={loading || validating}>
