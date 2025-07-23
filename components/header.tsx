@@ -76,6 +76,9 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
               <Link href="/search/users" className="nav-link">
                 {t('users')}
               </Link>
+              <Link href="/chapters" className="nav-link">
+                Chapters
+              </Link>
               <Link href="/events" className="nav-link">
                 {t('events')}
               </Link>
@@ -183,6 +186,11 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
                 href="/search/users"
                 icon={<Users />}
                 label={t('users')}
+              />
+              <MobileLink
+                href="/chapters"
+                icon={<Flag />}
+                label="Chapters"
               />
               <MobileLink
                 href="/events"
