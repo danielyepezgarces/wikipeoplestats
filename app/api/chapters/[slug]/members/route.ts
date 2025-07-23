@@ -123,7 +123,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     // Insertar en chapter_membership
     await conn.query(
       `
-      INSERT IGNORE INTO chapter_membership (user_id, chapter_id, created_at)
+      INSERT IGNORE INTO chapter_membership (user_id, chapter_id, joined_at)
       VALUES (?, ?, NOW())
       `,
       [userId, chapterId],
