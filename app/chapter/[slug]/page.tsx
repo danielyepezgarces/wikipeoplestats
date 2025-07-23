@@ -119,7 +119,20 @@ export default function ChapterPage({ params }: ChapterPageProps) {
 
         // Fetch chapter data from your API
         const chapterData = await apiService.fetchChapter(resolvedParams.slug)
-        setChapter(chapterData)
+        
+        // Ensure stats are never null - set to 0 if null/undefined
+        const normalizedChapter = {
+          ...chapterData,
+          stats: {
+            totalPeople: chapterData.stats?.totalPeople || 0,
+            totalWomen: chapterData.stats?.totalWomen || 0,
+            totalMen: chapterData.stats?.totalMen || 0,
+            otherGenders: chapterData.stats?.otherGenders || 0,
+            last_updated: chapterData.stats?.last_updated || new Date().toISOString()
+          }
+        }
+        
+        setChapter(normalizedChapter)
 
         // Fetch historical stats if available
         const statsData = await apiService.fetchChapterStats(resolvedParams.slug)
@@ -137,10 +150,10 @@ export default function ChapterPage({ params }: ChapterPageProps) {
             fallbackData.push({
               year: date.getFullYear().toString(),
               month: (date.getMonth() + 1).toString().padStart(2, '0'),
-              total: Math.floor(chapterData.stats.totalPeople * progressRatio),
-              totalWomen: Math.floor(chapterData.stats.totalWomen * progressRatio),
-              totalMen: Math.floor(chapterData.stats.totalMen * progressRatio),
-              otherGenders: Math.floor(chapterData.stats.otherGenders * progressRatio)
+              total: Math.floor((normalizedChapter.stats.totalPeople || 0) * progressRatio),
+              totalWomen: Math.floor((normalizedChapter.stats.totalWomen || 0) * progressRatio),
+              totalMen: Math.floor((normalizedChapter.stats.totalMen || 0) * progressRatio),
+              otherGenders: Math.floor((normalizedChapter.stats.otherGenders || 0) * progressRatio)
             })
           }
           
@@ -325,9 +338,9 @@ export default function ChapterPage({ params }: ChapterPageProps) {
     return notFound()
   }
 
-  const ratioWomen = chapter.stats.totalPeople > 0 ? (chapter.stats.totalWomen / chapter.stats.totalPeople) * 100 : 0
-  const ratioMen = chapter.stats.totalPeople > 0 ? (chapter.stats.totalMen / chapter.stats.totalPeople) * 100 : 0
-  const ratioOtherGenders = chapter.stats.totalPeople > 0 ? (chapter.stats.otherGenders / chapter.stats.totalPeople) * 100 : 0
+  const ratioWomen = (chapter.stats.totalPeople > 0 && chapter.stats.totalWomen) ? (chapter.stats.totalWomen / chapter.stats.totalPeople) * 100 : 0
+  const ratioMen = (chapter.stats.totalPeople > 0 && chapter.stats.totalMen) ? (chapter.stats.totalMen / chapter.stats.totalPeople) * 100 : 0
+  const ratioOtherGenders = (chapter.stats.totalPeople > 0 && chapter.stats.otherGenders) ? (chapter.stats.otherGenders / chapter.stats.totalPeople) * 100 : 0
 
   return (
     <div className="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300 min-h-screen">
@@ -409,27 +422,27 @@ export default function ChapterPage({ params }: ChapterPageProps) {
           <StatsCard 
             icon={<Users />} 
             title={t("total_people")} 
-            value={chapter.stats.totalPeople} 
+            value={chapter.stats.totalPeople || 0} 
             iconColor="text-blue-500" 
           />
           <StatsCard
             icon={<UserCheck />}
             title={t("total_women")}
-            value={chapter.stats.totalWomen}
+            value={chapter.stats.totalWomen || 0}
             percentage={ratioWomen}
             iconColor="text-pink-500"
           />
           <StatsCard
             icon={<User />}
             title={t("total_men")}
-            value={chapter.stats.totalMen}
+            value={chapter.stats.totalMen || 0}
             percentage={ratioMen}
             iconColor="text-blue-700"
           />
           <StatsCard
             icon={<Genderless />}
             title={t("other_genders")}
-            value={chapter.stats.otherGenders}
+            value={chapter.stats.otherGenders || 0}
             percentage={ratioOtherGenders}
             iconColor="text-purple-500"
           />
