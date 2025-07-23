@@ -37,57 +37,39 @@ export default function ChaptersPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Mock data - replace with actual API call
-    const mockChapters: Chapter[] = [
-      {
-        slug: "wikimedia-argentina",
-        group_name: "Wikimedia Argentina",
-        admin_name: "Daniel YG",
-        members_count: 125,
-        group_description: "Wikimedia Argentina promueve la educación y el acceso a la cultura",
-        creation_date: "2024-01-01",
-        banner_image: "https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg",
-        avatar_image: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Wikimedia_Argentina_logo_white.svg",
-        image_credit: "© Paula Kindsvater (CC-BY-SA 4.0)",
-        stats: {
-          totalPeople: 342,
-          totalWomen: 128,
-          totalMen: 198,
-          otherGenders: 16,
-          last_updated: new Date().toISOString()
-        }
-      },
-      {
-        slug: "wikimedia-espana",
-        group_name: "Wikimedia España",
-        admin_name: "Admin ES",
-        members_count: 89,
-        group_description: "Wikimedia España fomenta el conocimiento libre en España",
-        creation_date: "2023-06-15",
-        banner_image: "https://images.pexels.com/photos/3586966/pexels-photo-3586966.jpeg",
-        avatar_image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wikimedia_España_logo.svg/200px-Wikimedia_España_logo.svg.png",
-        image_credit: "© Wikimedia España",
-        stats: {
-          totalPeople: 256,
-          totalWomen: 98,
-          totalMen: 142,
-          otherGenders: 16,
-          last_updated: new Date().toISOString()
-        }
-      }
-    ]
+    const fetchChapters = async () => {
+      try {
+        const res = await fetch("https://api.wikipeoplestats.org/v1/chapters")
+        const data = await res.json()
 
-    setTimeout(() => {
-      setChapters(mockChapters)
-      setLoading(false)
-    }, 1000)
+        const formattedData = data.map((item: any) => ({
+          ...item,
+          stats: item.stats || {
+            totalPeople: 0,
+            totalWomen: 0,
+            totalMen: 0,
+            otherGenders: 0,
+            last_updated: ""
+          },
+          group_description: item.group_description ?? "–"
+        }))
+
+        setChapters(formattedData)
+      } catch (error) {
+        console.error("Failed to load chapters:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchChapters()
   }, [])
 
   if (loading) {
     return (
       <div className="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300 min-h-screen">
         <NoticeBanner />
-        <Header currentLang={domainContext.currentLang} onLanguageChange={() => {}} />
+        <Header currentLang={domainContext.currentLang} onLanguageChange={() => { }} />
         <main className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
@@ -109,7 +91,7 @@ export default function ChaptersPage() {
   return (
     <div className="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300 min-h-screen">
       <NoticeBanner />
-      <Header currentLang={domainContext.currentLang} onLanguageChange={() => {}} />
+      <Header currentLang={domainContext.currentLang} onLanguageChange={() => { }} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
@@ -126,7 +108,7 @@ export default function ChaptersPage() {
             <Card key={chapter.slug} className="bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow duration-300">
               <CardContent className="p-0">
                 {/* Banner */}
-                <div 
+                <div
                   className="h-32 bg-cover bg-center relative rounded-t-lg"
                   style={{ backgroundImage: `url('${chapter.banner_image}')` }}
                 >
@@ -139,8 +121,8 @@ export default function ChaptersPage() {
                 {/* Avatar */}
                 <div className="flex justify-center -mt-8 mb-4">
                   <div className="w-16 h-16 rounded-full p-1 shadow-xl bg-gray-100 dark:bg-gray-700 border-2 border-white dark:border-gray-800">
-                    <img 
-                      src={chapter.avatar_image} 
+                    <img
+                      src={chapter.avatar_image}
                       alt={`${chapter.group_name} logo`}
                       className="w-full h-full rounded-full object-cover"
                     />
@@ -152,7 +134,7 @@ export default function ChaptersPage() {
                   <h3 className="text-xl font-bold mb-2 text-center text-gray-900 dark:text-gray-100">
                     {chapter.group_name}
                   </h3>
-                  
+
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 text-center">
                     {chapter.group_description}
                   </p>
@@ -163,13 +145,13 @@ export default function ChaptersPage() {
                       <span className="text-gray-600 dark:text-gray-400">Admin:</span>
                       <span className="font-medium">{chapter.admin_name}</span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <Users className="h-4 w-4 text-green-500" />
                       <span className="text-gray-600 dark:text-gray-400">Members:</span>
                       <span className="font-medium">{chapter.members_count.toLocaleString()}</span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2 col-span-2">
                       <Calendar className="h-4 w-4 text-purple-500" />
                       <span className="text-gray-600 dark:text-gray-400">Created:</span>
@@ -217,7 +199,7 @@ export default function ChaptersPage() {
         )}
       </main>
 
-      <Footer currentLang={domainContext.currentLang} onLanguageChange={() => {}} />
+      <Footer currentLang={domainContext.currentLang} onLanguageChange={() => { }} />
     </div>
   )
 }
