@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -16,17 +16,17 @@ interface User {
 }
 
 interface Props {
-  chapterSlug: string
+  slug: string
 }
 
-export function ChapterMembersSection({ chapterSlug }: Props) {
+export function ChapterMembersSection({ slug }: Props) {
   const [members, setMembers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchMembers = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/chapters/${chapterSlug}/members`)
+      const res = await fetch(`/api/chapters/${slug}/members`)
       if (res.ok) {
         const data = await res.json()
         setMembers(data)
@@ -44,7 +44,7 @@ export function ChapterMembersSection({ chapterSlug }: Props) {
     if (!confirm("Are you sure you want to remove this member?")) return
 
     try {
-      const res = await fetch(`/api/chapters/${chapterSlug}/members?user_id=${userId}`, {
+      const res = await fetch(`/api/chapters/${slug}/members?user_id=${userId}`, {
         method: "DELETE",
       })
 
@@ -62,14 +62,14 @@ export function ChapterMembersSection({ chapterSlug }: Props) {
 
   useEffect(() => {
     fetchMembers()
-  }, [chapterSlug]) // Fixed: was using chapterId instead of chapterSlug
+  }, [slug])
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Members</h2>
 
       {/* Add member form */}
-      <AddMemberForm chapterSlug={chapterSlug} onSuccess={fetchMembers} />
+      <AddMemberForm chapterSlug={slug} onSuccess={fetchMembers} />
 
       {loading ? (
         <p className="text-sm text-gray-500 dark:text-gray-400">Loading members...</p>
