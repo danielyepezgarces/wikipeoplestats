@@ -150,7 +150,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     })
   } catch (error) {
     console.error("Error adding member:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
   }
 }
 
