@@ -213,6 +213,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting member:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
   }
 }
