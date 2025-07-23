@@ -10,6 +10,7 @@ import { Footer } from "@/components/footer"
 import { NoticeBanner } from "@/components/notice-banner"
 import { useI18n } from "@/hooks/use-i18n"
 import { useDomainContext } from "@/hooks/use-domain-context"
+import { getProject } from "@/lib/languages"
 
 interface Chapter {
   slug: string
@@ -35,11 +36,13 @@ export default function ChaptersPage() {
   const { t } = useI18n(domainContext.currentLang)
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [loading, setLoading] = useState(true)
-
+  const host = window.location.host
+  const project = getProject(host)
+  
   useEffect(() => {
     const fetchChapters = async () => {
       try {
-        const res = await fetch("https://api.wikipeoplestats.org/v1/chapters")
+        const res = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${project}`)
         const data = await res.json()
 
         const formattedData = data.map((item: any) => ({
