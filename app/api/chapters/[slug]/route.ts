@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getConnection } from '@/lib/database'
+import { getCurrentUser } from '@/lib/auth'
+import { getChapterIdBySlug } from '@/lib/db/chapters'
 
 interface Member {
   username: string
@@ -111,21 +113,23 @@ export async function GET(
 export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
   const user = await getCurrentUser()
   const chapterSlug = params.slug
-  
-  // Convert slug to ID if needed - you may need to adjust this based on your data structure
-  const chapterId = parseInt(chapterSlug) || await getChapterIdBySlug(chapterSlug)
+  const chapterId = await getChapterIdBySlug(chapterSlug)
+
+  if (!chapterId) {
+    return NextResponse.json({ error: 'Chapter not found' }, { status: 404 })
+  }
 
   if (!user || (!user.roles.includes('super_admin') && !user.chapter_admin_ids?.includes(chapterId))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  return NextResponse.json({ success: true })
-}
-
-// Helper function to get chapter ID by slug - implement based on your database structure
-async function getChapterIdBySlug(slug: string): Promise<number> {
-  // This is a placeholder - implement actual database lookup
+  const { name, slug, status, avatar_url, banner_url } = await req.json()
   const conn = await getConnection()
-  const [rows] = await conn.query('SELECT id FROM chapters WHERE slug = ?', [slug])
-  return rows[0]?.id || 0
+
+  await conn.query(
+    `UPDATE chapters SET name = ?, slug = ?, status = ?, avatar_url = ?, banner_url = ? WHERE id = ?`,
+    [name, slug, status, avatar_url || null, banner_url || null, chapterId]
+  )
+
+  return NextResponse.json({ success: true })
 }

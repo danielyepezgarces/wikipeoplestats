@@ -9,6 +9,7 @@ import { CreateChapterForm } from '@/components/dashboard/admin/CreateChapterFor
 interface Chapter {
   id: number
   name: string
+  slug: string
   users: number
   admins: number
   staff: number
@@ -68,7 +69,7 @@ export function ChaptersSection({ chapters }: ChaptersSectionProps) {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => router.push(`/dashboard/chapters/${chapter.id}/admin`)}
+                    onClick={() => router.push(`/dashboard/chapters/${chapter.slug}/admin`)}
                   >
                     <Edit className="h-4 w-4 mr-1" />
                     Edit
