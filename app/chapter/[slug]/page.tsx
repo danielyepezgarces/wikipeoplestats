@@ -54,6 +54,50 @@ interface ChartData {
   otherGenders: number
 }
 
+// API service functions
+const apiService = {
+  async fetchChapter(slug: string): Promise<Chapter> {
+    const response = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${slug}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any authentication headers if needed
+        // 'Authorization': `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Chapter not found')
+      }
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    return response.json()
+  },
+
+  async fetchChapterStats(slug: string): Promise<ChartData[]> {
+    // If your API has a separate endpoint for historical stats
+    try {
+      const response = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${slug}/stats`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        return response.json()
+      }
+    } catch (error) {
+      console.warn('Historical stats endpoint not available, using fallback')
+    }
+
+    // Fallback: generate chart data from current stats
+    return []
+  }
+}
+
 export default function ChapterPage({ params }: ChapterPageProps) {
   const resolvedParams = use(params)
   const domainContext = useDomainContext()
@@ -61,6 +105,7 @@ export default function ChapterPage({ params }: ChapterPageProps) {
   
   const [chapter, setChapter] = useState<Chapter | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showMembersModal, setShowMembersModal] = useState(false)
   const [chartData, setChartData] = useState<ChartData[]>([])
   const [isCumulative, setIsCumulative] = useState(false)
@@ -68,54 +113,53 @@ export default function ChapterPage({ params }: ChapterPageProps) {
 
   useEffect(() => {
     const fetchChapter = async () => {
-      // Mock data - replace with actual API call
-      const mockChapters: { [key: string]: Chapter } = {
-        "wikimedia-argentina": {
-          slug: "wikimedia-argentina",
-          group_name: "Wikimedia Argentina",
-          admin_name: "Daniel YG",
-          members_count: 125,
-          group_description: "Wikimedia Argentina promueve la educación y el acceso a la cultura",
-          creation_date: "2024-01-01",
-          banner_image: "https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg",
-          avatar_image: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Wikimedia_Argentina_logo_white.svg",
-          image_credit: "© Paula Kindsvater (CC-BY-SA 4.0)",
-          members: [
-            { username: "Usuario 1", join_date: "2023-01-01", member_type: "Afiliado" },
-            { username: "Usuario 2", join_date: "2023-02-15", member_type: "Socio" },
-            { username: "Usuario 3", join_date: "2023-03-30", member_type: "Afiliado" },
-            { username: "Usuario 4", join_date: "2023-04-12", member_type: "Socio" },
-            { username: "Usuario 5", join_date: "2023-05-25", member_type: "Afiliado" },
-          ],
-          stats: {
-            totalPeople: 342,
-            totalWomen: 128,
-            totalMen: 198,
-            otherGenders: 16,
-            last_updated: new Date().toISOString()
+      try {
+        setLoading(true)
+        setError(null)
+
+        // Fetch chapter data from your API
+        const chapterData = await apiService.fetchChapter(resolvedParams.slug)
+        setChapter(chapterData)
+
+        // Fetch historical stats if available
+        const statsData = await apiService.fetchChapterStats(resolvedParams.slug)
+        
+        // If no historical data, create a simple fallback
+        if (statsData.length === 0) {
+          const currentDate = new Date()
+          const fallbackData: ChartData[] = []
+          
+          // Generate last 6 months of mock progression data
+          for (let i = 5; i >= 0; i--) {
+            const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
+            const progressRatio = (6 - i) / 6
+            
+            fallbackData.push({
+              year: date.getFullYear().toString(),
+              month: (date.getMonth() + 1).toString().padStart(2, '0'),
+              total: Math.floor(chapterData.stats.totalPeople * progressRatio),
+              totalWomen: Math.floor(chapterData.stats.totalWomen * progressRatio),
+              totalMen: Math.floor(chapterData.stats.totalMen * progressRatio),
+              otherGenders: Math.floor(chapterData.stats.otherGenders * progressRatio)
+            })
           }
+          
+          setChartData(fallbackData)
+        } else {
+          setChartData(statsData)
         }
-      }
 
-      const foundChapter = mockChapters[resolvedParams.slug]
-      if (!foundChapter) {
-        notFound()
-        return
+      } catch (err) {
+        console.error('Error fetching chapter:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load chapter data')
+        
+        if (err instanceof Error && err.message === 'Chapter not found') {
+          notFound()
+          return
+        }
+      } finally {
+        setLoading(false)
       }
-
-      setChapter(foundChapter)
-      
-      // Mock chart data
-      const mockChartData: ChartData[] = [
-        { year: "2023", month: "01", total: 10, totalWomen: 3, totalMen: 6, otherGenders: 1 },
-        { year: "2023", month: "02", total: 15, totalWomen: 5, totalMen: 9, otherGenders: 1 },
-        { year: "2023", month: "03", total: 22, totalWomen: 8, totalMen: 12, otherGenders: 2 },
-        { year: "2023", month: "04", total: 30, totalWomen: 12, totalMen: 16, otherGenders: 2 },
-        { year: "2023", month: "05", total: 45, totalWomen: 18, totalMen: 24, otherGenders: 3 }
-      ]
-      
-      setChartData(mockChartData)
-      setLoading(false)
     }
 
     fetchChapter()
@@ -229,6 +273,7 @@ export default function ChapterPage({ params }: ChapterPageProps) {
     setIsCumulative(!isCumulative)
   }
 
+  // Loading state
   if (loading) {
     return (
       <div className="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300 min-h-screen">
@@ -244,6 +289,32 @@ export default function ChapterPage({ params }: ChapterPageProps) {
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="bg-gray-100 dark:bg-[#0D161C] text-gray-800 dark:text-gray-200 transition-colors duration-300 min-h-screen">
+        <NoticeBanner />
+        <Header currentLang={domainContext.currentLang} onLanguageChange={() => {}} />
+        <main className="container mx-auto px-4 py-8">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
+            <h2 className="text-xl font-bold text-red-800 dark:text-red-200 mb-2">
+              Error Loading Chapter
+            </h2>
+            <p className="text-red-600 dark:text-red-400 mb-4">
+              {error}
+            </p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Try Again
+            </Button>
           </div>
         </main>
       </div>
@@ -286,6 +357,10 @@ export default function ChapterPage({ params }: ChapterPageProps) {
                 src={chapter.avatar_image} 
                 alt={`${chapter.group_name} avatar`}
                 className="w-full h-full rounded-full object-cover"
+                onError={(e) => {
+                  // Fallback if image fails to load
+                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjNjc3NDhGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+'
+                }}
               />
             </div>
           </div>
@@ -361,20 +436,22 @@ export default function ChapterPage({ params }: ChapterPageProps) {
         </div>
         
         {/* Chart */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-10">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Activity Over Time
-            </h2>
-            <Button
-              onClick={toggleChart}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
-            >
-              {isCumulative ? "Show Normal" : "Show Cumulative"}
-            </Button>
+        {chartData.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-10">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Activity Over Time
+              </h2>
+              <Button
+                onClick={toggleChart}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
+              >
+                {isCumulative ? "Show Normal" : "Show Cumulative"}
+              </Button>
+            </div>
+            <div id="chartContainer" className="w-full h-96"></div>
           </div>
-          <div id="chartContainer" className="w-full h-96"></div>
-        </div>
+        )}
         
         {/* Credits */}
         <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg text-center">
