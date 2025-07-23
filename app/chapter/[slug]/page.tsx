@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useI18n } from "@/hooks/use-i18n"
 import { useDomainContext } from "@/hooks/use-domain-context"
 import { notFound } from "next/navigation"
+import { getProject } from "@/lib/languages"
 
 interface ChapterPageProps {
   params: Promise<{
@@ -79,7 +80,9 @@ const apiService = {
   async fetchChapterStats(slug: string): Promise<ChartData[]> {
     // If your API has a separate endpoint for historical stats
     try {
-      const response = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${slug}/stats`, {
+        const host = window.location.host
+        const project = getProject(host)
+      const response = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${slug}/${project}//stats`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

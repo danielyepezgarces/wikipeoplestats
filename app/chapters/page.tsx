@@ -43,7 +43,7 @@ export default function ChaptersPage() {
       try {
         const host = window.location.host
         const project = getProject(host)
-        const res = await fetch(`https://api.wikipeoplestats.org/v1/chapters/${project}`)
+        const res = await fetch(`https://api.wikipeoplestats.org/v1/chapters/`)
         const data = await res.json()
 
         const formattedData = data.map((item: any) => ({
