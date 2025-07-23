@@ -1,135 +1,116 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getConnection } from '@/lib/database'
-import { getCurrentUser } from '@/lib/auth'
-import { getChapterIdBySlug } from '@/lib/db/chapters'
+import { type NextRequest, NextResponse } from "next/server"
+import { getConnection } from "@/lib/database"
+import { getCurrentUser } from "@/lib/auth"
+import { getChapterIdBySlug } from "@/lib/db/chapters"
 
-interface Member {
-  username: string
-  join_date: string
-  member_type: string
-}
-
-interface Chapter {
-  slug: string
-  group_name: string
-  admin_name: string
-  members_count: number
-  group_description: string
-  creation_date: string
-  banner_image: string
-  avatar_image: string
-  image_credit: string
-  members: Member[]
-  stats: {
-    totalPeople: number
-    totalWomen: number
-    totalMen: number
-    otherGenders: number
-    last_updated: string
-  }
-}
-
-// Mock data - replace with actual database queries
-const mockChapters: { [key: string]: Chapter } = {
-  "wikimedia-argentina": {
-    slug: "wikimedia-argentina",
-    group_name: "Wikimedia Argentina",
-    admin_name: "Daniel YG",
-    members_count: 125,
-    group_description: "Wikimedia Argentina promueve la educación y el acceso a la cultura",
-    creation_date: "2024-01-01",
-    banner_image: "https://wikimedia.org.ar/wp-content/uploads/2022/01/Marcha_del_orgullo_parana_2019_16-scaled.jpg",
-    avatar_image: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Wikimedia_Argentina_logo_white.svg",
-    image_credit: "© Paula Kindsvater (CC-BY-SA 4.0)",
-    members: [
-      { username: "Usuario 1", join_date: "2023-01-01", member_type: "Afiliado" },
-      { username: "Usuario 2", join_date: "2023-02-15", member_type: "Socio" },
-      { username: "Usuario 3", join_date: "2023-03-30", member_type: "Afiliado" },
-      { username: "Usuario 4", join_date: "2023-04-12", member_type: "Socio" },
-      { username: "Usuario 5", join_date: "2023-05-25", member_type: "Afiliado" },
-    ],
-    stats: {
-      totalPeople: 342,
-      totalWomen: 128,
-      totalMen: 198,
-      otherGenders: 16,
-      last_updated: new Date().toISOString()
-    }
-  },
-  "wikimedia-espana": {
-    slug: "wikimedia-espana",
-    group_name: "Wikimedia España",
-    admin_name: "Admin ES",
-    members_count: 89,
-    group_description: "Wikimedia España fomenta el conocimiento libre en España",
-    creation_date: "2023-06-15",
-    banner_image: "https://images.pexels.com/photos/3586966/pexels-photo-3586966.jpeg",
-    avatar_image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wikimedia_España_logo.svg/200px-Wikimedia_España_logo.svg.png",
-    image_credit: "© Wikimedia España",
-    members: [
-      { username: "Admin ES", join_date: "2023-06-15", member_type: "Admin" },
-      { username: "Miembro 1", join_date: "2023-07-01", member_type: "Socio" },
-      { username: "Miembro 2", join_date: "2023-07-15", member_type: "Afiliado" },
-    ],
-    stats: {
-      totalPeople: 256,
-      totalWomen: 98,
-      totalMen: 142,
-      otherGenders: 16,
-      last_updated: new Date().toISOString()
-    }
-  }
-}
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
-  try {
-    const { slug } = await params
-    
-    // In a real application, you would fetch from your database
-    // const chapter = await getChapterBySlug(slug)
-    
-    const chapter = mockChapters[slug]
-    
-    if (!chapter) {
-      return NextResponse.json(
-        { error: 'Chapter not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(chapter)
-  } catch (error) {
-    console.error('Error fetching chapter:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch chapter' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
-  const user = await getCurrentUser()
+// Obtener detalles del capítulo
+export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
   const chapterSlug = params.slug
   const chapterId = await getChapterIdBySlug(chapterSlug)
 
   if (!chapterId) {
-    return NextResponse.json({ error: 'Chapter not found' }, { status: 404 })
+    return NextResponse.json({ error: "Chapter not found" }, { status: 404 })
   }
 
-  if (!user || (!user.roles.includes('super_admin') && !user.chapter_admin_ids?.includes(chapterId))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const conn = await getConnection()
+    const [rows] = await conn.query(
+      `
+      SELECT 
+        id, 
+        name, 
+        slug, 
+        status, 
+        avatar_url, 
+        banner_url,
+        banner_credits, -- Include banner_credits
+        created_at, 
+        updated_at
+      FROM chapters
+      WHERE id = ?
+      `,
+      [chapterId],
+    )
+    if (Array.isArray(rows) && rows.length > 0) {
+      return NextResponse.json(rows[0])
+    } else {
+      return NextResponse.json({ error: "Chapter not found" }, { status: 404 })
+    }
+  } catch (error) {
+    console.error("Error fetching chapter details:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+// Actualizar capítulo
+export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
+  const chapterSlug = params.slug
+  const chapterId = await getChapterIdBySlug(chapterSlug)
+
+  if (!chapterId) {
+    return NextResponse.json({ error: "Chapter not found" }, { status: 404 })
   }
 
-  const { name, slug, status, avatar_url, banner_url } = await req.json()
-  const conn = await getConnection()
+  const user = await getCurrentUser(req)
+  if (!user || (user.role !== "super_admin" && user.role !== "chapter_admin")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
-  await conn.query(
-    `UPDATE chapters SET name = ?, slug = ?, status = ?, avatar_url = ?, banner_url = ? WHERE id = ?`,
-    [name, slug, status, avatar_url || null, banner_url || null, chapterId]
-  )
+  if (user.role === "chapter_admin" && user.chapter_id !== chapterId) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
 
-  return NextResponse.json({ success: true })
+  try {
+    const body = await req.json()
+    const { name, slug, status, avatar_url, banner_url, banner_credits } = body // banner_credits included
+
+    if (!name || !slug || !status) {
+      return NextResponse.json({ error: "Missing name, slug or status" }, { status: 400 })
+    }
+
+    const conn = await getConnection()
+    await conn.query(
+      `
+      UPDATE chapters
+      SET 
+        name = ?, 
+        slug = ?, 
+        status = ?, 
+        avatar_url = ?, 
+        banner_url = ?,
+        banner_credits = ?, -- Update banner_credits
+        updated_at = NOW()
+      WHERE id = ?
+      `,
+      [name, slug, status, avatar_url, banner_url, banner_credits, chapterId],
+    )
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error updating chapter:", error)
+    return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
+  }
+}
+
+// Eliminar capítulo
+export async function DELETE(req: NextRequest, { params }: { params: { slug: string } }) {
+  const chapterSlug = params.slug
+  const chapterId = await getChapterIdBySlug(chapterSlug)
+
+  if (!chapterId) {
+    return NextResponse.json({ error: "Chapter not found" }, { status: 404 })
+  }
+
+  const user = await getCurrentUser(req)
+  if (!user || user.role !== "super_admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  try {
+    const conn = await getConnection()
+    await conn.query("DELETE FROM chapters WHERE id = ?", [chapterId])
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Error deleting chapter:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

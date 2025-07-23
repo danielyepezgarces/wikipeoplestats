@@ -30,10 +30,12 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         u.username,
         u.email,
         r.name AS role,
+        cm.joined_at, -- Include joined_at
         u.created_at
       FROM users u
       JOIN user_roles ur ON ur.user_id = u.id
       JOIN roles r ON r.id = ur.role_id
+      LEFT JOIN chapter_membership cm ON cm.user_id = u.id AND cm.chapter_id = ur.chapter_id
       WHERE ur.chapter_id = ?
       ORDER BY u.created_at DESC
       `,
@@ -46,7 +48,6 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
   }
 }
 
-// Añadir miembro al capítulo
 // Añadir miembro al capítulo
 export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
   const chapterSlug = params.slug
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
   try {
     const body = await req.json()
-    const { username, wikimedia_id, role_id } = body
+    const { username, wikimedia_id, role_id, joined_at } = body // joined_at added, banner_credits removed
 
     if (!username || !wikimedia_id || !role_id) {
       return NextResponse.json({ error: "Missing username, wikimedia_id or role_id" }, { status: 400 })
@@ -77,10 +78,10 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     const conn = await getConnection()
 
     // Verificar si el usuario ya existe en la base de datos local por wikimedia_id
-    const [existingUsers] = await conn.query(
-      "SELECT id FROM users WHERE wikimedia_id = ? OR username = ?", 
-      [wikimedia_id, username]
-    )
+    const [existingUsers] = await conn.query("SELECT id FROM users WHERE wikimedia_id = ? OR username = ?", [
+      wikimedia_id,
+      username,
+    ])
 
     let userId: number
     let userCreated = false
@@ -92,13 +93,13 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         INSERT INTO users (username, wikimedia_id, created_at, updated_at, is_active)
         VALUES (?, ?, NOW(), NOW(), 1)
         `,
-        [username, wikimedia_id], // Usar el wikimedia_id real
+        [username, wikimedia_id],
       )
       userId = (insertResult as any).insertId
       userCreated = true
     } else {
       userId = (existingUsers as any[])[0].id
-      
+
       // Actualizar el usuario existente con los datos más recientes
       await conn.query(
         `
@@ -106,27 +107,28 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
         SET username = ?, wikimedia_id = ?, updated_at = NOW()
         WHERE id = ?
         `,
-        [username, wikimedia_id, userId]
+        [username, wikimedia_id, userId],
       )
     }
 
-    // Verificar si el usuario ya es miembro del capítulo
-    const [existingMembership] = await conn.query("SELECT user_id FROM user_roles WHERE user_id = ? AND chapter_id = ?", [
-      userId,
-      chapterId,
-    ])
+    // Verificar si el user_role ya existe para evitar duplicados
+    const [existingUserRole] = await conn.query(
+      "SELECT user_id FROM user_roles WHERE user_id = ? AND chapter_id = ? AND role_id = ?",
+      [userId, chapterId, role_id],
+    )
 
-    if ((existingMembership as any[]).length > 0) {
-      return NextResponse.json({ error: "User is already a member of this chapter" }, { status: 400 })
+    if ((existingUserRole as any[]).length > 0) {
+      return NextResponse.json({ error: "User already has this role in this chapter" }, { status: 400 })
     }
 
-    // Insertar en chapter_membership
+    // Insertar en chapter_membership (if not already a member)
+    // Use INSERT IGNORE to prevent errors if the user is already in chapter_membership
     await conn.query(
       `
       INSERT IGNORE INTO chapter_membership (user_id, chapter_id, joined_at)
-      VALUES (?, ?, NOW())
+      VALUES (?, ?, ?)
       `,
-      [userId, chapterId],
+      [userId, chapterId, joined_at || null], // Pass joined_at or null, DB will use NOW() if null
     )
 
     // Insertar en user_roles
@@ -145,10 +147,10 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       user_data: {
         id: userId,
         username: username,
-        wikimedia_id: wikimedia_id
-      }
+        wikimedia_id: wikimedia_id,
+      },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error adding member:", error)
     return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
   }
