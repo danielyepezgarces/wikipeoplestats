@@ -44,7 +44,7 @@ export function ChapterAdminClient({
         </h1>
 
         <EditChapterForm chapter={chapter} />
-        <ChapterMembersSection chapterId={chapterId} />
+        <ChapterMembersSection slug={chapter.slug} />
       </div>
     </div>
   )
