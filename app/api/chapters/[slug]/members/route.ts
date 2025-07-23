@@ -132,8 +132,8 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     // Insertar en user_roles
     await conn.query(
       `
-      INSERT INTO user_roles (user_id, role_id, chapter_id, created_at)
-      VALUES (?, ?, ?, NOW())
+      INSERT INTO user_roles (user_id, role_id, chapter_id)
+      VALUES (?, ?, ?)
       `,
       [userId, role_id, chapterId],
     )
