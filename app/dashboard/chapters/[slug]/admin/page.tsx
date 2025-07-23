@@ -1,7 +1,7 @@
 import { getCurrentUser } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
-import { ChapterAdminClient } from './client'
 import { getChapterById, getChapterIdBySlug } from '@/lib/db/chapters'
+import { ChapterAdminClient } from '../../[id]/admin/client'
 
 
 export default async function ChapterAdminPage({ params }: { params: { slug: string } }) {
