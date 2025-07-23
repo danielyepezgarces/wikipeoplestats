@@ -22,8 +22,9 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         slug, 
         description, 
         status, 
-        banner_url, 
-        banner_credits, -- Include banner_credits
+        avatar_url, -- Re-added avatar_url
+        banner_url,
+        banner_credits,
         created_at, 
         updated_at
       FROM chapters
@@ -62,7 +63,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
 
   try {
     const body = await req.json()
-    const { name, slug, status, avatar_url, banner_url, banner_credits } = body // banner_credits included
+    const { name, slug, status, avatar_url, banner_url, banner_credits, description } = body // avatar_url re-added
 
     if (!name || !slug || !status) {
       return NextResponse.json({ error: "Missing name, slug or status" }, { status: 400 })
@@ -76,13 +77,23 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
         name = ?, 
         slug = ?, 
         status = ?, 
-        avatar_url = ?, 
+        avatar_url = ?, -- Update avatar_url
         banner_url = ?,
-        banner_credits = ?, -- Update banner_credits
+        banner_credits = ?,
+        description = ?, -- Ensure description is also updated if needed
         updated_at = NOW()
       WHERE id = ?
       `,
-      [name, slug, status, avatar_url || null, banner_url || null, banner_credits || null, chapterId],
+      [
+        name,
+        slug,
+        status,
+        avatar_url || null,
+        banner_url || null,
+        banner_credits || null,
+        description || null,
+        chapterId,
+      ],
     )
 
     if ((result as any).affectedRows === 0) {
@@ -90,7 +101,7 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
     }
 
     return NextResponse.json({ success: true, message: "Chapter updated successfully" })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating chapter:", error)
     return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
   }
@@ -119,7 +130,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { slug: str
     }
 
     return NextResponse.json({ success: true, message: "Chapter deleted successfully" })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting chapter:", error)
     return NextResponse.json({ error: "Internal server error", message: error.message }, { status: 500 })
   }
