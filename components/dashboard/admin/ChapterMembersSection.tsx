@@ -15,16 +15,16 @@ interface User {
 }
 
 interface Props {
-  chapterId: number
+  chapterSlug: string
 }
 
-export function ChapterMembersSection({ chapterId }: Props) {
+export function ChapterMembersSection({ chapterSlug }: Props) {
   const [members, setMembers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchMembers = async () => {
     setLoading(true)
-    const res = await fetch(`/api/chapters/${chapterId}/members`)
+    const res = await fetch(`/api/chapters/${chapterSlug}/members`)
     if (res.ok) {
       const data = await res.json()
       setMembers(data)
