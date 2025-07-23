@@ -111,7 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     }
 
     // Verificar si el usuario ya es miembro del capítulo
-    const [existingMembership] = await conn.query("SELECT id FROM user_roles WHERE user_id = ? AND chapter_id = ?", [
+    const [existingMembership] = await conn.query("SELECT user_id FROM user_roles WHERE user_id = ? AND chapter_id = ?", [
       userId,
       chapterId,
     ])
