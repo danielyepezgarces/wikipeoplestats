@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
         u.username,
         u.email,
         r.name AS role,
-        cm.joined_at, -- Include joined_at
+        cm.joined_at, -- Include joined_at from chapter_membership
         u.created_at
       FROM users u
       JOIN user_roles ur ON ur.user_id = u.id
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
   try {
     const body = await req.json()
-    const { username, wikimedia_id, role_id, joined_at } = body // joined_at added, banner_credits removed
+    const { username, wikimedia_id, role_id, joined_at } = body // joined_at is here, banner_credits is not
 
     if (!username || !wikimedia_id || !role_id) {
       return NextResponse.json({ error: "Missing username, wikimedia_id or role_id" }, { status: 400 })
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 
     const conn = await getConnection()
 
-    // Verificar si el usuario ya existe en la base de datos local por wikimedia_id
+    // Verificar si el usuario ya existe en la base de datos local por wikimedia_id o username
     const [existingUsers] = await conn.query("SELECT id FROM users WHERE wikimedia_id = ? OR username = ?", [
       wikimedia_id,
       username,
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
     } else {
       userId = (existingUsers as any[])[0].id
 
-      // Actualizar el usuario existente con los datos más recientes
+      // Update existing user with latest data
       await conn.query(
         `
         UPDATE users 
@@ -111,34 +111,62 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
       )
     }
 
-    // Verificar si el user_role ya existe para evitar duplicados
+    // Verificar si el usuario ya es miembro del capítulo (in chapter_membership)
+    const [existingMembership] = await conn.query(
+      "SELECT user_id FROM chapter_membership WHERE user_id = ? AND chapter_id = ?",
+      [userId, chapterId],
+    )
+
+    if ((existingMembership as any[]).length > 0) {
+      // If already a member, update joined_at if provided, otherwise do nothing for chapter_membership
+      if (joined_at) {
+        await conn.query(`UPDATE chapter_membership SET joined_at = ? WHERE user_id = ? AND chapter_id = ?`, [
+          joined_at,
+          userId,
+          chapterId,
+        ])
+      }
+    } else {
+      // Insert into chapter_membership if not already a member
+      await conn.query(
+        `
+        INSERT INTO chapter_membership (user_id, chapter_id, joined_at)
+        VALUES (?, ?, ?)
+        `,
+        [userId, chapterId, joined_at || null], // Pass joined_at or null, DB will use NOW() if null
+      )
+    }
+
+    // Check if user already has this role in this chapter (in user_roles)
     const [existingUserRole] = await conn.query(
       "SELECT user_id FROM user_roles WHERE user_id = ? AND chapter_id = ? AND role_id = ?",
       [userId, chapterId, role_id],
     )
 
     if ((existingUserRole as any[]).length > 0) {
-      return NextResponse.json({ error: "User already has this role in this chapter" }, { status: 400 })
+      // If role already exists, just return success, no need to re-insert
+      return NextResponse.json({
+        success: true,
+        created: userCreated,
+        message: userCreated
+          ? "User created and role already assigned in chapter"
+          : "User role already assigned in chapter",
+        user_data: {
+          id: userId,
+          username: username,
+          wikimedia_id: wikimedia_id,
+        },
+      })
+    } else {
+      // Insert into user_roles
+      await conn.query(
+        `
+        INSERT INTO user_roles (user_id, role_id, chapter_id)
+        VALUES (?, ?, ?)
+        `,
+        [userId, role_id, chapterId],
+      )
     }
-
-    // Insertar en chapter_membership (if not already a member)
-    // Use INSERT IGNORE to prevent errors if the user is already in chapter_membership
-    await conn.query(
-      `
-      INSERT IGNORE INTO chapter_membership (user_id, chapter_id, joined_at)
-      VALUES (?, ?, ?)
-      `,
-      [userId, chapterId, joined_at || null], // Pass joined_at or null, DB will use NOW() if null
-    )
-
-    // Insertar en user_roles
-    await conn.query(
-      `
-      INSERT INTO user_roles (user_id, role_id, chapter_id)
-      VALUES (?, ?, ?)
-      `,
-      [userId, role_id, chapterId],
-    )
 
     return NextResponse.json({
       success: true,
