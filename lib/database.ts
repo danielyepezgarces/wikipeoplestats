@@ -12,10 +12,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 })
 
-export async function getConnection(): Promise<mysql.PoolConnection> {
-  return await pool.getConnection()
-}
-
 export interface User {
   id: number
   wikimedia_id: string | null
@@ -58,8 +54,12 @@ export interface SessionWithUser extends Session {
 }
 
 export class Database {
+  static async getConnection(): Promise<mysql.PoolConnection> {
+    return await pool.getConnection()
+  }
+
   static async initializeTables(): Promise<void> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       // Actualizar tabla de usuarios para incluir is_claimed
       await conn.execute(`
@@ -83,7 +83,7 @@ export class Database {
   }
 
   static async getUserByWikipediaId(wikimediaId: string): Promise<User | null> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute("SELECT * FROM users WHERE wikimedia_id = ? AND is_active = 1", [wikimediaId])
       const users = rows as User[]
@@ -94,7 +94,7 @@ export class Database {
   }
 
   static async getUserByUsername(username: string): Promise<User | null> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute("SELECT * FROM users WHERE username = ? AND is_active = 1", [username])
       const users = rows as User[]
@@ -112,19 +112,19 @@ export class Database {
     registration_date?: string
     is_claimed?: boolean
   }): Promise<User> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
+      // Convert undefined values to null to avoid MySQL binding errors
+      const wikimediaId = data.wikimedia_id || null
+      const email = data.email || null
+      const avatarUrl = data.avatar_url || null
+      const registrationDate = data.registration_date || null
+      const isClaimed = data.is_claimed !== undefined ? data.is_claimed : false
+
       const [result] = await conn.execute(
         `INSERT INTO users (wikimedia_id, username, email, avatar_url, registration_date, is_claimed, created_at, updated_at, is_active)
          VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), 1)`,
-        [
-          data.wikimedia_id || null,
-          data.username,
-          data.email || null,
-          data.avatar_url || null,
-          data.registration_date || null,
-          data.is_claimed || false,
-        ],
+        [wikimediaId, data.username, email, avatarUrl, registrationDate, isClaimed],
       )
       const insertResult = result as mysql.ResultSetHeader
       const user = await this.getUserById(insertResult.insertId)
@@ -138,13 +138,14 @@ export class Database {
   }
 
   static async claimUserAccount(userId: number, wikimediaId: string, email?: string): Promise<User | null> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
+      const emailValue = email || null
       await conn.execute(
         `UPDATE users 
          SET wikimedia_id = ?, email = COALESCE(?, email), is_claimed = TRUE, updated_at = NOW()
          WHERE id = ?`,
-        [wikimediaId, email, userId],
+        [wikimediaId, emailValue, userId],
       )
       return await this.getUserById(userId)
     } finally {
@@ -153,7 +154,7 @@ export class Database {
   }
 
   static async getUserById(id: number): Promise<User | null> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute("SELECT * FROM users WHERE id = ?", [id])
       const users = rows as User[]
@@ -164,7 +165,7 @@ export class Database {
   }
 
   static async updateUserLogin(userId: number): Promise<void> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       await conn.execute("UPDATE users SET last_login = NOW(), updated_at = NOW() WHERE id = ?", [userId])
     } finally {
@@ -173,7 +174,7 @@ export class Database {
   }
 
   static async assignDefaultRole(userId: number, roleId = 1): Promise<void> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       await conn.execute(
         `INSERT INTO user_roles (user_id, role_id, created_at)
@@ -194,20 +195,17 @@ export class Database {
     ip_address?: string
     device_info?: string
   }): Promise<Session> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
+      // Convert undefined values to null
+      const userAgent = data.user_agent || null
+      const ipAddress = data.ip_address || null
+      const deviceInfo = data.device_info || null
+
       const [result] = await conn.execute(
         `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, device_info, is_active, created_at, last_used)
          VALUES (?, ?, ?, ?, ?, ?, ?, TRUE, NOW(), NOW())`,
-        [
-          data.user_id,
-          data.token_hash,
-          data.expires_at,
-          data.origin_domain,
-          data.user_agent || null,
-          data.ip_address || null,
-          data.device_info || null,
-        ],
+        [data.user_id, data.token_hash, data.expires_at, data.origin_domain, userAgent, ipAddress, deviceInfo],
       )
       const insertResult = result as mysql.ResultSetHeader
       const session = await this.getSessionById(insertResult.insertId)
@@ -221,7 +219,7 @@ export class Database {
   }
 
   static async getSessionById(id: number): Promise<Session | null> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute("SELECT * FROM sessions WHERE id = ?", [id])
       const sessions = rows as Session[]
@@ -232,7 +230,7 @@ export class Database {
   }
 
   static async getSessionByTokenHash(tokenHash: string): Promise<Session | null> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute(
         "SELECT * FROM sessions WHERE token_hash = ? AND is_active = TRUE AND expires_at > NOW()",
@@ -246,7 +244,7 @@ export class Database {
   }
 
   static async getUserActiveSessions(userId: number): Promise<SessionWithUser[]> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute(
         `SELECT s.*, u.username, u.avatar_url
@@ -263,7 +261,7 @@ export class Database {
   }
 
   static async updateSessionLastUsed(sessionId: number): Promise<void> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       await conn.execute("UPDATE sessions SET last_used = NOW() WHERE id = ?", [sessionId])
     } finally {
@@ -272,7 +270,7 @@ export class Database {
   }
 
   static async revokeSession(sessionId: number, userId?: number): Promise<boolean> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       let query = "UPDATE sessions SET is_active = FALSE WHERE id = ?"
       const params: any[] = [sessionId]
@@ -291,7 +289,7 @@ export class Database {
   }
 
   static async revokeAllUserSessions(userId: number, exceptSessionId?: number): Promise<number> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       let query = "UPDATE sessions SET is_active = FALSE WHERE user_id = ?"
       const params: any[] = [userId]
@@ -310,7 +308,7 @@ export class Database {
   }
 
   static async deleteExpiredSessions(): Promise<void> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       await conn.execute("DELETE FROM sessions WHERE expires_at < NOW()")
     } finally {
@@ -324,7 +322,7 @@ export class Database {
     devices: string[]
     last_login_ip: string | null
   }> {
-    const conn = await getConnection()
+    const conn = await this.getConnection()
     try {
       const [totalRows] = await conn.execute("SELECT COUNT(*) as count FROM sessions WHERE user_id = ?", [userId])
       const [activeRows] = await conn.execute(
@@ -355,4 +353,9 @@ export class Database {
       conn.release()
     }
   }
+}
+
+// Export the getConnection function for backward compatibility
+export async function getConnection(): Promise<mysql.PoolConnection> {
+  return await Database.getConnection()
 }
