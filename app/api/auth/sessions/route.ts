@@ -1,12 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
-import { verifyToken } from "@/lib/jwt"
+import { JWTManager } from '@/lib/jwt'
+
+export const verifyToken = JWTManager.verifyToken;
 
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("auth_token")?.value
     if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })  
     }
 
     const decoded = verifyToken(token)
