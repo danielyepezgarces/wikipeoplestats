@@ -16,8 +16,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
 
-    const sessions = await Database.getUserActiveSessions(decoded.userId)
-    const stats = await Database.getSessionStats(decoded.userId)
+    const userId = Number.parseInt(decoded.userId)
+    const sessions = await Database.getUserActiveSessions(userId)
+    const stats = await Database.getSessionStats(userId)
 
     return NextResponse.json({
       sessions,
