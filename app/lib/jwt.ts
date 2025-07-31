@@ -1,53 +1,45 @@
 // lib/jwt.ts
-import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
-import { User } from './database'
+import jwt from "jsonwebtoken"
+import crypto from "crypto"
+import type { User } from "./database"
 
 export interface JWTPayload {
-  userId: string
-  sessionId: string
-  role: string
-  chapter?: string
-  wikipediaUsername: string
+  userId: number
+  username: string
+  email?: string
   iat: number
   exp: number
 }
 
 export class JWTManager {
-  private static secret = process.env.JWT_SECRET!
-  
-  static generateToken(user: User, sessionId: string): string {
-    const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
+  private static secret = process.env.JWT_SECRET || "your-secret-key"
+
+  static generateToken(user: User): string {
+    const payload: Omit<JWTPayload, "iat" | "exp"> = {
       userId: user.id,
-      sessionId,
-      role: user.wikimedia_role,
-      chapter: user.chapter_assigned,
-      wikipediaUsername: user.wikipedia_username
+      username: user.username,
+      email: user.email,
     }
-    
+
     return jwt.sign(payload, this.secret, {
-      expiresIn: '30d',
-      issuer: process.env.AUTH_DOMAIN,
-      audience: process.env.DOMAIN
+      expiresIn: "30d",
     })
   }
-  
+
   static verifyToken(token: string): JWTPayload | null {
     try {
-      return jwt.verify(token, this.secret, {
-        issuer: process.env.AUTH_DOMAIN,
-        audience: process.env.DOMAIN
-      }) as JWTPayload
+      return jwt.verify(token, this.secret) as JWTPayload
     } catch (error) {
+      console.error("JWT verification error:", error)
       return null
     }
   }
-  
+
   static hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex')
+    return crypto.createHash("sha256").update(token).digest("hex")
   }
-  
+
   static generateSecureToken(): string {
-    return crypto.randomBytes(32).toString('hex')
+    return crypto.randomBytes(32).toString("hex")
   }
 }
