@@ -198,6 +198,11 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
   return response
 }
 
+/**
+ * Handles the OAuth callback GET request.
+ * Exchanges request token for access token, fetches user info,
+ * creates or updates user in DB, creates session, and sets cookies.
+ */
 export async function GET(request: NextRequest) {
   try {
     // Inicializar tablas si es necesario
@@ -234,7 +239,7 @@ export async function GET(request: NextRequest) {
 
       if (unclaimedUser && !unclaimedUser.is_claimed && !unclaimedUser.wikimedia_id) {
         console.log("🔗 Claiming existing unclaimed account...")
-        user = await Database.claimUserAccount(unclaimedUser.id, userInfo.id, userInfo.email || undefined)
+        user = await Database.claimUserAccount(unclaimedUser.id, userInfo.id, userInfo.email || null)
         if (!user) {
           return redirectToErrorPage(origin, "account_claim_failed")
         }
@@ -243,16 +248,16 @@ export async function GET(request: NextRequest) {
         user = await Database.createUser({
           wikimedia_id: userInfo.id,
           username: userInfo.username,
-          email: userInfo.email ?? undefined,
+          email: userInfo.email,
           avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`,
-          registration_date: userInfo.registrationDate,
+          registration_date: userInfo.registrationDate || null,
           is_claimed: true,
         })
       }
     } else if (!user.is_claimed) {
       // Usuario existe pero no está reclamado, reclamarlo
       console.log("🔗 Claiming existing account...")
-      user = await Database.claimUserAccount(user.id, userInfo.id, userInfo.email || undefined)
+      user = await Database.claimUserAccount(user.id, userInfo.id, userInfo.email || null)
       if (!user) {
         return redirectToErrorPage(origin, "account_claim_failed")
       }
@@ -276,8 +281,8 @@ export async function GET(request: NextRequest) {
       token_hash: token,
       expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 19).replace("T", " "),
       origin_domain: origin,
-      user_agent: userAgent,
-      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "",
+      user_agent: userAgent || null,
+      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || null,
       device_info: deviceInfo,
     })
 
