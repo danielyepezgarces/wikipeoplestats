@@ -7,16 +7,23 @@ export interface JWTPayload {
   userId: string
   username: string
   email?: string
+  sessionId?: string
   iat: number
   exp: number
 }
 
 export class JWTManager {
-  static generateToken(payload: { userId: number; username: string; email?: string | null }): string {
+  static generateToken(payload: {
+    userId: number
+    username: string
+    email?: string | null
+    sessionId?: number
+  }): string {
     const tokenPayload: Omit<JWTPayload, "iat" | "exp"> = {
       userId: payload.userId.toString(),
       username: payload.username,
       email: payload.email || undefined,
+      sessionId: payload.sessionId?.toString(),
     }
 
     return jwt.sign(tokenPayload, JWT_SECRET, {
@@ -40,5 +47,14 @@ export class JWTManager {
 
   static generateSecureToken(): string {
     return crypto.randomBytes(32).toString("hex")
+  }
+
+  static decodeTokenWithoutVerification(token: string): JWTPayload | null {
+    try {
+      return jwt.decode(token) as JWTPayload
+    } catch (error) {
+      console.error("JWT decode failed:", error)
+      return null
+    }
   }
 }

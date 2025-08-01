@@ -53,6 +53,14 @@ export interface SessionWithUser extends Session {
   avatar_url?: string
 }
 
+export interface TokenBlacklist {
+  id: number
+  token_hash: string
+  user_id: number
+  revoked_at: string
+  expires_at: string
+}
+
 export class Database {
   static async getConnection(): Promise<mysql.PoolConnection> {
     return await pool.getConnection()
@@ -76,6 +84,21 @@ export class Database {
         ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
         ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
         ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active)
+      `)
+
+      // Crear tabla de blacklist de tokens
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS token_blacklist (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          token_hash VARCHAR(255) NOT NULL,
+          user_id INT NOT NULL,
+          revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          expires_at TIMESTAMP NOT NULL,
+          INDEX idx_token_hash (token_hash),
+          INDEX idx_user_id (user_id),
+          INDEX idx_expires_at (expires_at),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
       `)
     } finally {
       conn.release()
@@ -114,7 +137,6 @@ export class Database {
   }): Promise<User> {
     const conn = await this.getConnection()
     try {
-      // Convert undefined values to null to avoid MySQL binding errors
       const wikimediaId = data.wikimedia_id || null
       const email = data.email || null
       const avatarUrl = data.avatar_url || null
@@ -197,7 +219,6 @@ export class Database {
   }): Promise<Session> {
     const conn = await this.getConnection()
     try {
-      // Convert undefined values to null
       const userAgent = data.user_agent || null
       const ipAddress = data.ip_address || null
       const deviceInfo = data.device_info || null
@@ -255,6 +276,27 @@ export class Database {
         [userId],
       )
       return rows as SessionWithUser[]
+    } finally {
+      conn.release()
+    }
+  }
+
+  static async getUserActiveSessionsExcept(userId: number, exceptSessionId: number | null): Promise<Session[]> {
+    const conn = await this.getConnection()
+    try {
+      let query = `SELECT * FROM sessions 
+                   WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()`
+      const params: any[] = [userId]
+
+      if (exceptSessionId) {
+        query += " AND id != ?"
+        params.push(exceptSessionId)
+      }
+
+      query += " ORDER BY last_used DESC"
+
+      const [rows] = await conn.execute(query, params)
+      return rows as Session[]
     } finally {
       conn.release()
     }
@@ -349,6 +391,48 @@ export class Database {
         devices,
         last_login_ip: lastIp,
       }
+    } finally {
+      conn.release()
+    }
+  }
+
+  // Token Blacklist Methods
+  static async blacklistToken(tokenHash: string, userId: number, expiresAt?: Date): Promise<void> {
+    const conn = await this.getConnection()
+    try {
+      const expiry = expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days default
+
+      await conn.execute(
+        `INSERT INTO token_blacklist (token_hash, user_id, expires_at)
+         VALUES (?, ?, ?)`,
+        [tokenHash, userId, expiry],
+      )
+    } finally {
+      conn.release()
+    }
+  }
+
+  static async isTokenBlacklisted(token: string): Promise<boolean> {
+    const conn = await this.getConnection()
+    try {
+      // Hash the token to compare with stored hashes
+      const crypto = require("crypto")
+      const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
+
+      const [rows] = await conn.execute("SELECT id FROM token_blacklist WHERE token_hash = ? AND expires_at > NOW()", [
+        tokenHash,
+      ])
+      const results = rows as any[]
+      return results.length > 0
+    } finally {
+      conn.release()
+    }
+  }
+
+  static async cleanupExpiredBlacklistedTokens(): Promise<void> {
+    const conn = await this.getConnection()
+    try {
+      await conn.execute("DELETE FROM token_blacklist WHERE expires_at < NOW()")
     } finally {
       conn.release()
     }

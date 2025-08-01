@@ -8,9 +8,20 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Monitor, Smartphone, Tablet, MapPin, Clock, Shield, LogOut, AlertTriangle, Activity } from "lucide-react"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface Session {
   id: number
+  user_id: number
   device_info: string
   ip_address: string
   origin_domain: string
@@ -36,13 +47,21 @@ export default function SessionManager() {
   const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [revoking, setRevoking] = useState<number | null>(null)
+  const [showRevokeDialog, setShowRevokeDialog] = useState(false)
+  const [showRevokeAllDialog, setShowRevokeAllDialog] = useState(false)
+  const [sessionToRevoke, setSessionToRevoke] = useState<number | null>(null)
 
   const fetchSessions = async () => {
     try {
-      const response = await fetch("/api/auth/sessions")
+      const response = await fetch("/api/auth/sessions", {
+        credentials: "include",
+      })
       if (response.ok) {
         const data = await response.json()
         setSessionData(data)
+      } else if (response.status === 401) {
+        // Token revocado o inválido, redirigir al login
+        window.location.href = "/login"
       } else {
         toast.error("Error al cargar las sesiones")
       }
@@ -58,11 +77,14 @@ export default function SessionManager() {
     try {
       const response = await fetch(`/api/auth/sessions?session_id=${sessionId}`, {
         method: "DELETE",
+        credentials: "include",
       })
 
       if (response.ok) {
         toast.success("Sesión revocada exitosamente")
-        fetchSessions()
+        await fetchSessions()
+      } else if (response.status === 401) {
+        window.location.href = "/login"
       } else {
         toast.error("Error al revocar la sesión")
       }
@@ -70,6 +92,8 @@ export default function SessionManager() {
       toast.error("Error de conexión")
     } finally {
       setRevoking(null)
+      setShowRevokeDialog(false)
+      setSessionToRevoke(null)
     }
   }
 
@@ -78,12 +102,15 @@ export default function SessionManager() {
     try {
       const response = await fetch("/api/auth/sessions?action=revoke_all_others", {
         method: "DELETE",
+        credentials: "include",
       })
 
       if (response.ok) {
         const result = await response.json()
         toast.success(result.message)
-        fetchSessions()
+        await fetchSessions()
+      } else if (response.status === 401) {
+        window.location.href = "/login"
       } else {
         toast.error("Error al revocar las sesiones")
       }
@@ -91,6 +118,7 @@ export default function SessionManager() {
       toast.error("Error de conexión")
     } finally {
       setRevoking(null)
+      setShowRevokeAllDialog(false)
     }
   }
 
@@ -127,6 +155,10 @@ export default function SessionManager() {
 
   useEffect(() => {
     fetchSessions()
+
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchSessions, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   if (loading) {
@@ -219,7 +251,12 @@ export default function SessionManager() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button variant="destructive" size="sm" onClick={revokeAllOtherSessions} disabled={revoking === -1}>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowRevokeAllDialog(true)}
+              disabled={revoking === -1 || sessionData.sessions.length <= 1}
+            >
               <LogOut className="h-4 w-4 mr-2" />
               {revoking === -1 ? "Revocando..." : "Cerrar Otras Sesiones"}
             </Button>
@@ -266,14 +303,19 @@ export default function SessionManager() {
                     </div>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => revokeSession(session.id)}
-                  disabled={revoking === session.id}
-                >
-                  {revoking === session.id ? "Revocando..." : "Revocar"}
-                </Button>
+                {session.id !== sessionData.current_session_id && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSessionToRevoke(session.id)
+                      setShowRevokeDialog(true)
+                    }}
+                    disabled={revoking === session.id}
+                  >
+                    {revoking === session.id ? "Revocando..." : "Revocar"}
+                  </Button>
+                )}
               </div>
               {index < sessionData.sessions.length - 1 && <Separator className="my-4" />}
             </div>
@@ -287,6 +329,46 @@ export default function SessionManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Diálogo de confirmación para revocar sesión individual */}
+      <AlertDialog open={showRevokeDialog} onOpenChange={setShowRevokeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revocar Sesión</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que quieres revocar esta sesión? La sesión se cerrará inmediatamente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => sessionToRevoke && revokeSession(sessionToRevoke)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Revocar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Diálogo de confirmación para revocar todas las otras sesiones */}
+      <AlertDialog open={showRevokeAllDialog} onOpenChange={setShowRevokeAllDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revocar Todas las Otras Sesiones</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que quieres revocar todas las otras sesiones? Esto cerrará todas las sesiones excepto la
+              actual.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={revokeAllOtherSessions} className="bg-red-600 hover:bg-red-700">
+              Revocar Todas
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
