@@ -1,17 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
-import { JWTManager } from '@/lib/jwt'
-
-export const verifyToken = JWTManager.verifyToken;
+import { JWTManager } from "@/lib/jwt"
 
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("auth_token")?.value
     if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })  
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const decoded = verifyToken(token)
+    const decoded = JWTManager.verifyToken(token)
     if (!decoded) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
@@ -27,7 +25,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error fetching sessions:", error)
-    const errorMessage = (error instanceof Error) ? error.message : "Unknown error"
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
     return NextResponse.json({ error: "Internal server error", message: errorMessage }, { status: 500 })
   }
 }
@@ -39,7 +37,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const decoded = verifyToken(token)
+    const decoded = JWTManager.verifyToken(token)
     if (!decoded) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
@@ -49,13 +47,13 @@ export async function DELETE(request: NextRequest) {
     const action = searchParams.get("action") // 'revoke' or 'revoke_all_others'
 
     if (action === "revoke_all_others") {
-      const revokedCount = await Database.revokeAllUserSessions(decoded.userId)
+      const revokedCount = await Database.revokeAllUserSessions(Number.parseInt(decoded.userId))
       return NextResponse.json({
         success: true,
         message: `Revoked ${revokedCount} sessions`,
       })
     } else if (sessionId) {
-      const success = await Database.revokeSession(Number.parseInt(sessionId), decoded.userId)
+      const success = await Database.revokeSession(Number.parseInt(sessionId), Number.parseInt(decoded.userId))
       if (success) {
         return NextResponse.json({
           success: true,
@@ -69,8 +67,7 @@ export async function DELETE(request: NextRequest) {
     }
   } catch (error) {
     console.error("Error revoking session:", error)
-    const errorMessage = (error instanceof Error) ? error.message : "Unknown error"
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
     return NextResponse.json({ error: "Internal server error", message: errorMessage }, { status: 500 })
   }
 }
-import { getCurrentUser } from "@/lib/auth"
