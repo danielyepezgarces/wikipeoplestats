@@ -59,6 +59,7 @@ export interface TokenBlacklist {
   user_id: number
   revoked_at: string
   expires_at: string
+  reason: string
 }
 
 export class Database {
@@ -83,7 +84,10 @@ export class Database {
         ADD COLUMN IF NOT EXISTS device_info TEXT NULL,
         ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
         ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
-        ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active)
+        ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active),
+        ADD INDEX IF NOT EXISTS idx_token_hash (token_hash),
+        ADD INDEX IF NOT EXISTS idx_user_expires (user_id, expires_at),
+        ADD INDEX IF NOT EXISTS idx_active_expires (is_active, expires_at)
       `)
 
       // Crear tabla de blacklist de tokens
@@ -94,6 +98,7 @@ export class Database {
           user_id INT NOT NULL,
           revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           expires_at TIMESTAMP NOT NULL,
+          reason VARCHAR(255) DEFAULT 'manual_revocation',
           INDEX idx_token_hash (token_hash),
           INDEX idx_user_id (user_id),
           INDEX idx_expires_at (expires_at),
@@ -397,15 +402,16 @@ export class Database {
   }
 
   // Token Blacklist Methods
-  static async blacklistToken(tokenHash: string, userId: number, expiresAt?: Date): Promise<void> {
+  static async blacklistToken(tokenHash: string, userId: number, reason = "manual_revocation"): Promise<void> {
     const conn = await this.getConnection()
     try {
-      const expiry = expiresAt || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days default
+      // Calcular la fecha de expiración basada en el token original
+      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días por defecto
 
       await conn.execute(
-        `INSERT INTO token_blacklist (token_hash, user_id, expires_at)
-         VALUES (?, ?, ?)`,
-        [tokenHash, userId, expiry],
+        `INSERT INTO token_blacklist (token_hash, user_id, expires_at, reason)
+         VALUES (?, ?, ?, ?)`,
+        [tokenHash, userId, expiry, reason],
       )
     } finally {
       conn.release()
@@ -433,6 +439,26 @@ export class Database {
     const conn = await this.getConnection()
     try {
       await conn.execute("DELETE FROM token_blacklist WHERE expires_at < NOW()")
+    } finally {
+      conn.release()
+    }
+  }
+
+  static async getBlacklistedTokens(userId?: number): Promise<TokenBlacklist[]> {
+    const conn = await this.getConnection()
+    try {
+      let query = "SELECT * FROM token_blacklist WHERE expires_at > NOW()"
+      const params: any[] = []
+
+      if (userId) {
+        query += " AND user_id = ?"
+        params.push(userId)
+      }
+
+      query += " ORDER BY revoked_at DESC"
+
+      const [rows] = await conn.execute(query, params)
+      return rows as TokenBlacklist[]
     } finally {
       conn.release()
     }

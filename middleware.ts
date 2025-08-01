@@ -22,13 +22,24 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Proteger rutas del dashboard y API
-  if (
-    request.nextUrl.pathname.startsWith("/dashboard") ||
-    (request.nextUrl.pathname.startsWith("/api") &&
-      !request.nextUrl.pathname.startsWith("/api/auth/login") &&
-      !request.nextUrl.pathname.startsWith("/api/auth/callback"))
-  ) {
+  // Solo proteger rutas específicas del dashboard y API
+  const protectedPaths = [
+    "/dashboard",
+    "/api/admin",
+    "/api/auth/sessions",
+    "/api/auth/me",
+    "/api/auth/verify",
+    "/api/auth/logout",
+  ]
+
+  const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
+
+  // Permitir rutas de autenticación sin verificación
+  const authPaths = ["/api/auth/login", "/api/auth/callback"]
+
+  const isAuthPath = authPaths.some((path) => request.nextUrl.pathname.startsWith(path))
+
+  if (isProtectedPath && !isAuthPath) {
     const token = request.cookies.get("auth_token")?.value
 
     if (!token) {
@@ -41,17 +52,18 @@ export async function middleware(request: NextRequest) {
     // Verificar si el token es válido
     const decoded = JWTManager.verifyToken(token)
     if (!decoded) {
-      if (request.nextUrl.pathname.startsWith("/dashboard")) {
-        return NextResponse.redirect(new URL("/login", request.url))
-      }
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 })
+      const response = request.nextUrl.pathname.startsWith("/dashboard")
+        ? NextResponse.redirect(new URL("/login", request.url))
+        : NextResponse.json({ error: "Invalid token" }, { status: 401 })
+
+      response.cookies.delete("auth_token")
+      return response
     }
 
     // Verificar si el token está en la blacklist
     try {
       const isBlacklisted = await Database.isTokenBlacklisted(token)
       if (isBlacklisted) {
-        // Limpiar la cookie
         const response = request.nextUrl.pathname.startsWith("/dashboard")
           ? NextResponse.redirect(new URL("/login", request.url))
           : NextResponse.json({ error: "Token revoked" }, { status: 401 })
@@ -61,7 +73,30 @@ export async function middleware(request: NextRequest) {
       }
     } catch (error) {
       console.error("Error checking token blacklist:", error)
-      // En caso de error, permitir continuar pero loggear el error
+      // En caso de error con la blacklist, permitir continuar
+      // pero loggear el error para investigación
+    }
+
+    // Verificar si la sesión existe y está activa
+    try {
+      const tokenHash = JWTManager.hashToken(token)
+      const session = await Database.getSessionByTokenHash(tokenHash)
+
+      if (!session || !session.is_active) {
+        const response = request.nextUrl.pathname.startsWith("/dashboard")
+          ? NextResponse.redirect(new URL("/login", request.url))
+          : NextResponse.json({ error: "Session expired" }, { status: 401 })
+
+        response.cookies.delete("auth_token")
+        return response
+      }
+
+      // Actualizar última actividad de la sesión
+      await Database.updateSessionLastUsed(session.id)
+    } catch (error) {
+      console.error("Error checking session:", error)
+      // En caso de error con la sesión, permitir continuar
+      // pero loggear el error para investigación
     }
   }
 
@@ -69,5 +104,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/api/admin/:path*",
+    "/api/auth/sessions/:path*",
+    "/api/auth/me/:path*",
+    "/api/auth/verify/:path*",
+    "/api/auth/logout/:path*",
+  ],
 }

@@ -22,20 +22,19 @@ export async function GET(request: NextRequest) {
 
     const userId = Number.parseInt(decoded.userId)
     const sessions = await Database.getUserActiveSessions(userId)
-    const stats = await Database.getSessionStats(userId)
 
-    // Obtener el session_id actual del token
-    const currentSessionId = decoded.sessionId ? Number.parseInt(decoded.sessionId) : null
+    // Obtener el hash del token actual para identificar la sesión actual
+    const currentTokenHash = JWTManager.hashToken(token)
 
-    return NextResponse.json({
-      sessions,
-      stats,
-      current_session_id: currentSessionId,
-    })
+    const sessionsWithCurrent = sessions.map((session) => ({
+      ...session,
+      is_current: session.token_hash === currentTokenHash,
+    }))
+
+    return NextResponse.json({ sessions: sessionsWithCurrent })
   } catch (error) {
     console.error("Error fetching sessions:", error)
-    const errorMessage = error instanceof Error ? error.message : "Unknown error"
-    return NextResponse.json({ error: "Internal server error", message: errorMessage }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
@@ -57,61 +56,59 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Token revoked" }, { status: 401 })
     }
 
+    const userId = Number.parseInt(decoded.userId)
     const { searchParams } = new URL(request.url)
     const sessionId = searchParams.get("session_id")
     const action = searchParams.get("action")
 
     if (action === "revoke_all_others") {
-      // Obtener todas las sesiones del usuario excepto la actual
-      const currentSessionId = decoded.sessionId ? Number.parseInt(decoded.sessionId) : null
-      const sessionsToRevoke = await Database.getUserActiveSessionsExcept(
-        Number.parseInt(decoded.userId),
-        currentSessionId,
-      )
+      // Obtener el hash del token actual
+      const currentTokenHash = JWTManager.hashToken(token)
 
-      // Agregar todos los tokens a la blacklist
-      for (const session of sessionsToRevoke) {
-        if (session.token_hash) {
-          await Database.blacklistToken(session.token_hash, Number.parseInt(decoded.userId))
-        }
+      // Obtener la sesión actual
+      const currentSession = await Database.getSessionByTokenHash(currentTokenHash)
+      const currentSessionId = currentSession?.id
+
+      // Obtener todas las otras sesiones activas
+      const otherSessions = await Database.getUserActiveSessionsExcept(userId, currentSessionId)
+
+      // Agregar todos los tokens de las otras sesiones a la blacklist
+      for (const session of otherSessions) {
+        await Database.blacklistToken(session.token_hash, userId, "revoke_all_others")
       }
 
-      // Revocar las sesiones en la base de datos
-      const revokedCount = await Database.revokeAllUserSessions(Number.parseInt(decoded.userId), currentSessionId)
+      // Revocar todas las otras sesiones en la base de datos
+      const revokedCount = await Database.revokeAllUserSessions(userId, currentSessionId)
 
       return NextResponse.json({
-        success: true,
-        message: `Revoked ${revokedCount} sessions`,
+        message: `${revokedCount} sessions revoked`,
+        revoked_count: revokedCount,
       })
-    } else if (sessionId) {
-      // Obtener la sesión específica para obtener su token
-      const session = await Database.getSessionById(Number.parseInt(sessionId))
-      if (session && session.user_id === Number.parseInt(decoded.userId)) {
-        // Agregar el token a la blacklist
-        if (session.token_hash) {
-          await Database.blacklistToken(session.token_hash, Number.parseInt(decoded.userId))
-        }
-
-        // Revocar la sesión
-        const success = await Database.revokeSession(Number.parseInt(sessionId), Number.parseInt(decoded.userId))
-
-        if (success) {
-          return NextResponse.json({
-            success: true,
-            message: "Session revoked successfully",
-          })
-        } else {
-          return NextResponse.json({ error: "Session not found" }, { status: 404 })
-        }
-      } else {
-        return NextResponse.json({ error: "Session not found" }, { status: 404 })
-      }
-    } else {
-      return NextResponse.json({ error: "Invalid parameters" }, { status: 400 })
     }
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
+    }
+
+    // Obtener la sesión a revocar
+    const sessionToRevoke = await Database.getSessionById(Number.parseInt(sessionId))
+    if (!sessionToRevoke || sessionToRevoke.user_id !== userId) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 })
+    }
+
+    // Agregar el token a la blacklist
+    await Database.blacklistToken(sessionToRevoke.token_hash, userId, "manual_revocation")
+
+    // Revocar la sesión
+    const success = await Database.revokeSession(Number.parseInt(sessionId), userId)
+
+    if (!success) {
+      return NextResponse.json({ error: "Failed to revoke session" }, { status: 500 })
+    }
+
+    return NextResponse.json({ message: "Session revoked successfully" })
   } catch (error) {
     console.error("Error revoking session:", error)
-    const errorMessage = error instanceof Error ? error.message : "Unknown error"
-    return NextResponse.json({ error: "Internal server error", message: errorMessage }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

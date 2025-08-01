@@ -4,10 +4,19 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Monitor, Smartphone, Tablet, MapPin, Clock, Shield, LogOut, AlertTriangle, Activity } from "lucide-react"
-import { toast } from "sonner"
+import {
+  Monitor,
+  Smartphone,
+  Tablet,
+  Globe,
+  MapPin,
+  Clock,
+  Shield,
+  AlertTriangle,
+  Trash2,
+  RefreshCw,
+} from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,358 +26,332 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useRouter } from "next/navigation"
 
 interface Session {
   id: number
   user_id: number
-  device_info: string
-  ip_address: string
+  token_hash: string
+  expires_at: string
   origin_domain: string
+  user_agent?: string
+  ip_address?: string
+  device_info?: string
+  is_active: boolean
   created_at: string
   last_used: string
-  is_active: boolean
+  is_current?: boolean
 }
 
-interface SessionStats {
-  total_sessions: number
-  active_sessions: number
-  devices: string[]
-  last_login_ip: string | null
-}
-
-interface SessionData {
-  sessions: Session[]
-  stats: SessionStats
-  current_session_id: number | null
-}
-
-export default function SessionManager() {
-  const [sessionData, setSessionData] = useState<SessionData | null>(null)
+export function SessionManager() {
+  const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [revoking, setRevoking] = useState<number | null>(null)
-  const [showRevokeDialog, setShowRevokeDialog] = useState(false)
-  const [showRevokeAllDialog, setShowRevokeAllDialog] = useState(false)
-  const [sessionToRevoke, setSessionToRevoke] = useState<number | null>(null)
+  const [revokingAll, setRevokingAll] = useState(false)
+  const router = useRouter()
 
   const fetchSessions = async () => {
     try {
-      const response = await fetch("/api/auth/sessions", {
-        credentials: "include",
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setSessionData(data)
-      } else if (response.status === 401) {
-        // Token revocado o inválido, redirigir al login
-        window.location.href = "/login"
-      } else {
-        toast.error("Error al cargar las sesiones")
+      const response = await fetch("/api/auth/sessions")
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push("/login")
+          return
+        }
+        throw new Error("Failed to fetch sessions")
       }
-    } catch (error) {
-      toast.error("Error de conexión")
+      const data = await response.json()
+      setSessions(data.sessions || [])
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error")
     } finally {
       setLoading(false)
     }
   }
 
+  useEffect(() => {
+    fetchSessions()
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchSessions, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   const revokeSession = async (sessionId: number) => {
     setRevoking(sessionId)
     try {
-      const response = await fetch(`/api/auth/sessions?session_id=${sessionId}`, {
+      const response = await fetch(`/api/auth/sessions?sessionId=${sessionId}`, {
         method: "DELETE",
-        credentials: "include",
       })
 
-      if (response.ok) {
-        toast.success("Sesión revocada exitosamente")
-        await fetchSessions()
-      } else if (response.status === 401) {
-        window.location.href = "/login"
-      } else {
-        toast.error("Error al revocar la sesión")
+      if (!response.ok) {
+        throw new Error("Failed to revoke session")
       }
-    } catch (error) {
-      toast.error("Error de conexión")
+
+      await fetchSessions()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to revoke session")
     } finally {
       setRevoking(null)
-      setShowRevokeDialog(false)
-      setSessionToRevoke(null)
     }
   }
 
   const revokeAllOtherSessions = async () => {
-    setRevoking(-1)
+    setRevokingAll(true)
     try {
-      const response = await fetch("/api/auth/sessions?action=revoke_all_others", {
+      const response = await fetch("/api/auth/sessions?action=revoke-all-others", {
         method: "DELETE",
-        credentials: "include",
       })
 
-      if (response.ok) {
-        const result = await response.json()
-        toast.success(result.message)
-        await fetchSessions()
-      } else if (response.status === 401) {
-        window.location.href = "/login"
-      } else {
-        toast.error("Error al revocar las sesiones")
+      if (!response.ok) {
+        throw new Error("Failed to revoke sessions")
       }
-    } catch (error) {
-      toast.error("Error de conexión")
+
+      await fetchSessions()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to revoke sessions")
     } finally {
-      setRevoking(null)
-      setShowRevokeAllDialog(false)
+      setRevokingAll(false)
     }
   }
 
-  const getDeviceIcon = (deviceInfo: string) => {
-    const info = deviceInfo.toLowerCase()
-    if (info.includes("mobile") || info.includes("android") || info.includes("iphone")) {
+  const getDeviceIcon = (userAgent?: string) => {
+    if (!userAgent) return <Globe className="h-4 w-4" />
+
+    const ua = userAgent.toLowerCase()
+    if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
       return <Smartphone className="h-4 w-4" />
-    } else if (info.includes("tablet") || info.includes("ipad")) {
+    }
+    if (ua.includes("tablet") || ua.includes("ipad")) {
       return <Tablet className="h-4 w-4" />
     }
     return <Monitor className="h-4 w-4" />
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString("es-ES", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
+  const getBrowserInfo = (userAgent?: string) => {
+    if (!userAgent) return "Unknown Browser"
+
+    const ua = userAgent.toLowerCase()
+    if (ua.includes("chrome")) return "Chrome"
+    if (ua.includes("firefox")) return "Firefox"
+    if (ua.includes("safari") && !ua.includes("chrome")) return "Safari"
+    if (ua.includes("edge")) return "Edge"
+    if (ua.includes("opera")) return "Opera"
+    return "Unknown Browser"
   }
 
-  const getTimeAgo = (dateString: string) => {
-    const now = new Date()
+  const getOSInfo = (userAgent?: string) => {
+    if (!userAgent) return "Unknown OS"
+
+    const ua = userAgent.toLowerCase()
+    if (ua.includes("windows")) return "Windows"
+    if (ua.includes("mac")) return "macOS"
+    if (ua.includes("linux")) return "Linux"
+    if (ua.includes("android")) return "Android"
+    if (ua.includes("ios") || ua.includes("iphone") || ua.includes("ipad")) return "iOS"
+    return "Unknown OS"
+  }
+
+  const formatLastUsed = (dateString: string) => {
     const date = new Date(dateString)
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
 
-    if (diffInMinutes < 1) return "Ahora mismo"
-    if (diffInMinutes < 60) return `Hace ${diffInMinutes} min`
-    if (diffInMinutes < 1440) return `Hace ${Math.floor(diffInMinutes / 60)} h`
-    return `Hace ${Math.floor(diffInMinutes / 1440)} días`
+    if (diffMins < 1) return "Just now"
+    if (diffMins < 60) return `${diffMins} minutes ago`
+    if (diffHours < 24) return `${diffHours} hours ago`
+    return `${diffDays} days ago`
   }
-
-  useEffect(() => {
-    fetchSessions()
-
-    // Actualizar cada 30 segundos
-    const interval = setInterval(fetchSessions, 30000)
-    return () => clearInterval(interval)
-  }, [])
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="h-4 w-20 bg-muted animate-pulse rounded" />
-                <div className="h-4 w-4 bg-muted animate-pulse rounded" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-8 w-16 bg-muted animate-pulse rounded mb-2" />
-                <div className="h-3 w-24 bg-muted animate-pulse rounded" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (!sessionData) {
-    return (
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>No se pudieron cargar las sesiones. Intenta recargar la página.</AlertDescription>
-      </Alert>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Estadísticas */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sesiones Activas</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{sessionData.stats.active_sessions}</div>
-            <p className="text-xs text-muted-foreground">de {sessionData.stats.total_sessions} totales</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Dispositivos</CardTitle>
-            <Monitor className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{sessionData.stats.devices.length}</div>
-            <p className="text-xs text-muted-foreground">dispositivos únicos</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Última IP</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm font-mono">{sessionData.stats.last_login_ip || "N/A"}</div>
-            <p className="text-xs text-muted-foreground">último acceso</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Seguridad</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">✓</div>
-            <p className="text-xs text-muted-foreground">estado normal</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Acciones rápidas */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Acciones de Seguridad
+            Active Sessions
           </CardTitle>
-          <CardDescription>Gestiona tus sesiones activas para mantener tu cuenta segura</CardDescription>
+          <CardDescription>Manage your active login sessions across devices</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowRevokeAllDialog(true)}
-              disabled={revoking === -1 || sessionData.sessions.length <= 1}
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              {revoking === -1 ? "Revocando..." : "Cerrar Otras Sesiones"}
-            </Button>
-            <Button variant="outline" size="sm" onClick={fetchSessions} disabled={loading}>
-              Actualizar
-            </Button>
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="h-6 w-6 animate-spin" />
           </div>
         </CardContent>
       </Card>
+    )
+  }
 
-      {/* Lista de sesiones */}
+  const currentSession = sessions.find((s) => s.is_current)
+  const otherSessions = sessions.filter((s) => !s.is_current)
+
+  return (
+    <div className="space-y-6">
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {sessions.length > 1 && (
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            You have {sessions.length} active sessions. For security, consider revoking sessions you don't recognize.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
-        <CardHeader>
-          <CardTitle>Sesiones Activas</CardTitle>
-          <CardDescription>Todas las sesiones actualmente conectadas a tu cuenta</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Active Sessions ({sessions.length})
+            </CardTitle>
+            <CardDescription>Manage your active login sessions across devices</CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={fetchSessions} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </Button>
+            {otherSessions.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" disabled={revokingAll}>
+                    {revokingAll ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                    Revoke All Others
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Revoke All Other Sessions?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will sign you out of all other devices and browsers. You will remain signed in on this
+                      device.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={revokeAllOtherSessions}>Revoke All Others</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {sessionData.sessions.map((session, index) => (
-            <div key={session.id}>
-              <div className="flex items-start justify-between p-4 border rounded-lg">
-                <div className="flex items-start space-x-3">
-                  <div className="mt-1">{getDeviceIcon(session.device_info)}</div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">{session.device_info}</p>
-                      {session.id === sessionData.current_session_id && (
-                        <Badge variant="secondary" className="text-xs">
-                          Sesión Actual
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>{session.ip_address}</span>
-                        <span>•</span>
-                        <span>{session.origin_domain}</span>
+          {sessions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">No active sessions found</div>
+          ) : (
+            <>
+              {/* Current Session */}
+              {currentSession && (
+                <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-950/20">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      {getDeviceIcon(currentSession.user_agent)}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {getBrowserInfo(currentSession.user_agent)} on {getOSInfo(currentSession.user_agent)}
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          >
+                            Current Session
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {currentSession.ip_address || "Unknown IP"}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Globe className="h-3 w-3" />
+                            {currentSession.origin_domain}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            Last active: {formatLastUsed(currentSession.last_used)}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>Última actividad: {getTimeAgo(session.last_used)}</span>
-                      </div>
-                      <div className="text-xs">Creada: {formatDate(session.created_at)}</div>
                     </div>
                   </div>
                 </div>
-                {session.id !== sessionData.current_session_id && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSessionToRevoke(session.id)
-                      setShowRevokeDialog(true)
-                    }}
-                    disabled={revoking === session.id}
-                  >
-                    {revoking === session.id ? "Revocando..." : "Revocar"}
-                  </Button>
-                )}
-              </div>
-              {index < sessionData.sessions.length - 1 && <Separator className="my-4" />}
-            </div>
-          ))}
+              )}
 
-          {sessionData.sessions.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No hay sesiones activas</p>
-            </div>
+              {/* Other Sessions */}
+              {otherSessions.map((session) => (
+                <div key={session.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      {getDeviceIcon(session.user_agent)}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {getBrowserInfo(session.user_agent)} on {getOSInfo(session.user_agent)}
+                          </span>
+                        </div>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {session.ip_address || "Unknown IP"}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Globe className="h-3 w-3" />
+                            {session.origin_domain}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            Last active: {formatLastUsed(session.last_used)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm" disabled={revoking === session.id}>
+                          {revoking === session.id ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                          Revoke
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Revoke Session?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will sign out this device/browser immediately. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => revokeSession(session.id)}>
+                            Revoke Session
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              ))}
+            </>
           )}
         </CardContent>
       </Card>
-
-      {/* Diálogo de confirmación para revocar sesión individual */}
-      <AlertDialog open={showRevokeDialog} onOpenChange={setShowRevokeDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Revocar Sesión</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Estás seguro de que quieres revocar esta sesión? La sesión se cerrará inmediatamente.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => sessionToRevoke && revokeSession(sessionToRevoke)}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Revocar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Diálogo de confirmación para revocar todas las otras sesiones */}
-      <AlertDialog open={showRevokeAllDialog} onOpenChange={setShowRevokeAllDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Revocar Todas las Otras Sesiones</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Estás seguro de que quieres revocar todas las otras sesiones? Esto cerrará todas las sesiones excepto la
-              actual.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={revokeAllOtherSessions} className="bg-red-600 hover:bg-red-700">
-              Revocar Todas
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

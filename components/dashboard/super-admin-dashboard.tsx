@@ -4,12 +4,11 @@ import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, Shield, Settings, Activity, Database, BarChart3 } from "lucide-react"
 import { DashboardStats } from "./admin/DashboardStats"
 import { UsersSection } from "./admin/UsersSection"
 import { ChaptersSection } from "./admin/ChaptersSection"
-import { RoleManagement } from "../admin/role-management"
-import SessionManager from "./session-manager"
+import { SessionManager } from "./session-manager"
+import { Shield, Users, Building, BarChart3, Settings } from "lucide-react"
 
 interface User {
   id: number
@@ -26,22 +25,22 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview")
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Super Admin Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Welcome back, {user.name}
-            <Badge variant="destructive" className="ml-2">
-              <Shield className="h-3 w-3 mr-1" />
-              Super Admin
-            </Badge>
-          </p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Super Admin Dashboard</h1>
+            <p className="text-muted-foreground mt-2">Welcome back, {user.name}</p>
+          </div>
+          <Badge variant="destructive" className="text-sm">
+            <Shield className="h-4 w-4 mr-1" />
+            Super Admin
+          </Badge>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
@@ -51,15 +50,11 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
             Users
           </TabsTrigger>
           <TabsTrigger value="chapters" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
+            <Building className="h-4 w-4" />
             Chapters
           </TabsTrigger>
-          <TabsTrigger value="roles" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Roles
-          </TabsTrigger>
           <TabsTrigger value="sessions" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
+            <Shield className="h-4 w-4" />
             Sessions
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
@@ -80,10 +75,6 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
           <ChaptersSection />
         </TabsContent>
 
-        <TabsContent value="roles" className="space-y-6">
-          <RoleManagement />
-        </TabsContent>
-
         <TabsContent value="sessions" className="space-y-6">
           <SessionManager />
         </TabsContent>
@@ -92,10 +83,10 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
           <Card>
             <CardHeader>
               <CardTitle>System Settings</CardTitle>
-              <CardDescription>Configure system-wide settings and preferences</CardDescription>
+              <CardDescription>Configure global system settings and preferences</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">System settings panel coming soon...</p>
+              <div className="text-center py-8 text-muted-foreground">System settings panel coming soon...</div>
             </CardContent>
           </Card>
         </TabsContent>
