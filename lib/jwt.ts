@@ -1,53 +1,44 @@
-// lib/jwt.ts
-import jwt from 'jsonwebtoken'
-import crypto from 'crypto'
-import { User } from './database'
+import jwt from "jsonwebtoken"
+import crypto from "crypto"
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
 export interface JWTPayload {
   userId: string
-  sessionId: string
-  role: string
-  chapter?: string
-  wikipediaUsername: string
+  username: string
+  email?: string
   iat: number
   exp: number
 }
 
 export class JWTManager {
-  private static secret = process.env.JWT_SECRET!
-  
-  static generateToken(user: User, sessionId: string): string {
-    const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
-      userId: user.id,
-      sessionId,
-      role: user.wikimedia_role,
-      chapter: user.chapter_assigned,
-      wikipediaUsername: user.wikipedia_username
+  static generateToken(payload: { userId: number; username: string; email?: string | null }): string {
+    const tokenPayload: Omit<JWTPayload, "iat" | "exp"> = {
+      userId: payload.userId.toString(),
+      username: payload.username,
+      email: payload.email || undefined,
     }
-    
-    return jwt.sign(payload, this.secret, {
-      expiresIn: '30d',
-      issuer: process.env.AUTH_DOMAIN,
-      audience: process.env.DOMAIN
+
+    return jwt.sign(tokenPayload, JWT_SECRET, {
+      expiresIn: "30d",
     })
   }
-  
+
   static verifyToken(token: string): JWTPayload | null {
     try {
-      return jwt.verify(token, this.secret, {
-        issuer: process.env.AUTH_DOMAIN,
-        audience: process.env.DOMAIN
-      }) as JWTPayload
+      const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
+      return decoded
     } catch (error) {
+      console.error("JWT verification failed:", error)
       return null
     }
   }
-  
+
   static hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex')
+    return crypto.createHash("sha256").update(token).digest("hex")
   }
-  
+
   static generateSecureToken(): string {
-    return crypto.randomBytes(32).toString('hex')
+    return crypto.randomBytes(32).toString("hex")
   }
 }
