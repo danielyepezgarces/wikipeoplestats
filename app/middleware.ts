@@ -1,37 +1,72 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from "next/server"
+import { SessionManager } from "@/lib/session-manager"
 
-export function middleware(request: NextRequest) {
-  const origin = request.headers.get('origin')
-  const hostname = request.nextUrl.hostname
+// Rutas que requieren autenticación
+const protectedRoutes = ["/dashboard", "/admin", "/profile"]
 
-  // Allow CORS for localhost during development and wikipeoplestats.org subdomains
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isLocalhostOrigin = origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))
-  const isWikipeopleOrigin = origin && origin.includes('wikipeoplestats.org')
+// Rutas que solo pueden acceder usuarios no autenticados
+const authRoutes = ["/login"]
 
-  if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
-    const response = NextResponse.next()
-    response.headers.set('Access-Control-Allow-Origin', origin)
-    response.headers.set('Access-Control-Allow-Credentials', 'true')
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const sessionId = request.cookies.get("session_id")?.value
 
-    return response
-  }
+  // Verificar si la ruta requiere autenticación
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
 
-  // Proteger rutas del dashboard
-  if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    const token = request.cookies.get('auth_token')
+  try {
+    let isAuthenticated = false
 
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url))
+    if (sessionId && SessionManager.isValidSessionId(sessionId)) {
+      // Verificar sesión
+      const sessionData = await SessionManager.getSession(sessionId)
+      isAuthenticated = !!sessionData
     }
-  }
 
-  return NextResponse.next()
+    // Redirigir usuarios no autenticados desde rutas protegidas
+    if (isProtectedRoute && !isAuthenticated) {
+      const loginUrl = new URL("/login", request.url)
+      loginUrl.searchParams.set("redirect", pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Redirigir usuarios autenticados desde rutas de auth
+    if (isAuthRoute && isAuthenticated) {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
+
+    // Limpiar cookie inválida
+    if (sessionId && !isAuthenticated) {
+      const response = NextResponse.next()
+      response.cookies.delete("session_id")
+      return response
+    }
+
+    return NextResponse.next()
+  } catch (error) {
+    console.error("❌ Middleware error:", error)
+
+    // En caso de error, limpiar cookie y continuar
+    if (sessionId) {
+      const response = NextResponse.next()
+      response.cookies.delete("session_id")
+      return response
+    }
+
+    return NextResponse.next()
+  }
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/api/:path*']
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 }

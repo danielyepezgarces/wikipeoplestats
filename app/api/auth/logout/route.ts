@@ -1,40 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from "next/server"
+import { SessionManager } from "@/lib/session-manager"
 
 export async function POST(request: NextRequest) {
-  console.log('🔍 Procesando logout...')
-  
   try {
-    const domain = process.env.NEXT_PUBLIC_DOMAIN || '.wikipeoplestats.org'
-    
-    const response = NextResponse.json({ message: 'Sesión cerrada exitosamente' })
-    
-    // Limpiar cookies
-    response.cookies.set('auth_token', '', {
-      domain: domain,
-      path: '/',
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 0
+    const sessionId = request.cookies.get("session_id")?.value
+
+    if (sessionId) {
+      // Destruir la sesión en la base de datos
+      await SessionManager.destroySession(sessionId)
+    }
+
+    // Crear respuesta y limpiar cookie
+    const response = NextResponse.json({
+      message: "Logged out successfully",
+      success: true,
     })
-    
-    response.cookies.set('user_info', '', {
-      domain: domain,
-      path: '/',
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 0
-    })
-    
-    console.log('✅ Cookies limpiadas')
-    
+
+    response.cookies.delete("session_id")
+
     return response
-    
   } catch (error) {
-    console.error('❌ Error cerrando sesión:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    console.error("❌ Logout error:", error)
+
+    // Incluso si hay error, limpiar la cookie
+    const response = NextResponse.json({
+      message: "Logged out (with errors)",
+      success: true,
+    })
+
+    response.cookies.delete("session_id")
+    return response
   }
+}
+
+export async function GET(request: NextRequest) {
+  // Permitir logout via GET también (para enlaces directos)
+  return POST(request)
 }

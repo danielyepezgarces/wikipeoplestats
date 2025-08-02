@@ -31,13 +31,14 @@ export interface UserRole {
   user_id: number
   role: string
   chapter_id?: number
+  chapter_name?: string
   created_at: string
 }
 
 export interface Session {
   id: number
   user_id: number
-  token_hash: string
+  token_hash: string // Ahora contiene session_id en lugar de JWT hash
   expires_at: string
   origin_domain: string
   user_agent?: string
@@ -78,11 +79,12 @@ export class Database {
         MODIFY COLUMN wikimedia_id VARCHAR(255) NULL
       `)
 
-      // Actualizar tabla de sesiones
+      // Actualizar tabla de sesiones existente para el nuevo sistema
       await conn.execute(`
         ALTER TABLE sessions 
         ADD COLUMN IF NOT EXISTS device_info TEXT NULL,
         ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
+        MODIFY COLUMN token_hash VARCHAR(64) NOT NULL COMMENT 'Now stores session_id instead of JWT hash',
         ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
         ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active),
         ADD INDEX IF NOT EXISTS idx_token_hash (token_hash),
@@ -90,7 +92,7 @@ export class Database {
         ADD INDEX IF NOT EXISTS idx_active_expires (is_active, expires_at)
       `)
 
-      // Crear tabla de blacklist de tokens
+      // Crear tabla de blacklist de tokens (mantener para compatibilidad con JWTs legacy)
       await conn.execute(`
         CREATE TABLE IF NOT EXISTS token_blacklist (
           id INT AUTO_INCREMENT PRIMARY KEY,
@@ -110,6 +112,7 @@ export class Database {
     }
   }
 
+  // ===== MÉTODOS DE USUARIOS =====
   static async getUserByWikipediaId(wikimediaId: string): Promise<User | null> {
     const conn = await this.getConnection()
     try {
@@ -200,6 +203,27 @@ export class Database {
     }
   }
 
+  static async getUserRole(userId: number): Promise<UserRole | null> {
+    const conn = await this.getConnection()
+    try {
+      const [rows] = await conn.execute(
+        `
+        SELECT ur.*, c.name as chapter_name
+        FROM user_roles ur
+        LEFT JOIN chapters c ON ur.chapter_id = c.id
+        WHERE ur.user_id = ?
+        ORDER BY ur.created_at DESC
+        LIMIT 1
+      `,
+        [userId],
+      )
+      const roles = rows as UserRole[]
+      return roles[0] || null
+    } finally {
+      conn.release()
+    }
+  }
+
   static async assignDefaultRole(userId: number, roleId = 1): Promise<void> {
     const conn = await this.getConnection()
     try {
@@ -213,9 +237,10 @@ export class Database {
     }
   }
 
+  // ===== MÉTODOS DE SESIONES (Modificados para usar session_id) =====
   static async createSession(data: {
     user_id: number
-    token_hash: string
+    token_hash: string // Ahora es session_id
     expires_at: string
     origin_domain: string
     user_agent?: string
@@ -255,12 +280,12 @@ export class Database {
     }
   }
 
-  static async getSessionByTokenHash(tokenHash: string): Promise<Session | null> {
+  static async getSessionByTokenHash(sessionId: string): Promise<Session | null> {
     const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute(
         "SELECT * FROM sessions WHERE token_hash = ? AND is_active = TRUE AND expires_at > NOW()",
-        [tokenHash],
+        [sessionId],
       )
       const sessions = rows as Session[]
       return sessions[0] || null
@@ -357,7 +382,7 @@ export class Database {
   static async deleteExpiredSessions(): Promise<void> {
     const conn = await this.getConnection()
     try {
-      await conn.execute("DELETE FROM sessions WHERE expires_at < NOW()")
+      await conn.execute("DELETE FROM sessions WHERE expires_at < NOW() OR is_active = FALSE")
     } finally {
       conn.release()
     }
@@ -401,12 +426,11 @@ export class Database {
     }
   }
 
-  // Token Blacklist Methods
+  // ===== MÉTODOS DE TOKEN BLACKLIST (mantener para JWTs legacy) =====
   static async blacklistToken(tokenHash: string, userId: number, reason = "manual_revocation"): Promise<void> {
     const conn = await this.getConnection()
     try {
-      // Calcular la fecha de expiración basada en el token original
-      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días por defecto
+      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
       await conn.execute(
         `INSERT INTO token_blacklist (token_hash, user_id, expires_at, reason)
@@ -421,7 +445,6 @@ export class Database {
   static async isTokenBlacklisted(token: string): Promise<boolean> {
     const conn = await this.getConnection()
     try {
-      // Hash the token to compare with stored hashes
       const crypto = require("crypto")
       const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
 

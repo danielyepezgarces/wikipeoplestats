@@ -1,114 +1,104 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { Database } from "@/lib/database"
-import { JWTManager } from "@/lib/jwt"
+import { SessionManager } from "@/lib/session-manager"
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth_token")?.value
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const sessionId = request.cookies.get("session_id")?.value
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "No active session" }, { status: 401 })
     }
 
-    const decoded = JWTManager.verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 })
+    // Verificar sesión actual
+    const currentSession = await SessionManager.getSession(sessionId)
+    if (!currentSession) {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 })
     }
 
-    // Verificar si el token está en la blacklist
-    const isBlacklisted = await Database.isTokenBlacklisted(token)
-    if (isBlacklisted) {
-      return NextResponse.json({ error: "Token revoked" }, { status: 401 })
-    }
+    // Obtener todas las sesiones del usuario
+    const sessions = await SessionManager.getUserSessions(currentSession.userId)
 
-    const userId = Number.parseInt(decoded.userId)
-    const sessions = await Database.getUserActiveSessions(userId)
-
-    // Obtener el hash del token actual para identificar la sesión actual
-    const currentTokenHash = JWTManager.hashToken(token)
-
+    // Marcar la sesión actual
     const sessionsWithCurrent = sessions.map((session) => ({
       ...session,
-      is_current: session.token_hash === currentTokenHash,
+      isCurrent: session.id === sessionId,
     }))
 
-    return NextResponse.json({ sessions: sessionsWithCurrent })
+    return NextResponse.json({
+      sessions: sessionsWithCurrent,
+      currentSessionId: sessionId,
+    })
   } catch (error) {
-    console.error("Error fetching sessions:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Error fetching sessions:", error)
+    return NextResponse.json({ error: "Failed to fetch sessions" }, { status: 500 })
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth_token")?.value
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const decoded = JWTManager.verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 })
-    }
-
-    // Verificar si el token está en la blacklist
-    const isBlacklisted = await Database.isTokenBlacklisted(token)
-    if (isBlacklisted) {
-      return NextResponse.json({ error: "Token revoked" }, { status: 401 })
-    }
-
-    const userId = Number.parseInt(decoded.userId)
+    const currentSessionId = request.cookies.get("session_id")?.value
     const { searchParams } = new URL(request.url)
-    const sessionId = searchParams.get("session_id")
-    const action = searchParams.get("action")
+    const targetSessionId = searchParams.get("sessionId")
+    const action = searchParams.get("action") // 'single' | 'all_others' | 'all'
 
-    if (action === "revoke_all_others") {
-      // Obtener el hash del token actual
-      const currentTokenHash = JWTManager.hashToken(token)
-
-      // Obtener la sesión actual
-      const currentSession = await Database.getSessionByTokenHash(currentTokenHash)
-      const currentSessionId = currentSession?.id
-
-      // Obtener todas las otras sesiones activas
-      const otherSessions = await Database.getUserActiveSessionsExcept(userId, currentSessionId)
-
-      // Agregar todos los tokens de las otras sesiones a la blacklist
-      for (const session of otherSessions) {
-        await Database.blacklistToken(session.token_hash, userId, "revoke_all_others")
-      }
-
-      // Revocar todas las otras sesiones en la base de datos
-      const revokedCount = await Database.revokeAllUserSessions(userId, currentSessionId)
-
-      return NextResponse.json({
-        message: `${revokedCount} sessions revoked`,
-        revoked_count: revokedCount,
-      })
+    if (!currentSessionId) {
+      return NextResponse.json({ error: "No active session" }, { status: 401 })
     }
 
-    if (!sessionId) {
-      return NextResponse.json({ error: "Session ID required" }, { status: 400 })
+    // Verificar sesión actual
+    const currentSession = await SessionManager.getSession(currentSessionId)
+    if (!currentSession) {
+      return NextResponse.json({ error: "Invalid current session" }, { status: 401 })
     }
 
-    // Obtener la sesión a revocar
-    const sessionToRevoke = await Database.getSessionById(Number.parseInt(sessionId))
-    if (!sessionToRevoke || sessionToRevoke.user_id !== userId) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 })
+    let revokedCount = 0
+
+    switch (action) {
+      case "single":
+        if (!targetSessionId) {
+          return NextResponse.json({ error: "Session ID required for single revocation" }, { status: 400 })
+        }
+
+        const success = await SessionManager.destroySession(targetSessionId)
+        revokedCount = success ? 1 : 0
+
+        // Si se revocó la sesión actual, limpiar cookie
+        if (targetSessionId === currentSessionId && success) {
+          const response = NextResponse.json({
+            message: "Current session revoked",
+            revokedCount,
+            currentSessionRevoked: true,
+          })
+          response.cookies.delete("session_id")
+          return response
+        }
+        break
+
+      case "all_others":
+        revokedCount = await SessionManager.destroyAllUserSessions(currentSession.userId, currentSessionId)
+        break
+
+      case "all":
+        revokedCount = await SessionManager.destroyAllUserSessions(currentSession.userId)
+        const response = NextResponse.json({
+          message: "All sessions revoked",
+          revokedCount,
+          currentSessionRevoked: true,
+        })
+        response.cookies.delete("session_id")
+        return response
+
+      default:
+        return NextResponse.json({ error: "Invalid action" }, { status: 400 })
     }
 
-    // Agregar el token a la blacklist
-    await Database.blacklistToken(sessionToRevoke.token_hash, userId, "manual_revocation")
-
-    // Revocar la sesión
-    const success = await Database.revokeSession(Number.parseInt(sessionId), userId)
-
-    if (!success) {
-      return NextResponse.json({ error: "Failed to revoke session" }, { status: 500 })
-    }
-
-    return NextResponse.json({ message: "Session revoked successfully" })
+    return NextResponse.json({
+      message: `Successfully revoked ${revokedCount} session(s)`,
+      revokedCount,
+      currentSessionRevoked: false,
+    })
   } catch (error) {
-    console.error("Error revoking session:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("❌ Error revoking sessions:", error)
+    return NextResponse.json({ error: "Failed to revoke sessions" }, { status: 500 })
   }
 }

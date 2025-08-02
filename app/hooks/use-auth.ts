@@ -1,102 +1,99 @@
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+"use client"
+
+import { useState, useEffect, useCallback } from "react"
 
 interface User {
-  id: string
-  name: string
+  id: number
+  username: string
   email?: string
-  role: string
+  role?: string
   chapter?: string
-  wikipediaUsername: string
-  avatarUrl?: string
-  lastLogin?: string
+}
+
+interface AuthState {
+  user: User | null
+  loading: boolean
+  authenticated: boolean
 }
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
-  
-  useEffect(() => {
-    verifyAuth()
-  }, [])
-  
-  const verifyAuth = async () => {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    loading: true,
+    authenticated: false,
+  })
+
+  const checkAuth = useCallback(async () => {
     try {
-      setIsLoading(true)
-      
-      // Intentar verificar con el dominio de auth
-      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-      
-      const response = await fetch(`${authDomain}/api/auth/verify`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      const response = await fetch("/api/auth/verify", {
+        method: "GET",
+        credentials: "include",
       })
-      
+
       if (response.ok) {
         const data = await response.json()
-        setUser(data.user)
+        if (data.authenticated) {
+          setAuthState({
+            user: data.user,
+            loading: false,
+            authenticated: true,
+          })
+        } else {
+          setAuthState({
+            user: null,
+            loading: false,
+            authenticated: false,
+          })
+        }
       } else {
-        setUser(null)
+        setAuthState({
+          user: null,
+          loading: false,
+          authenticated: false,
+        })
       }
     } catch (error) {
-      console.error('Error verificando autenticación:', error)
-      setUser(null)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  
-  const login = (redirectUrl?: string) => {
-    const currentDomain = window.location.hostname
-    const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-    
-    if (redirectUrl) {
-      window.location.href = redirectUrl
-    } else {
-      window.location.href = `${authDomain}/api/auth/login?origin=${encodeURIComponent(currentDomain)}`
-    }
-  }
-  
-  const logout = async () => {
-    try {
-      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-      
-      await fetch(`${authDomain}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include'
+      console.error("❌ Auth check failed:", error)
+      setAuthState({
+        user: null,
+        loading: false,
+        authenticated: false,
       })
-      
-      setUser(null)
-      router.push('/')
+    }
+  }, [])
+
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      })
     } catch (error) {
-      console.error('Error cerrando sesión:', error)
+      console.error("❌ Logout failed:", error)
+    } finally {
+      setAuthState({
+        user: null,
+        loading: false,
+        authenticated: false,
+      })
+      // Redirigir al login
+      window.location.href = "/login"
     }
-  }
-  
-  const hasPermission = (permission: string) => {
-    if (!user) return false
-    
-    const permissions = {
-      super_admin: ['all'],
-      chapter_admin: ['manage_chapter', 'manage_users', 'moderate'],
-      chapter_moderator: ['moderate', 'view_reports'],
-      chapter_partner: ['view_stats']
-    }
-    
-    const userPermissions = permissions[user.role as keyof typeof permissions] || []
-    return userPermissions.includes(permission) || userPermissions.includes('all')
-  }
-  
+  }, [])
+
+  const refreshAuth = useCallback(() => {
+    setAuthState((prev) => ({ ...prev, loading: true }))
+    checkAuth()
+  }, [checkAuth])
+
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
+
   return {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    login,
+    ...authState,
     logout,
-    hasPermission,
-    refetch: verifyAuth
+    refreshAuth,
+    checkAuth,
   }
 }
