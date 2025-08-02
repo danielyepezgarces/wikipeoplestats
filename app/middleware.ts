@@ -1,41 +1,62 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { SessionManager } from "@/lib/session-manager"
 
 // Rutas que requieren autenticación
-const protectedRoutes = ["/dashboard", "/admin", "/profile", "/settings"]
+const protectedRoutes = ["/dashboard", "/admin", "/api/admin"]
 
-// Rutas que solo pueden acceder usuarios no autenticados
-const authRoutes = ["/login", "/register"]
+// Rutas públicas que no requieren autenticación
+const publicRoutes = ["/", "/login", "/chapters", "/users", "/compare", "/genders", "/search"]
+
+// Rutas de API que no requieren autenticación
+const publicApiRoutes = ["/api/auth/login", "/api/auth/callback", "/api/chapters", "/api/stats", "/api/graph"]
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const sessionId = request.cookies.get("session_id")?.value
+
+  // Permitir archivos estáticos y API públicas
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/static") ||
+    pathname.includes(".") ||
+    publicApiRoutes.some((route) => pathname.startsWith(route))
+  ) {
+    return NextResponse.next()
+  }
 
   // Verificar si la ruta requiere autenticación
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
+  const isPublicRoute = publicRoutes.some((route) => pathname === route || pathname.startsWith(route))
 
-  // Si es una ruta protegida, verificar autenticación
+  if (!isProtectedRoute && !isPublicRoute) {
+    // Ruta no definida, permitir por defecto
+    return NextResponse.next()
+  }
+
+  // Obtener session ID de las cookies
+  const sessionId = request.cookies.get("session_id")?.value
+
   if (isProtectedRoute) {
     if (!sessionId) {
+      // Redirigir a login si no hay sesión
       return NextResponse.redirect(new URL("/login", request.url))
     }
 
-    // Verificar que la sesión sea válida
-    const session = await SessionManager.getSession(sessionId)
-    if (!session) {
+    // Verificar que la sesión sea válida (verificación rápida)
+    if (!SessionManager.isValidSessionId(sessionId)) {
+      // Session ID inválido, limpiar cookie y redirigir
       const response = NextResponse.redirect(new URL("/login", request.url))
       response.cookies.delete("session_id")
       response.cookies.delete("user_info")
       return response
     }
+
+    // Para rutas protegidas, la verificación completa se hace en el servidor
+    // El middleware solo hace verificaciones básicas por rendimiento
   }
 
-  // Si es una ruta de auth y el usuario ya está autenticado, redirigir al dashboard
-  if (isAuthRoute && sessionId) {
-    const session = await SessionManager.getSession(sessionId)
-    if (session) {
+  if (isPublicRoute && sessionId && SessionManager.isValidSessionId(sessionId)) {
+    // Usuario autenticado accediendo a ruta pública como /login
+    if (pathname === "/login") {
       return NextResponse.redirect(new URL("/dashboard", request.url))
     }
   }

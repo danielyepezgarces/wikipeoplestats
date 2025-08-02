@@ -1,22 +1,24 @@
 import type { Metadata } from "next"
-import { SessionManager } from "@/components/dashboard/session-manager"
+import SessionManager from "@/components/dashboard/session-manager"
 
 export const metadata: Metadata = {
-  title: "Gestión de Sesiones - WikiPeopleStats",
-  description: "Gestiona tus sesiones activas y mantén tu cuenta segura",
+  title: "Session Management - WikiPeopleStats",
+  description: "Manage your active sessions and security settings",
 }
 
 export default function SessionsPage() {
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Gestión de Sesiones</h1>
-        <p className="text-muted-foreground">
-          Controla y gestiona todas las sesiones activas de tu cuenta para mantener tu seguridad.
-        </p>
-      </div>
+    <div className="container mx-auto py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">Session Management</h1>
+          <p className="text-muted-foreground mt-2">
+            Monitor and manage your active sessions across different devices and browsers.
+          </p>
+        </div>
 
-      <SessionManager />
+        <SessionManager />
+      </div>
     </div>
   )
 }

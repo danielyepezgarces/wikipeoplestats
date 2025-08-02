@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { SessionManager } from "@/lib/session-manager"
-import { Database } from "@/lib/database"
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,28 +15,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ authenticated: false }, { status: 401 })
     }
 
-    const user = await Database.getUserById(session.userId)
-
-    if (!user) {
-      return NextResponse.json({ authenticated: false }, { status: 401 })
-    }
-
     return NextResponse.json({
       authenticated: true,
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        is_claimed: user.is_claimed,
+        id: session.userId,
+        username: session.username,
+        email: session.email,
+        roles: session.roles,
       },
       session: {
         id: session.id,
+        createdAt: session.createdAt,
         expiresAt: session.expiresAt,
-        lastUsed: session.lastUsed,
+        lastActivity: session.lastActivity,
+        deviceInfo: session.deviceInfo,
+        origin: session.origin,
       },
     })
   } catch (error) {
-    console.error("Error verifying session:", error)
-    return NextResponse.json({ authenticated: false }, { status: 500 })
+    console.error("❌ Error verifying session:", error)
+    return NextResponse.json({ authenticated: false, error: "Internal server error" }, { status: 500 })
   }
 }

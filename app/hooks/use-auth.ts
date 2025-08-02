@@ -1,67 +1,64 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 interface User {
   id: number
   username: string
   email?: string
-  is_claimed: boolean
+  roles?: string[]
 }
 
-interface AuthState {
-  user: User | null
-  isLoading: boolean
-  isAuthenticated: boolean
+interface Session {
+  id: string
+  createdAt: string
+  expiresAt: string
+  lastActivity: string
+  deviceInfo?: string
+  origin?: string
 }
 
 export function useAuth() {
-  const [authState, setAuthState] = useState<AuthState>({
-    user: null,
-    isLoading: true,
-    isAuthenticated: false,
-  })
+  const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
-    checkAuth()
+    verifyAuth()
   }, [])
 
-  const checkAuth = async () => {
+  const verifyAuth = async () => {
     try {
+      setIsLoading(true)
+
       const response = await fetch("/api/auth/verify", {
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
 
       if (response.ok) {
         const data = await response.json()
-        if (data.authenticated) {
-          setAuthState({
-            user: data.user,
-            isLoading: false,
-            isAuthenticated: true,
-          })
-        } else {
-          setAuthState({
-            user: null,
-            isLoading: false,
-            isAuthenticated: false,
-          })
-        }
+        setUser(data.user)
+        setSession(data.session)
       } else {
-        setAuthState({
-          user: null,
-          isLoading: false,
-          isAuthenticated: false,
-        })
+        setUser(null)
+        setSession(null)
       }
     } catch (error) {
-      console.error("Auth check failed:", error)
-      setAuthState({
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      })
+      console.error("Error verificando autenticación:", error)
+      setUser(null)
+      setSession(null)
+    } finally {
+      setIsLoading(false)
     }
+  }
+
+  const login = () => {
+    window.location.href = "/api/auth/login"
   }
 
   const logout = async () => {
@@ -71,26 +68,49 @@ export function useAuth() {
         credentials: "include",
       })
 
-      setAuthState({
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      })
-
-      // Redirigir al login
-      window.location.href = "/login"
+      setUser(null)
+      setSession(null)
+      router.push("/")
     } catch (error) {
-      console.error("Logout failed:", error)
+      console.error("Error cerrando sesión:", error)
     }
   }
 
-  const refreshAuth = () => {
-    checkAuth()
+  const hasRole = (role: string) => {
+    if (!user || !user.roles) return false
+    return user.roles.includes(role)
+  }
+
+  const hasPermission = (permission: string) => {
+    if (!user) return false
+
+    const permissions = {
+      super_admin: ["all"],
+      chapter_admin: ["manage_chapter", "manage_users", "moderate"],
+      chapter_moderator: ["moderate", "view_reports"],
+      chapter_partner: ["view_stats"],
+    }
+
+    const userRoles = user.roles || []
+    for (const role of userRoles) {
+      const rolePermissions = permissions[role as keyof typeof permissions] || []
+      if (rolePermissions.includes(permission) || rolePermissions.includes("all")) {
+        return true
+      }
+    }
+
+    return false
   }
 
   return {
-    ...authState,
+    user,
+    session,
+    isLoading,
+    isAuthenticated: !!user,
+    login,
     logout,
-    refreshAuth,
+    hasRole,
+    hasPermission,
+    refetch: verifyAuth,
   }
 }

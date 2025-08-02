@@ -9,65 +9,92 @@ export interface SessionData {
   roles?: string[]
   createdAt: Date
   expiresAt: Date
-  lastUsed: Date
-  origin: string
-  userAgent?: string
+  lastActivity: Date
   ipAddress?: string
+  userAgent?: string
   deviceInfo?: string
-  isActive: boolean
+  origin?: string
 }
 
-export interface CreateSessionOptions {
-  origin: string
+export interface SessionMetadata {
+  origin?: string
   userAgent?: string
   ipAddress?: string
   deviceInfo?: string
-  expiresInDays?: number
 }
 
 export class SessionManager {
-  private static readonly SESSION_DURATION_DAYS = 30
-  private static readonly CLEANUP_INTERVAL_MS = 60 * 60 * 1000 // 1 hora
+  private static readonly SESSION_DURATION = 30 * 24 * 60 * 60 * 1000 // 30 días
+  private static readonly CLEANUP_INTERVAL = 60 * 60 * 1000 // 1 hora
+  private static cleanupTimer: NodeJS.Timeout | null = null
 
   /**
-   * Genera un session ID único y seguro
+   * Genera un session ID compacto y seguro (22 caracteres)
    */
   private static generateSessionId(): string {
-    return crypto.randomBytes(32).toString("hex")
+    // 16 bytes = 128 bits de entropía, convertido a base64url = 22 caracteres
+    const bytes = crypto.randomBytes(16)
+    return bytes.toString("base64url")
   }
 
   /**
-   * Crea una nueva sesión del servidor
+   * Valida el formato de un session ID
    */
-  static async createSession(user: any, options: CreateSessionOptions): Promise<string> {
-    const sessionId = this.generateSessionId()
-    const expiresInDays = options.expiresInDays || this.SESSION_DURATION_DAYS
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + expiresInDays)
-
-    await Database.createSession({
-      user_id: user.id,
-      token_hash: sessionId, // Reutilizamos el campo token_hash para el session ID
-      expires_at: expiresAt.toISOString().slice(0, 19).replace("T", " "),
-      origin_domain: options.origin,
-      user_agent: options.userAgent,
-      ip_address: options.ipAddress,
-      device_info: options.deviceInfo || this.parseDeviceInfo(options.userAgent || ""),
-    })
-
-    return sessionId
+  static isValidSessionId(sessionId: string): boolean {
+    // Debe ser exactamente 22 caracteres base64url
+    return /^[A-Za-z0-9_-]{22}$/.test(sessionId)
   }
 
   /**
-   * Verifica y obtiene una sesión por su ID
+   * Crea una nueva sesión para un usuario
+   */
+  static async createSession(user: any, metadata: SessionMetadata = {}): Promise<string> {
+    const sessionId = this.generateSessionId()
+    const now = new Date()
+    const expiresAt = new Date(now.getTime() + this.SESSION_DURATION)
+
+    try {
+      await Database.query(
+        `INSERT INTO sessions (
+          id, user_id, token_hash, expires_at, created_at, last_activity,
+          ip_address, user_agent, device_info, origin
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          sessionId,
+          user.id,
+          sessionId, // Usar el session ID directamente como token_hash
+          expiresAt,
+          now,
+          now,
+          metadata.ipAddress,
+          metadata.userAgent,
+          metadata.deviceInfo,
+          metadata.origin,
+        ],
+      )
+
+      console.log(`✅ Session created: ${sessionId} for user ${user.username}`)
+      return sessionId
+    } catch (error) {
+      console.error("❌ Error creating session:", error)
+      throw new Error("Failed to create session")
+    }
+  }
+
+  /**
+   * Obtiene los datos de una sesión
    */
   static async getSession(sessionId: string): Promise<SessionData | null> {
+    if (!this.isValidSessionId(sessionId)) {
+      return null
+    }
+
     try {
       const sessions = await Database.query(
         `SELECT s.*, u.username, u.email 
          FROM sessions s 
          JOIN users u ON s.user_id = u.id 
-         WHERE s.token_hash = ? AND s.is_active = 1 AND s.expires_at > NOW()`,
+         WHERE s.id = ? AND s.expires_at > NOW()`,
         [sessionId],
       )
 
@@ -77,74 +104,71 @@ export class SessionManager {
 
       const session = sessions[0]
 
-      // Actualizar último uso
-      await this.updateLastUsed(sessionId)
+      // Actualizar última actividad
+      await this.updateLastActivity(sessionId)
 
       return {
-        id: session.token_hash,
+        id: session.id,
         userId: session.user_id,
         username: session.username,
         email: session.email,
         createdAt: new Date(session.created_at),
         expiresAt: new Date(session.expires_at),
-        lastUsed: new Date(session.last_used),
-        origin: session.origin_domain,
-        userAgent: session.user_agent,
+        lastActivity: new Date(session.last_activity),
         ipAddress: session.ip_address,
+        userAgent: session.user_agent,
         deviceInfo: session.device_info,
-        isActive: session.is_active === 1,
+        origin: session.origin,
       }
     } catch (error) {
-      console.error("Error getting session:", error)
+      console.error("❌ Error getting session:", error)
       return null
     }
   }
 
   /**
-   * Actualiza el último uso de una sesión
+   * Actualiza la última actividad de una sesión
    */
-  static async updateLastUsed(sessionId: string): Promise<void> {
+  static async updateLastActivity(sessionId: string): Promise<void> {
     try {
-      await Database.query("UPDATE sessions SET last_used = NOW() WHERE token_hash = ?", [sessionId])
+      await Database.query("UPDATE sessions SET last_activity = NOW() WHERE id = ?", [sessionId])
     } catch (error) {
-      console.error("Error updating last used:", error)
+      console.error("❌ Error updating last activity:", error)
     }
   }
 
   /**
-   * Invalida una sesión específica
+   * Revoca una sesión específica
    */
-  static async revokeSession(sessionId: string, userId?: number): Promise<boolean> {
+  static async revokeSession(sessionId: string): Promise<boolean> {
     try {
-      const query = userId
-        ? "UPDATE sessions SET is_active = 0 WHERE token_hash = ? AND user_id = ?"
-        : "UPDATE sessions SET is_active = 0 WHERE token_hash = ?"
-
-      const params = userId ? [sessionId, userId] : [sessionId]
-      const result = await Database.query(query, params)
-
+      const result = await Database.query("DELETE FROM sessions WHERE id = ?", [sessionId])
+      console.log(`🗑️ Session revoked: ${sessionId}`)
       return result.affectedRows > 0
     } catch (error) {
-      console.error("Error revoking session:", error)
+      console.error("❌ Error revoking session:", error)
       return false
     }
   }
 
   /**
-   * Invalida todas las sesiones de un usuario excepto la actual
+   * Revoca todas las sesiones de un usuario excepto la actual
    */
   static async revokeAllUserSessions(userId: number, exceptSessionId?: string): Promise<number> {
     try {
-      const query = exceptSessionId
-        ? "UPDATE sessions SET is_active = 0 WHERE user_id = ? AND token_hash != ?"
-        : "UPDATE sessions SET is_active = 0 WHERE user_id = ?"
+      let query = "DELETE FROM sessions WHERE user_id = ?"
+      const params: any[] = [userId]
 
-      const params = exceptSessionId ? [userId, exceptSessionId] : [userId]
+      if (exceptSessionId) {
+        query += " AND id != ?"
+        params.push(exceptSessionId)
+      }
+
       const result = await Database.query(query, params)
-
+      console.log(`🗑️ Revoked ${result.affectedRows} sessions for user ${userId}`)
       return result.affectedRows
     } catch (error) {
-      console.error("Error revoking user sessions:", error)
+      console.error("❌ Error revoking user sessions:", error)
       return 0
     }
   }
@@ -158,27 +182,26 @@ export class SessionManager {
         `SELECT s.*, u.username, u.email 
          FROM sessions s 
          JOIN users u ON s.user_id = u.id 
-         WHERE s.user_id = ? AND s.is_active = 1 AND s.expires_at > NOW()
-         ORDER BY s.last_used DESC`,
+         WHERE s.user_id = ? AND s.expires_at > NOW() 
+         ORDER BY s.last_activity DESC`,
         [userId],
       )
 
       return sessions.map((session: any) => ({
-        id: session.token_hash,
+        id: session.id,
         userId: session.user_id,
         username: session.username,
         email: session.email,
         createdAt: new Date(session.created_at),
         expiresAt: new Date(session.expires_at),
-        lastUsed: new Date(session.last_used),
-        origin: session.origin_domain,
-        userAgent: session.user_agent,
+        lastActivity: new Date(session.last_activity),
         ipAddress: session.ip_address,
+        userAgent: session.user_agent,
         deviceInfo: session.device_info,
-        isActive: session.is_active === 1,
+        origin: session.origin,
       }))
     } catch (error) {
-      console.error("Error getting user sessions:", error)
+      console.error("❌ Error getting user sessions:", error)
       return []
     }
   }
@@ -188,123 +211,80 @@ export class SessionManager {
    */
   static async cleanupExpiredSessions(): Promise<number> {
     try {
-      const result = await Database.query("DELETE FROM sessions WHERE expires_at < NOW() OR is_active = 0")
-
-      console.log(`🧹 Cleaned up ${result.affectedRows} expired sessions`)
-      return result.affectedRows
+      const result = await Database.query("DELETE FROM sessions WHERE expires_at <= NOW()")
+      const deletedCount = result.affectedRows
+      if (deletedCount > 0) {
+        console.log(`🧹 Cleaned up ${deletedCount} expired sessions`)
+      }
+      return deletedCount
     } catch (error) {
-      console.error("Error cleaning up sessions:", error)
+      console.error("❌ Error cleaning up sessions:", error)
       return 0
     }
   }
 
   /**
-   * Inicia el proceso de limpieza automática
+   * Inicia el proceso automático de limpieza de sesiones
    */
   static startCleanupProcess(): void {
-    // Limpieza inicial
-    this.cleanupExpiredSessions()
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer)
+    }
 
-    // Programar limpiezas periódicas
-    setInterval(() => {
-      this.cleanupExpiredSessions()
-    }, this.CLEANUP_INTERVAL_MS)
+    this.cleanupTimer = setInterval(async () => {
+      await this.cleanupExpiredSessions()
+    }, this.CLEANUP_INTERVAL)
 
     console.log("🔄 Session cleanup process started")
   }
 
   /**
-   * Extiende la expiración de una sesión
+   * Detiene el proceso de limpieza
    */
-  static async extendSession(sessionId: string, days = 30): Promise<boolean> {
-    try {
-      const newExpiresAt = new Date()
-      newExpiresAt.setDate(newExpiresAt.getDate() + days)
-
-      const result = await Database.query("UPDATE sessions SET expires_at = ? WHERE token_hash = ? AND is_active = 1", [
-        newExpiresAt.toISOString().slice(0, 19).replace("T", " "),
-        sessionId,
-      ])
-
-      return result.affectedRows > 0
-    } catch (error) {
-      console.error("Error extending session:", error)
-      return false
+  static stopCleanupProcess(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer)
+      this.cleanupTimer = null
+      console.log("⏹️ Session cleanup process stopped")
     }
   }
 
   /**
-   * Parsea información del dispositivo desde el User-Agent
+   * Obtiene estadísticas de sesiones
    */
-  private static parseDeviceInfo(userAgent: string): string {
-    const ua = userAgent.toLowerCase()
-    let device = "Desktop"
-    let browser = "Unknown"
-    let os = "Unknown"
-
-    // Detectar dispositivo
-    if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
-      device = "Mobile"
-    } else if (ua.includes("tablet") || ua.includes("ipad")) {
-      device = "Tablet"
-    }
-
-    // Detectar navegador
-    if (ua.includes("chrome")) browser = "Chrome"
-    else if (ua.includes("firefox")) browser = "Firefox"
-    else if (ua.includes("safari") && !ua.includes("chrome")) browser = "Safari"
-    else if (ua.includes("edge")) browser = "Edge"
-    else if (ua.includes("opera")) browser = "Opera"
-
-    // Detectar OS
-    if (ua.includes("windows")) os = "Windows"
-    else if (ua.includes("mac")) os = "macOS"
-    else if (ua.includes("linux")) os = "Linux"
-    else if (ua.includes("android")) os = "Android"
-    else if (ua.includes("ios") || ua.includes("iphone") || ua.includes("ipad")) os = "iOS"
-
-    return `${device} - ${browser} on ${os}`
-  }
-
-  /**
-   * Obtiene estadísticas de sesiones de un usuario
-   */
-  static async getSessionStats(userId: number): Promise<{
-    totalSessions: number
-    activeSessions: number
-    expiredSessions: number
-    devicesUsed: string[]
+  static async getSessionStats(): Promise<{
+    total: number
+    active: number
+    expired: number
+    byDevice: Record<string, number>
   }> {
     try {
-      const [totalResult, activeResult, expiredResult, devicesResult] = await Promise.all([
-        Database.query("SELECT COUNT(*) as count FROM sessions WHERE user_id = ?", [userId]),
-        Database.query(
-          "SELECT COUNT(*) as count FROM sessions WHERE user_id = ? AND is_active = 1 AND expires_at > NOW()",
-          [userId],
-        ),
-        Database.query(
-          "SELECT COUNT(*) as count FROM sessions WHERE user_id = ? AND (is_active = 0 OR expires_at <= NOW())",
-          [userId],
-        ),
-        Database.query("SELECT DISTINCT device_info FROM sessions WHERE user_id = ? AND device_info IS NOT NULL", [
-          userId,
-        ]),
+      const [totalResult, activeResult, expiredResult, deviceResult] = await Promise.all([
+        Database.query("SELECT COUNT(*) as count FROM sessions"),
+        Database.query("SELECT COUNT(*) as count FROM sessions WHERE expires_at > NOW()"),
+        Database.query("SELECT COUNT(*) as count FROM sessions WHERE expires_at <= NOW()"),
+        Database.query(`
+          SELECT device_info, COUNT(*) as count 
+          FROM sessions 
+          WHERE expires_at > NOW() AND device_info IS NOT NULL 
+          GROUP BY device_info
+        `),
       ])
 
+      const byDevice: Record<string, number> = {}
+      deviceResult.forEach((row: any) => {
+        byDevice[row.device_info] = row.count
+      })
+
       return {
-        totalSessions: totalResult[0]?.count || 0,
-        activeSessions: activeResult[0]?.count || 0,
-        expiredSessions: expiredResult[0]?.count || 0,
-        devicesUsed: devicesResult.map((row: any) => row.device_info).filter(Boolean),
+        total: totalResult[0].count,
+        active: activeResult[0].count,
+        expired: expiredResult[0].count,
+        byDevice,
       }
     } catch (error) {
-      console.error("Error getting session stats:", error)
-      return {
-        totalSessions: 0,
-        activeSessions: 0,
-        expiredSessions: 0,
-        devicesUsed: [],
-      }
+      console.error("❌ Error getting session stats:", error)
+      return { total: 0, active: 0, expired: 0, byDevice: {} }
     }
   }
 }

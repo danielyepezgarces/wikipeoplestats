@@ -4,57 +4,69 @@ import { AuthService } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await AuthService.requireAuth(request)
-    if (!auth) {
+    const user = await AuthService.getAuthenticatedUser(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const sessions = await SessionManager.getUserSessions(auth.user.id)
-    const stats = await SessionManager.getSessionStats(auth.user.id)
+    const sessions = await SessionManager.getUserSessions(user.id)
 
     return NextResponse.json({
-      sessions,
-      stats,
-      current_session_id: auth.session.id,
+      sessions: sessions.map((session) => ({
+        id: session.id,
+        createdAt: session.createdAt,
+        lastActivity: session.lastActivity,
+        expiresAt: session.expiresAt,
+        deviceInfo: session.deviceInfo,
+        ipAddress: session.ipAddress,
+        origin: session.origin,
+        isCurrent: session.id === request.cookies.get("session_id")?.value,
+      })),
     })
   } catch (error) {
-    console.error("Error fetching sessions:", error)
+    console.error("❌ Error getting user sessions:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const auth = await AuthService.requireAuth(request)
-    if (!auth) {
+    const user = await AuthService.getAuthenticatedUser(request)
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
-    const sessionId = searchParams.get("session_id")
-    const action = searchParams.get("action") // 'revoke' or 'revoke_all_others'
+    const sessionId = searchParams.get("sessionId")
+    const all = searchParams.get("all") === "true"
 
-    if (action === "revoke_all_others") {
-      const revokedCount = await SessionManager.revokeAllUserSessions(auth.user.id, auth.session.id)
+    if (all) {
+      // Revocar todas las sesiones excepto la actual
+      const currentSessionId = request.cookies.get("session_id")?.value
+      const revokedCount = await SessionManager.revokeAllUserSessions(user.id, currentSessionId)
+
       return NextResponse.json({
         success: true,
         message: `Revoked ${revokedCount} sessions`,
+        revokedCount,
       })
     } else if (sessionId) {
-      const success = await SessionManager.revokeSession(sessionId, auth.user.id)
+      // Revocar sesión específica
+      const success = await SessionManager.revokeSession(sessionId)
+
       if (success) {
         return NextResponse.json({
           success: true,
           message: "Session revoked successfully",
         })
       } else {
-        return NextResponse.json({ error: "Session not found" }, { status: 404 })
+        return NextResponse.json({ error: "Failed to revoke session" }, { status: 400 })
       }
     } else {
-      return NextResponse.json({ error: "Invalid parameters" }, { status: 400 })
+      return NextResponse.json({ error: "Missing sessionId or all parameter" }, { status: 400 })
     }
   } catch (error) {
-    console.error("Error revoking session:", error)
+    console.error("❌ Error revoking sessions:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

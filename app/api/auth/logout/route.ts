@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
       await SessionManager.revokeSession(sessionId)
     }
 
-    const response = NextResponse.json({ success: true })
+    const response = NextResponse.json({ success: true, message: "Logged out successfully" })
 
     // Limpiar cookies
     response.cookies.delete("session_id")
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error) {
-    console.error("Error during logout:", error)
+    console.error("❌ Error during logout:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
