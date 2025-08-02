@@ -1,186 +1,93 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { Database } from "@/lib/database"
+import { OAuthService } from "@/lib/oauth"
 import { SessionManager } from "@/lib/session-manager"
-import { exchangeCodeForToken, getWikipediaUserInfo } from "@/lib/oauth"
-
-const DEFAULT_ORIGIN = "www.wikipeoplestats.org"
-const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".wikipeoplestats.org"
-
-function redirectToErrorPage(origin: string, errorType: string): NextResponse {
-  const errorMessages: Record<string, string> = {
-    missing_parameters: "Missing required parameters",
-    session_expired: "Session expired, please try again",
-    token_exchange_failed: "Failed to authenticate with Wikipedia",
-    user_info_failed: "Failed to get user info from Wikipedia",
-    session_creation_failed: "Failed to create session",
-    authentication_failed: "Authentication error",
-    account_claim_failed: "Failed to claim account",
-  }
-
-  const errorUrl = new URL(`https://${origin}/login`)
-  errorUrl.searchParams.set("error", errorType)
-  errorUrl.searchParams.set("message", errorMessages[errorType] || "An error occurred")
-
-  return NextResponse.redirect(errorUrl.toString())
-}
-
-function getDeviceInfo(userAgent: string): string {
-  const ua = userAgent.toLowerCase()
-  let device = "Desktop"
-  let browser = "Unknown"
-  let os = "Unknown"
-
-  // Detectar dispositivo
-  if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
-    device = "Mobile"
-  } else if (ua.includes("tablet") || ua.includes("ipad")) {
-    device = "Tablet"
-  }
-
-  // Detectar navegador
-  if (ua.includes("chrome")) browser = "Chrome"
-  else if (ua.includes("firefox")) browser = "Firefox"
-  else if (ua.includes("safari") && !ua.includes("chrome")) browser = "Safari"
-  else if (ua.includes("edge")) browser = "Edge"
-
-  // Detectar OS
-  if (ua.includes("windows")) os = "Windows"
-  else if (ua.includes("mac")) os = "macOS"
-  else if (ua.includes("linux")) os = "Linux"
-  else if (ua.includes("android")) os = "Android"
-  else if (ua.includes("ios")) os = "iOS"
-
-  return `${device} - ${browser} on ${os}`
-}
-
-function createAuthResponse(origin: string, sessionId: string, userData: any): NextResponse {
-  const maxAge = 30 * 24 * 60 * 60 // 30 días en segundos
-  const response = NextResponse.redirect(`https://${origin}/dashboard`)
-
-  // Usar session ID compacto
-  response.cookies.set("session_id", sessionId, {
-    domain: COOKIE_DOMAIN,
-    path: "/",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge,
-  })
-
-  // Información básica del usuario (no sensible)
-  response.cookies.set(
-    "user_info",
-    JSON.stringify({
-      id: userData.id,
-      username: userData.username,
-      is_claimed: userData.is_claimed,
-    }),
-    {
-      domain: COOKIE_DOMAIN,
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge,
-    },
-  )
-
-  return response
-}
+import { Database } from "@/lib/database"
 
 export async function GET(request: NextRequest) {
   try {
-    // Inicializar tablas si es necesario
-    await Database.initializeTables()
+    const { searchParams } = new URL(request.url)
+    const code = searchParams.get("code")
+    const state = searchParams.get("state")
 
-    const searchParams = request.nextUrl.searchParams
-    const oauth_token = searchParams.get("oauth_token")
-    const oauth_verifier = searchParams.get("oauth_verifier")
-    const origin = searchParams.get("origin") || DEFAULT_ORIGIN
-
-    if (!oauth_token || !oauth_verifier) {
-      return redirectToErrorPage(origin, "missing_parameters")
+    if (!code || !state) {
+      return NextResponse.redirect(new URL("/login?error=missing_params", request.url))
     }
 
-    const oauth_token_secret = request.cookies.get("oauth_token_secret")?.value
-    if (!oauth_token_secret) {
-      return redirectToErrorPage(origin, "session_expired")
+    // Verificar el estado CSRF
+    const storedState = request.cookies.get("oauth_state")?.value
+    if (state !== storedState) {
+      return NextResponse.redirect(new URL("/login?error=invalid_state", request.url))
     }
 
-    console.log("🔑 Getting access token...")
-    const accessToken = await exchangeCodeForToken(oauth_token, oauth_token_secret, oauth_verifier)
-    if (!accessToken) return redirectToErrorPage(origin, "token_exchange_failed")
+    // Intercambiar código por token de acceso
+    const tokenData = await OAuthService.exchangeCodeForToken(code)
+    if (!tokenData) {
+      return NextResponse.redirect(new URL("/login?error=token_exchange_failed", request.url))
+    }
 
-    console.log("👤 Getting user info...")
-    const userInfo = await getWikipediaUserInfo(accessToken.oauth_token, accessToken.oauth_token_secret)
-    if (!userInfo) return redirectToErrorPage(origin, "user_info_failed")
+    // Obtener información del usuario
+    const userInfo = await OAuthService.getUserInfo(tokenData.access_token)
+    if (!userInfo) {
+      return NextResponse.redirect(new URL("/login?error=user_info_failed", request.url))
+    }
 
-    console.log("🔍 Looking for existing user...")
+    // Buscar o crear usuario
     let user = await Database.getUserByWikipediaId(userInfo.sub)
 
     if (!user) {
-      // Buscar por nombre de usuario en caso de cuenta no reclamada
-      const unclaimedUser = await Database.getUserByUsername(userInfo.username)
+      // Buscar por nombre de usuario para cuentas no reclamadas
+      const existingUser = await Database.getUserByUsername(userInfo.username)
 
-      if (unclaimedUser && !unclaimedUser.is_claimed && !unclaimedUser.wikimedia_id) {
-        console.log("🔗 Claiming existing unclaimed account...")
-        user = await Database.claimUserAccount(unclaimedUser.id, userInfo.sub, userInfo.email)
-        if (!user) {
-          return redirectToErrorPage(origin, "account_claim_failed")
-        }
+      if (existingUser && !existingUser.is_claimed) {
+        // Reclamar cuenta existente
+        user = await Database.claimUserAccount(existingUser.id, userInfo.sub, userInfo.email)
       } else {
-        console.log("🆕 Creating new user...")
+        // Crear nueva cuenta
         user = await Database.createUser({
           wikimedia_id: userInfo.sub,
           username: userInfo.username,
           email: userInfo.email,
-          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`,
-          registration_date: userInfo.registration,
+          avatar_url: userInfo.avatar_url,
+          registration_date: userInfo.registration_date,
           is_claimed: true,
         })
-
-        if (user) {
-          await Database.assignDefaultRole(user.id)
-        }
-      }
-    } else if (!user.is_claimed) {
-      // Usuario existe pero no está reclamado, reclamarlo
-      console.log("🔗 Claiming existing account...")
-      user = await Database.claimUserAccount(user.id, userInfo.sub, userInfo.email)
-      if (!user) {
-        return redirectToErrorPage(origin, "account_claim_failed")
       }
     }
 
     if (!user) {
-      return redirectToErrorPage(origin, "authentication_failed")
+      return NextResponse.redirect(new URL("/login?error=user_creation_failed", request.url))
     }
 
-    console.log("🕓 Updating last login...")
+    // Actualizar último login
     await Database.updateUserLogin(user.id)
 
-    console.log("🔐 Creating compact server session...")
-    const userAgent = request.headers.get("user-agent") || ""
-    const deviceInfo = getDeviceInfo(userAgent)
-    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
+    // Asignar rol por defecto si es necesario
+    await Database.assignDefaultRole(user.id)
 
-    // Crear sesión del servidor con ID compacto
+    // Crear sesión del servidor
     const sessionId = await SessionManager.createSession(user, {
-      origin,
-      userAgent,
-      ipAddress,
-      deviceInfo,
+      origin: request.headers.get("origin") || "unknown",
+      userAgent: request.headers.get("user-agent"),
+      ipAddress: request.ip || request.headers.get("x-forwarded-for") || "unknown",
     })
 
-    console.log("✅ Auth successful. Redirecting...")
-    return createAuthResponse(origin, sessionId, {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      is_claimed: user.is_claimed,
+    // Configurar cookie de sesión
+    const response = NextResponse.redirect(new URL("/dashboard", request.url))
+
+    response.cookies.set("session_id", sessionId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60, // 30 días
+      path: "/",
     })
-  } catch (error: unknown) {
-    console.error("🔥 Unhandled error in auth callback:", error)
-    const message = error instanceof Error ? error.message : String(error)
-    return new NextResponse(`Internal Server Error: ${message}`, { status: 500 })
+
+    // Limpiar cookie de estado OAuth
+    response.cookies.delete("oauth_state")
+
+    return response
+  } catch (error) {
+    console.error("OAuth callback error:", error)
+    return NextResponse.redirect(new URL("/login?error=callback_failed", request.url))
   }
 }

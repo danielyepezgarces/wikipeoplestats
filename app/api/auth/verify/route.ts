@@ -1,39 +1,27 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { SessionManager } from "@/lib/session-manager"
+import { AuthService } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
-    const sessionId = request.cookies.get("session_id")?.value
+    const user = await AuthService.getAuthenticatedUser(request)
 
-    if (!sessionId) {
-      return NextResponse.json({ authenticated: false }, { status: 401 })
-    }
-
-    const session = await SessionManager.getSession(sessionId)
-
-    if (!session) {
-      return NextResponse.json({ authenticated: false }, { status: 401 })
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
     return NextResponse.json({
-      authenticated: true,
       user: {
-        id: session.userId,
-        username: session.username,
-        email: session.email,
-        roles: session.roles,
-      },
-      session: {
-        id: session.id,
-        createdAt: session.createdAt,
-        expiresAt: session.expiresAt,
-        lastActivity: session.lastActivity,
-        deviceInfo: session.deviceInfo,
-        origin: session.origin,
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.roles?.[0] || "user",
+        roles: user.roles || [],
+        chapter_id: user.chapter_id,
+        chapter_admin_ids: user.chapter_admin_ids || [],
       },
     })
   } catch (error) {
-    console.error("❌ Error verifying session:", error)
-    return NextResponse.json({ authenticated: false, error: "Internal server error" }, { status: 500 })
+    console.error("Error verifying user:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

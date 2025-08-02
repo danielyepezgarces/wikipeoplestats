@@ -1,19 +1,25 @@
-// pages/api/auth/me.ts
-import { NextApiRequest, NextApiResponse } from 'next'
-import jwt from 'jsonwebtoken'
+import { type NextRequest, NextResponse } from "next/server"
+import { AuthService } from "@/lib/auth"
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
-
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const token = req.cookies['auth_token']
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-
+export async function GET(request: NextRequest) {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any
-    res.status(200).json({ user: { id: decoded.userId, username: decoded.username, email: decoded.email } })
-  } catch {
-    res.status(401).json({ error: 'Invalid token' })
+    const user = await AuthService.getAuthenticatedUser(request)
+
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+    }
+
+    return NextResponse.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      roles: user.roles || [],
+      chapter_id: user.chapter_id,
+      chapter_admin_ids: user.chapter_admin_ids || [],
+      isAuthenticated: true,
+    })
+  } catch (error) {
+    console.error("Error getting user info:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

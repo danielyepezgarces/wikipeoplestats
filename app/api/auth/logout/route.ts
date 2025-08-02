@@ -11,13 +11,12 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({ success: true, message: "Logged out successfully" })
 
-    // Limpiar cookies
+    // Eliminar cookie de sesión
     response.cookies.delete("session_id")
-    response.cookies.delete("user_info")
 
     return response
   } catch (error) {
-    console.error("❌ Error during logout:", error)
+    console.error("Logout error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

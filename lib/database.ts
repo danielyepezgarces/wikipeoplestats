@@ -22,32 +22,47 @@ export interface CreateUserData {
   is_claimed?: boolean
 }
 
-export class Database {
-  private static connection: mysql.Connection | null = null
+let connectionPool: mysql.Pool | null = null
 
-  /**
-   * Obtiene la conexión a la base de datos
-   */
-  private static async getConnection(): Promise<mysql.Connection> {
-    if (!this.connection) {
-      this.connection = await mysql.createConnection({
-        host: process.env.DB_HOST || "localhost",
-        user: process.env.DB_USER || "root",
-        password: process.env.DB_PASSWORD || "",
-        database: process.env.DB_NAME || "wikipeoplestats",
-        charset: "utf8mb4",
-      })
-    }
-    return this.connection
+/**
+ * Obtiene el pool de conexiones a la base de datos
+ */
+export function getConnectionPool(): mysql.Pool {
+  if (!connectionPool) {
+    connectionPool = mysql.createPool({
+      host: process.env.DB_HOST || "localhost",
+      user: process.env.DB_USER || "root",
+      password: process.env.DB_PASSWORD || "",
+      database: process.env.DB_NAME || "wikipeoplestats",
+      charset: "utf8mb4",
+      connectionLimit: 10,
+      acquireTimeout: 60000,
+      timeout: 60000,
+    })
   }
+  return connectionPool
+}
 
+/**
+ * Obtiene una conexión individual de la base de datos
+ */
+export async function getConnection(): Promise<mysql.PoolConnection> {
+  const pool = getConnectionPool()
+  return await pool.getConnection()
+}
+
+export class Database {
   /**
    * Ejecuta una consulta SQL
    */
   static async query(sql: string, params: any[] = []): Promise<any> {
-    const connection = await this.getConnection()
-    const [results] = await connection.execute(sql, params)
-    return results
+    const connection = await getConnection()
+    try {
+      const [results] = await connection.execute(sql, params)
+      return results
+    } finally {
+      connection.release()
+    }
   }
 
   /**

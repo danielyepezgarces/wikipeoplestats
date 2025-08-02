@@ -1,48 +1,41 @@
-// app/api/auth/check-permission/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { checkPermission } from '@/lib/auth-middleware'
+import { type NextRequest, NextResponse } from "next/server"
+import { AuthService } from "@/lib/auth"
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const permission = searchParams.get('permission')
-    const chapterIdParam = searchParams.get('chapterId')
-    
-    if (!permission) {
-      return NextResponse.json(
-        { error: 'Permission parameter is required' },
-        { status: 400 }
-      )
+    const { permission, chapterId } = await request.json()
+
+    const user = await AuthService.getAuthenticatedUser(request)
+    if (!user) {
+      return NextResponse.json({ hasPermission: false }, { status: 401 })
     }
 
-    const chapterId = chapterIdParam ? parseInt(chapterIdParam) : undefined
+    let hasPermission = false
 
-    // Verificar el permiso
-    const { auth, hasPermission } = await checkPermission(
-      request, 
-      permission as any, 
-      chapterId
-    )
+    switch (permission) {
+      case "super_admin":
+        hasPermission = user.roles?.includes("super_admin") || false
+        break
+      case "chapter_admin":
+        hasPermission =
+          user.roles?.includes("super_admin") ||
+          (user.roles?.includes("chapter_admin") && (!chapterId || user.chapter_admin_ids?.includes(chapterId))) ||
+          false
+        break
+      case "moderator":
+        hasPermission =
+          user.roles?.includes("super_admin") ||
+          user.roles?.includes("moderator") ||
+          user.roles?.includes("chapter_admin") ||
+          false
+        break
+      default:
+        hasPermission = user.roles?.includes(permission) || false
+    }
 
-    return NextResponse.json({
-      userId: auth.userId,
-      permission,
-      chapterId,
-      hasPermission
-    })
-
+    return NextResponse.json({ hasPermission })
   } catch (error) {
-    
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message.includes('Authentication') ? 401 : 500 }
-      )
-    }
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error("Error checking permission:", error)
+    return NextResponse.json({ hasPermission: false }, { status: 500 })
   }
 }

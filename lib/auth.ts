@@ -7,6 +7,8 @@ export interface AuthUser {
   username: string
   email?: string
   roles?: string[]
+  chapter_id?: number
+  chapter_admin_ids?: number[]
   isAuthenticated: boolean
 }
 
@@ -28,11 +30,17 @@ export class AuthService {
     const session = await this.getCurrentSession(request)
     if (!session) return null
 
+    // Obtener roles del usuario
+    const roles = await this.getUserRoles(session.userId)
+    const chapterInfo = await this.getUserChapterInfo(session.userId)
+
     return {
       id: session.userId,
       username: session.username,
       email: session.email,
-      roles: session.roles,
+      roles,
+      chapter_id: chapterInfo.chapter_id,
+      chapter_admin_ids: chapterInfo.admin_chapter_ids,
       isAuthenticated: true,
     }
   }
@@ -100,14 +108,17 @@ export class AuthService {
       const user = await Database.getUserById(userId)
       if (!user) return null
 
-      // Obtener roles del usuario (si existe sistema de roles)
+      // Obtener roles del usuario
       const roles = await this.getUserRoles(userId)
+      const chapterInfo = await this.getUserChapterInfo(userId)
 
       return {
         id: user.id,
         username: user.username,
         email: user.email,
         roles,
+        chapter_id: chapterInfo.chapter_id,
+        chapter_admin_ids: chapterInfo.admin_chapter_ids,
         isAuthenticated: true,
       }
     } catch (error) {
@@ -137,6 +148,43 @@ export class AuthService {
   }
 
   /**
+   * Obtiene información de capítulos del usuario
+   */
+  private static async getUserChapterInfo(userId: number): Promise<{
+    chapter_id?: number
+    admin_chapter_ids: number[]
+  }> {
+    try {
+      const chapterRoles = await Database.query(
+        `SELECT ur.chapter_id, r.name as role_name
+         FROM user_roles ur 
+         JOIN roles r ON ur.role_id = r.id 
+         WHERE ur.user_id = ? AND ur.chapter_id IS NOT NULL`,
+        [userId],
+      )
+
+      const adminChapterIds: number[] = []
+      let primaryChapterId: number | undefined
+
+      chapterRoles.forEach((role: any) => {
+        if (role.role_name === "chapter_admin") {
+          adminChapterIds.push(role.chapter_id)
+        }
+        if (!primaryChapterId) {
+          primaryChapterId = role.chapter_id
+        }
+      })
+
+      return {
+        chapter_id: primaryChapterId,
+        admin_chapter_ids: adminChapterIds,
+      }
+    } catch (error) {
+      return { admin_chapter_ids: [] }
+    }
+  }
+
+  /**
    * Invalida la sesión actual
    */
   static async logout(request: NextRequest): Promise<boolean> {
@@ -155,4 +203,12 @@ export class AuthService {
 
     return await SessionManager.revokeAllUserSessions(session.userId, session.id)
   }
+}
+
+/**
+ * Función helper para obtener el usuario actual (compatible con el código existente)
+ */
+export async function getCurrentUser(request?: NextRequest): Promise<AuthUser | null> {
+  if (!request) return null
+  return await AuthService.getAuthenticatedUser(request)
 }
