@@ -31,25 +31,33 @@ import {
 import { useRouter } from "next/navigation"
 
 interface Session {
-  id: number
-  user_id: number
-  token_hash: string
-  expires_at: string
-  origin_domain: string
-  user_agent?: string
-  ip_address?: string
-  device_info?: string
-  is_active: boolean
-  created_at: string
-  last_used: string
+  id: string
+  userId: number
+  username: string
+  createdAt: string
+  expiresAt: string
+  lastUsed: string
+  origin: string
+  userAgent?: string
+  ipAddress?: string
+  deviceInfo?: string
+  isActive: boolean
   is_current?: boolean
+}
+
+interface SessionStats {
+  totalSessions: number
+  activeSessions: number
+  expiredSessions: number
+  devicesUsed: string[]
 }
 
 export function SessionManager() {
   const [sessions, setSessions] = useState<Session[]>([])
+  const [stats, setStats] = useState<SessionStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [revoking, setRevoking] = useState<number | null>(null)
+  const [revoking, setRevoking] = useState<string | null>(null)
   const [revokingAll, setRevokingAll] = useState(false)
   const router = useRouter()
 
@@ -65,6 +73,7 @@ export function SessionManager() {
       }
       const data = await response.json()
       setSessions(data.sessions || [])
+      setStats(data.stats || null)
       setError(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error")
@@ -81,10 +90,10 @@ export function SessionManager() {
     return () => clearInterval(interval)
   }, [])
 
-  const revokeSession = async (sessionId: number) => {
+  const revokeSession = async (sessionId: string) => {
     setRevoking(sessionId)
     try {
-      const response = await fetch(`/api/auth/sessions?sessionId=${sessionId}`, {
+      const response = await fetch(`/api/auth/sessions?session_id=${sessionId}`, {
         method: "DELETE",
       })
 
@@ -103,7 +112,7 @@ export function SessionManager() {
   const revokeAllOtherSessions = async () => {
     setRevokingAll(true)
     try {
-      const response = await fetch("/api/auth/sessions?action=revoke-all-others", {
+      const response = await fetch("/api/auth/sessions?action=revoke_all_others", {
         method: "DELETE",
       })
 
@@ -119,41 +128,17 @@ export function SessionManager() {
     }
   }
 
-  const getDeviceIcon = (userAgent?: string) => {
-    if (!userAgent) return <Globe className="h-4 w-4" />
+  const getDeviceIcon = (deviceInfo?: string) => {
+    if (!deviceInfo) return <Globe className="h-4 w-4" />
 
-    const ua = userAgent.toLowerCase()
-    if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
+    const info = deviceInfo.toLowerCase()
+    if (info.includes("mobile") || info.includes("android") || info.includes("iphone")) {
       return <Smartphone className="h-4 w-4" />
     }
-    if (ua.includes("tablet") || ua.includes("ipad")) {
+    if (info.includes("tablet") || info.includes("ipad")) {
       return <Tablet className="h-4 w-4" />
     }
     return <Monitor className="h-4 w-4" />
-  }
-
-  const getBrowserInfo = (userAgent?: string) => {
-    if (!userAgent) return "Unknown Browser"
-
-    const ua = userAgent.toLowerCase()
-    if (ua.includes("chrome")) return "Chrome"
-    if (ua.includes("firefox")) return "Firefox"
-    if (ua.includes("safari") && !ua.includes("chrome")) return "Safari"
-    if (ua.includes("edge")) return "Edge"
-    if (ua.includes("opera")) return "Opera"
-    return "Unknown Browser"
-  }
-
-  const getOSInfo = (userAgent?: string) => {
-    if (!userAgent) return "Unknown OS"
-
-    const ua = userAgent.toLowerCase()
-    if (ua.includes("windows")) return "Windows"
-    if (ua.includes("mac")) return "macOS"
-    if (ua.includes("linux")) return "Linux"
-    if (ua.includes("android")) return "Android"
-    if (ua.includes("ios") || ua.includes("iphone") || ua.includes("ipad")) return "iOS"
-    return "Unknown OS"
   }
 
   const formatLastUsed = (dateString: string) => {
@@ -199,6 +184,29 @@ export function SessionManager() {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+      )}
+
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold">{stats.activeSessions}</div>
+              <div className="text-sm text-muted-foreground">Active Sessions</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold">{stats.totalSessions}</div>
+              <div className="text-sm text-muted-foreground">Total Sessions</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-2xl font-bold">{stats.devicesUsed.length}</div>
+              <div className="text-sm text-muted-foreground">Devices Used</div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {sessions.length > 1 && (
@@ -258,12 +266,10 @@ export function SessionManager() {
                 <div className="border rounded-lg p-4 bg-green-50 dark:bg-green-950/20">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
-                      {getDeviceIcon(currentSession.user_agent)}
+                      {getDeviceIcon(currentSession.deviceInfo)}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {getBrowserInfo(currentSession.user_agent)} on {getOSInfo(currentSession.user_agent)}
-                          </span>
+                          <span className="font-medium">{currentSession.deviceInfo || "Unknown Device"}</span>
                           <Badge
                             variant="secondary"
                             className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
@@ -274,15 +280,15 @@ export function SessionManager() {
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {currentSession.ip_address || "Unknown IP"}
+                            {currentSession.ipAddress || "Unknown IP"}
                           </div>
                           <div className="flex items-center gap-1">
                             <Globe className="h-3 w-3" />
-                            {currentSession.origin_domain}
+                            {currentSession.origin}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            Last active: {formatLastUsed(currentSession.last_used)}
+                            Last active: {formatLastUsed(currentSession.lastUsed)}
                           </div>
                         </div>
                       </div>
@@ -296,25 +302,23 @@ export function SessionManager() {
                 <div key={session.id} className="border rounded-lg p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
-                      {getDeviceIcon(session.user_agent)}
+                      {getDeviceIcon(session.deviceInfo)}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {getBrowserInfo(session.user_agent)} on {getOSInfo(session.user_agent)}
-                          </span>
+                          <span className="font-medium">{session.deviceInfo || "Unknown Device"}</span>
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
-                            {session.ip_address || "Unknown IP"}
+                            {session.ipAddress || "Unknown IP"}
                           </div>
                           <div className="flex items-center gap-1">
                             <Globe className="h-3 w-3" />
-                            {session.origin_domain}
+                            {session.origin}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            Last active: {formatLastUsed(session.last_used)}
+                            Last active: {formatLastUsed(session.lastUsed)}
                           </div>
                         </div>
                       </div>
@@ -355,3 +359,5 @@ export function SessionManager() {
     </div>
   )
 }
+
+export default SessionManager

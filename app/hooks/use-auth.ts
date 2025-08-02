@@ -1,32 +1,34 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 
 interface User {
   id: number
   username: string
   email?: string
-  role?: string
-  chapter?: string
+  is_claimed: boolean
 }
 
 interface AuthState {
   user: User | null
-  loading: boolean
-  authenticated: boolean
+  isLoading: boolean
+  isAuthenticated: boolean
 }
 
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
-    loading: true,
-    authenticated: false,
+    isLoading: true,
+    isAuthenticated: false,
   })
 
-  const checkAuth = useCallback(async () => {
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  const checkAuth = async () => {
     try {
       const response = await fetch("/api/auth/verify", {
-        method: "GET",
         credentials: "include",
       })
 
@@ -35,65 +37,60 @@ export function useAuth() {
         if (data.authenticated) {
           setAuthState({
             user: data.user,
-            loading: false,
-            authenticated: true,
+            isLoading: false,
+            isAuthenticated: true,
           })
         } else {
           setAuthState({
             user: null,
-            loading: false,
-            authenticated: false,
+            isLoading: false,
+            isAuthenticated: false,
           })
         }
       } else {
         setAuthState({
           user: null,
-          loading: false,
-          authenticated: false,
+          isLoading: false,
+          isAuthenticated: false,
         })
       }
     } catch (error) {
-      console.error("❌ Auth check failed:", error)
+      console.error("Auth check failed:", error)
       setAuthState({
         user: null,
-        loading: false,
-        authenticated: false,
+        isLoading: false,
+        isAuthenticated: false,
       })
     }
-  }, [])
+  }
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     try {
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       })
-    } catch (error) {
-      console.error("❌ Logout failed:", error)
-    } finally {
+
       setAuthState({
         user: null,
-        loading: false,
-        authenticated: false,
+        isLoading: false,
+        isAuthenticated: false,
       })
+
       // Redirigir al login
       window.location.href = "/login"
+    } catch (error) {
+      console.error("Logout failed:", error)
     }
-  }, [])
+  }
 
-  const refreshAuth = useCallback(() => {
-    setAuthState((prev) => ({ ...prev, loading: true }))
+  const refreshAuth = () => {
     checkAuth()
-  }, [checkAuth])
-
-  useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
+  }
 
   return {
     ...authState,
     logout,
     refreshAuth,
-    checkAuth,
   }
 }

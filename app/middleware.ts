@@ -1,11 +1,12 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 import { SessionManager } from "@/lib/session-manager"
 
 // Rutas que requieren autenticación
-const protectedRoutes = ["/dashboard", "/admin", "/profile"]
+const protectedRoutes = ["/dashboard", "/admin", "/profile", "/settings"]
 
 // Rutas que solo pueden acceder usuarios no autenticados
-const authRoutes = ["/login"]
+const authRoutes = ["/login", "/register"]
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -15,47 +16,31 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
 
-  try {
-    let isAuthenticated = false
-
-    if (sessionId && SessionManager.isValidSessionId(sessionId)) {
-      // Verificar sesión
-      const sessionData = await SessionManager.getSession(sessionId)
-      isAuthenticated = !!sessionData
+  // Si es una ruta protegida, verificar autenticación
+  if (isProtectedRoute) {
+    if (!sessionId) {
+      return NextResponse.redirect(new URL("/login", request.url))
     }
 
-    // Redirigir usuarios no autenticados desde rutas protegidas
-    if (isProtectedRoute && !isAuthenticated) {
-      const loginUrl = new URL("/login", request.url)
-      loginUrl.searchParams.set("redirect", pathname)
-      return NextResponse.redirect(loginUrl)
+    // Verificar que la sesión sea válida
+    const session = await SessionManager.getSession(sessionId)
+    if (!session) {
+      const response = NextResponse.redirect(new URL("/login", request.url))
+      response.cookies.delete("session_id")
+      response.cookies.delete("user_info")
+      return response
     }
+  }
 
-    // Redirigir usuarios autenticados desde rutas de auth
-    if (isAuthRoute && isAuthenticated) {
+  // Si es una ruta de auth y el usuario ya está autenticado, redirigir al dashboard
+  if (isAuthRoute && sessionId) {
+    const session = await SessionManager.getSession(sessionId)
+    if (session) {
       return NextResponse.redirect(new URL("/dashboard", request.url))
     }
-
-    // Limpiar cookie inválida
-    if (sessionId && !isAuthenticated) {
-      const response = NextResponse.next()
-      response.cookies.delete("session_id")
-      return response
-    }
-
-    return NextResponse.next()
-  } catch (error) {
-    console.error("❌ Middleware error:", error)
-
-    // En caso de error, limpiar cookie y continuar
-    if (sessionId) {
-      const response = NextResponse.next()
-      response.cookies.delete("session_id")
-      return response
-    }
-
-    return NextResponse.next()
   }
+
+  return NextResponse.next()
 }
 
 export const config = {

@@ -6,34 +6,18 @@ export async function POST(request: NextRequest) {
     const sessionId = request.cookies.get("session_id")?.value
 
     if (sessionId) {
-      // Destruir la sesión en la base de datos
-      await SessionManager.destroySession(sessionId)
+      await SessionManager.revokeSession(sessionId)
     }
 
-    // Crear respuesta y limpiar cookie
-    const response = NextResponse.json({
-      message: "Logged out successfully",
-      success: true,
-    })
+    const response = NextResponse.json({ success: true })
 
+    // Limpiar cookies
     response.cookies.delete("session_id")
+    response.cookies.delete("user_info")
 
     return response
   } catch (error) {
-    console.error("❌ Logout error:", error)
-
-    // Incluso si hay error, limpiar la cookie
-    const response = NextResponse.json({
-      message: "Logged out (with errors)",
-      success: true,
-    })
-
-    response.cookies.delete("session_id")
-    return response
+    console.error("Error during logout:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
-
-export async function GET(request: NextRequest) {
-  // Permitir logout via GET también (para enlaces directos)
-  return POST(request)
 }

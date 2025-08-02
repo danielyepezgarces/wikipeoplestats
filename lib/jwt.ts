@@ -52,3 +52,12 @@ export class JWTManager {
     }
   }
 }
+
+// Funciones de compatibilidad para el código existente
+export function verifyToken(token: string): JWTPayload | null {
+  return JWTManager.verifyToken(token)
+}
+
+export function generateToken(payload: Omit<JWTPayload, "iat" | "exp">): string {
+  return JWTManager.generateToken(payload)
+}

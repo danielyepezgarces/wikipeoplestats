@@ -1,26 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { Database } from "@/lib/database"
-import { verifyToken } from "@/lib/jwt"
+import { SessionManager } from "@/lib/session-manager"
+import { AuthService } from "@/lib/auth"
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth_token")?.value
-    if (!token) {
+    const auth = await AuthService.requireAuth(request)
+    if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const decoded = verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 })
-    }
-
-    const sessions = await Database.getUserActiveSessions(decoded.userId)
-    const stats = await Database.getSessionStats(decoded.userId)
+    const sessions = await SessionManager.getUserSessions(auth.user.id)
+    const stats = await SessionManager.getSessionStats(auth.user.id)
 
     return NextResponse.json({
       sessions,
       stats,
-      current_session_id: null, // We could track this if needed
+      current_session_id: auth.session.id,
     })
   } catch (error) {
     console.error("Error fetching sessions:", error)
@@ -30,14 +25,9 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth_token")?.value
-    if (!token) {
+    const auth = await AuthService.requireAuth(request)
+    if (!auth) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    const decoded = verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -45,13 +35,13 @@ export async function DELETE(request: NextRequest) {
     const action = searchParams.get("action") // 'revoke' or 'revoke_all_others'
 
     if (action === "revoke_all_others") {
-      const revokedCount = await Database.revokeAllUserSessions(decoded.userId)
+      const revokedCount = await SessionManager.revokeAllUserSessions(auth.user.id, auth.session.id)
       return NextResponse.json({
         success: true,
         message: `Revoked ${revokedCount} sessions`,
       })
     } else if (sessionId) {
-      const success = await Database.revokeSession(Number.parseInt(sessionId), decoded.userId)
+      const success = await SessionManager.revokeSession(sessionId, auth.user.id)
       if (success) {
         return NextResponse.json({
           success: true,

@@ -1,494 +1,226 @@
 import mysql from "mysql2/promise"
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "wikipeoplestats",
-  timezone: "+00:00",
-  dateStrings: true,
-  waitForConnections: true,
-  connectionLimit: 25,
-  queueLimit: 0,
-})
-
 export interface User {
   id: number
-  wikimedia_id: string | null
+  wikimedia_id?: string
   username: string
   email?: string
   avatar_url?: string
-  is_active: boolean
+  registration_date?: string
   is_claimed: boolean
   created_at: string
   updated_at: string
   last_login?: string
+}
+
+export interface CreateUserData {
+  wikimedia_id?: string
+  username: string
+  email?: string
+  avatar_url?: string
   registration_date?: string
+  is_claimed?: boolean
 }
 
-export interface UserRole {
-  id: number
+export interface CreateSessionData {
   user_id: number
-  role: string
-  chapter_id?: number
-  chapter_name?: string
-  created_at: string
-}
-
-export interface Session {
-  id: number
-  user_id: number
-  token_hash: string // Ahora contiene session_id en lugar de JWT hash
+  token_hash: string
   expires_at: string
   origin_domain: string
   user_agent?: string
   ip_address?: string
   device_info?: string
-  is_active: boolean
-  created_at: string
-  last_used: string
-}
-
-export interface SessionWithUser extends Session {
-  username: string
-  avatar_url?: string
-}
-
-export interface TokenBlacklist {
-  id: number
-  token_hash: string
-  user_id: number
-  revoked_at: string
-  expires_at: string
-  reason: string
 }
 
 export class Database {
-  static async getConnection(): Promise<mysql.PoolConnection> {
-    return await pool.getConnection()
+  private static connection: mysql.Connection | null = null
+
+  static async getConnection(): Promise<mysql.Connection> {
+    if (!this.connection) {
+      this.connection = await mysql.createConnection({
+        host: process.env.DB_HOST || "localhost",
+        user: process.env.DB_USER || "root",
+        password: process.env.DB_PASSWORD || "",
+        database: process.env.DB_NAME || "wikipeoplestats",
+        charset: "utf8mb4",
+      })
+    }
+    return this.connection
+  }
+
+  static async query(sql: string, params: any[] = []): Promise<any> {
+    const connection = await this.getConnection()
+    const [rows] = await connection.execute(sql, params)
+    return rows
   }
 
   static async initializeTables(): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      // Actualizar tabla de usuarios para incluir is_claimed
-      await conn.execute(`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS is_claimed BOOLEAN DEFAULT FALSE,
-        ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(500) NULL,
-        MODIFY COLUMN wikimedia_id VARCHAR(255) NULL
-      `)
+    const connection = await this.getConnection()
 
-      // Actualizar tabla de sesiones existente para el nuevo sistema
-      await conn.execute(`
-        ALTER TABLE sessions 
-        ADD COLUMN IF NOT EXISTS device_info TEXT NULL,
-        ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
-        MODIFY COLUMN token_hash VARCHAR(64) NOT NULL COMMENT 'Now stores session_id instead of JWT hash',
-        ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
-        ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active),
-        ADD INDEX IF NOT EXISTS idx_token_hash (token_hash),
-        ADD INDEX IF NOT EXISTS idx_user_expires (user_id, expires_at),
-        ADD INDEX IF NOT EXISTS idx_active_expires (is_active, expires_at)
-      `)
+    // Actualizar tabla sessions para el nuevo sistema
+    await connection.execute(`
+      ALTER TABLE sessions 
+      MODIFY COLUMN token_hash VARCHAR(64) NOT NULL COMMENT 'Session ID (64 hex chars) or JWT hash for legacy sessions',
+      ADD INDEX IF NOT EXISTS idx_token_hash (token_hash),
+      ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
+      ADD INDEX IF NOT EXISTS idx_expires (expires_at)
+    `)
 
-      // Crear tabla de blacklist de tokens (mantener para compatibilidad con JWTs legacy)
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS token_blacklist (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          token_hash VARCHAR(255) NOT NULL,
-          user_id INT NOT NULL,
-          revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          expires_at TIMESTAMP NOT NULL,
-          reason VARCHAR(255) DEFAULT 'manual_revocation',
-          INDEX idx_token_hash (token_hash),
-          INDEX idx_user_id (user_id),
-          INDEX idx_expires_at (expires_at),
-          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-      `)
-    } finally {
-      conn.release()
-    }
+    console.log("✅ Database tables initialized/updated for server sessions")
   }
 
-  // ===== MÉTODOS DE USUARIOS =====
+  // Métodos de usuario
+  static async getUserById(id: number): Promise<User | null> {
+    const users = await this.query("SELECT * FROM users WHERE id = ?", [id])
+    return users.length > 0 ? users[0] : null
+  }
+
   static async getUserByWikipediaId(wikimediaId: string): Promise<User | null> {
-    const conn = await this.getConnection()
-    try {
-      const [rows] = await conn.execute("SELECT * FROM users WHERE wikimedia_id = ? AND is_active = 1", [wikimediaId])
-      const users = rows as User[]
-      return users[0] || null
-    } finally {
-      conn.release()
-    }
+    const users = await this.query("SELECT * FROM users WHERE wikimedia_id = ?", [wikimediaId])
+    return users.length > 0 ? users[0] : null
   }
 
   static async getUserByUsername(username: string): Promise<User | null> {
-    const conn = await this.getConnection()
-    try {
-      const [rows] = await conn.execute("SELECT * FROM users WHERE username = ? AND is_active = 1", [username])
-      const users = rows as User[]
-      return users[0] || null
-    } finally {
-      conn.release()
-    }
+    const users = await this.query("SELECT * FROM users WHERE username = ?", [username])
+    return users.length > 0 ? users[0] : null
   }
 
-  static async createUser(data: {
-    wikimedia_id?: string
-    username: string
-    email?: string
-    avatar_url?: string
-    registration_date?: string
-    is_claimed?: boolean
-  }): Promise<User> {
-    const conn = await this.getConnection()
+  static async createUser(userData: CreateUserData): Promise<User | null> {
     try {
-      const wikimediaId = data.wikimedia_id || null
-      const email = data.email || null
-      const avatarUrl = data.avatar_url || null
-      const registrationDate = data.registration_date || null
-      const isClaimed = data.is_claimed !== undefined ? data.is_claimed : false
-
-      const [result] = await conn.execute(
-        `INSERT INTO users (wikimedia_id, username, email, avatar_url, registration_date, is_claimed, created_at, updated_at, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), 1)`,
-        [wikimediaId, data.username, email, avatarUrl, registrationDate, isClaimed],
+      const result = await this.query(
+        `INSERT INTO users (wikimedia_id, username, email, avatar_url, registration_date, is_claimed, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [
+          userData.wikimedia_id || null,
+          userData.username,
+          userData.email || null,
+          userData.avatar_url || null,
+          userData.registration_date || null,
+          userData.is_claimed || false,
+        ],
       )
-      const insertResult = result as mysql.ResultSetHeader
-      const user = await this.getUserById(insertResult.insertId)
-      if (!user) {
-        throw new Error("User creation failed")
-      }
-      return user
-    } finally {
-      conn.release()
+
+      return await this.getUserById(result.insertId)
+    } catch (error) {
+      console.error("Error creating user:", error)
+      return null
     }
   }
 
   static async claimUserAccount(userId: number, wikimediaId: string, email?: string): Promise<User | null> {
-    const conn = await this.getConnection()
     try {
-      const emailValue = email || null
-      await conn.execute(
-        `UPDATE users 
-         SET wikimedia_id = ?, email = COALESCE(?, email), is_claimed = TRUE, updated_at = NOW()
-         WHERE id = ?`,
-        [wikimediaId, emailValue, userId],
+      await this.query(
+        "UPDATE users SET wikimedia_id = ?, email = ?, is_claimed = 1, updated_at = NOW() WHERE id = ?",
+        [wikimediaId, email || null, userId],
       )
-      return await this.getUserById(userId)
-    } finally {
-      conn.release()
-    }
-  }
 
-  static async getUserById(id: number): Promise<User | null> {
-    const conn = await this.getConnection()
-    try {
-      const [rows] = await conn.execute("SELECT * FROM users WHERE id = ?", [id])
-      const users = rows as User[]
-      return users[0] || null
-    } finally {
-      conn.release()
+      return await this.getUserById(userId)
+    } catch (error) {
+      console.error("Error claiming user account:", error)
+      return null
     }
   }
 
   static async updateUserLogin(userId: number): Promise<void> {
-    const conn = await this.getConnection()
     try {
-      await conn.execute("UPDATE users SET last_login = NOW(), updated_at = NOW() WHERE id = ?", [userId])
-    } finally {
-      conn.release()
+      await this.query("UPDATE users SET last_login = NOW() WHERE id = ?", [userId])
+    } catch (error) {
+      console.error("Error updating user login:", error)
     }
   }
 
-  static async getUserRole(userId: number): Promise<UserRole | null> {
-    const conn = await this.getConnection()
-    try {
-      const [rows] = await conn.execute(
-        `
-        SELECT ur.*, c.name as chapter_name
-        FROM user_roles ur
-        LEFT JOIN chapters c ON ur.chapter_id = c.id
-        WHERE ur.user_id = ?
-        ORDER BY ur.created_at DESC
-        LIMIT 1
-      `,
-        [userId],
-      )
-      const roles = rows as UserRole[]
-      return roles[0] || null
-    } finally {
-      conn.release()
-    }
+  // Métodos de sesión
+  static async createSession(sessionData: CreateSessionData): Promise<void> {
+    await this.query(
+      `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, device_info, is_active, created_at, last_used)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), NOW())`,
+      [
+        sessionData.user_id,
+        sessionData.token_hash,
+        sessionData.expires_at,
+        sessionData.origin_domain,
+        sessionData.user_agent || null,
+        sessionData.ip_address || null,
+        sessionData.device_info || null,
+      ],
+    )
   }
 
-  static async assignDefaultRole(userId: number, roleId = 1): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      await conn.execute(
-        `INSERT INTO user_roles (user_id, role_id, created_at)
-         VALUES (?, ?, NOW())`,
-        [userId, roleId],
-      )
-    } finally {
-      conn.release()
-    }
+  static async getSessionByToken(tokenHash: string): Promise<any | null> {
+    const sessions = await this.query(
+      "SELECT * FROM sessions WHERE token_hash = ? AND is_active = 1 AND expires_at > NOW()",
+      [tokenHash],
+    )
+    return sessions.length > 0 ? sessions[0] : null
   }
 
-  // ===== MÉTODOS DE SESIONES (Modificados para usar session_id) =====
-  static async createSession(data: {
-    user_id: number
-    token_hash: string // Ahora es session_id
-    expires_at: string
-    origin_domain: string
-    user_agent?: string
-    ip_address?: string
-    device_info?: string
-  }): Promise<Session> {
-    const conn = await this.getConnection()
-    try {
-      const userAgent = data.user_agent || null
-      const ipAddress = data.ip_address || null
-      const deviceInfo = data.device_info || null
-
-      const [result] = await conn.execute(
-        `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, device_info, is_active, created_at, last_used)
-         VALUES (?, ?, ?, ?, ?, ?, ?, TRUE, NOW(), NOW())`,
-        [data.user_id, data.token_hash, data.expires_at, data.origin_domain, userAgent, ipAddress, deviceInfo],
-      )
-      const insertResult = result as mysql.ResultSetHeader
-      const session = await this.getSessionById(insertResult.insertId)
-      if (!session) {
-        throw new Error("Session creation failed")
-      }
-      return session
-    } finally {
-      conn.release()
-    }
+  static async getUserActiveSessions(userId: number): Promise<any[]> {
+    return await this.query(
+      `SELECT * FROM sessions 
+       WHERE user_id = ? AND is_active = 1 AND expires_at > NOW() 
+       ORDER BY last_used DESC`,
+      [userId],
+    )
   }
 
-  static async getSessionById(id: number): Promise<Session | null> {
-    const conn = await this.getConnection()
-    try {
-      const [rows] = await conn.execute("SELECT * FROM sessions WHERE id = ?", [id])
-      const sessions = rows as Session[]
-      return sessions[0] || null
-    } finally {
-      conn.release()
-    }
+  static async revokeSession(sessionId: number, userId: number): Promise<boolean> {
+    const result = await this.query("UPDATE sessions SET is_active = 0 WHERE id = ? AND user_id = ?", [
+      sessionId,
+      userId,
+    ])
+    return result.affectedRows > 0
   }
 
-  static async getSessionByTokenHash(sessionId: string): Promise<Session | null> {
-    const conn = await this.getConnection()
-    try {
-      const [rows] = await conn.execute(
-        "SELECT * FROM sessions WHERE token_hash = ? AND is_active = TRUE AND expires_at > NOW()",
-        [sessionId],
-      )
-      const sessions = rows as Session[]
-      return sessions[0] || null
-    } finally {
-      conn.release()
-    }
-  }
+  static async revokeAllUserSessions(userId: number, exceptTokenHash?: string): Promise<number> {
+    const query = exceptTokenHash
+      ? "UPDATE sessions SET is_active = 0 WHERE user_id = ? AND token_hash != ?"
+      : "UPDATE sessions SET is_active = 0 WHERE user_id = ?"
 
-  static async getUserActiveSessions(userId: number): Promise<SessionWithUser[]> {
-    const conn = await this.getConnection()
-    try {
-      const [rows] = await conn.execute(
-        `SELECT s.*, u.username, u.avatar_url
-         FROM sessions s
-         JOIN users u ON s.user_id = u.id
-         WHERE s.user_id = ? AND s.is_active = TRUE AND s.expires_at > NOW()
-         ORDER BY s.last_used DESC`,
-        [userId],
-      )
-      return rows as SessionWithUser[]
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async getUserActiveSessionsExcept(userId: number, exceptSessionId: number | null): Promise<Session[]> {
-    const conn = await this.getConnection()
-    try {
-      let query = `SELECT * FROM sessions 
-                   WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()`
-      const params: any[] = [userId]
-
-      if (exceptSessionId) {
-        query += " AND id != ?"
-        params.push(exceptSessionId)
-      }
-
-      query += " ORDER BY last_used DESC"
-
-      const [rows] = await conn.execute(query, params)
-      return rows as Session[]
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async updateSessionLastUsed(sessionId: number): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      await conn.execute("UPDATE sessions SET last_used = NOW() WHERE id = ?", [sessionId])
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async revokeSession(sessionId: number, userId?: number): Promise<boolean> {
-    const conn = await this.getConnection()
-    try {
-      let query = "UPDATE sessions SET is_active = FALSE WHERE id = ?"
-      const params: any[] = [sessionId]
-
-      if (userId) {
-        query += " AND user_id = ?"
-        params.push(userId)
-      }
-
-      const [result] = await conn.execute(query, params)
-      const updateResult = result as mysql.ResultSetHeader
-      return updateResult.affectedRows > 0
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async revokeAllUserSessions(userId: number, exceptSessionId?: number): Promise<number> {
-    const conn = await this.getConnection()
-    try {
-      let query = "UPDATE sessions SET is_active = FALSE WHERE user_id = ?"
-      const params: any[] = [userId]
-
-      if (exceptSessionId) {
-        query += " AND id != ?"
-        params.push(exceptSessionId)
-      }
-
-      const [result] = await conn.execute(query, params)
-      const updateResult = result as mysql.ResultSetHeader
-      return updateResult.affectedRows
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async deleteExpiredSessions(): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      await conn.execute("DELETE FROM sessions WHERE expires_at < NOW() OR is_active = FALSE")
-    } finally {
-      conn.release()
-    }
+    const params = exceptTokenHash ? [userId, exceptTokenHash] : [userId]
+    const result = await this.query(query, params)
+    return result.affectedRows
   }
 
   static async getSessionStats(userId: number): Promise<{
-    total_sessions: number
-    active_sessions: number
-    devices: string[]
-    last_login_ip: string | null
+    totalSessions: number
+    activeSessions: number
+    expiredSessions: number
   }> {
-    const conn = await this.getConnection()
+    const [totalResult, activeResult, expiredResult] = await Promise.all([
+      this.query("SELECT COUNT(*) as count FROM sessions WHERE user_id = ?", [userId]),
+      this.query("SELECT COUNT(*) as count FROM sessions WHERE user_id = ? AND is_active = 1 AND expires_at > NOW()", [
+        userId,
+      ]),
+      this.query(
+        "SELECT COUNT(*) as count FROM sessions WHERE user_id = ? AND (is_active = 0 OR expires_at <= NOW())",
+        [userId],
+      ),
+    ])
+
+    return {
+      totalSessions: totalResult[0]?.count || 0,
+      activeSessions: activeResult[0]?.count || 0,
+      expiredSessions: expiredResult[0]?.count || 0,
+    }
+  }
+
+  // Método para asignar rol por defecto (si existe sistema de roles)
+  static async assignDefaultRole(userId: number): Promise<void> {
     try {
-      const [totalRows] = await conn.execute("SELECT COUNT(*) as count FROM sessions WHERE user_id = ?", [userId])
-      const [activeRows] = await conn.execute(
-        "SELECT COUNT(*) as count FROM sessions WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()",
-        [userId],
-      )
-      const [deviceRows] = await conn.execute(
-        "SELECT DISTINCT device_info FROM sessions WHERE user_id = ? AND device_info IS NOT NULL",
-        [userId],
-      )
-      const [lastIpRows] = await conn.execute(
-        "SELECT ip_address FROM sessions WHERE user_id = ? ORDER BY last_used DESC LIMIT 1",
-        [userId],
-      )
-
-      const total = (totalRows as any)[0].count
-      const active = (activeRows as any)[0].count
-      const devices = (deviceRows as any[]).map((row) => row.device_info).filter(Boolean)
-      const lastIp = (lastIpRows as any)[0]?.ip_address || null
-
-      return {
-        total_sessions: total,
-        active_sessions: active,
-        devices,
-        last_login_ip: lastIp,
+      // Verificar si existe la tabla de roles
+      const tables = await this.query("SHOW TABLES LIKE 'user_roles'")
+      if (tables.length > 0) {
+        // Asignar rol 'user' por defecto si existe
+        const roles = await this.query("SELECT id FROM roles WHERE name = 'user' LIMIT 1")
+        if (roles.length > 0) {
+          await this.query("INSERT IGNORE INTO user_roles (user_id, role_id, assigned_at) VALUES (?, ?, NOW())", [
+            userId,
+            roles[0].id,
+          ])
+        }
       }
-    } finally {
-      conn.release()
+    } catch (error) {
+      console.error("Error assigning default role:", error)
     }
   }
-
-  // ===== MÉTODOS DE TOKEN BLACKLIST (mantener para JWTs legacy) =====
-  static async blacklistToken(tokenHash: string, userId: number, reason = "manual_revocation"): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-
-      await conn.execute(
-        `INSERT INTO token_blacklist (token_hash, user_id, expires_at, reason)
-         VALUES (?, ?, ?, ?)`,
-        [tokenHash, userId, expiry, reason],
-      )
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async isTokenBlacklisted(token: string): Promise<boolean> {
-    const conn = await this.getConnection()
-    try {
-      const crypto = require("crypto")
-      const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
-
-      const [rows] = await conn.execute("SELECT id FROM token_blacklist WHERE token_hash = ? AND expires_at > NOW()", [
-        tokenHash,
-      ])
-      const results = rows as any[]
-      return results.length > 0
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async cleanupExpiredBlacklistedTokens(): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      await conn.execute("DELETE FROM token_blacklist WHERE expires_at < NOW()")
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async getBlacklistedTokens(userId?: number): Promise<TokenBlacklist[]> {
-    const conn = await this.getConnection()
-    try {
-      let query = "SELECT * FROM token_blacklist WHERE expires_at > NOW()"
-      const params: any[] = []
-
-      if (userId) {
-        query += " AND user_id = ?"
-        params.push(userId)
-      }
-
-      query += " ORDER BY revoked_at DESC"
-
-      const [rows] = await conn.execute(query, params)
-      return rows as TokenBlacklist[]
-    } finally {
-      conn.release()
-    }
-  }
-}
-
-// Export the getConnection function for backward compatibility
-export async function getConnection(): Promise<mysql.PoolConnection> {
-  return await Database.getConnection()
 }
