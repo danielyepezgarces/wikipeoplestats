@@ -46,6 +46,38 @@ export class SessionManager {
   }
 
   /**
+   * Parsea información del dispositivo desde el User-Agent
+   */
+  private static parseDeviceInfo(userAgent: string): string {
+    const ua = userAgent.toLowerCase()
+    let device = "Desktop"
+    let browser = "Unknown"
+    let os = "Unknown"
+
+    // Detectar dispositivo
+    if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
+      device = "Mobile"
+    } else if (ua.includes("tablet") || ua.includes("ipad")) {
+      device = "Tablet"
+    }
+
+    // Detectar navegador
+    if (ua.includes("chrome")) browser = "Chrome"
+    else if (ua.includes("firefox")) browser = "Firefox"
+    else if (ua.includes("safari") && !ua.includes("chrome")) browser = "Safari"
+    else if (ua.includes("edge")) browser = "Edge"
+
+    // Detectar OS
+    if (ua.includes("windows")) os = "Windows"
+    else if (ua.includes("mac")) os = "macOS"
+    else if (ua.includes("linux")) os = "Linux"
+    else if (ua.includes("android")) os = "Android"
+    else if (ua.includes("ios")) os = "iOS"
+
+    return `${device} - ${browser} on ${os}`
+  }
+
+  /**
    * Crea una nueva sesión para un usuario
    */
   static async createSession(user: any, metadata: SessionMetadata = {}): Promise<string> {
@@ -54,24 +86,15 @@ export class SessionManager {
     const expiresAt = new Date(now.getTime() + this.SESSION_DURATION)
 
     try {
-      await Database.query(
-        `INSERT INTO sessions (
-          id, user_id, token_hash, expires_at, created_at, last_activity,
-          ip_address, user_agent, device_info, origin
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          sessionId,
-          user.id,
-          sessionId, // Usar el session ID directamente como token_hash
-          expiresAt,
-          now,
-          now,
-          metadata.ipAddress,
-          metadata.userAgent,
-          metadata.deviceInfo,
-          metadata.origin,
-        ],
-      )
+      await Database.createSession({
+        user_id: user.id,
+        token_hash: sessionId,
+        expires_at: expiresAt.toISOString().slice(0, 19).replace("T", " "),
+        origin_domain: metadata.origin,
+        user_agent: metadata.userAgent,
+        ip_address: metadata.ipAddress,
+        device_info: metadata.deviceInfo || this.parseDeviceInfo(metadata.userAgent || ""),
+      })
 
       console.log(`✅ Session created: ${sessionId} for user ${user.username}`)
       return sessionId

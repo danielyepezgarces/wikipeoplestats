@@ -1,178 +1,106 @@
 import crypto from "crypto"
 
-const oauth = require("oauth-1.0a")
-
-const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
-
-interface AccessToken {
-  oauth_token: string
-  oauth_token_secret: string
+interface TokenResponse {
+  access_token: string
+  token_type: string
+  expires_in: number
 }
 
 interface UserInfo {
   sub: string
   username: string
   email?: string
-  editcount?: number
-  registration?: string
+  avatar_url?: string
+  registration_date?: string
 }
 
-function createOAuthClient() {
-  return oauth({
-    consumer: {
-      key: process.env.WIKIPEDIA_CLIENT_ID || "",
-      secret: process.env.WIKIPEDIA_CLIENT_SECRET || "",
-    },
-    signature_method: "HMAC-SHA1",
-    hash_function(base_string: string, key: string) {
-      return crypto.createHmac("sha1", key).update(base_string).digest("base64")
-    },
-  })
-}
+export class OAuthService {
+  private static readonly CLIENT_ID = process.env.OAUTH_CLIENT_ID!
+  private static readonly CLIENT_SECRET = process.env.OAUTH_CLIENT_SECRET!
+  private static readonly REDIRECT_URI = process.env.OAUTH_REDIRECT_URI!
+  private static readonly AUTHORIZATION_URL = "https://meta.wikimedia.org/w/rest.php/oauth2/authorize"
+  private static readonly TOKEN_URL = "https://meta.wikimedia.org/w/rest.php/oauth2/access_token"
+  private static readonly USER_INFO_URL = "https://meta.wikimedia.org/w/rest.php/oauth2/resource/profile"
 
-/**
- * Intercambia el código de autorización por un token de acceso
- */
-export async function exchangeCodeForToken(
-  oauth_token: string,
-  oauth_token_secret: string,
-  oauth_verifier: string,
-): Promise<AccessToken | null> {
-  const oauthClient = createOAuthClient()
-  const requestData = {
-    url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/token`,
-    method: "POST",
-    data: { oauth_token, oauth_verifier },
-  }
-
-  const authHeader = oauthClient.toHeader(
-    oauthClient.authorize(requestData, { key: oauth_token, secret: oauth_token_secret }),
-  )
-
-  try {
-    const response = await fetch(requestData.url, {
-      method: "POST",
-      headers: {
-        ...authHeader,
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "WikiPeopleStats/1.0",
-      },
+  static generateAuthUrl(state?: string): string {
+    const params = new URLSearchParams({
+      response_type: "code",
+      client_id: this.CLIENT_ID,
+      redirect_uri: this.REDIRECT_URI,
+      scope: "basic",
+      state: state || crypto.randomBytes(16).toString("hex"),
     })
 
-    if (!response.ok) {
-      console.error("❌ Token exchange failed:", await response.text())
+    return `${this.AUTHORIZATION_URL}?${params.toString()}`
+  }
+
+  static async exchangeCodeForToken(code: string): Promise<TokenResponse | null> {
+    try {
+      const response = await fetch(this.TOKEN_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Accept: "application/json",
+        },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: this.CLIENT_ID,
+          client_secret: this.CLIENT_SECRET,
+          redirect_uri: this.REDIRECT_URI,
+          code,
+        }),
+      })
+
+      if (!response.ok) {
+        console.error("Token exchange failed:", response.status, response.statusText)
+        return null
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error("Error exchanging code for token:", error)
       return null
     }
+  }
 
-    const text = await response.text()
-    const params = new URLSearchParams(text)
+  static async getUserInfo(accessToken: string): Promise<UserInfo | null> {
+    try {
+      const response = await fetch(this.USER_INFO_URL, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      })
 
-    return {
-      oauth_token: params.get("oauth_token") || "",
-      oauth_token_secret: params.get("oauth_token_secret") || "",
+      if (!response.ok) {
+        console.error("User info request failed:", response.status, response.statusText)
+        return null
+      }
+
+      const data = await response.json()
+
+      return {
+        sub: data.sub,
+        username: data.username,
+        email: data.email,
+        avatar_url: data.avatar_url,
+        registration_date: data.registration_date,
+      }
+    } catch (error) {
+      console.error("Error getting user info:", error)
+      return null
     }
-  } catch (error) {
-    console.error("❌ Error in exchangeCodeForToken:", error)
-    return null
   }
 }
 
-/**
- * Obtiene información del usuario de Wikipedia
- */
-export async function getWikipediaUserInfo(oauth_token: string, oauth_token_secret: string): Promise<UserInfo | null> {
-  const oauthClient = createOAuthClient()
-  const requestData = {
-    url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/identify`,
-    method: "POST",
-  }
-
-  const authHeader = oauthClient.toHeader(
-    oauthClient.authorize(requestData, { key: oauth_token, secret: oauth_token_secret }),
-  )
-
-  try {
-    const response = await fetch(requestData.url, {
-      method: "POST",
-      headers: {
-        ...authHeader,
-        "User-Agent": "WikiPeopleStats/1.0",
-      },
-    })
-
-    if (!response.ok) {
-      console.error("❌ Failed to get user identity:", await response.text())
-      return null
-    }
-
-    const jwtEncoded = await response.text()
-
-    // Decodificar el JWT sin verificar (Wikipedia ya lo firmó)
-    const payload = jwtEncoded.split(".")[1]
-    const decoded = JSON.parse(Buffer.from(payload, "base64").toString())
-
-    if (!decoded || !decoded.sub || !decoded.username) return null
-
-    return {
-      sub: decoded.sub,
-      username: decoded.username,
-      email: decoded.email || undefined,
-      editcount: decoded.editcount || 0,
-      registration: decoded.registration || undefined,
-    }
-  } catch (error) {
-    console.error("❌ Error in getWikipediaUserInfo:", error)
-    return null
-  }
+// Exportar funciones individuales para compatibilidad
+export async function exchangeCodeForToken(oauth_token: string, oauth_token_secret: string, oauth_verifier: string) {
+  // Esta función mantiene compatibilidad con el sistema anterior
+  // En el nuevo sistema OAuth2, solo necesitamos el código
+  return OAuthService.exchangeCodeForToken(oauth_verifier)
 }
 
-/**
- * Inicia el flujo de autenticación OAuth
- */
-export async function initiateOAuthFlow(): Promise<{ authUrl: string; oauth_token_secret: string } | null> {
-  const oauthClient = createOAuthClient()
-  const requestData = {
-    url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/initiate`,
-    method: "POST",
-    data: {
-      oauth_callback: process.env.OAUTH_CALLBACK_URL || "https://auth.wikipeoplestats.org/api/auth/callback",
-    },
-  }
-
-  try {
-    const response = await fetch(requestData.url, {
-      method: "POST",
-      headers: {
-        ...oauthClient.toHeader(oauthClient.authorize(requestData)),
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "WikiPeopleStats/1.0",
-      },
-      body: new URLSearchParams(requestData.data).toString(),
-    })
-
-    if (!response.ok) {
-      console.error("❌ OAuth initiation failed:", await response.text())
-      return null
-    }
-
-    const text = await response.text()
-    const params = new URLSearchParams(text)
-    const oauth_token = params.get("oauth_token")
-    const oauth_token_secret = params.get("oauth_token_secret")
-
-    if (!oauth_token || !oauth_token_secret) {
-      console.error("❌ Missing OAuth tokens in response")
-      return null
-    }
-
-    const authUrl = `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/authorize&oauth_token=${oauth_token}&oauth_consumer_key=${process.env.WIKIPEDIA_CLIENT_ID}`
-
-    return {
-      authUrl,
-      oauth_token_secret,
-    }
-  } catch (error) {
-    console.error("❌ Error initiating OAuth flow:", error)
-    return null
-  }
+export async function getWikipediaUserInfo(access_token: string, access_token_secret: string) {
+  // Mantener compatibilidad con el sistema anterior
+  return OAuthService.getUserInfo(access_token)
 }

@@ -1,37 +1,32 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { SessionManager } from "@/lib/session-manager"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
+  const sessionId = request.cookies.get("session_id")?.value
   const { pathname } = request.nextUrl
 
   // Rutas que requieren autenticación
-  const protectedRoutes = ["/dashboard", "/admin"]
+  const protectedRoutes = ["/dashboard", "/admin", "/api/auth/me", "/api/auth/sessions"]
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
-  if (isProtectedRoute) {
-    const sessionId = request.cookies.get("session_id")?.value
+  // Si es una ruta protegida y no hay session ID, redirigir al login
+  if (isProtectedRoute && !sessionId) {
+    const loginUrl = new URL("/login", request.url)
+    loginUrl.searchParams.set("redirect", pathname)
+    return NextResponse.redirect(loginUrl)
+  }
 
-    if (!sessionId || !SessionManager.isValidSessionId(sessionId)) {
-      return NextResponse.redirect(new URL("/login", request.url))
-    }
-
-    // Verificar sesión en la base de datos (opcional para middleware)
-    // Para mejor rendimiento, solo validamos el formato aquí
-    // La verificación completa se hace en las rutas API
+  // Validar formato del session ID si existe
+  if (sessionId && !/^[A-Za-z0-9_-]{22}$/.test(sessionId)) {
+    // Session ID inválido, limpiar cookie y redirigir
+    const response = NextResponse.redirect(new URL("/login", request.url))
+    response.cookies.delete("session_id")
+    return response
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/api/auth/me", "/api/auth/sessions", "/api/admin/:path*"],
 }

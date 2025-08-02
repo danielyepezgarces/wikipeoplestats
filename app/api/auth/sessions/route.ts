@@ -1,38 +1,35 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { getCurrentUser } from "@/lib/auth"
 import { SessionManager } from "@/lib/session-manager"
-import { AuthService } from "@/lib/auth"
+import { cookies } from "next/headers"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const user = await AuthService.getAuthenticatedUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const sessions = await SessionManager.getUserSessions(user.id)
-    const currentSessionId = request.cookies.get("session_id")?.value
+    const cookieStore = await cookies()
+    const currentSessionId = cookieStore.get("session_id")?.value
 
+    // Marcar la sesión actual
     const sessionsWithCurrent = sessions.map((session) => ({
-      id: session.id,
-      deviceInfo: session.deviceInfo,
-      ipAddress: session.ipAddress,
-      lastActivity: session.lastActivity.toISOString(),
-      createdAt: session.createdAt.toISOString(),
-      origin: session.origin,
-      userAgent: session.userAgent,
+      ...session,
       isCurrent: session.id === currentSessionId,
     }))
 
     return NextResponse.json({ sessions: sessionsWithCurrent })
   } catch (error) {
-    console.error("Error fetching sessions:", error)
+    console.error("Error getting sessions:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const user = await AuthService.getAuthenticatedUser(request)
+    const user = await getCurrentUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -41,16 +38,19 @@ export async function DELETE(request: NextRequest) {
     const { sessionId, revokeAll } = body
 
     if (revokeAll) {
-      const currentSessionId = request.cookies.get("session_id")?.value
+      const cookieStore = await cookies()
+      const currentSessionId = cookieStore.get("session_id")?.value
       const revokedCount = await SessionManager.revokeAllUserSessions(user.id, currentSessionId)
+
       return NextResponse.json({
-        success: true,
         message: `Revoked ${revokedCount} sessions`,
+        revokedCount,
       })
     } else if (sessionId) {
       const success = await SessionManager.revokeSession(sessionId)
+
       if (success) {
-        return NextResponse.json({ success: true, message: "Session revoked" })
+        return NextResponse.json({ message: "Session revoked successfully" })
       } else {
         return NextResponse.json({ error: "Failed to revoke session" }, { status: 400 })
       }

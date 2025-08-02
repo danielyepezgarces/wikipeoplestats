@@ -303,3 +303,6 @@ export function SessionManager() {
     </Card>
   )
 }
+
+// Exportar como default también para compatibilidad
+export default SessionManager
