@@ -12,7 +12,7 @@ const DEFAULT_ORIGIN = "www.wikipeoplestats.org"
 const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".wikipeoplestats.org"
 
 interface UserInfo {
-  id: string
+  id: number
   username: string
   email: string | null
   editCount: number
