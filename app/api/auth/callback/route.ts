@@ -204,8 +204,6 @@ function createAuthResponse(origin: string, sessionId: string, userData: any): N
 export async function GET(request: NextRequest) {
   try {
     // Inicializar tablas si es necesario
-    await Database.initializeTables()
-    await SessionManager.initializeTable()
 
     const searchParams = request.nextUrl.searchParams
     const oauth_token = searchParams.get("oauth_token")
