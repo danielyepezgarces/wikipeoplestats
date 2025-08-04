@@ -1,6 +1,6 @@
 // app/api/auth/check-permission/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { checkPermission } from '@/lib/auth-middleware'
+import { checkPermission } from '@/lib/auth-middleware-new'
 
 export async function GET(request: NextRequest) {
   try {

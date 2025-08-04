@@ -1,13 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
-import jwt from "jsonwebtoken"
 import { Database } from "@/lib/database"
+import { SessionManager } from "@/lib/session-manager"
 
 const oauth = require("oauth-1.0a")
 
 const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
 const DEFAULT_ORIGIN = "www.wikipeoplestats.org"
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".wikipeoplestats.org"
 
 interface UserInfo {
@@ -141,10 +140,6 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
   }
 }
 
-function generateToken(user: { id: number; username: string; email: string | null }) {
-  return jwt.sign({ userId: user.id, username: user.username, email: user.email }, JWT_SECRET, { expiresIn: "30d" })
-}
-
 function getDeviceInfo(userAgent: string): string {
   const ua = userAgent.toLowerCase()
   let device = "Desktop"
@@ -174,11 +169,11 @@ function getDeviceInfo(userAgent: string): string {
   return `${device} - ${browser} on ${os}`
 }
 
-function createAuthResponse(origin: string, token: string, userData: any): NextResponse {
+function createAuthResponse(origin: string, sessionToken: string, userData: any): NextResponse {
   const maxAge = 30 * 24 * 60 * 60
   const response = NextResponse.redirect(`https://${origin}/dashboard`)
 
-  response.cookies.set("auth_token", token, {
+  response.cookies.set("session_token", sessionToken, {
     domain: COOKIE_DOMAIN,
     path: "/",
     httpOnly: true,
@@ -266,28 +261,22 @@ export async function GET(request: NextRequest) {
     console.log("🕓 Updating last login...")
     await Database.updateUserLogin(user.id)
 
-    console.log("🔐 Creating session...")
-    const token = generateToken({
-      id: user.id,
-      username: user.username,
-      email: user.email || null,
-    })
+    console.log("🔐 Creating server-side session...")
 
     const userAgent = request.headers.get("user-agent") || ""
     const deviceInfo = getDeviceInfo(userAgent)
+    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
 
-    await Database.createSession({
+    const sessionToken = await SessionManager.createSession({
       user_id: user.id,
-      token_hash: token,
-      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 19).replace("T", " "),
       origin_domain: origin,
-      user_agent: userAgent || undefined,
-      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
+      user_agent: userAgent,
+      ip_address: ipAddress,
       device_info: deviceInfo,
     })
 
     console.log("✅ Auth successful. Redirecting...")
-    return createAuthResponse(origin, token, {
+    return createAuthResponse(origin, sessionToken, {
       id: user.id,
       username: user.username,
       email: user.email,

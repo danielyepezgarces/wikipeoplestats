@@ -1,37 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getConnection } from '@/lib/database'
 import { getAllChaptersWithStats } from '@/lib/queries/chapters'
-
-let rawDomain = process.env.AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
-if (!rawDomain.startsWith('http')) {
-  rawDomain = 'https://' + rawDomain
-}
-const authDomain = rawDomain
+import { requireRole } from '@/lib/auth-middleware-new'
 
 // === GET: Obtener capítulos con stats ===
 export async function GET(req: NextRequest) {
   try {
-    const cookieHeader = req.headers.get('cookie') || ''
-    const verifyRes = await fetch(`${authDomain}/api/auth/verify`, {
-      headers: { cookie: cookieHeader },
-      credentials: 'include'
-    })
-
-    if (!verifyRes.ok) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    const { user } = await verifyRes.json()
-
-    if (!user || !['super_admin', 'chapter_admin'].includes(user.role)) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
-    }
+    const auth = await requireRole(req, ['super_admin', 'chapter_admin'])
 
     const chapters = await getAllChaptersWithStats()
     return NextResponse.json(chapters)
   } catch (error) {
-    console.error('Error al verificar sesión (GET):', error)
-    return NextResponse.json({ error: 'Error interno del servidor', message: error.message }, { status: 500 })
+    console.error('Error en GET /api/admin/chapters:', error)
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : 'Error interno del servidor' 
+    }, { 
+      status: error instanceof Error && error.message.includes('permissions') ? 403 : 500 
+    })
   }
 }
 
@@ -40,21 +25,7 @@ export async function POST(req: NextRequest) {
   const conn = await getConnection()
 
   try {
-    const cookieHeader = req.headers.get('cookie') || ''
-    const verifyRes = await fetch(`${authDomain}/api/auth/verify`, {
-      headers: { cookie: cookieHeader },
-      credentials: 'include',
-    })
-
-    if (!verifyRes.ok) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    const { user } = await verifyRes.json()
-
-    if (!user || user.role !== 'super_admin') {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
-    }
+    const auth = await requireRole(req, 'super_admin')
 
     const {
       name,
@@ -134,7 +105,11 @@ export async function POST(req: NextRequest) {
       // rollback puede fallar si no hubo beginTransaction
     }
     console.error('Error en POST /api/chapters:', error)
-    return NextResponse.json({ error: 'Error interno del servidor', message: error.message }, { status: 500 })
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : 'Error interno del servidor' 
+    }, { 
+      status: error instanceof Error && error.message.includes('permissions') ? 403 : 500 
+    })
   } finally {
     conn.release()
   }

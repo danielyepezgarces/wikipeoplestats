@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { SessionManager } from "@/lib/session-manager"
 import { JWTManager } from "@/lib/jwt"
 import { Database } from "@/lib/database"
 
@@ -22,81 +23,54 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Solo proteger rutas específicas del dashboard y API
+  // Proteger rutas del dashboard y API admin
   const protectedPaths = [
     "/dashboard",
     "/api/admin",
     "/api/auth/sessions",
-    "/api/auth/me",
-    "/api/auth/verify",
-    "/api/auth/logout",
   ]
 
   const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
   // Permitir rutas de autenticación sin verificación
-  const authPaths = ["/api/auth/login", "/api/auth/callback"]
+  const authPaths = ["/api/auth/login", "/api/auth/callback", "/api/auth/verify", "/api/auth/logout"]
 
   const isAuthPath = authPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
+  // Validación de sesión para rutas protegidas
   if (isProtectedPath && !isAuthPath) {
-    const token = request.cookies.get("auth_token")?.value
+    const sessionToken = request.cookies.get("session_token")?.value
 
-    if (!token) {
+    if (!sessionToken) {
       if (request.nextUrl.pathname.startsWith("/dashboard")) {
         return NextResponse.redirect(new URL("/login", request.url))
       }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verificar si el token es válido
-    const decoded = JWTManager.verifyToken(token)
-    if (!decoded) {
-      const response = request.nextUrl.pathname.startsWith("/dashboard")
-        ? NextResponse.redirect(new URL("/login", request.url))
-        : NextResponse.json({ error: "Invalid token" }, { status: 401 })
-
-      response.cookies.delete("auth_token")
-      return response
-    }
-
-    // Verificar si el token está en la blacklist
+    // Validar sesión de forma asíncrona (solo para rutas críticas)
     try {
-      const isBlacklisted = await Database.isTokenBlacklisted(token)
-      if (isBlacklisted) {
-        const response = request.nextUrl.pathname.startsWith("/dashboard")
-          ? NextResponse.redirect(new URL("/login", request.url))
-          : NextResponse.json({ error: "Token revoked" }, { status: 401 })
+      const session = await SessionManager.getSessionWithUser(sessionToken)
 
-        response.cookies.delete("auth_token")
-        return response
-      }
-    } catch (error) {
-      console.error("Error checking token blacklist:", error)
-      // En caso de error con la blacklist, permitir continuar
-      // pero loggear el error para investigación
-    }
-
-    // Verificar si la sesión existe y está activa
-    try {
-      const tokenHash = JWTManager.hashToken(token)
-      const session = await Database.getSessionByTokenHash(tokenHash)
-
-      if (!session || !session.is_active) {
+      if (!session) {
         const response = request.nextUrl.pathname.startsWith("/dashboard")
           ? NextResponse.redirect(new URL("/login", request.url))
           : NextResponse.json({ error: "Session expired" }, { status: 401 })
 
-        response.cookies.delete("auth_token")
+        response.cookies.delete("session_token")
         return response
       }
 
-      // Actualizar última actividad de la sesión
-      await Database.updateSessionLastUsed(session.id)
+      // La validación ya actualiza la última actividad
     } catch (error) {
       console.error("Error checking session:", error)
-      // En caso de error con la sesión, permitir continuar
-      // pero loggear el error para investigación
+      // En caso de error, redirigir a login por seguridad
+      const response = request.nextUrl.pathname.startsWith("/dashboard")
+        ? NextResponse.redirect(new URL("/login", request.url))
+        : NextResponse.json({ error: "Session validation failed" }, { status: 401 })
+
+      response.cookies.delete("session_token")
+      return response
     }
   }
 
@@ -107,9 +81,6 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/api/admin/:path*",
-    "/api/auth/sessions/:path*",
-    "/api/auth/me/:path*",
-    "/api/auth/verify/:path*",
-    "/api/auth/logout/:path*",
+    "/api/auth/sessions/:path*"
   ],
 }

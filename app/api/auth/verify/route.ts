@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
-import mysql from 'mysql2/promise'
-
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: 'wikipeoplestats',
-})
+import { SessionManager } from '@/lib/session-manager'
 
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin')
@@ -25,51 +17,29 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth_token')?.value
+    const sessionToken = request.cookies.get('session_token')?.value
 
-    if (!token) {
-      return NextResponse.json({ error: 'Token no proporcionado' }, { status: 401, headers: response.headers })
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Sesión no encontrada' }, { status: 401, headers: response.headers })
     }
 
-    let payload: any
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET!)
-    } catch (err) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401, headers: response.headers })
+    const session = await SessionManager.validateSession(sessionToken)
+
+    if (!session) {
+      return NextResponse.json({ error: 'Sesión inválida o expirada' }, { status: 401, headers: response.headers })
     }
 
-    const userId = payload.userId
-    const [userRows] = await db.query(
-      'SELECT id, username, email, last_login FROM users WHERE id = ? LIMIT 1',
-      [userId]
-    )
-    const user = (userRows as any)[0]
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 401, headers: response.headers })
-    }
-
-    const [roleRows] = await db.query(
-      `SELECT r.name FROM roles r
-       INNER JOIN user_roles ur ON ur.role_id = r.id
-       WHERE ur.user_id = ?`,
-      [userId]
-    )
-
-    // ✅ Eliminar duplicados usando Set
-    const roles = Array.from(new Set((roleRows as any[]).map(r => r.name)))
-    const role = roles[0] || 'user'
+    const role = session.roles[0] || 'user'
 
     return NextResponse.json({
       user: {
-        id: user.id,
-        name: user.username,
-        email: user.email,
+        id: session.user_id,
+        name: session.username,
+        email: session.email,
         role,
-        roles,
-        wikipediaUsername: user.username,
-        lastLogin: user.last_login,
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=random&rounded=true`
+        roles: session.roles,
+        wikipediaUsername: session.username,
+        avatarUrl: session.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.username)}&background=random&rounded=true`
       }
     }, { headers: response.headers })
   } catch (e) {

@@ -40,6 +40,11 @@ export function useAuth() {
         setUser(data.user)
       } else {
         setUser(null)
+        // Si la sesión no es válida, limpiar cookies locales
+        if (response.status === 401) {
+          document.cookie = 'session_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+          document.cookie = 'user_info=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+        }
       }
     } catch (error) {
       console.error('Error verificando autenticación:', error)

@@ -78,30 +78,43 @@ export class Database {
         MODIFY COLUMN wikimedia_id VARCHAR(255) NULL
       `)
 
-      // Actualizar tabla de sesiones
+      // Actualizar tabla de sesiones para el nuevo sistema
       await conn.execute(`
-        ALTER TABLE sessions 
-        ADD COLUMN IF NOT EXISTS device_info TEXT NULL,
-        ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
-        ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
-        ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active),
-        ADD INDEX IF NOT EXISTS idx_token_hash (token_hash),
-        ADD INDEX IF NOT EXISTS idx_user_expires (user_id, expires_at),
-        ADD INDEX IF NOT EXISTS idx_active_expires (is_active, expires_at)
+        CREATE TABLE IF NOT EXISTS sessions (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          user_id INT NOT NULL,
+          session_token VARCHAR(64) NOT NULL UNIQUE,
+          expires_at TIMESTAMP NOT NULL,
+          origin_domain VARCHAR(255) NOT NULL,
+          user_agent TEXT NULL,
+          ip_address VARCHAR(45) NULL,
+          device_info TEXT NULL,
+          is_active BOOLEAN DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_session_token (session_token),
+          INDEX idx_user_active (user_id, is_active),
+          INDEX idx_expires_active (expires_at, is_active),
+          INDEX idx_user_expires (user_id, expires_at),
+          INDEX idx_active_expires (is_active, expires_at),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
       `)
 
-      // Crear tabla de blacklist de tokens
+      // Crear tabla de logs de sesiones para auditoría
       await conn.execute(`
-        CREATE TABLE IF NOT EXISTS token_blacklist (
+        CREATE TABLE IF NOT EXISTS session_logs (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          token_hash VARCHAR(255) NOT NULL,
+          session_id INT NOT NULL,
           user_id INT NOT NULL,
-          revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          expires_at TIMESTAMP NOT NULL,
-          reason VARCHAR(255) DEFAULT 'manual_revocation',
-          INDEX idx_token_hash (token_hash),
+          action ENUM('created', 'validated', 'revoked', 'expired') NOT NULL,
+          ip_address VARCHAR(45) NULL,
+          user_agent TEXT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_session_id (session_id),
           INDEX idx_user_id (user_id),
-          INDEX idx_expires_at (expires_at),
+          INDEX idx_action (action),
+          INDEX idx_created_at (created_at),
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
       `)
@@ -215,7 +228,7 @@ export class Database {
 
   static async createSession(data: {
     user_id: number
-    token_hash: string
+    session_token: string
     expires_at: string
     origin_domain: string
     user_agent?: string
@@ -229,9 +242,9 @@ export class Database {
       const deviceInfo = data.device_info || null
 
       const [result] = await conn.execute(
-        `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, device_info, is_active, created_at, last_used)
+        `INSERT INTO sessions (user_id, session_token, expires_at, origin_domain, user_agent, ip_address, device_info, is_active, created_at, last_used)
          VALUES (?, ?, ?, ?, ?, ?, ?, TRUE, NOW(), NOW())`,
-        [data.user_id, data.token_hash, data.expires_at, data.origin_domain, userAgent, ipAddress, deviceInfo],
+        [data.user_id, data.session_token, data.expires_at, data.origin_domain, userAgent, ipAddress, deviceInfo],
       )
       const insertResult = result as mysql.ResultSetHeader
       const session = await this.getSessionById(insertResult.insertId)
@@ -255,12 +268,12 @@ export class Database {
     }
   }
 
-  static async getSessionByTokenHash(tokenHash: string): Promise<Session | null> {
+  static async getSessionByToken(sessionToken: string): Promise<Session | null> {
     const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute(
-        "SELECT * FROM sessions WHERE token_hash = ? AND is_active = TRUE AND expires_at > NOW()",
-        [tokenHash],
+        "SELECT * FROM sessions WHERE session_token = ? AND is_active = TRUE AND expires_at > NOW()",
+        [sessionToken],
       )
       const sessions = rows as Session[]
       return sessions[0] || null
@@ -363,6 +376,65 @@ export class Database {
     }
   }
 
+  // Session Logging Methods
+  static async logSessionAction(
+    sessionId: number, 
+    userId: number, 
+    action: 'created' | 'validated' | 'revoked' | 'expired',
+    ipAddress?: string,
+    userAgent?: string
+  ): Promise<void> {
+    const conn = await this.getConnection()
+    try {
+      await conn.execute(
+        `INSERT INTO session_logs (session_id, user_id, action, ip_address, user_agent)
+         VALUES (?, ?, ?, ?, ?)`,
+        [sessionId, userId, action, ipAddress || null, userAgent || null],
+      )
+    } finally {
+      conn.release()
+    }
+  }
+
+  static async getSessionLogs(userId?: number, limit = 100): Promise<any[]> {
+    const conn = await this.getConnection()
+    try {
+      let query = `
+        SELECT sl.*, u.username 
+        FROM session_logs sl
+        JOIN users u ON sl.user_id = u.id
+      `
+      const params: any[] = []
+
+      if (userId) {
+        query += ` WHERE sl.user_id = ?`
+        params.push(userId)
+      }
+
+      query += ` ORDER BY sl.created_at DESC LIMIT ?`
+      params.push(limit)
+
+      const [rows] = await conn.execute(query, params)
+      return rows as any[]
+    } finally {
+      conn.release()
+    }
+  }
+
+  static async cleanupOldSessionLogs(daysToKeep = 90): Promise<number> {
+    const conn = await this.getConnection()
+    try {
+      const [result] = await conn.execute(
+        "DELETE FROM session_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)",
+        [daysToKeep]
+      )
+      const deleteResult = result as any
+      return deleteResult.affectedRows
+    } finally {
+      conn.release()
+    }
+  }
+
   static async getSessionStats(userId: number): Promise<{
     total_sessions: number
     active_sessions: number
@@ -396,69 +468,6 @@ export class Database {
         devices,
         last_login_ip: lastIp,
       }
-    } finally {
-      conn.release()
-    }
-  }
-
-  // Token Blacklist Methods
-  static async blacklistToken(tokenHash: string, userId: number, reason = "manual_revocation"): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      // Calcular la fecha de expiración basada en el token original
-      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días por defecto
-
-      await conn.execute(
-        `INSERT INTO token_blacklist (token_hash, user_id, expires_at, reason)
-         VALUES (?, ?, ?, ?)`,
-        [tokenHash, userId, expiry, reason],
-      )
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async isTokenBlacklisted(token: string): Promise<boolean> {
-    const conn = await this.getConnection()
-    try {
-      // Hash the token to compare with stored hashes
-      const crypto = require("crypto")
-      const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
-
-      const [rows] = await conn.execute("SELECT id FROM token_blacklist WHERE token_hash = ? AND expires_at > NOW()", [
-        tokenHash,
-      ])
-      const results = rows as any[]
-      return results.length > 0
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async cleanupExpiredBlacklistedTokens(): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      await conn.execute("DELETE FROM token_blacklist WHERE expires_at < NOW()")
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async getBlacklistedTokens(userId?: number): Promise<TokenBlacklist[]> {
-    const conn = await this.getConnection()
-    try {
-      let query = "SELECT * FROM token_blacklist WHERE expires_at > NOW()"
-      const params: any[] = []
-
-      if (userId) {
-        query += " AND user_id = ?"
-        params.push(userId)
-      }
-
-      query += " ORDER BY revoked_at DESC"
-
-      const [rows] = await conn.execute(query, params)
-      return rows as TokenBlacklist[]
     } finally {
       conn.release()
     }

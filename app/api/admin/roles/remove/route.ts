@@ -1,6 +1,6 @@
 // app/api/admin/roles/remove/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAnyRole } from '@/lib/auth-middleware'
+import { requireAnyRole } from '@/lib/auth-middleware-new'
 import { RoleManager } from '@/lib/role-manager'
 
 export async function POST(request: NextRequest) {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message },
-        { status: error.message.includes('permissions') ? 403 : 400 }
+        { status: error.message.includes('permissions') || error.message.includes('Authentication') ? 403 : 400 }
       )
     }
 
