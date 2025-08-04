@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
 
   // Validación de sesión para rutas protegidas
   if (isProtectedPath && !isAuthPath) {
-    const sessionToken = request.cookies.get("session_id")?.value
+    const sessionToken = request.cookies.get("session_token")?.value
 
     if (!sessionToken) {
       if (request.nextUrl.pathname.startsWith("/dashboard")) {
@@ -78,6 +78,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  runtime: 'nodejs', 
   matcher: [
     "/dashboard/:path*",
     "/api/admin/:path*",
