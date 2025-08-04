@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
 
   // Validación de sesión para rutas protegidas
   if (isProtectedPath && !isAuthPath) {
-    const sessionToken = request.cookies.get("session_token")?.value
+    const sessionToken = request.cookies.get("session_id")?.value
 
     if (!sessionToken) {
       if (request.nextUrl.pathname.startsWith("/dashboard")) {
