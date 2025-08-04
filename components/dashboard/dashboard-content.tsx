@@ -7,6 +7,7 @@ import { DefaultDashboard } from '@/components/dashboard/default-dashboard'
 
 interface DashboardContentProps {
   user: {
+    id: number
     name: string
     email: string
     role: string
