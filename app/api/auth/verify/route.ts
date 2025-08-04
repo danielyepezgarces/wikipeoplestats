@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const sessionToken = request.cookies.get('session_token')?.value
+    const sessionToken = request.cookies.get('session_id')?.value
 
     if (!sessionToken) {
       return NextResponse.json({ error: 'Sesión no encontrada' }, { status: 401, headers: response.headers })
