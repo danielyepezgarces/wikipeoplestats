@@ -32,8 +32,7 @@ import { useRouter } from "next/navigation"
 
 interface Session {
   id: number
-  user_id: number
-  token_hash: string
+  session_token: string
   expires_at: string
   origin_domain: string
   user_agent?: string
@@ -42,14 +41,14 @@ interface Session {
   is_active: boolean
   created_at: string
   last_used: string
-  is_current?: boolean
+  is_current: boolean
 }
 
 export function SessionManager() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [revoking, setRevoking] = useState<number | null>(null)
+  const [revoking, setRevoking] = useState<string | null>(null)
   const [revokingAll, setRevokingAll] = useState(false)
   const router = useRouter()
 
@@ -81,10 +80,10 @@ export function SessionManager() {
     return () => clearInterval(interval)
   }, [])
 
-  const revokeSession = async (sessionId: number) => {
-    setRevoking(sessionId)
+  const revokeSession = async (sessionToken: string) => {
+    setRevoking(sessionToken)
     try {
-      const response = await fetch(`/api/auth/sessions?sessionId=${sessionId}`, {
+      const response = await fetch(`/api/auth/sessions?session_token=${sessionToken}`, {
         method: "DELETE",
       })
 
@@ -321,8 +320,8 @@ export function SessionManager() {
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" disabled={revoking === session.id}>
-                          {revoking === session.id ? (
+                        <Button variant="destructive" size="sm" disabled={revoking === session.session_token}>
+                          {revoking === session.session_token ? (
                             <RefreshCw className="h-4 w-4 animate-spin" />
                           ) : (
                             <Trash2 className="h-4 w-4" />
@@ -339,7 +338,7 @@ export function SessionManager() {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => revokeSession(session.id)}>
+                          <AlertDialogAction onClick={() => revokeSession(session.session_token)}>
                             Revoke Session
                           </AlertDialogAction>
                         </AlertDialogFooter>
