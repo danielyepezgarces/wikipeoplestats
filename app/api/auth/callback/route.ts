@@ -176,7 +176,7 @@ function createAuthResponse(origin: string, sessionId: string, userData: any): N
   const maxAge = 30 * 24 * 60 * 60
   const response = NextResponse.redirect(`https://${origin}/dashboard`)
 
-  response.cookies.set("session_id", sessionId, {
+  response.cookies.set("session_token", sessionId, {
     domain: COOKIE_DOMAIN,
     path: "/",
     httpOnly: true,
