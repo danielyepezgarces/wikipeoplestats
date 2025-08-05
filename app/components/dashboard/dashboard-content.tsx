@@ -29,7 +29,9 @@ export function DashboardContent() {
   
   // Preparar datos del usuario para el dashboard
   const dashboardUser = {
-    ...user,
+    id: typeof user.id === 'string' ? parseInt(user.id, 10) : user.id,
+    name: user.name,
+    email: user.email ?? '',
     role: currentRole,
     chapter: activeContext.chapterName
   }
