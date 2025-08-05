@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useAuth } from "@/hooks/use-auth"
 import { 
   BarChart3, 
   Activity, 
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ContextSwitcher } from "./context-switcher"
 
 interface DefaultDashboardProps {
   user: {
@@ -28,6 +30,7 @@ interface DefaultDashboardProps {
 export function DefaultDashboard({ user }: DefaultDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const { getAvailableContexts } = useAuth()
 
   const chapterName = user.chapter || "Wikimedia Community"
 
@@ -154,6 +157,14 @@ export function DefaultDashboard({ user }: DefaultDashboardProps) {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Context Switcher */}
+          {getAvailableContexts().length > 1 && (
+            <div className="py-3 border-b border-gray-200 dark:border-gray-700">
+              <ContextSwitcher />
+            </div>
+          )}
+          
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <div>

@@ -29,19 +29,65 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Sesión inválida o expirada' }, { status: 401, headers: response.headers })
     }
 
-    const role = session.roles[0] || 'user'
+    // Obtener información completa de roles y chapters del usuario
+    const conn = await Database.getConnection()
+    
+    try {
+      // Obtener todos los roles del usuario con información de chapters
+      const [roleRows] = await conn.execute(`
+        SELECT 
+          r.name as role_name,
+          c.id as chapter_id,
+          c.name as chapter_name,
+          c.slug as chapter_slug
+        FROM user_roles ur
+        JOIN roles r ON ur.role_id = r.id
+        LEFT JOIN chapters c ON ur.chapter_id = c.id
+        WHERE ur.user_id = ? AND r.is_active = 1
+        ORDER BY 
+          CASE r.name 
+            WHEN 'super_admin' THEN 1
+            WHEN 'chapter_admin' THEN 2
+            WHEN 'community_admin' THEN 3
+            WHEN 'chapter_moderator' THEN 4
+            WHEN 'community_moderator' THEN 5
+            ELSE 6
+          END
+      `, [session.user_id])
+      
+      const userRoles = roleRows as any[]
+      const roles = userRoles.map(r => r.role_name)
+      const primaryRole = roles[0] || 'user'
+      
+      // Agrupar chapters por usuario
+      const chapters = userRoles
+        .filter(r => r.chapter_id)
+        .map(r => ({
+          id: r.chapter_id,
+          name: r.chapter_name,
+          slug: r.chapter_slug,
+          role: r.role_name
+        }))
+        .filter((chapter, index, self) => 
+          index === self.findIndex(c => c.id === chapter.id)
+        )
 
     return NextResponse.json({
       user: {
         id: session.user_id,
         name: session.username,
         email: session.email,
-        role,
-        roles: session.roles,
+        role: primaryRole,
+        roles: roles,
+        chapters: chapters,
         wikipediaUsername: session.username,
         avatarUrl: session.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(session.username)}&background=random&rounded=true`
       }
     }, { headers: response.headers })
+    
+    } finally {
+      conn.release()
+    }
   } catch (e) {
     console.error('Error interno:', e)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500, headers: response.headers })

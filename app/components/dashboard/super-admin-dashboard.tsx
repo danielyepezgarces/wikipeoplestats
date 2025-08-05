@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
 import {
   BarChart3,
   Users,
@@ -37,6 +38,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DashboardStats } from './admin/DashboardStats';
 import { UsersSection } from './admin/UsersSection';
 import { SuperAdminHeader } from './layout/SuperAdminHeader';
+import { ContextSwitcher } from './context-switcher';
 
 interface SuperAdminDashboardProps {
   user: {
@@ -58,6 +60,7 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('en')
+  const { getAvailableContexts } = useAuth()
 
   const recentActivities = [
     {
@@ -134,11 +137,19 @@ export function SuperAdminDashboard({ user }: SuperAdminDashboardProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-       <SuperAdminHeader user={user} currentLang={currentLang} />
+      <SuperAdminHeader user={user} currentLang={currentLang} />
 
       {/* Tabs Wrapper */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          
+          {/* Context Switcher */}
+          {getAvailableContexts().length > 1 && (
+            <div className="mb-4">
+              <ContextSwitcher />
+            </div>
+          )}
+          
           {/* Mobile dropdown */}
           <div className="lg:hidden">
             <select

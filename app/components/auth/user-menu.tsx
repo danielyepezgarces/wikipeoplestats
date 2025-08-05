@@ -18,6 +18,7 @@ interface UserMenuProps {
     name: string
     email: string
     role: string
+    roles?: string[]
     chapter?: string
   }
   onLogout: () => void
@@ -25,6 +26,8 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ user, onLogout, onDashboard }: UserMenuProps) {
+  const primaryRole = user.roles?.[0] || user.role
+  
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'super_admin':
@@ -86,14 +89,19 @@ export function UserMenu({ user, onLogout, onDashboard }: UserMenuProps) {
           <div className="flex flex-col space-y-1">
             <div className="flex items-center space-x-2">
               <p className="text-sm font-medium leading-none">{user.name}</p>
-              {getRoleIcon(user.role)}
+              {getRoleIcon(primaryRole)}
             </div>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {getRoleDisplayName(user.role)}
+              {getRoleDisplayName(primaryRole)}
             </p>
+            {user.roles && user.roles.length > 1 && (
+              <p className="text-xs leading-none text-blue-600 dark:text-blue-400">
+                +{user.roles.length - 1} more role{user.roles.length > 2 ? 's' : ''}
+              </p>
+            )}
             {user.chapter && (
               <p className="text-xs leading-none text-blue-600 dark:text-blue-400">
                 {user.chapter}

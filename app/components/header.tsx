@@ -255,6 +255,11 @@ export function Header({ currentLang, onLanguageChange }: HeaderProps) {
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                     {user.email}
                   </div>
+                  {user.roles && user.roles.length > 1 && (
+                    <div className="text-xs text-blue-600 dark:text-blue-400 mb-2">
+                      {user.roles.length} roles available
+                    </div>
+                  )}
                   <Button
                     variant="ghost"
                     className="w-full justify-start"

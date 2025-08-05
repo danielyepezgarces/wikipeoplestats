@@ -12,6 +12,11 @@ const pool = mysql.createPool({
   queueLimit: 0,
 })
 
+// Export the getConnection function first for imports
+export async function getConnection(): Promise<mysql.PoolConnection> {
+  return await pool.getConnection()
+}
+
 export interface User {
   id: number
   wikimedia_id: string | null
@@ -55,7 +60,7 @@ export interface SessionWithUser extends Session {
 
 export class Database {
   static async getConnection(): Promise<mysql.PoolConnection> {
-    return await pool.getConnection()
+    return await getConnection()
   }
 
   static async initializeTables(): Promise<void> {
@@ -355,7 +360,3 @@ export class Database {
   }
 }
 
-// Export the getConnection function for backward compatibility
-export async function getConnection(): Promise<mysql.PoolConnection> {
-  return await Database.getConnection()
-}
