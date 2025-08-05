@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SessionManager } from '@/lib/session-manager'
+import { Database } from '@/lib/database'
 
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin')
