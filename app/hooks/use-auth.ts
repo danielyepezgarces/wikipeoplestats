@@ -35,21 +35,6 @@ export function useAuth() {
     verifyAuth()
   }, [])
 
-  // Inicializar contexto activo cuando el usuario cambia
-  useEffect(() => {
-    if (user && !activeContext) {
-      // Determinar el contexto inicial basado en los roles del usuario
-      const primaryRole = getPrimaryRole(user.roles)
-      const primaryChapter = user.chapters?.[0]
-      
-      setActiveContext({
-        role: primaryRole,
-        chapterId: primaryChapter?.id,
-        chapterName: primaryChapter?.name
-      })
-    }
-  }, [user, activeContext])
-
   const getPrimaryRole = (roles: string[]): string => {
     // Orden de prioridad de roles
     const roleHierarchy = [
@@ -92,20 +77,71 @@ export function useAuth() {
         const userData = data.user
         
         // Asegurar que roles y chapters sean arrays
-        setUser({
+        const normalizedUser = {
           ...userData,
           roles: userData.roles || [userData.role],
           chapters: userData.chapters || []
-        })
+        }
+        
+        setUser(normalizedUser)
+        
+        // Inicializar contexto activo inmediatamente
+        initializeActiveContext(normalizedUser)
       } else {
         setUser(null)
+        setActiveContext(null)
       }
     } catch (error) {
       console.error('Error verificando autenticación:', error)
       setUser(null)
+      setActiveContext(null)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const initializeActiveContext = (userData: User) => {
+    // Intentar restaurar desde localStorage
+    const savedContext = localStorage.getItem('activeContext')
+    if (savedContext) {
+      try {
+        const parsed = JSON.parse(savedContext)
+        // Verificar que el contexto guardado sigue siendo válido
+        if (isValidContext(parsed, userData)) {
+          setActiveContext(parsed)
+          return
+        }
+      } catch (error) {
+        console.error('Error parsing saved context:', error)
+      }
+    }
+
+    // Si no hay contexto guardado válido, crear uno por defecto
+    const primaryRole = getPrimaryRole(userData.roles)
+    const primaryChapter = userData.chapters?.[0]
+    
+    const defaultContext: ActiveContext = {
+      role: primaryRole,
+      chapterId: primaryChapter?.id,
+      chapterName: primaryChapter?.name || (primaryRole === 'super_admin' ? 'Global Administration' : 'General Access')
+    }
+    
+    setActiveContext(defaultContext)
+    localStorage.setItem('activeContext', JSON.stringify(defaultContext))
+  }
+
+  const isValidContext = (context: ActiveContext, userData: User): boolean => {
+    // Verificar que el rol existe en los roles del usuario
+    if (!userData.roles.includes(context.role)) {
+      return false
+    }
+    
+    // Si tiene chapterId, verificar que el usuario tiene acceso a ese chapter
+    if (context.chapterId) {
+      return userData.chapters.some(chapter => chapter.id === context.chapterId)
+    }
+    
+    return true
   }
   
   const switchContext = (newContext: ActiveContext) => {
@@ -140,8 +176,9 @@ export function useAuth() {
     
     // Si no tiene chapters específicos pero tiene roles, agregar contexto general
     if (contexts.length === 0 && user.roles.length > 0) {
+      const primaryRole = getPrimaryRole(user.roles)
       contexts.push({
-        role: user.roles[0],
+        role: primaryRole,
         chapterId: undefined,
         chapterName: 'General Access'
       })
@@ -180,9 +217,9 @@ export function useAuth() {
   }
   
   const hasPermission = (permission: string) => {
-    if (!user) return false
+    if (!user || !activeContext) return false
     
-    const currentRole = activeContext?.role || user.role
+    const currentRole = activeContext.role
     
     const permissions = {
       super_admin: ['all'],

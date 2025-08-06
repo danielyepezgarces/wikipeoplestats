@@ -73,6 +73,13 @@ export async function GET(request: NextRequest) {
           index === self.findIndex(c => c.id === chapter.id)
         )
 
+    console.log('🔍 User verification result:', {
+      userId: session.user_id,
+      username: session.username,
+      roles: roles,
+      chapters: chapters,
+      primaryRole: primaryRole
+    })
     return NextResponse.json({
       user: {
         id: session.user_id,
