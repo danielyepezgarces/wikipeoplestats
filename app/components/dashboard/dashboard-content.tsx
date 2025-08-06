@@ -7,17 +7,49 @@ import { ModeratorDashboard } from '@/components/dashboard/moderator-dashboard'
 import { DefaultDashboard } from '@/components/dashboard/default-dashboard'
 import { ContextSwitcher } from '@/components/dashboard/context-switcher'
 import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Loader2 } from 'lucide-react'
 
 export function DashboardContent() {
-  const { user, activeContext, getAvailableContexts } = useAuth()
+  const { user, activeContext, getAvailableContexts, isLoading } = useAuth()
   
-  if (!user || !activeContext) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4" />
+            <Loader2 className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4" />
             <p className="text-muted-foreground">Loading dashboard...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Please log in to access the dashboard.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // No active context (shouldn't happen but safety check)
+  if (!activeContext) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-8 text-center">
+            <p className="text-muted-foreground">Initializing dashboard context...</p>
+            <p className="text-sm text-gray-500 mt-2">
+              User: {user.name} | Roles: {user.roles.join(', ')}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -41,21 +73,23 @@ export function DashboardContent() {
   
   // Renderizar dashboard basado en el rol activo
   const renderDashboard = () => {
+    console.log('Rendering dashboard for role:', currentRole, 'Context:', activeContext)
+    
     switch (currentRole) {
-    case 'super_admin':
-      return <SuperAdminDashboard user={dashboardUser} />
-    case 'chapter_admin':
-    case 'community_admin':
-      return <ChapterAdminDashboard user={dashboardUser} />
-    case 'chapter_moderator':
-    case 'community_moderator':
-      return <ModeratorDashboard user={dashboardUser} />
-    case 'chapter_partner':
-    case 'chapter_staff':
-    case 'chapter_affiliate':
-    case 'community_partner':
-    default:
-      return <DefaultDashboard user={dashboardUser} />
+      case 'super_admin':
+        return <SuperAdminDashboard user={dashboardUser} />
+      case 'chapter_admin':
+      case 'community_admin':
+        return <ChapterAdminDashboard user={dashboardUser} />
+      case 'chapter_moderator':
+      case 'community_moderator':
+        return <ModeratorDashboard user={dashboardUser} />
+      case 'chapter_partner':
+      case 'chapter_staff':
+      case 'chapter_affiliate':
+      case 'community_partner':
+      default:
+        return <DefaultDashboard user={dashboardUser} />
     }
   }
   

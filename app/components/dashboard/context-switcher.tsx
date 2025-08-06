@@ -26,8 +26,9 @@ export function ContextSwitcher() {
   
   const availableContexts = getAvailableContexts()
   
-  if (availableContexts.length <= 1) {
-    return null // No mostrar switcher si solo hay un contexto
+  // No mostrar si no hay contexto activo o solo hay uno
+  if (!activeContext || availableContexts.length <= 1) {
+    return null
   }
 
   const getRoleIcon = (role: string) => {
@@ -92,6 +93,7 @@ export function ContextSwitcher() {
   }
 
   const handleContextSwitch = (context: ActiveContext) => {
+    console.log('Switching to context:', context)
     switchContext(context)
     setIsOpen(false)
   }
@@ -104,12 +106,12 @@ export function ContextSwitcher() {
           className="flex items-center gap-2 min-w-[200px] justify-between"
         >
           <div className="flex items-center gap-2">
-            {getRoleIcon(activeContext?.role || '')}
+            {getRoleIcon(activeContext.role)}
             <div className="flex flex-col items-start">
               <span className="text-sm font-medium">
-                {getRoleDisplayName(activeContext?.role || '')}
+                {getRoleDisplayName(activeContext.role)}
               </span>
-              {activeContext?.chapterName && (
+              {activeContext.chapterName && (
                 <span className="text-xs text-muted-foreground">
                   {activeContext.chapterName}
                 </span>
@@ -154,8 +156,8 @@ export function ContextSwitcher() {
               </div>
             </div>
             
-            {activeContext?.role === context.role && 
-             activeContext?.chapterId === context.chapterId && (
+            {activeContext.role === context.role && 
+             activeContext.chapterId === context.chapterId && (
               <Check className="h-4 w-4 text-green-500" />
             )}
           </DropdownMenuItem>

@@ -132,6 +132,14 @@ export function DefaultDashboard({ user }: DefaultDashboardProps) {
         return 'Community Partner'
       case 'chapter_affiliate':
         return 'Community Affiliate'
+      case 'chapter_staff':
+        return 'Community Staff'
+      case 'chapter_moderator':
+        return 'Community Moderator'
+      case 'chapter_admin':
+        return 'Chapter Administrator'
+      case 'super_admin':
+        return 'Super Administrator'
       default:
         return 'Community Member'
     }
@@ -139,17 +147,25 @@ export function DefaultDashboard({ user }: DefaultDashboardProps) {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'chapter_partner':
+      case 'super_admin':
+        return 'bg-red-500'
+      case 'chapter_admin':
+        return 'bg-orange-500'
+      case 'chapter_moderator':
+        return 'bg-blue-500'
+      case 'chapter_staff':
         return 'bg-green-500'
+      case 'chapter_partner':
+        return 'bg-purple-500'
       case 'chapter_affiliate':
         return 'bg-gray-500'
       default:
-        return 'bg-blue-500'
+        return 'bg-gray-400'
     }
   }
 
   const handleLogout = () => {
-    console.log("Cerrando sesión...")
+    // This will be handled by the auth hook
   }
 
   return (
@@ -157,14 +173,6 @@ export function DefaultDashboard({ user }: DefaultDashboardProps) {
       {/* Header */}
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* Context Switcher */}
-          {getAvailableContexts().length > 1 && (
-            <div className="py-3 border-b border-gray-200 dark:border-gray-700">
-              <ContextSwitcher />
-            </div>
-          )}
-          
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <div>
