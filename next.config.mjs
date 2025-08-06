@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    allowedallowedDevOrigins: [
+      'http://localhost:3030',
+      '*.wikipeoplestats.org',
+      'https://*.wikipeoplestats.org',
+    ],
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
