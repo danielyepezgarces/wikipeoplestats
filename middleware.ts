@@ -4,6 +4,8 @@ import { SessionManager } from "@/lib/session-manager"
 import { JWTManager } from "@/lib/jwt"
 import { Database } from "@/lib/database"
 
+export const runtime = 'nodejs'; // Force Node.js runtime
+
 export async function middleware(request: NextRequest) {
   const origin = request.headers.get("origin")
   const hostname = request.nextUrl.hostname
