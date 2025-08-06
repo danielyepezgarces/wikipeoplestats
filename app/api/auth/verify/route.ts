@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SessionManager } from '@/lib/session-manager'
 import { Database } from '@/lib/database'
 
+export const runtime = 'nodejs' // Add this to your route file
+
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin')
   const response = new NextResponse()
