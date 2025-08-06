@@ -61,20 +61,28 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // ✅ Usar la API interna de verify en lugar de acceso directo a BD
+    // ✅ Usar la API interna de verify - con URL absoluta para evitar problemas
     try {
-      const verifyUrl = new URL("/api/auth/verify", request.url)
+      // Construir URL absoluta
+      const protocol = request.nextUrl.protocol
+      const host = request.headers.get("host") || request.nextUrl.host
+      const verifyUrl = `${protocol}//${host}/api/auth/verify`
+      
+      console.log(`Calling verify API at: ${verifyUrl}`)
       
       const verifyResponse = await fetch(verifyUrl, {
         method: "GET",
         headers: {
           "Cookie": `session_token=${sessionToken}`,
           "Content-Type": "application/json",
+          "User-Agent": "NextJS-Middleware",
           // Agregar un header para identificar que viene del middleware
           "X-Middleware-Request": "true"
         },
         // Importante: no usar redirect automático
-        redirect: "manual"
+        redirect: "manual",
+        // Agregar timeout para evitar hanging
+        signal: AbortSignal.timeout(5000) // 5 segundos timeout
       })
 
       // Si la verificación falla
