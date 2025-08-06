@@ -2,6 +2,8 @@
 import { Database } from './database'
 import crypto from 'crypto'
 
+export const runtime = 'nodejs'; // Force Node.js runtime
+
 export interface SessionData {
   id: number
   user_id: number
