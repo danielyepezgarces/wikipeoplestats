@@ -13,6 +13,9 @@ import { Loader2 } from 'lucide-react'
 export function DashboardContent() {
   const { user, activeContext, getAvailableContexts, isLoading } = useAuth()
   
+  // Debug logging
+  console.log('DashboardContent render:', { user, activeContext, isLoading })
+  
   // Loading state
   if (isLoading) {
     return (
@@ -42,10 +45,12 @@ export function DashboardContent() {
 
   // No active context (shouldn't happen but safety check)
   if (!activeContext) {
+    console.log('No active context, available contexts:', getAvailableContexts())
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
+            <Loader2 className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4" />
             <p className="text-muted-foreground">Initializing dashboard context...</p>
             <p className="text-sm text-gray-500 mt-2">
               User: {user.name} | Roles: {user.roles.join(', ')}
@@ -58,6 +63,8 @@ export function DashboardContent() {
 
   const availableContexts = getAvailableContexts()
   const currentRole = activeContext.role
+  
+  console.log('Rendering dashboard for:', { currentRole, activeContext, availableContexts })
   
   // Preparar datos del usuario para el dashboard
   const dashboardUser = {

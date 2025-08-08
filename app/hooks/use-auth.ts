@@ -61,6 +61,7 @@ export function useAuth() {
   const verifyAuth = async () => {
     try {
       setIsLoading(true)
+      console.log('Starting auth verification...')
       
       // Intentar verificar con el dominio de auth
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'
@@ -75,6 +76,7 @@ export function useAuth() {
       if (response.ok) {
         const data = await response.json()
         const userData = data.user
+        console.log('Auth verification successful:', userData)
         
         // Asegurar que roles y chapters sean arrays
         const normalizedUser = {
@@ -86,8 +88,10 @@ export function useAuth() {
         setUser(normalizedUser)
         
         // Inicializar contexto activo inmediatamente
+        console.log('Initializing context for normalized user:', normalizedUser)
         initializeActiveContext(normalizedUser)
       } else {
+        console.log('Auth verification failed:', response.status)
         setUser(null)
         setActiveContext(null)
       }
@@ -96,20 +100,27 @@ export function useAuth() {
       setUser(null)
       setActiveContext(null)
     } finally {
+      console.log('Auth verification completed')
       setIsLoading(false)
     }
   }
 
   const initializeActiveContext = (userData: User) => {
+    console.log('Initializing active context for user:', userData)
+    
     // Intentar restaurar desde localStorage
     const savedContext = localStorage.getItem('activeContext')
     if (savedContext) {
       try {
         const parsed = JSON.parse(savedContext)
+        console.log('Found saved context:', parsed)
         // Verificar que el contexto guardado sigue siendo válido
         if (isValidContext(parsed, userData)) {
+          console.log('Saved context is valid, using it')
           setActiveContext(parsed)
           return
+        } else {
+          console.log('Saved context is invalid, creating new one')
         }
       } catch (error) {
         console.error('Error parsing saved context:', error)
@@ -126,6 +137,7 @@ export function useAuth() {
       chapterName: primaryChapter?.name || (primaryRole === 'super_admin' ? 'Global Administration' : 'General Access')
     }
     
+    console.log('Setting default context:', defaultContext)
     setActiveContext(defaultContext)
     localStorage.setItem('activeContext', JSON.stringify(defaultContext))
   }
