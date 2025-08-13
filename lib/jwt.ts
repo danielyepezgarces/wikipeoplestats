@@ -1,196 +1,179 @@
 import jwt from "jsonwebtoken"
-import crypto from "crypto"
+import { randomBytes } from "crypto"
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m" // Tokens más cortos para mayor seguridad
+const JWT_SECRET = process.env.JWT_SECRET
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m"
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d"
 
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required")
+}
+
+// Validar fortaleza del JWT_SECRET en producción
+if (process.env.NODE_ENV === "production" && JWT_SECRET.length < 32) {
+  throw new Error("JWT_SECRET must be at least 32 characters long in production")
+}
+
 export interface JWTPayload {
-  userId: string
+  userId: number
   username: string
-  role?: string
-  tokenType: "access" | "refresh"
-  jti: string // JWT ID para tracking
-  iat?: number
-  exp?: number
+  email?: string
+  roles?: string[]
+  jti: string
+  iat: number
+  exp: number
+  type: "access" | "refresh"
 }
 
 export interface TokenPair {
   accessToken: string
   refreshToken: string
-  expiresIn: number
+  accessTokenExpiry: number
+  refreshTokenExpiry: number
 }
 
-export class JWTManager {
-  static generateTokenPair(payload: {
-    userId: string
-    username: string
-    role?: string
-  }): TokenPair {
-    const jti = crypto.randomUUID()
+/**
+ * Genera un identificador único para el token (JTI)
+ */
+export function generateJTI(): string {
+  return randomBytes(16).toString("hex")
+}
 
-    // Access Token (corta duración)
-    const accessToken = jwt.sign(
-      {
-        ...payload,
-        tokenType: "access",
-        jti: jti + "_access",
-      },
-      JWT_SECRET,
-      {
-        expiresIn: JWT_EXPIRES_IN,
-        issuer: "wikipeoplestats",
-        audience: "wikipeoplestats-users",
-      },
-    )
+/**
+ * Crea un access token JWT
+ */
+export function createAccessToken(payload: {
+  userId: number
+  username: string
+  email?: string
+  roles?: string[]
+}): { token: string; jti: string; expiresAt: number } {
+  const jti = generateJTI()
+  const expiresAt = Math.floor(Date.now() / 1000) + 15 * 60 // 15 minutos
 
-    // Refresh Token (larga duración)
-    const refreshToken = jwt.sign(
-      {
-        userId: payload.userId,
-        username: payload.username,
-        tokenType: "refresh",
-        jti: jti + "_refresh",
-      },
-      JWT_SECRET,
-      {
-        expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-        issuer: "wikipeoplestats",
-        audience: "wikipeoplestats-users",
-      },
-    )
-
-    // Calcular tiempo de expiración en segundos
-    const expiresIn = this.parseExpirationTime(JWT_EXPIRES_IN)
-
-    return {
-      accessToken,
-      refreshToken,
-      expiresIn,
-    }
+  const tokenPayload: Omit<JWTPayload, "iat" | "exp"> = {
+    userId: payload.userId,
+    username: payload.username,
+    email: payload.email,
+    roles: payload.roles || [],
+    jti,
+    type: "access",
   }
 
-  static verifyToken(token: string, expectedType?: "access" | "refresh"): JWTPayload | null {
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET, {
-        issuer: "wikipeoplestats",
-        audience: "wikipeoplestats-users",
-      }) as JWTPayload
+  const token = jwt.sign(tokenPayload, JWT_SECRET!, {
+    expiresIn: JWT_EXPIRES_IN,
+    issuer: "wikipeoplestats",
+    audience: "wikipeoplestats-users",
+  })
 
-      // Verificar tipo de token si se especifica
-      if (expectedType && decoded.tokenType !== expectedType) {
-        console.error(`Expected ${expectedType} token, got ${decoded.tokenType}`)
-        return null
-      }
+  return { token, jti, expiresAt }
+}
 
-      return decoded
-    } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        console.error("JWT token expired")
-      } else if (error instanceof jwt.JsonWebTokenError) {
-        console.error("JWT token invalid:", error.message)
-      } else {
-        console.error("JWT verification failed:", error)
-      }
-      return null
-    }
+/**
+ * Crea un refresh token JWT
+ */
+export function createRefreshToken(payload: {
+  userId: number
+  username: string
+}): { token: string; jti: string; expiresAt: number } {
+  const jti = generateJTI()
+  const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 // 7 días
+
+  const tokenPayload: Omit<JWTPayload, "iat" | "exp"> = {
+    userId: payload.userId,
+    username: payload.username,
+    jti,
+    type: "refresh",
   }
 
-  static refreshAccessToken(refreshToken: string): string | null {
-    const decoded = this.verifyToken(refreshToken, "refresh")
-    if (!decoded) {
-      return null
-    }
+  const token = jwt.sign(tokenPayload, JWT_SECRET!, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+    issuer: "wikipeoplestats",
+    audience: "wikipeoplestats-users",
+  })
 
-    // Generar nuevo access token
-    const newAccessToken = jwt.sign(
-      {
-        userId: decoded.userId,
-        username: decoded.username,
-        role: decoded.role,
-        tokenType: "access",
-        jti: decoded.jti.replace("_refresh", "_access_new"),
-      },
-      JWT_SECRET,
-      {
-        expiresIn: JWT_EXPIRES_IN,
-        issuer: "wikipeoplestats",
-        audience: "wikipeoplestats-users",
-      },
-    )
+  return { token, jti, expiresAt }
+}
 
-    return newAccessToken
-  }
+/**
+ * Crea un par de tokens (access + refresh)
+ */
+export function createTokenPair(payload: {
+  userId: number
+  username: string
+  email?: string
+  roles?: string[]
+}): TokenPair {
+  const accessTokenData = createAccessToken(payload)
+  const refreshTokenData = createRefreshToken({
+    userId: payload.userId,
+    username: payload.username,
+  })
 
-  static hashToken(token: string): string {
-    return crypto.createHash("sha256").update(token).digest("hex")
-  }
-
-  static getTokenExpiration(token: string): Date | null {
-    try {
-      const decoded = jwt.decode(token) as JWTPayload
-      if (decoded && decoded.exp) {
-        return new Date(decoded.exp * 1000)
-      }
-      return null
-    } catch (error) {
-      return null
-    }
-  }
-
-  static getTokenId(token: string): string | null {
-    try {
-      const decoded = jwt.decode(token) as JWTPayload
-      return decoded?.jti || null
-    } catch (error) {
-      return null
-    }
-  }
-
-  static isTokenExpired(token: string): boolean {
-    const expiration = this.getTokenExpiration(token)
-    if (!expiration) return true
-    return expiration.getTime() < Date.now()
-  }
-
-  private static parseExpirationTime(timeString: string): number {
-    const match = timeString.match(/^(\d+)([smhd])$/)
-    if (!match) return 900 // 15 minutos por defecto
-
-    const value = Number.parseInt(match[1])
-    const unit = match[2]
-
-    switch (unit) {
-      case "s":
-        return value
-      case "m":
-        return value * 60
-      case "h":
-        return value * 60 * 60
-      case "d":
-        return value * 60 * 60 * 24
-      default:
-        return 900
-    }
-  }
-
-  // Método para validar la fortaleza del JWT_SECRET
-  static validateSecretStrength(): boolean {
-    if (!JWT_SECRET || JWT_SECRET === "your-secret-key") {
-      console.error("⚠️  JWT_SECRET is not set or using default value. This is insecure!")
-      return false
-    }
-
-    if (JWT_SECRET.length < 32) {
-      console.error("⚠️  JWT_SECRET should be at least 32 characters long for security")
-      return false
-    }
-
-    return true
+  return {
+    accessToken: accessTokenData.token,
+    refreshToken: refreshTokenData.token,
+    accessTokenExpiry: accessTokenData.expiresAt,
+    refreshTokenExpiry: refreshTokenData.expiresAt,
   }
 }
 
-// Validar la configuración al importar el módulo
-if (process.env.NODE_ENV === "production") {
-  JWTManager.validateSecretStrength()
+/**
+ * Verifica y decodifica un JWT
+ */
+export function verifyToken(token: string): JWTPayload | null {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET!, {
+      issuer: "wikipeoplestats",
+      audience: "wikipeoplestats-users",
+    }) as JWTPayload
+
+    return decoded
+  } catch (error) {
+    console.error("JWT verification failed:", error)
+    return null
+  }
+}
+
+/**
+ * Decodifica un JWT sin verificar (útil para obtener información expirada)
+ */
+export function decodeToken(token: string): JWTPayload | null {
+  try {
+    const decoded = jwt.decode(token) as JWTPayload
+    return decoded
+  } catch (error) {
+    console.error("JWT decode failed:", error)
+    return null
+  }
+}
+
+/**
+ * Verifica si un token está expirado
+ */
+export function isTokenExpired(token: string): boolean {
+  const decoded = decodeToken(token)
+  if (!decoded) return true
+
+  const now = Math.floor(Date.now() / 1000)
+  return decoded.exp < now
+}
+
+/**
+ * Obtiene el tiempo restante de un token en segundos
+ */
+export function getTokenTimeRemaining(token: string): number {
+  const decoded = decodeToken(token)
+  if (!decoded) return 0
+
+  const now = Math.floor(Date.now() / 1000)
+  return Math.max(0, decoded.exp - now)
+}
+
+/**
+ * Verifica si un token necesita ser renovado (menos de 5 minutos restantes)
+ */
+export function shouldRefreshToken(token: string): boolean {
+  const timeRemaining = getTokenTimeRemaining(token)
+  return timeRemaining < 300 // 5 minutos
 }
