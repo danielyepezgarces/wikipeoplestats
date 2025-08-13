@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     // Generar header de autorización
     const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData))
 
-    console.log("🔐 Auth header generated")
+    console.log("🔐 Auth header generated:", JSON.stringify(authHeader, null, 2))
 
     // Hacer la solicitud
     const response = await fetch(requestData.url, {
@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
     })
 
     console.log("📥 Response status:", response.status)
+    console.log("📥 Response headers:", Object.fromEntries(response.headers.entries()))
 
     if (!response.ok) {
       const errorText = await response.text()
