@@ -1,4 +1,5 @@
 import mysql from "mysql2/promise"
+import { JWTManager } from "./jwt"
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
@@ -53,15 +54,6 @@ export interface SessionWithUser extends Session {
   avatar_url?: string
 }
 
-export interface TokenBlacklist {
-  id: number
-  token_hash: string
-  user_id: number
-  revoked_at: string
-  expires_at: string
-  reason: string
-}
-
 export class Database {
   static async getConnection(): Promise<mysql.PoolConnection> {
     return await pool.getConnection()
@@ -84,26 +76,7 @@ export class Database {
         ADD COLUMN IF NOT EXISTS device_info TEXT NULL,
         ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
         ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
-        ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active),
-        ADD INDEX IF NOT EXISTS idx_token_hash (token_hash),
-        ADD INDEX IF NOT EXISTS idx_user_expires (user_id, expires_at),
-        ADD INDEX IF NOT EXISTS idx_active_expires (is_active, expires_at)
-      `)
-
-      // Crear tabla de blacklist de tokens
-      await conn.execute(`
-        CREATE TABLE IF NOT EXISTS token_blacklist (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          token_hash VARCHAR(255) NOT NULL,
-          user_id INT NOT NULL,
-          revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          expires_at TIMESTAMP NOT NULL,
-          reason VARCHAR(255) DEFAULT 'manual_revocation',
-          INDEX idx_token_hash (token_hash),
-          INDEX idx_user_id (user_id),
-          INDEX idx_expires_at (expires_at),
-          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
+        ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active)
       `)
     } finally {
       conn.release()
@@ -142,11 +115,12 @@ export class Database {
   }): Promise<User> {
     const conn = await this.getConnection()
     try {
-      const wikimediaId = data.wikimedia_id || null
-      const email = data.email || null
-      const avatarUrl = data.avatar_url || null
-      const registrationDate = data.registration_date || null
-      const isClaimed = data.is_claimed !== undefined ? data.is_claimed : false
+      // Ensure all optional parameters are properly converted to null if undefined
+      const wikimediaId = data.wikimedia_id ?? null
+      const email = data.email ?? null
+      const avatarUrl = data.avatar_url ?? null
+      const registrationDate = data.registration_date ?? null
+      const isClaimed = data.is_claimed ?? false
 
       const [result] = await conn.execute(
         `INSERT INTO users (wikimedia_id, username, email, avatar_url, registration_date, is_claimed, created_at, updated_at, is_active)
@@ -167,7 +141,7 @@ export class Database {
   static async claimUserAccount(userId: number, wikimediaId: string, email?: string): Promise<User | null> {
     const conn = await this.getConnection()
     try {
-      const emailValue = email || null
+      const emailValue = email ?? null
       await conn.execute(
         `UPDATE users 
          SET wikimedia_id = ?, email = COALESCE(?, email), is_claimed = TRUE, updated_at = NOW()
@@ -224,9 +198,10 @@ export class Database {
   }): Promise<Session> {
     const conn = await this.getConnection()
     try {
-      const userAgent = data.user_agent || null
-      const ipAddress = data.ip_address || null
-      const deviceInfo = data.device_info || null
+      // Use nullish coalescing operator to ensure proper null values
+      const userAgent = data.user_agent ?? null
+      const ipAddress = data.ip_address ?? null
+      const deviceInfo = data.device_info ?? null
 
       const [result] = await conn.execute(
         `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, device_info, is_active, created_at, last_used)
@@ -281,27 +256,6 @@ export class Database {
         [userId],
       )
       return rows as SessionWithUser[]
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async getUserActiveSessionsExcept(userId: number, exceptSessionId: number | null): Promise<Session[]> {
-    const conn = await this.getConnection()
-    try {
-      let query = `SELECT * FROM sessions 
-                   WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()`
-      const params: any[] = [userId]
-
-      if (exceptSessionId) {
-        query += " AND id != ?"
-        params.push(exceptSessionId)
-      }
-
-      query += " ORDER BY last_used DESC"
-
-      const [rows] = await conn.execute(query, params)
-      return rows as Session[]
     } finally {
       conn.release()
     }
@@ -401,17 +355,14 @@ export class Database {
     }
   }
 
-  // Token Blacklist Methods
   static async blacklistToken(tokenHash: string, userId: number, reason = "manual_revocation"): Promise<void> {
     const conn = await this.getConnection()
     try {
-      // Calcular la fecha de expiración basada en el token original
-      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días por defecto
-
       await conn.execute(
-        `INSERT INTO token_blacklist (token_hash, user_id, expires_at, reason)
-         VALUES (?, ?, ?, ?)`,
-        [tokenHash, userId, expiry, reason],
+        `INSERT INTO token_blacklist (token_hash, user_id, reason, created_at) 
+         VALUES (?, ?, ?, NOW()) 
+         ON DUPLICATE KEY UPDATE reason = VALUES(reason)`,
+        [tokenHash, userId, reason],
       )
     } finally {
       conn.release()
@@ -421,44 +372,43 @@ export class Database {
   static async isTokenBlacklisted(token: string): Promise<boolean> {
     const conn = await this.getConnection()
     try {
-      // Hash the token to compare with stored hashes
-      const crypto = require("crypto")
-      const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
-
-      const [rows] = await conn.execute("SELECT id FROM token_blacklist WHERE token_hash = ? AND expires_at > NOW()", [
-        tokenHash,
-      ])
-      const results = rows as any[]
-      return results.length > 0
+      const tokenHash = JWTManager.hashToken(token)
+      const [rows] = await conn.execute("SELECT 1 FROM token_blacklist WHERE token_hash = ?", [tokenHash])
+      return (rows as any[]).length > 0
     } finally {
       conn.release()
     }
   }
 
-  static async cleanupExpiredBlacklistedTokens(): Promise<void> {
+  static async getUserActiveSessionsExcept(userId: number, exceptSessionId?: number): Promise<Session[]> {
     const conn = await this.getConnection()
     try {
-      await conn.execute("DELETE FROM token_blacklist WHERE expires_at < NOW()")
-    } finally {
-      conn.release()
-    }
-  }
+      let query = `SELECT * FROM sessions 
+                   WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()`
+      const params: any[] = [userId]
 
-  static async getBlacklistedTokens(userId?: number): Promise<TokenBlacklist[]> {
-    const conn = await this.getConnection()
-    try {
-      let query = "SELECT * FROM token_blacklist WHERE expires_at > NOW()"
-      const params: any[] = []
-
-      if (userId) {
-        query += " AND user_id = ?"
-        params.push(userId)
+      if (exceptSessionId) {
+        query += " AND id != ?"
+        params.push(exceptSessionId)
       }
 
-      query += " ORDER BY revoked_at DESC"
+      query += " ORDER BY last_used DESC"
 
       const [rows] = await conn.execute(query, params)
-      return rows as TokenBlacklist[]
+      return rows as Session[]
+    } finally {
+      conn.release()
+    }
+  }
+
+  static async cleanupExpiredTokens(): Promise<void> {
+    const conn = await this.getConnection()
+    try {
+      // Remove blacklisted tokens older than 30 days
+      await conn.execute("DELETE FROM token_blacklist WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)")
+
+      // Remove expired sessions
+      await conn.execute("DELETE FROM sessions WHERE expires_at < NOW()")
     } finally {
       conn.release()
     }

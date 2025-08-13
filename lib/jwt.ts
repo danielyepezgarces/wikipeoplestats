@@ -5,10 +5,10 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d"
 
 export interface JWTPayload {
-  userId: string
-  sessionId?: string
+  userId: number
   username: string
-  role?: string
+  email?: string
+  sessionId?: number
   iat?: number
   exp?: number
 }
@@ -28,7 +28,6 @@ export class JWTManager {
         issuer: "wikipeoplestats",
         audience: "wikipeoplestats-users",
       }) as JWTPayload
-
       return decoded
     } catch (error) {
       console.error("JWT verification failed:", error)
@@ -50,5 +49,11 @@ export class JWTManager {
     } catch (error) {
       return null
     }
+  }
+
+  static isTokenExpired(token: string): boolean {
+    const expiration = this.getTokenExpiration(token)
+    if (!expiration) return true
+    return expiration < new Date()
   }
 }

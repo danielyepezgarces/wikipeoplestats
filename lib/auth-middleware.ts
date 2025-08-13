@@ -1,93 +1,66 @@
-// lib/auth-middleware.ts
-import { NextRequest } from 'next/server'
-import jwt from 'jsonwebtoken'
-import { RoleManager } from './role-manager'
+import { NextRequest, NextResponse } from "next/server"
+import { JWTManager } from "./jwt"
+import { Database } from "./database"
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
-
-export interface AuthContext {
-  userId: number
+export interface AuthUser {
+  id: number
   username: string
   email?: string
+  roles: string[]
 }
 
-// Extraer y verificar token de autenticación
-export async function getAuthContext(request: NextRequest): Promise<AuthContext | null> {
+export async function verifyAuth(request: NextRequest): Promise<AuthUser | null> {
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth_token')?.value
-
+    const token = request.cookies.get("auth_token")?.value
+    
     if (!token) {
       return null
     }
 
-    const payload = jwt.verify(token, JWT_SECRET) as any
-    
+    // Verify JWT token
+    const decoded = JWTManager.verifyToken(token)
+    if (!decoded) {
+      return null
+    }
+
+    // Check if token is blacklisted
+    const isBlacklisted = await Database.isTokenBlacklisted(token)
+    if (isBlacklisted) {
+      return null
+    }
+
+    // Get user from database to ensure they still exist and are active
+    const user = await Database.getUserById(decoded.userId)
+    if (!user || !user.is_active) {
+      return null
+    }
+
+    // Update session last used time
+    const tokenHash = JWTManager.hashToken(token)
+    const session = await Database.getSessionByTokenHash(tokenHash)
+    if (session) {
+      await Database.updateSessionLastUsed(session.id)
+    }
+
     return {
-      userId: payload.userId,
-      username: payload.username,
-      email: payload.email
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      roles: [] // This would be populated from user roles query
     }
   } catch (error) {
+    console.error("Auth verification error:", error)
     return null
   }
 }
 
-// Middleware para requerir autenticación
-export async function requireAuth(request: NextRequest): Promise<AuthContext> {
-  const auth = await getAuthContext(request)
-  if (!auth) {
-    throw new Error('Authentication required')
-  }
-  return auth
-}
-
-// Middleware para requerir rol específico
-export async function requireRole(
-  request: NextRequest, 
-  requiredRole: string, 
-  chapterId?: number
-): Promise<AuthContext> {
-  const auth = await requireAuth(request)
-  await RoleManager.requireRole(auth.userId, requiredRole, chapterId)
-  return auth
-}
-
-// Middleware para requerir cualquiera de varios roles
-export async function requireAnyRole(
-  request: NextRequest, 
-  requiredRoles: string[], 
-  chapterId?: number
-): Promise<AuthContext> {
-  const auth = await requireAuth(request)
-  await RoleManager.requireAnyRole(auth.userId, requiredRoles, chapterId)
-  return auth
-}
-
-// Verificar permisos específicos
-export async function checkPermission(
-  request: NextRequest,
-  permission: 'manage_users' | 'moderate' | 'view_stats' | 'super_admin',
-  chapterId?: number
-): Promise<{ auth: AuthContext; hasPermission: boolean }> {
-  const auth = await requireAuth(request)
+export function createAuthResponse(user: AuthUser | null, response?: NextResponse): NextResponse {
+  const res = response || NextResponse.json({ user })
   
-  let hasPermission = false
-  
-  switch (permission) {
-    case 'super_admin':
-      hasPermission = await RoleManager.hasRole(auth.userId, 'super_admin')
-      break
-    case 'manage_users':
-      hasPermission = await RoleManager.hasAnyRole(auth.userId, ['super_admin', 'chapter_admin'], chapterId)
-      break
-    case 'moderate':
-      hasPermission = await RoleManager.canModerate(auth.userId, chapterId)
-      break
-    case 'view_stats':
-      hasPermission = await RoleManager.canViewStats(auth.userId, chapterId)
-      break
+  if (!user) {
+    // Clear auth cookie if user is not authenticated
+    res.cookies.delete("auth_token")
   }
-
-  return { auth, hasPermission }
+  
+  return res
 }
