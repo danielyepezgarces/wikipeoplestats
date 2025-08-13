@@ -39,6 +39,8 @@ async function getAccessToken(
   )
 
   try {
+    console.log("🔄 Exchanging request token for access token...")
+
     const response = await fetch(requestData.url, {
       method: "POST",
       headers: {
@@ -49,11 +51,14 @@ async function getAccessToken(
     })
 
     if (!response.ok) {
-      console.error("❌ Token exchange failed:", await response.text())
+      const errorText = await response.text()
+      console.error("❌ Token exchange failed:", errorText)
       return null
     }
 
     const text = await response.text()
+    console.log("📄 Token exchange response:", text)
+
     const params = new URLSearchParams(text)
 
     return {
@@ -78,6 +83,8 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
   )
 
   try {
+    console.log("👤 Getting user identity...")
+
     const response = await fetch(requestData.url, {
       method: "POST",
       headers: {
@@ -87,14 +94,26 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
     })
 
     if (!response.ok) {
-      console.error("❌ Failed to get user identity:", await response.text())
+      const errorText = await response.text()
+      console.error("❌ Failed to get user identity:", errorText)
       return null
     }
 
     const jwtEncoded = await response.text()
+    console.log("🔐 Received JWT from Wikipedia")
+
     const decoded: any = jwt.decode(jwtEncoded)
 
-    if (!decoded || !decoded.sub || !decoded.username) return null
+    if (!decoded || !decoded.sub || !decoded.username) {
+      console.error("❌ Invalid JWT payload:", decoded)
+      return null
+    }
+
+    console.log("✅ User identity decoded:", {
+      id: decoded.sub,
+      username: decoded.username,
+      email: decoded.email || null,
+    })
 
     return {
       id: decoded.sub,
@@ -120,24 +139,31 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const oauth_token = searchParams.get("oauth_token")
   const oauth_verifier = searchParams.get("oauth_verifier")
-  const origin = searchParams.get("origin") || DEFAULT_ORIGIN
+
+  // Get origin from cookie or use default
+  const origin = request.cookies.get("oauth_origin")?.value || DEFAULT_ORIGIN
 
   try {
     // Inicializar tablas si es necesario
     await Database.initializeTables()
 
+    console.log("📋 Callback parameters:")
+    console.log("  - oauth_token:", oauth_token ? oauth_token.substring(0, 8) + "..." : "missing")
+    console.log("  - oauth_verifier:", oauth_verifier ? oauth_verifier.substring(0, 8) + "..." : "missing")
+    console.log("  - origin:", origin)
+
     if (!oauth_token || !oauth_verifier) {
-      throw new Error("Missing required parameters")
+      throw new Error("Missing required OAuth parameters")
     }
 
     const oauth_token_secret = request.cookies.get("oauth_token_secret")?.value
     if (!oauth_token_secret) {
-      throw new Error("Session expired, please try again")
+      throw new Error("OAuth token secret not found in cookies - session may have expired")
     }
 
     console.log("🔑 Getting access token...")
     const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
-    if (!accessToken) throw new Error("Failed to authenticate with Wikipedia")
+    if (!accessToken) throw new Error("Failed to exchange tokens with Wikipedia")
 
     console.log("👤 Getting user info...")
     const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
@@ -154,7 +180,7 @@ export async function GET(request: NextRequest) {
         console.log("🔗 Claiming existing unclaimed account...")
         user = await Database.claimUserAccount(unclaimedUser.id, userInfo.id, userInfo.email || undefined)
         if (!user) {
-          throw new Error("Failed to claim account")
+          throw new Error("Failed to claim existing account")
         }
       } else {
         console.log("🆕 Creating new user...")
@@ -176,7 +202,7 @@ export async function GET(request: NextRequest) {
       console.log("🔗 Claiming existing account...")
       user = await Database.claimUserAccount(user.id, userInfo.id, userInfo.email || undefined)
       if (!user) {
-        throw new Error("Failed to claim account")
+        throw new Error("Failed to claim existing account")
       }
     }
 
@@ -201,13 +227,13 @@ export async function GET(request: NextRequest) {
       await Database.storeRefreshToken({
         user_id: user.id,
         token_jti: refreshTokenDecoded.jti,
-        expires_at: new Date(refreshTokenDecoded.exp * 1000).toISOString(),
+        expires_at: new Date(refreshTokenDecoded.exp! * 1000).toISOString(),
         user_agent: request.headers.get("user-agent") || undefined,
         ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
       })
     }
 
-    console.log("✅ Auth successful. Redirecting...")
+    console.log("✅ Auth successful. Redirecting to:", `https://${origin}/dashboard`)
     const response = NextResponse.redirect(`https://${origin}/dashboard`)
 
     // Set secure cookies
@@ -229,12 +255,13 @@ export async function GET(request: NextRequest) {
       domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
-    // Clear OAuth secret cookie
+    // Clear OAuth cookies
     response.cookies.delete("oauth_token_secret")
+    response.cookies.delete("oauth_origin")
 
     return response
   } catch (error: unknown) {
-    console.error("🔥 Unhandled error in auth callback:", error)
+    console.error("🔥 Callback error:", error)
 
     const errorUrl = new URL(`https://${origin}/login`)
     errorUrl.searchParams.set("error", "authentication_failed")
