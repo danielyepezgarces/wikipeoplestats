@@ -1,28 +1,48 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { checkPermission } from "@/lib/auth-middleware"
+// app/api/auth/check-permission/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { checkPermission } from '@/lib/auth-middleware'
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { permission, chapter_id } = await request.json()
-
+    const { searchParams } = new URL(request.url)
+    const permission = searchParams.get('permission')
+    const chapterIdParam = searchParams.get('chapterId')
+    
     if (!permission) {
-      return NextResponse.json({ error: "Permission parameter is required" }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Permission parameter is required' },
+        { status: 400 }
+      )
     }
 
-    const { auth, hasPermission } = await checkPermission(request, permission, chapter_id)
+    const chapterId = chapterIdParam ? parseInt(chapterIdParam) : undefined
+
+    // Verificar el permiso
+    const { auth, hasPermission } = await checkPermission(
+      request, 
+      permission as any, 
+      chapterId
+    )
 
     return NextResponse.json({
-      user_id: auth.user.id,
-      username: auth.user.username,
+      userId: auth.userId,
       permission,
-      chapter_id,
-      has_permission: hasPermission,
+      chapterId,
+      hasPermission
     })
+
   } catch (error) {
-    console.error("Permission check error:", error)
+    
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message.includes('Authentication') ? 401 : 500 }
+      )
+    }
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Authentication required" },
-      { status: 401 },
+      { error: 'Internal server error' },
+      { status: 500 }
     )
   }
 }

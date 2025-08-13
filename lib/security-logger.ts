@@ -1,180 +1,142 @@
-import { Database } from "./database"
+// lib/security-logger.ts
+import { Database } from './database'
 
-export interface SessionData {
-  id: number
-  user_id: number
-  token: string
-  expires_at: string
-  origin_domain: string
-  user_agent?: string
+export interface SecurityEvent {
+  type: 'auth_attempt' | 'auth_success' | 'auth_failure' | 'permission_denied' | 'domain_violation' | 'suspicious_activity'
+  userId?: number
+  username?: string
   ip_address?: string
-  device_info?: string
-  is_active: boolean
-  created_at: string
-  last_used: string
+  user_agent?: string
+  domain?: string
+  endpoint?: string
+  details?: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
 }
 
-export interface UserSession {
-  id: number
-  username: string
-  email?: string
-  avatar_url?: string
-  is_claimed: boolean
-  session_id: number
-}
+export class SecurityLogger {
+  static async logEvent(event: SecurityEvent): Promise<void> {
+    try {
+      const conn = await Database.getConnection()
+      
+      // Crear tabla de logs de seguridad si no existe
+      await conn.execute(`
+        CREATE TABLE IF NOT EXISTS security_logs (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          type VARCHAR(50) NOT NULL,
+          user_id INT NULL,
+          username VARCHAR(255) NULL,
+          ip_address VARCHAR(45) NULL,
+          user_agent TEXT NULL,
+          domain VARCHAR(255) NULL,
+          endpoint VARCHAR(255) NULL,
+          details TEXT NULL,
+          severity ENUM('low', 'medium', 'high', 'critical') NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_type (type),
+          INDEX idx_user_id (user_id),
+          INDEX idx_severity (severity),
+          INDEX idx_created_at (created_at),
+          INDEX idx_domain (domain)
+        )
+      `)
 
-export class SessionManager {
-  // Generate a secure random token
-  static generateToken(): string {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    let result = ""
-    for (let i = 0; i < 64; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length))
+      await conn.execute(`
+        INSERT INTO security_logs (
+          type, user_id, username, ip_address, user_agent, 
+          domain, endpoint, details, severity, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      `, [
+        event.type,
+        event.userId || null,
+        event.username || null,
+        event.ip_address || null,
+        event.user_agent || null,
+        event.domain || null,
+        event.endpoint || null,
+        event.details || null,
+        event.severity
+      ])
+
+      // Log crítico también en consola
+      if (event.severity === 'critical' || event.severity === 'high') {
+        console.error(`🚨 SECURITY ALERT [${event.severity.toUpperCase()}]: ${event.type}`, {
+          user: event.username || event.userId,
+          domain: event.domain,
+          endpoint: event.endpoint,
+          details: event.details
+        })
+      }
+
+    } catch (error) {
+      console.error('❌ Error logging security event:', error)
+      // En caso de error, al menos log en consola
+      console.warn(`🔒 Security Event [${event.severity}]: ${event.type} - ${event.details}`)
     }
-    return result
   }
 
-  // Create a new session
-  static async createSession(data: {
-    user_id: number
-    origin_domain: string
+  static async logDomainViolation(
+    domain: string, 
+    endpoint: string, 
+    ip_address?: string, 
     user_agent?: string
-    ip_address?: string
-    device_info?: string
-  }): Promise<{ token: string; session: SessionData }> {
-    const token = this.generateToken()
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-
-    const session = await Database.createSession({
-      user_id: data.user_id,
-      token_hash: token, // Store the token directly (we'll hash it in DB if needed)
-      expires_at: expiresAt.toISOString().slice(0, 19).replace("T", " "),
-      origin_domain: data.origin_domain,
-      user_agent: data.user_agent,
-      ip_address: data.ip_address,
-      device_info: data.device_info,
+  ): Promise<void> {
+    await this.logEvent({
+      type: 'domain_violation',
+      domain,
+      endpoint,
+      ip_address,
+      user_agent,
+      details: `Unauthorized access attempt from domain: ${domain} to endpoint: ${endpoint}`,
+      severity: 'high'
     })
-
-    return { token, session }
   }
 
-  // Validate a session token
-  static async validateSession(token: string): Promise<UserSession | null> {
-    if (!token) {
-      return null
-    }
-
-    try {
-      // Get session from database
-      const session = await Database.getSessionByToken(token)
-      if (!session || !session.is_active) {
-        return null
-      }
-
-      // Check if session is expired
-      if (new Date(session.expires_at) < new Date()) {
-        await Database.revokeSession(session.id)
-        return null
-      }
-
-      // Get user data
-      const user = await Database.getUserById(session.user_id)
-      if (!user || !user.is_active) {
-        await Database.revokeSession(session.id)
-        return null
-      }
-
-      // Update last used time
-      await Database.updateSessionLastUsed(session.id)
-
-      return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatar_url: user.avatar_url,
-        is_claimed: user.is_claimed,
-        session_id: session.id,
-      }
-    } catch (error) {
-      console.error("Session validation error:", error)
-      return null
-    }
+  static async logAuthSuccess(
+    userId: number, 
+    username: string, 
+    domain: string, 
+    ip_address?: string
+  ): Promise<void> {
+    await this.logEvent({
+      type: 'auth_success',
+      userId,
+      username,
+      domain,
+      ip_address,
+      details: `Successful authentication from domain: ${domain}`,
+      severity: 'low'
+    })
   }
 
-  // Revoke a session
-  static async revokeSession(token: string): Promise<boolean> {
-    try {
-      const session = await Database.getSessionByToken(token)
-      if (!session) {
-        return false
-      }
-
-      return await Database.revokeSession(session.id)
-    } catch (error) {
-      console.error("Session revocation error:", error)
-      return false
-    }
+  static async logAuthFailure(
+    reason: string, 
+    domain: string, 
+    ip_address?: string, 
+    user_agent?: string
+  ): Promise<void> {
+    await this.logEvent({
+      type: 'auth_failure',
+      domain,
+      ip_address,
+      user_agent,
+      details: `Authentication failure: ${reason}`,
+      severity: 'medium'
+    })
   }
 
-  // Revoke all user sessions except current
-  static async revokeAllUserSessions(userId: number, exceptToken?: string): Promise<number> {
-    try {
-      let exceptSessionId: number | undefined
-
-      if (exceptToken) {
-        const currentSession = await Database.getSessionByToken(exceptToken)
-        exceptSessionId = currentSession?.id
-      }
-
-      return await Database.revokeAllUserSessions(userId, exceptSessionId)
-    } catch (error) {
-      console.error("Error revoking user sessions:", error)
-      return 0
-    }
-  }
-
-  // Get user active sessions
-  static async getUserSessions(userId: number): Promise<SessionData[]> {
-    try {
-      return await Database.getUserActiveSessions(userId)
-    } catch (error) {
-      console.error("Error getting user sessions:", error)
-      return []
-    }
-  }
-
-  // Clean up expired sessions
-  static async cleanupExpiredSessions(): Promise<void> {
-    try {
-      await Database.deleteExpiredSessions()
-    } catch (error) {
-      console.error("Error cleaning up expired sessions:", error)
-    }
-  }
-
-  // Get session info
-  static async getSessionInfo(token: string): Promise<SessionData | null> {
-    try {
-      return await Database.getSessionByToken(token)
-    } catch (error) {
-      console.error("Error getting session info:", error)
-      return null
-    }
-  }
-
-  // Extend session expiration
-  static async extendSession(token: string, days = 30): Promise<boolean> {
-    try {
-      const session = await Database.getSessionByToken(token)
-      if (!session || !session.is_active) {
-        return false
-      }
-
-      const newExpiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000)
-      return await Database.extendSession(session.id, newExpiresAt.toISOString().slice(0, 19).replace("T", " "))
-    } catch (error) {
-      console.error("Error extending session:", error)
-      return false
-    }
+  static async logPermissionDenied(
+    userId: number, 
+    username: string, 
+    permission: string, 
+    endpoint: string
+  ): Promise<void> {
+    await this.logEvent({
+      type: 'permission_denied',
+      userId,
+      username,
+      endpoint,
+      details: `Permission denied for ${permission} at ${endpoint}`,
+      severity: 'medium'
+    })
   }
 }

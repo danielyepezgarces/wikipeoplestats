@@ -1,94 +1,115 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { JWTManager } from "@/lib/jwt"
+import { Database } from "@/lib/database"
 
 export async function middleware(request: NextRequest) {
   const origin = request.headers.get("origin")
-  const { pathname } = request.nextUrl
+  const hostname = request.nextUrl.hostname
 
-  // Handle CORS for all requests
+  // Allow CORS for localhost during development and wikipeoplestats.org subdomains
   const isDevelopment = process.env.NODE_ENV === "development"
   const isLocalhostOrigin = origin && (origin.includes("localhost") || origin.includes("127.0.0.1"))
   const isWikipeopleOrigin = origin && origin.includes("wikipeoplestats.org")
 
-  // Create response with CORS headers
-  const response = NextResponse.next()
-
   if ((isDevelopment && isLocalhostOrigin) || isWikipeopleOrigin) {
+    const response = NextResponse.next()
     response.headers.set("Access-Control-Allow-Origin", origin)
     response.headers.set("Access-Control-Allow-Credentials", "true")
     response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
     response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-  }
 
-  // Handle preflight requests
-  if (request.method === "OPTIONS") {
-    return new NextResponse(null, {
-      status: 200,
-      headers: response.headers,
-    })
-  }
-
-  // Skip middleware for static files and certain API routes
-  if (
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/api/auth/login") ||
-    pathname.startsWith("/api/auth/callback") ||
-    pathname.includes(".") ||
-    pathname === "/login"
-  ) {
     return response
   }
 
-  // Protected paths that require authentication
-  const protectedPaths = ["/dashboard", "/api/admin", "/api/auth/sessions", "/api/auth/logout"]
+  // Solo proteger rutas específicas del dashboard y API
+  const protectedPaths = [
+    "/dashboard",
+    "/api/admin",
+    "/api/auth/sessions",
+    "/api/auth/me",
+    "/api/auth/verify",
+    "/api/auth/logout",
+  ]
 
-  const isProtectedPath = protectedPaths.some((path) => pathname.startsWith(path))
+  const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
-  if (isProtectedPath) {
+  // Permitir rutas de autenticación sin verificación
+  const authPaths = ["/api/auth/login", "/api/auth/callback"]
+
+  const isAuthPath = authPaths.some((path) => request.nextUrl.pathname.startsWith(path))
+
+  if (isProtectedPath && !isAuthPath) {
     const token = request.cookies.get("auth_token")?.value
 
     if (!token) {
-      if (pathname.startsWith("/dashboard")) {
+      if (request.nextUrl.pathname.startsWith("/dashboard")) {
         return NextResponse.redirect(new URL("/login", request.url))
       }
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        {
-          status: 401,
-          headers: response.headers,
-        },
-      )
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // For API routes, let them handle their own authentication
-    // For dashboard routes, we can do basic token validation here
-    if (pathname.startsWith("/dashboard")) {
-      try {
-        // Basic token validation - detailed validation happens in API routes
-        const { JWTManager } = await import("@/lib/jwt")
-        const decoded = JWTManager.verifyToken(token)
+    // Verificar si el token es válido
+    const decoded = JWTManager.verifyToken(token)
+    if (!decoded) {
+      const response = request.nextUrl.pathname.startsWith("/dashboard")
+        ? NextResponse.redirect(new URL("/login", request.url))
+        : NextResponse.json({ error: "Invalid token" }, { status: 401 })
 
-        if (!decoded) {
-          return NextResponse.redirect(new URL("/login", request.url))
-        }
-      } catch (error) {
-        console.error("Middleware token validation error:", error)
-        return NextResponse.redirect(new URL("/login", request.url))
+      response.cookies.delete("auth_token")
+      return response
+    }
+
+    // Verificar si el token está en la blacklist
+    try {
+      const isBlacklisted = await Database.isTokenBlacklisted(token)
+      if (isBlacklisted) {
+        const response = request.nextUrl.pathname.startsWith("/dashboard")
+          ? NextResponse.redirect(new URL("/login", request.url))
+          : NextResponse.json({ error: "Token revoked" }, { status: 401 })
+
+        response.cookies.delete("auth_token")
+        return response
       }
+    } catch (error) {
+      console.error("Error checking token blacklist:", error)
+      // En caso de error con la blacklist, permitir continuar
+      // pero loggear el error para investigación
+    }
+
+    // Verificar si la sesión existe y está activa
+    try {
+      const tokenHash = JWTManager.hashToken(token)
+      const session = await Database.getSessionByTokenHash(tokenHash)
+
+      if (!session || !session.is_active) {
+        const response = request.nextUrl.pathname.startsWith("/dashboard")
+          ? NextResponse.redirect(new URL("/login", request.url))
+          : NextResponse.json({ error: "Session expired" }, { status: 401 })
+
+        response.cookies.delete("auth_token")
+        return response
+      }
+
+      // Actualizar última actividad de la sesión
+      await Database.updateSessionLastUsed(session.id)
+    } catch (error) {
+      console.error("Error checking session:", error)
+      // En caso de error con la sesión, permitir continuar
+      // pero loggear el error para investigación
     }
   }
 
-  return response
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/dashboard/:path*",
+    "/api/admin/:path*",
+    "/api/auth/sessions/:path*",
+    "/api/auth/me/:path*",
+    "/api/auth/verify/:path*",
+    "/api/auth/logout/:path*",
   ],
 }

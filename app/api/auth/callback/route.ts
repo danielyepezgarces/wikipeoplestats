@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
-import jwt from "jsonwebtoken"
 import crypto from "crypto"
+import jwt from "jsonwebtoken"
 import { Database } from "@/lib/database"
-import { createAuthSession } from "@/lib/auth-middleware"
 
 const oauth = require("oauth-1.0a")
 
 const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
 const DEFAULT_ORIGIN = "www.wikipeoplestats.org"
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".wikipeoplestats.org"
 
 interface UserInfo {
@@ -110,7 +110,6 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
   )
 
   try {
-    console.log("🔍 Making request to Wikipedia identify endpoint...")
     const response = await fetch(requestData.url, {
       method: "POST",
       headers: {
@@ -120,39 +119,59 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error("❌ Failed to get user identity:", response.status, errorText)
+      console.error("❌ Failed to get user identity:", await response.text())
       return null
     }
 
     const jwtEncoded = await response.text()
-    console.log("🔍 Received JWT from Wikipedia:", jwtEncoded.substring(0, 100) + "...")
+    const decoded: any = jwt.decode(jwtEncoded)
 
-    try {
-      // Usar jsonwebtoken SOLO para decodificar la respuesta de Wikipedia (sin verificar)
-      const decoded: any = jwt.decode(jwtEncoded)
-      console.log("🔍 Decoded JWT payload:", decoded)
+    if (!decoded || !decoded.sub || !decoded.username) return null
 
-      if (!decoded || !decoded.sub || !decoded.username) {
-        console.error("❌ Missing required fields in JWT payload")
-        return null
-      }
-
-      return {
-        id: decoded.sub,
-        username: decoded.username,
-        email: decoded.email || null,
-        editCount: decoded.editcount || 0,
-        registrationDate: decoded.registration || "",
-      }
-    } catch (decodeError) {
-      console.error("❌ Error decoding JWT:", decodeError)
-      return null
+    return {
+      id: decoded.sub,
+      username: decoded.username,
+      email: decoded.email || null,
+      editCount: decoded.editcount || 0,
+      registrationDate: decoded.registration || "",
     }
   } catch (error) {
     console.error("❌ Error in getUserIdentity:", error)
     return null
   }
+}
+
+function generateToken(user: { id: number; username: string; email: string | null }) {
+  return jwt.sign({ userId: user.id, username: user.username, email: user.email }, JWT_SECRET, { expiresIn: "30d" })
+}
+
+function getDeviceInfo(userAgent: string): string {
+  const ua = userAgent.toLowerCase()
+  let device = "Desktop"
+  let browser = "Unknown"
+  let os = "Unknown"
+
+  // Detectar dispositivo
+  if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
+    device = "Mobile"
+  } else if (ua.includes("tablet") || ua.includes("ipad")) {
+    device = "Tablet"
+  }
+
+  // Detectar navegador
+  if (ua.includes("chrome")) browser = "Chrome"
+  else if (ua.includes("firefox")) browser = "Firefox"
+  else if (ua.includes("safari")) browser = "Safari"
+  else if (ua.includes("edge")) browser = "Edge"
+
+  // Detectar OS
+  if (ua.includes("windows")) os = "Windows"
+  else if (ua.includes("mac")) os = "macOS"
+  else if (ua.includes("linux")) os = "Linux"
+  else if (ua.includes("android")) os = "Android"
+  else if (ua.includes("ios")) os = "iOS"
+
+  return `${device} - ${browser} on ${os}`
 }
 
 function createAuthResponse(origin: string, token: string, userData: any): NextResponse {
@@ -179,11 +198,14 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
   return response
 }
 
+/**
+ * Handles the OAuth callback GET request.
+ * Exchanges request token for access token, fetches user info,
+ * creates or updates user in DB, creates session, and sets cookies.
+ */
 export async function GET(request: NextRequest) {
   try {
-    console.log("🚀 Starting OAuth callback process...")
-
-    // Initialize database tables
+    // Inicializar tablas si es necesario
     await Database.initializeTables()
 
     const searchParams = request.nextUrl.searchParams
@@ -191,40 +213,28 @@ export async function GET(request: NextRequest) {
     const oauth_verifier = searchParams.get("oauth_verifier")
     const origin = searchParams.get("origin") || DEFAULT_ORIGIN
 
-    console.log("🔍 OAuth parameters:", { oauth_token, oauth_verifier, origin })
-
     if (!oauth_token || !oauth_verifier) {
-      console.error("❌ Missing OAuth parameters")
       return redirectToErrorPage(origin, "missing_parameters")
     }
 
     const oauth_token_secret = request.cookies.get("oauth_token_secret")?.value
     if (!oauth_token_secret) {
-      console.error("❌ Missing OAuth token secret from cookies")
       return redirectToErrorPage(origin, "session_expired")
     }
 
     console.log("🔑 Getting access token...")
     const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
-    if (!accessToken) {
-      console.error("❌ Failed to get access token")
-      return redirectToErrorPage(origin, "token_exchange_failed")
-    }
+    if (!accessToken) return redirectToErrorPage(origin, "token_exchange_failed")
 
     console.log("👤 Getting user info...")
     const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
-    if (!userInfo) {
-      console.error("❌ Failed to get user info")
-      return redirectToErrorPage(origin, "user_info_failed")
-    }
-
-    console.log("✅ User info obtained:", { id: userInfo.id, username: userInfo.username })
+    if (!userInfo) return redirectToErrorPage(origin, "user_info_failed")
 
     console.log("🔍 Looking for existing user...")
     let user = await Database.getUserByWikipediaId(userInfo.id)
 
     if (!user) {
-      // Look for unclaimed account by username
+      // Buscar por nombre de usuario en caso de cuenta no reclamada
       const unclaimedUser = await Database.getUserByUsername(userInfo.username)
 
       if (unclaimedUser && !unclaimedUser.is_claimed && !unclaimedUser.wikimedia_id) {
@@ -245,6 +255,7 @@ export async function GET(request: NextRequest) {
         })
       }
     } else if (!user.is_claimed) {
+      // Usuario existe pero no está reclamado, reclamarlo
       console.log("🔗 Claiming existing account...")
       user = await Database.claimUserAccount(user.id, userInfo.id, userInfo.email || undefined)
       if (!user) {
@@ -256,10 +267,24 @@ export async function GET(request: NextRequest) {
     await Database.updateUserLogin(user.id)
 
     console.log("🔐 Creating session...")
-    const userAgent = request.headers.get("user-agent") || ""
-    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
+    const token = generateToken({
+      id: user.id,
+      username: user.username,
+      email: user.email || null,
+    })
 
-    const { token } = await createAuthSession(user.id, origin, userAgent, ipAddress)
+    const userAgent = request.headers.get("user-agent") || ""
+    const deviceInfo = getDeviceInfo(userAgent)
+
+    await Database.createSession({
+      user_id: user.id,
+      token_hash: token,
+      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 19).replace("T", " "),
+      origin_domain: origin,
+      user_agent: userAgent || undefined,
+      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
+      device_info: deviceInfo,
+    })
 
     console.log("✅ Auth successful. Redirecting...")
     return createAuthResponse(origin, token, {
