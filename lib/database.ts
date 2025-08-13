@@ -53,6 +53,27 @@ export interface RefreshToken {
   is_revoked: boolean
 }
 
+export interface Role {
+  id: number
+  name: string
+  i18n_key: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface UserRole {
+  user_id: number
+  role_id: number
+  chapter_id: number | null
+  role_name: string
+  role_i18n_key: string
+}
+
+export interface UserWithRoles extends User {
+  roles: UserRole[]
+}
+
 export class Database {
   static async initializeTables(): Promise<void> {
     const connection = await getPool().getConnection()
@@ -110,6 +131,40 @@ export class Database {
           INDEX idx_token_jti (token_jti),
           INDEX idx_expires_at (expires_at),
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `)
+
+      // Crear tabla roles si no existe
+      await connection.execute(`
+        CREATE TABLE IF NOT EXISTS roles (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          i18n_key VARCHAR(255) NOT NULL,
+          is_active BOOLEAN DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_name (name),
+          INDEX idx_i18n_key (i18n_key),
+          INDEX idx_is_active (is_active)
+        )
+      `)
+
+      // Crear tabla user_roles si no existe
+      await connection.execute(`
+        CREATE TABLE IF NOT EXISTS user_roles (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          user_id INT NOT NULL,
+          role_id INT NOT NULL,
+          chapter_id INT NULL,
+          role_name VARCHAR(255) NOT NULL,
+          role_i18n_key VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          INDEX idx_user_id (user_id),
+          INDEX idx_role_id (role_id),
+          INDEX idx_chapter_id (chapter_id),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
         )
       `)
 
@@ -179,14 +234,26 @@ export class Database {
     }
   }
 
-  static async getUserById(id: number): Promise<User | null> {
+  static async getUserById(id: number, includeRoles = false): Promise<User | UserWithRoles | null> {
     const connection = await getPool().getConnection()
 
     try {
       const [rows] = await connection.execute("SELECT * FROM users WHERE id = ?", [id])
 
       const users = rows as User[]
-      return users.length > 0 ? users[0] : null
+      if (users.length === 0) return null
+
+      const user = users[0]
+
+      if (includeRoles) {
+        const roles = await this.getUserRoles(id)
+        return {
+          ...user,
+          roles,
+        } as UserWithRoles
+      }
+
+      return user
     } finally {
       connection.release()
     }
@@ -356,6 +423,43 @@ export class Database {
       console.log("✅ Expired tokens cleaned up")
     } finally {
       connection.release()
+    }
+  }
+
+  static async getUserRoles(userId: number): Promise<UserRole[]> {
+    const connection = await getPool().getConnection()
+
+    try {
+      const [rows] = await connection.execute(
+        `
+        SELECT 
+          ur.user_id,
+          ur.role_id,
+          ur.chapter_id,
+          r.name as role_name,
+          r.i18n_key as role_i18n_key
+        FROM user_roles ur
+        JOIN roles r ON ur.role_id = r.id
+        WHERE ur.user_id = ? AND r.is_active = 1
+      `,
+        [userId],
+      )
+
+      return rows as UserRole[]
+    } finally {
+      connection.release()
+    }
+  }
+
+  static async getUserWithRoles(userId: number): Promise<UserWithRoles | null> {
+    const user = await this.getUserById(userId)
+    if (!user) return null
+
+    const roles = await this.getUserRoles(userId)
+
+    return {
+      ...user,
+      roles,
     }
   }
 }
