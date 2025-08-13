@@ -142,7 +142,19 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
 }
 
 function generateToken(user: { id: number; username: string; email: string | null }) {
-  return jwt.sign({ userId: user.id, username: user.username, email: user.email }, JWT_SECRET, { expiresIn: "30d" })
+  return jwt.sign(
+    {
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+    },
+    JWT_SECRET,
+    {
+      expiresIn: "30d",
+      issuer: "wikipeoplestats",
+      audience: "wikipeoplestats-users",
+    },
+  )
 }
 
 function getDeviceInfo(userAgent: string): string {
@@ -276,9 +288,12 @@ export async function GET(request: NextRequest) {
     const userAgent = request.headers.get("user-agent") || ""
     const deviceInfo = getDeviceInfo(userAgent)
 
+    // Hash the token for storage
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
+
     await Database.createSession({
       user_id: user.id,
-      token_hash: token,
+      token_hash: tokenHash, // Store the hashed version
       expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 19).replace("T", " "),
       origin_domain: origin,
       user_agent: userAgent || undefined,

@@ -49,19 +49,22 @@ export async function middleware(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Verificar si el token es válido
-    const decoded = JWTManager.verifyToken(token)
-    if (!decoded) {
-      const response = request.nextUrl.pathname.startsWith("/dashboard")
-        ? NextResponse.redirect(new URL("/login", request.url))
-        : NextResponse.json({ error: "Invalid token" }, { status: 401 })
-
-      response.cookies.delete("auth_token")
-      return response
-    }
-
-    // Verificar si el token está en la blacklist
     try {
+      // Initialize database tables first
+      await Database.initializeTables()
+
+      // Verificar si el token es válido
+      const decoded = JWTManager.verifyToken(token)
+      if (!decoded) {
+        const response = request.nextUrl.pathname.startsWith("/dashboard")
+          ? NextResponse.redirect(new URL("/login", request.url))
+          : NextResponse.json({ error: "Invalid token" }, { status: 401 })
+
+        response.cookies.delete("auth_token")
+        return response
+      }
+
+      // Verificar si el token está en la blacklist
       const isBlacklisted = await Database.isTokenBlacklisted(token)
       if (isBlacklisted) {
         const response = request.nextUrl.pathname.startsWith("/dashboard")
@@ -71,14 +74,8 @@ export async function middleware(request: NextRequest) {
         response.cookies.delete("auth_token")
         return response
       }
-    } catch (error) {
-      console.error("Error checking token blacklist:", error)
-      // En caso de error con la blacklist, permitir continuar
-      // pero loggear el error para investigación
-    }
 
-    // Verificar si la sesión existe y está activa
-    try {
+      // Verificar si la sesión existe y está activa
       const tokenHash = JWTManager.hashToken(token)
       const session = await Database.getSessionByTokenHash(tokenHash)
 
@@ -94,9 +91,16 @@ export async function middleware(request: NextRequest) {
       // Actualizar última actividad de la sesión
       await Database.updateSessionLastUsed(session.id)
     } catch (error) {
-      console.error("Error checking session:", error)
-      // En caso de error con la sesión, permitir continuar
-      // pero loggear el error para investigación
+      console.error("Middleware error:", error)
+
+      // En caso de error, permitir continuar pero loggear
+      if (request.nextUrl.pathname.startsWith("/dashboard")) {
+        console.warn("Database error in middleware, redirecting to login")
+        return NextResponse.redirect(new URL("/login", request.url))
+      }
+
+      // Para API routes, devolver error 500
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 })
     }
   }
 
