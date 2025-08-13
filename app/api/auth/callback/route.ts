@@ -185,6 +185,13 @@ export async function GET(request: NextRequest) {
       roles: [], // TODO: Obtener roles del usuario
     })
 
+    console.log("🔑 Token pair created:", {
+      accessJti: tokenPair.accessJti.substring(0, 8) + "...",
+      refreshJti: tokenPair.refreshJti.substring(0, 8) + "...",
+      accessExpiry: new Date(tokenPair.accessTokenExpiry * 1000).toISOString(),
+      refreshExpiry: new Date(tokenPair.refreshTokenExpiry * 1000).toISOString(),
+    })
+
     // Almacenar refresh token en la base de datos
     const userAgent = request.headers.get("user-agent") || undefined
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
@@ -192,40 +199,77 @@ export async function GET(request: NextRequest) {
     await Database.storeRefreshToken({
       user_id: user.id,
       token_jti: tokenPair.refreshJti,
-      expires_at: tokenPair.refreshTokenExpiry,
+      expires_at: tokenPair.refreshTokenExpiry.toString(), // Convert number to string
       user_agent: userAgent,
       ip_address: ipAddress,
     })
 
     console.log("✅ Login completed for:", user.username)
 
+    const isProduction = process.env.NODE_ENV === "production"
+    const cookieDomain = isProduction ? ".wikipeoplestats.org" : undefined
+
+    console.log("🍪 Setting cookies with config:", {
+      isProduction,
+      cookieDomain,
+      origin,
+    })
+
     // Crear URL de redirección
     const redirectUrl = new URL(`https://${origin}/dashboard`)
     const redirectResponse = NextResponse.redirect(redirectUrl.toString())
 
-    // Configurar cookies
-    redirectResponse.cookies.set("access_token", tokenPair.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 15 * 60, // 15 minutos
-      path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
-    })
+    try {
+      // Configurar access token cookie
+      redirectResponse.cookies.set("access_token", tokenPair.accessToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: "lax",
+        maxAge: 15 * 60, // 15 minutos
+        path: "/",
+        domain: cookieDomain,
+      })
+      console.log("✅ Access token cookie set")
 
-    redirectResponse.cookies.set("refresh_token", tokenPair.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 días
-      path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
-    })
+      // Configurar refresh token cookie
+      redirectResponse.cookies.set("refresh_token", tokenPair.refreshToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60, // 7 días en segundos
+        path: "/",
+        domain: cookieDomain,
+      })
+      console.log("✅ Refresh token cookie set")
+
+      redirectResponse.cookies.set(
+        "session_info",
+        JSON.stringify({
+          userId: user.id,
+          username: user.username,
+          loginTime: new Date().toISOString(),
+        }),
+        {
+          httpOnly: false, // Allow client-side access for debugging
+          secure: isProduction,
+          sameSite: "lax",
+          maxAge: 7 * 24 * 60 * 60, // 7 días
+          path: "/",
+          domain: cookieDomain,
+        },
+      )
+      console.log("✅ Session info cookie set")
+    } catch (cookieError) {
+      console.error("❌ Error setting cookies:", cookieError)
+      // Continue anyway - cookies might still work
+    }
 
     // Limpiar cookies temporales
     redirectResponse.cookies.delete("oauth_token_secret")
     redirectResponse.cookies.delete("oauth_origin")
+    console.log("🧹 Temporary cookies cleaned")
 
+    console.log("🚀 Redirecting to:", redirectUrl.toString())
     return redirectResponse
   } catch (error) {
     console.error("❌ Callback error:", error)
