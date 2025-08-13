@@ -27,11 +27,11 @@ export function UserMenu({ user, onLogout, onDashboard }: UserMenuProps) {
     switch (role) {
       case "super_admin":
         return <Shield className="h-4 w-4 text-red-500" />
-      case "community_admin":
+      case "chapter_admin":
         return <Users className="h-4 w-4 text-orange-500" />
-      case "community_moderator":
+      case "chapter_moderator":
         return <Gavel className="h-4 w-4 text-blue-500" />
-      case "community_partner":
+      case "chapter_partner":
         return <Handshake className="h-4 w-4 text-green-500" />
       default:
         return <User className="h-4 w-4" />
@@ -42,11 +42,11 @@ export function UserMenu({ user, onLogout, onDashboard }: UserMenuProps) {
     switch (role) {
       case "super_admin":
         return "bg-red-500"
-      case "community_admin":
+      case "chapter_admin":
         return "bg-orange-500"
-      case "community_moderator":
+      case "chapter_moderator":
         return "bg-blue-500"
-      case "community_partner":
+      case "chapter_partner":
         return "bg-green-500"
       default:
         return "bg-gray-500"
@@ -57,11 +57,11 @@ export function UserMenu({ user, onLogout, onDashboard }: UserMenuProps) {
     switch (role) {
       case "super_admin":
         return "Super Administrador"
-      case "community_admin":
-        return "Admin de Comunidad"
-      case "community_moderator":
-        return "Moderador de Comunidad"
-      case "community_partner":
+      case "chapter_admin":
+        return "Admin de Chapter"
+      case "chapter_moderator":
+        return "Moderador de Chapter"
+      case "chapter_partner":
         return "Socio/Afiliado"
       default:
         return role
