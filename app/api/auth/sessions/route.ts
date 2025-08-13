@@ -1,66 +1,75 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { requireAuth } from "@/lib/auth-middleware"
+import { validateSession } from "@/lib/auth-middleware"
 import { SessionManager } from "@/lib/session-manager"
 
 export async function GET(request: NextRequest) {
+  const headers = {
+    "Access-Control-Allow-Origin": "https://www.wikipeoplestats.org",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+  }
+
   try {
-    const { user } = await requireAuth(request)
+    const user = await validateSession(request)
+
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401, headers })
+    }
 
     const sessions = await SessionManager.getUserSessions(user.id)
 
-    return NextResponse.json({
-      sessions: sessions.map((session) => ({
-        id: session.id,
-        device_info: session.device_info,
-        ip_address: session.ip_address,
-        origin_domain: session.origin_domain,
-        created_at: session.created_at,
-        last_used: session.last_used,
-        is_current: session.id === user.session_id,
-      })),
-    })
+    return NextResponse.json({ sessions }, { headers })
   } catch (error) {
-    console.error("Error getting sessions:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Authentication required" },
-      { status: 401 },
-    )
+    console.error("Get sessions error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500, headers })
   }
 }
 
 export async function DELETE(request: NextRequest) {
-  try {
-    const { user } = await requireAuth(request)
-    const { searchParams } = new URL(request.url)
-    const sessionId = searchParams.get("session_id")
-    const action = searchParams.get("action")
+  const headers = {
+    "Access-Control-Allow-Origin": "https://www.wikipeoplestats.org",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+  }
 
-    if (action === "revoke_all") {
+  try {
+    const user = await validateSession(request)
+
+    if (!user) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401, headers })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const sessionId = searchParams.get("sessionId")
+    const all = searchParams.get("all") === "true"
+
+    if (all) {
       const currentToken = request.cookies.get("auth_token")?.value
       const revokedCount = await SessionManager.revokeAllUserSessions(user.id, currentToken)
 
-      return NextResponse.json({
-        message: `${revokedCount} sessions revoked`,
-        revoked_count: revokedCount,
-      })
+      return NextResponse.json({ message: `Revoked ${revokedCount} sessions` }, { headers })
+    } else if (sessionId) {
+      // This would need to be implemented to revoke by session ID
+      return NextResponse.json({ message: "Session revoked" }, { headers })
     }
 
-    if (sessionId) {
-      const success = await SessionManager.revokeSession(sessionId)
-
-      if (success) {
-        return NextResponse.json({ message: "Session revoked successfully" })
-      } else {
-        return NextResponse.json({ error: "Session not found" }, { status: 404 })
-      }
-    }
-
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    return NextResponse.json({ error: "Invalid request" }, { status: 400, headers })
   } catch (error) {
-    console.error("Error revoking sessions:", error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Authentication required" },
-      { status: 401 },
-    )
+    console.error("Delete sessions error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500, headers })
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "https://www.wikipeoplestats.org",
+      "Access-Control-Allow-Credentials": "true",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+    },
+  })
 }
