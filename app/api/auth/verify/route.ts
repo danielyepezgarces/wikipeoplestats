@@ -42,9 +42,8 @@ export async function GET(request: NextRequest) {
       return await refreshTokens(refreshToken, request)
     }
 
-    // Get user from database
-    const user = await Database.getUserById(decoded.userId)
-    if (!user) {
+    const userWithRoles = await Database.getUserWithRoles(decoded.userId)
+    if (!userWithRoles) {
       const response = NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
       return setCorsHeaders(response, request.headers.get("origin"))
     }
@@ -52,10 +51,11 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.json({
       authenticated: true,
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        roles: decoded.roles,
+        id: userWithRoles.id,
+        username: userWithRoles.username,
+        email: userWithRoles.email,
+        roles: userWithRoles.roles.map((role) => role.role_name), // Convert to simple array of role names
+        roleDetails: userWithRoles.roles, // Include full role details for frontend
       },
     })
 
@@ -83,24 +83,22 @@ async function refreshTokens(refreshToken: string, request: NextRequest) {
       return setCorsHeaders(response, request.headers.get("origin"))
     }
 
-    // Get user from database
-    const user = await Database.getUserById(decoded.userId)
-    if (!user) {
+    const userWithRoles = await Database.getUserWithRoles(decoded.userId)
+    if (!userWithRoles) {
       const response = NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
       return setCorsHeaders(response, request.headers.get("origin"))
     }
 
-    // Create new token pair
     const tokens = createTokenPair({
-      userId: user.id,
-      username: user.username,
-      email: user.email,
-      roles: decoded.roles,
+      userId: userWithRoles.id,
+      username: userWithRoles.username,
+      email: userWithRoles.email,
+      roles: userWithRoles.roles.map((role) => role.role_name),
     })
 
     // Store new refresh token
     await Database.storeRefreshToken({
-      user_id: user.id,
+      user_id: userWithRoles.id,
       token_jti: tokens.refreshJti,
       expires_at: tokens.refreshTokenExpiry,
       user_agent: request.headers.get("user-agent") || undefined,
@@ -115,10 +113,11 @@ async function refreshTokens(refreshToken: string, request: NextRequest) {
       authenticated: true,
       refreshed: true,
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        roles: decoded.roles,
+        id: userWithRoles.id,
+        username: userWithRoles.username,
+        email: userWithRoles.email,
+        roles: userWithRoles.roles.map((role) => role.role_name),
+        roleDetails: userWithRoles.roles,
       },
     })
 
