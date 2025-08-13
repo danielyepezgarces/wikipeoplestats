@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import jwt from "jsonwebtoken"
 import { Database } from "@/lib/database"
 import { createAuthSession } from "@/lib/auth-middleware"
 
@@ -104,25 +105,6 @@ async function getAccessToken(
   }
 }
 
-// Simple base64 decode function
-function base64Decode(str: string): string {
-  try {
-    // Add padding if needed
-    const padding = str.length % 4
-    if (padding) {
-      str += "=".repeat(4 - padding)
-    }
-
-    // Replace URL-safe characters
-    str = str.replace(/-/g, "+").replace(/_/g, "/")
-
-    return atob(str)
-  } catch (error) {
-    console.error("Base64 decode error:", error)
-    return ""
-  }
-}
-
 async function getUserIdentity(oauth_token: string, oauth_token_secret: string): Promise<UserInfo | null> {
   const oauthClient = createOAuthClient()
   const requestData = {
@@ -149,42 +131,18 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
     }
 
     const jwtEncoded = await response.text()
-    console.log("🔍 JWT response:", jwtEncoded.substring(0, 100) + "...")
 
-    // Manual JWT decode without verification (since it's from Wikimedia)
-    const parts = jwtEncoded.split(".")
-    if (parts.length !== 3) {
-      console.error("❌ Invalid JWT format, parts:", parts.length)
-      return null
-    }
+    // Usar jsonwebtoken SOLO para decodificar la respuesta de Wikipedia (sin verificar)
+    const decoded: any = jwt.decode(jwtEncoded)
 
-    try {
-      const payloadDecoded = base64Decode(parts[1])
-      console.log("🔍 Decoded payload:", payloadDecoded.substring(0, 200) + "...")
+    if (!decoded || !decoded.sub || !decoded.username) return null
 
-      const payload = JSON.parse(payloadDecoded)
-      console.log("🔍 Parsed payload:", {
-        sub: payload.sub,
-        username: payload.username,
-        email: payload.email,
-        editcount: payload.editcount,
-      })
-
-      if (!payload || !payload.sub || !payload.username) {
-        console.error("❌ Missing required fields in payload")
-        return null
-      }
-
-      return {
-        id: payload.sub,
-        username: payload.username,
-        email: payload.email || null,
-        editCount: payload.editcount || 0,
-        registrationDate: payload.registration || "",
-      }
-    } catch (parseError) {
-      console.error("❌ Error parsing JWT payload:", parseError)
-      return null
+    return {
+      id: decoded.sub,
+      username: decoded.username,
+      email: decoded.email || null,
+      editCount: decoded.editcount || 0,
+      registrationDate: decoded.registration || "",
     }
   } catch (error) {
     console.error("❌ Error in getUserIdentity:", error)
