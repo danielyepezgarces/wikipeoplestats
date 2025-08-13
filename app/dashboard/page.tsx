@@ -1,22 +1,31 @@
-'use client'
+"use client"
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/use-auth'
-import { SuperAdminDashboard } from '@/components/dashboard/super-admin-dashboard'
-import { ChapterAdminDashboard } from '@/components/dashboard/chapter-admin-dashboard'
-import { ModeratorDashboard } from '@/components/dashboard/moderator-dashboard'
-import { DefaultDashboard } from '@/components/dashboard/default-dashboard'
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/use-auth"
+import { SuperAdminDashboard } from "@/components/dashboard/super-admin-dashboard"
+import { ChapterAdminDashboard } from "@/components/dashboard/chapter-admin-dashboard"
+import { ModeratorDashboard } from "@/components/dashboard/moderator-dashboard"
+import { DefaultDashboard } from "@/components/dashboard/default-dashboard"
+import { DashboardSwitcher } from "@/components/dashboard/dashboard-switcher"
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isLoading } = useAuth()
+  const { user, isAuthenticated, isLoading, getDashboardUrl } = useAuth()
   const router = useRouter()
+  const [selectedDashboard, setSelectedDashboard] = useState<string>("")
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/')
+      router.push("/")
     }
   }, [isAuthenticated, isLoading, router])
+
+  useEffect(() => {
+    if (user && !selectedDashboard) {
+      const defaultDashboard = getDashboardUrl()
+      setSelectedDashboard(defaultDashboard.replace("/dashboard/", "") || "default")
+    }
+  }, [user, selectedDashboard, getDashboardUrl])
 
   if (isLoading) {
     return (
@@ -28,21 +37,45 @@ export default function DashboardPage() {
 
   if (!user) return null
 
-  // Renderizar dashboard según el rol
-  switch (user.role) {
-    case 'super_admin':
-      return <SuperAdminDashboard user={user} />
-    case 'chapter_admin':
-    case 'community_admin':
-      return <ChapterAdminDashboard user={user} />
-    case 'chapter_moderator':
-    case 'community_moderator':
-      return <ModeratorDashboard user={user} />
-    case 'chapter_partner':
-    case 'chapter_staff':
-    case 'chapter_affiliate':
-    case 'community_partner':
-    default:
-      return <DefaultDashboard user={user} />
+  const availableDashboards = []
+  if (user.roles.some((r) => r.role === "super_admin")) {
+    availableDashboards.push({ key: "super-admin", label: "Super Admin", role: "super_admin" })
   }
+  if (user.roles.some((r) => r.role === "chapter_admin")) {
+    availableDashboards.push({ key: "chapter-admin", label: "Chapter Admin", role: "chapter_admin" })
+  }
+  if (user.roles.some((r) => r.role === "chapter_moderator")) {
+    availableDashboards.push({ key: "moderator", label: "Moderator", role: "chapter_moderator" })
+  }
+  if (user.roles.some((r) => ["chapter_partner", "chapter_staff", "chapter_affiliate"].includes(r.role))) {
+    availableDashboards.push({ key: "default", label: "My Dashboard", role: "default" })
+  }
+
+  const showSwitcher = availableDashboards.length > 1
+
+  const renderDashboard = () => {
+    switch (selectedDashboard) {
+      case "super-admin":
+        return <SuperAdminDashboard user={user} />
+      case "chapter-admin":
+        return <ChapterAdminDashboard user={user} />
+      case "moderator":
+        return <ModeratorDashboard user={user} />
+      default:
+        return <DefaultDashboard user={user} />
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0D161C]">
+      {showSwitcher && (
+        <DashboardSwitcher
+          availableDashboards={availableDashboards}
+          selectedDashboard={selectedDashboard}
+          onDashboardChange={setSelectedDashboard}
+        />
+      )}
+      {renderDashboard()}
+    </div>
+  )
 }
