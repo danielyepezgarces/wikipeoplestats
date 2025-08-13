@@ -165,8 +165,6 @@ export async function GET(request: NextRequest) {
 
   try {
     // Inicializar tablas si es necesario
-    await Database.initializeTables()
-
     const searchParams = request.nextUrl.searchParams
     const oauthToken = searchParams.get("oauth_token")
     const oauthVerifier = searchParams.get("oauth_verifier")
