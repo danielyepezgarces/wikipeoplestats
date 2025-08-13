@@ -11,12 +11,12 @@ import { NoticeBanner } from "@/components/notice-banner"
 import { SkeletonCard } from "@/components/skeleton-card"
 import { useI18n } from "@/hooks/use-i18n"
 import { useDomainContext } from "@/hooks/use-domain-context"
-import { getProject } from "@/lib/languages"
+import { events } from "@/lib/events-data"
 import Link from "next/link"
 import Image from "next/image"
 
 interface Event {
-  id: string
+  id: number
   slug: string
   name: string
   description: string
@@ -25,104 +25,53 @@ interface Event {
   location: string
   url: string
   event_image?: string
-  wiki_project: string
+  wikis: string[]
   status: "active" | "past" | "upcoming"
   participants_count?: number
-}
-
-interface EventsResponse {
-  active: Event[]
-  past: Event[]
-  upcoming: Event[]
 }
 
 export default function EventsPage() {
   const domainContext = useDomainContext()
   const { t } = useI18n(domainContext.currentLang)
-  const [events, setEvents] = useState<EventsResponse | null>(null)
+  const [processedEvents, setProcessedEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const processEvents = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        const host = window.location.host
-        const project = getProject(host)
+        const currentDate = new Date()
+        const eventsWithStatus = events.map((event) => {
+          const startDate = new Date(event.start_date)
+          const endDate = new Date(event.end_date)
 
-        const response = await fetch(`https://api.wikipeoplestats.org/v1/events/${project}`, {
-          headers: {
-            "User-Agent": "WikiPeopleStats/1.0",
-          },
-          cache: "no-cache",
+          let status: "active" | "past" | "upcoming" = "upcoming"
+          if (currentDate >= startDate && currentDate <= endDate) {
+            status = "active"
+          } else if (currentDate > endDate) {
+            status = "past"
+          }
+
+          return {
+            ...event,
+            status,
+            participants_count: Math.floor(Math.random() * 200) + 50, // Mock participant count
+          }
         })
 
-        if (response.ok) {
-          const data = await response.json()
-          setEvents(data)
-        } else {
-          const fallbackEvents: EventsResponse = {
-            active: [
-              {
-                id: "women-in-red-2024",
-                slug: "women-in-red-2024",
-                name: "Women in Red Wikipedia 2024",
-                description: "Editatón para crear y mejorar artículos sobre mujeres notables en Wikipedia",
-                start_date: "2024-03-08T00:00:00Z",
-                end_date: "2024-03-31T23:59:59Z",
-                location: "Virtual/Global",
-                url: "https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Women_in_Red",
-                event_image: "/women-in-red-wikipedia.png",
-                wiki_project: project,
-                status: "active",
-                participants_count: 156,
-              },
-            ],
-            past: [
-              {
-                id: "art-feminism-2024",
-                slug: "art-feminism-2024",
-                name: "Art+Feminism Editathon 2024",
-                description: "Editatón anual para mejorar la cobertura de arte feminista y mujeres artistas",
-                start_date: "2024-02-01T00:00:00Z",
-                end_date: "2024-02-29T23:59:59Z",
-                location: "Multiple locations worldwide",
-                url: "https://en.wikipedia.org/wiki/Wikipedia:Meetup/ArtAndFeminism",
-                event_image: "/art-feminism-editathon.png",
-                wiki_project: project,
-                status: "past",
-                participants_count: 89,
-              },
-              {
-                id: "wikimedia-hackathon-2024",
-                slug: "wikimedia-hackathon-2024",
-                name: "Wikimedia Hackathon 2024",
-                description: "Hackathon anual de desarrolladores de Wikimedia para mejorar herramientas y proyectos",
-                start_date: "2024-01-15T00:00:00Z",
-                end_date: "2024-01-17T23:59:59Z",
-                location: "Athens, Greece",
-                url: "https://www.mediawiki.org/wiki/Wikimedia_Hackathon_2024",
-                event_image: "/wikimedia-hackathon-2024.png",
-                wiki_project: project,
-                status: "past",
-                participants_count: 234,
-              },
-            ],
-            upcoming: [],
-          }
-          setEvents(fallbackEvents)
-        }
+        setProcessedEvents(eventsWithStatus)
       } catch (err) {
-        console.error("Error fetching events:", err)
+        console.error("Error processing events:", err)
         setError(err instanceof Error ? err.message : "Failed to load events")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchEvents()
+    processEvents()
   }, [])
 
   if (loading) {
@@ -164,6 +113,10 @@ export default function EventsPage() {
       </div>
     )
   }
+
+  const activeEvents = processedEvents.filter((event) => event.status === "active")
+  const pastEvents = processedEvents.filter((event) => event.status === "past")
+  const upcomingEvents = processedEvents.filter((event) => event.status === "upcoming")
 
   const renderEventCard = (event: Event, isPast = false) => (
     <Card
@@ -257,43 +210,43 @@ export default function EventsPage() {
         </div>
 
         {/* Active Events Section */}
-        {events?.active && events.active.length > 0 && (
+        {activeEvents.length > 0 && (
           <section className="mb-16">
             <h2 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
               {t("active_events") || "Eventos Activos"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.active.map((event) => renderEventCard(event))}
+              {activeEvents.map((event) => renderEventCard(event))}
             </div>
           </section>
         )}
 
         {/* Upcoming Events Section */}
-        {events?.upcoming && events.upcoming.length > 0 && (
+        {upcomingEvents.length > 0 && (
           <section className="mb-16">
             <h2 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
               {t("upcoming_events") || "Próximos Eventos"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.upcoming.map((event) => renderEventCard(event))}
+              {upcomingEvents.map((event) => renderEventCard(event))}
             </div>
           </section>
         )}
 
         {/* Past Events Section */}
-        {events?.past && events.past.length > 0 && (
+        {pastEvents.length > 0 && (
           <section className="mb-16">
             <h2 className="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
               {t("past_events") || "Eventos Pasados"}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {events.past.map((event) => renderEventCard(event, true))}
+              {pastEvents.map((event) => renderEventCard(event, true))}
             </div>
           </section>
         )}
 
         {/* No events message */}
-        {!events?.active?.length && !events?.past?.length && !events?.upcoming?.length && (
+        {processedEvents.length === 0 && (
           <div className="text-center text-xl text-gray-600 dark:text-gray-400 py-16">
             {t("no_events_available") || "No hay eventos disponibles en este momento"}
           </div>
