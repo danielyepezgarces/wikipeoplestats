@@ -155,6 +155,7 @@ export async function GET(request: NextRequest) {
         wikimedia_id: userInfo.sub.toString(),
         username: userInfo.username,
         email: userInfo.email,
+        avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`,
         registration_date: userInfo.registered,
         is_claimed: true,
       })
@@ -181,7 +182,7 @@ export async function GET(request: NextRequest) {
     const tokenPair = createTokenPair({
       userId: user.id,
       username: user.username,
-      email: user.email,
+      email: user.email || null,
       roles: [], // TODO: Obtener roles del usuario
     })
 
