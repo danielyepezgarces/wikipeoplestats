@@ -10,42 +10,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No refresh token provided" }, { status: 401 })
     }
 
-    // Verificar el refresh token
+    // Verify refresh token
     const decoded = verifyToken(refreshToken)
     if (!decoded || decoded.type !== "refresh") {
       return NextResponse.json({ error: "Invalid refresh token" }, { status: 401 })
     }
 
-    // Verificar que el token no esté en la blacklist
+    // Check if token is blacklisted
     const isBlacklisted = await Database.isTokenBlacklisted(decoded.jti)
     if (isBlacklisted) {
       return NextResponse.json({ error: "Token has been revoked" }, { status: 401 })
     }
 
-    // Verificar que el refresh token existe en la base de datos
+    // Check if refresh token exists in database
     const storedToken = await Database.getRefreshToken(decoded.jti)
     if (!storedToken) {
       return NextResponse.json({ error: "Refresh token not found" }, { status: 401 })
     }
 
-    // Obtener información del usuario
+    // Get user data
     const user = await Database.getUserById(decoded.userId)
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 401 })
     }
 
-    // Crear nuevo par de tokens
+    // Create new token pair
     const tokenPair = createTokenPair({
       userId: user.id,
       username: user.username,
-      email: user.email,
+      email: user.email || null,
       roles: [], // TODO: Get user roles
     })
 
-    // Revocar el refresh token anterior
+    // Revoke old refresh token
     await Database.revokeRefreshToken(decoded.jti)
 
-    // Almacenar el nuevo refresh token
+    // Store new refresh token
     await Database.storeRefreshToken({
       user_id: user.id,
       token_jti: tokenPair.refreshJti,
@@ -54,20 +54,12 @@ export async function POST(request: NextRequest) {
       ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
     })
 
-    // Actualizar última renovación de token
-    await Database.updateUserTokenRefresh(user.id)
-
     const response = NextResponse.json({
-      message: "Tokens refreshed successfully",
-      tokens: {
-        accessToken: tokenPair.accessToken,
-        refreshToken: tokenPair.refreshToken,
-        expiresIn: tokenPair.expiresIn,
-        tokenType: "Bearer",
-      },
+      success: true,
+      expiresIn: 15 * 60, // 15 minutes
     })
 
-    // Actualizar cookies
+    // Set new cookies
     response.cookies.set("access_token", tokenPair.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -88,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch (error) {
-    console.error("Error refreshing tokens:", error)
+    console.error("Token refresh error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
