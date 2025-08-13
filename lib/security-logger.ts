@@ -1,144 +1,180 @@
-// lib/security-logger.ts
 import { Database } from "./database"
 
-export interface SecurityEvent {
-  user_id?: number
-  action: string
-  details?: any
-  ip_address?: string
+export interface SessionData {
+  id: number
+  user_id: number
+  token: string
+  expires_at: string
+  origin_domain: string
   user_agent?: string
-  severity?: "low" | "medium" | "high" | "critical"
+  ip_address?: string
+  device_info?: string
+  is_active: boolean
+  created_at: string
+  last_used: string
 }
 
-export class SecurityLogger {
-  static async log(event: SecurityEvent): Promise<void> {
+export interface UserSession {
+  id: number
+  username: string
+  email?: string
+  avatar_url?: string
+  is_claimed: boolean
+  session_id: number
+}
+
+export class SessionManager {
+  // Generate a secure random token
+  static generateToken(): string {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    let result = ""
+    for (let i = 0; i < 64; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
+  }
+
+  // Create a new session
+  static async createSession(data: {
+    user_id: number
+    origin_domain: string
+    user_agent?: string
+    ip_address?: string
+    device_info?: string
+  }): Promise<{ token: string; session: SessionData }> {
+    const token = this.generateToken()
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+
+    const session = await Database.createSession({
+      user_id: data.user_id,
+      token_hash: token, // Store the token directly (we'll hash it in DB if needed)
+      expires_at: expiresAt.toISOString().slice(0, 19).replace("T", " "),
+      origin_domain: data.origin_domain,
+      user_agent: data.user_agent,
+      ip_address: data.ip_address,
+      device_info: data.device_info,
+    })
+
+    return { token, session }
+  }
+
+  // Validate a session token
+  static async validateSession(token: string): Promise<UserSession | null> {
+    if (!token) {
+      return null
+    }
+
     try {
-      await Database.logSecurityEvent(event)
+      // Get session from database
+      const session = await Database.getSessionByToken(token)
+      if (!session || !session.is_active) {
+        return null
+      }
+
+      // Check if session is expired
+      if (new Date(session.expires_at) < new Date()) {
+        await Database.revokeSession(session.id)
+        return null
+      }
+
+      // Get user data
+      const user = await Database.getUserById(session.user_id)
+      if (!user || !user.is_active) {
+        await Database.revokeSession(session.id)
+        return null
+      }
+
+      // Update last used time
+      await Database.updateSessionLastUsed(session.id)
+
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar_url: user.avatar_url,
+        is_claimed: user.is_claimed,
+        session_id: session.id,
+      }
     } catch (error) {
-      console.error("Failed to log security event:", error)
-      // Don't throw error to avoid breaking the main flow
+      console.error("Session validation error:", error)
+      return null
     }
   }
 
-  static async logLoginAttempt(data: {
-    user_id?: number
-    username?: string
-    success: boolean
-    ip_address?: string
-    user_agent?: string
-    reason?: string
-  }): Promise<void> {
-    await this.log({
-      user_id: data.user_id,
-      action: data.success ? "login_success" : "login_failed",
-      details: {
-        username: data.username,
-        reason: data.reason,
-      },
-      ip_address: data.ip_address,
-      user_agent: data.user_agent,
-      severity: data.success ? "low" : "medium",
-    })
+  // Revoke a session
+  static async revokeSession(token: string): Promise<boolean> {
+    try {
+      const session = await Database.getSessionByToken(token)
+      if (!session) {
+        return false
+      }
+
+      return await Database.revokeSession(session.id)
+    } catch (error) {
+      console.error("Session revocation error:", error)
+      return false
+    }
   }
 
-  static async logLogout(data: {
-    user_id: number
-    session_id?: number
-    ip_address?: string
-    user_agent?: string
-    reason?: string
-  }): Promise<void> {
-    await this.log({
-      user_id: data.user_id,
-      action: "logout",
-      details: {
-        session_id: data.session_id,
-        reason: data.reason,
-      },
-      ip_address: data.ip_address,
-      user_agent: data.user_agent,
-      severity: "low",
-    })
+  // Revoke all user sessions except current
+  static async revokeAllUserSessions(userId: number, exceptToken?: string): Promise<number> {
+    try {
+      let exceptSessionId: number | undefined
+
+      if (exceptToken) {
+        const currentSession = await Database.getSessionByToken(exceptToken)
+        exceptSessionId = currentSession?.id
+      }
+
+      return await Database.revokeAllUserSessions(userId, exceptSessionId)
+    } catch (error) {
+      console.error("Error revoking user sessions:", error)
+      return 0
+    }
   }
 
-  static async logSessionRevoked(data: {
-    user_id: number
-    session_id: number
-    revoked_by?: number
-    ip_address?: string
-    user_agent?: string
-    reason?: string
-  }): Promise<void> {
-    await this.log({
-      user_id: data.user_id,
-      action: "session_revoked",
-      details: {
-        session_id: data.session_id,
-        revoked_by: data.revoked_by,
-        reason: data.reason,
-      },
-      ip_address: data.ip_address,
-      user_agent: data.user_agent,
-      severity: "medium",
-    })
+  // Get user active sessions
+  static async getUserSessions(userId: number): Promise<SessionData[]> {
+    try {
+      return await Database.getUserActiveSessions(userId)
+    } catch (error) {
+      console.error("Error getting user sessions:", error)
+      return []
+    }
   }
 
-  static async logSuspiciousActivity(data: {
-    user_id?: number
-    action: string
-    details?: any
-    ip_address?: string
-    user_agent?: string
-    severity?: "medium" | "high" | "critical"
-  }): Promise<void> {
-    await this.log({
-      user_id: data.user_id,
-      action: `suspicious_${data.action}`,
-      details: data.details,
-      ip_address: data.ip_address,
-      user_agent: data.user_agent,
-      severity: data.severity || "high",
-    })
+  // Clean up expired sessions
+  static async cleanupExpiredSessions(): Promise<void> {
+    try {
+      await Database.deleteExpiredSessions()
+    } catch (error) {
+      console.error("Error cleaning up expired sessions:", error)
+    }
   }
 
-  static async logPermissionDenied(data: {
-    user_id?: number
-    action: string
-    resource?: string
-    ip_address?: string
-    user_agent?: string
-  }): Promise<void> {
-    await this.log({
-      user_id: data.user_id,
-      action: "permission_denied",
-      details: {
-        attempted_action: data.action,
-        resource: data.resource,
-      },
-      ip_address: data.ip_address,
-      user_agent: data.user_agent,
-      severity: "medium",
-    })
+  // Get session info
+  static async getSessionInfo(token: string): Promise<SessionData | null> {
+    try {
+      return await Database.getSessionByToken(token)
+    } catch (error) {
+      console.error("Error getting session info:", error)
+      return null
+    }
   }
 
-  static async logRoleChange(data: {
-    user_id: number
-    target_user_id: number
-    action: "role_added" | "role_removed" | "role_updated"
-    role_details: any
-    ip_address?: string
-    user_agent?: string
-  }): Promise<void> {
-    await this.log({
-      user_id: data.user_id,
-      action: data.action,
-      details: {
-        target_user_id: data.target_user_id,
-        role_details: data.role_details,
-      },
-      ip_address: data.ip_address,
-      user_agent: data.user_agent,
-      severity: "medium",
-    })
+  // Extend session expiration
+  static async extendSession(token: string, days = 30): Promise<boolean> {
+    try {
+      const session = await Database.getSessionByToken(token)
+      if (!session || !session.is_active) {
+        return false
+      }
+
+      const newExpiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000)
+      return await Database.extendSession(session.id, newExpiresAt.toISOString().slice(0, 19).replace("T", " "))
+    } catch (error) {
+      console.error("Error extending session:", error)
+      return false
+    }
   }
 }

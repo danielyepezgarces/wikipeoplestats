@@ -1,49 +1,39 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { JWTManager } from "./jwt"
-import { Database } from "./database"
+import { SessionManager } from "./session-manager"
 
 export interface AuthUser {
   id: number
   username: string
   email?: string
-  roles: string[]
-  permissions: string[]
+  avatar_url?: string
+  is_claimed: boolean
+  session_id: number
 }
 
 export interface AuthContext {
-  userId: number
-  username: string
-  sessionId: number
-  roles: string[]
-  permissions: string[]
+  user: AuthUser
+  session_id: number
 }
 
 export interface AuthRequest extends NextRequest {
   user?: AuthUser
 }
 
-// Get user from token
+// Get user from session token
 export async function getUserFromToken(token: string): Promise<AuthUser | null> {
   try {
-    const payload = JWTManager.verifyToken(token)
-    if (!payload || typeof payload === "string") {
+    const userSession = await SessionManager.validateSession(token)
+    if (!userSession) {
       return null
     }
 
-    // Get user from database
-    const user = await Database.getUserById(payload.userId)
-    if (!user || !user.is_active) {
-      return null
-    }
-
-    // For now, return basic user info with empty roles/permissions
-    // You can enhance this later with actual role/permission queries
     return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      roles: ["user"], // Default role
-      permissions: [],
+      id: userSession.id,
+      username: userSession.username,
+      email: userSession.email,
+      avatar_url: userSession.avatar_url,
+      is_claimed: userSession.is_claimed,
+      session_id: userSession.session_id,
     }
   } catch (error) {
     console.error("Error getting user from token:", error)
@@ -59,29 +49,14 @@ export async function getAuthContext(request: NextRequest): Promise<AuthContext 
       return null
     }
 
-    const decoded = JWTManager.verifyToken(token)
-    if (!decoded) {
-      return null
-    }
-
-    const user = await Database.getUserById(decoded.userId)
-    if (!user || !user.is_active) {
-      return null
-    }
-
-    // Get session info
-    const tokenHash = JWTManager.hashToken(token)
-    const session = await Database.getSessionByTokenHash(tokenHash)
-    if (!session || !session.is_active) {
+    const user = await getUserFromToken(token)
+    if (!user) {
       return null
     }
 
     return {
-      userId: user.id,
-      username: user.username,
-      sessionId: session.id,
-      roles: ["user"], // Default role - enhance with actual roles later
-      permissions: [],
+      user,
+      session_id: user.session_id,
     }
   } catch (error) {
     console.error("Error getting auth context:", error)
@@ -99,7 +74,7 @@ export async function requireAuth(request: NextRequest): Promise<{ userId: numbe
 
   const user = await getUserFromToken(token)
   if (!user) {
-    throw new Error("Invalid token")
+    throw new Error("Invalid session")
   }
 
   return { userId: user.id, user }
@@ -109,7 +84,10 @@ export async function requireAuth(request: NextRequest): Promise<{ userId: numbe
 export async function requireAnyRole(request: NextRequest, roles: string[]): Promise<{ user: AuthUser }> {
   const { user } = await requireAuth(request)
 
-  const hasRole = roles.some((role) => user.roles.includes(role)) || user.roles.includes("super_admin")
+  // For now, implement basic role checking
+  // You can enhance this with actual role queries from the database
+  const userRoles = ["user"] // Default role - enhance with actual roles later
+  const hasRole = roles.some((role) => userRoles.includes(role)) || userRoles.includes("super_admin")
 
   if (!hasRole) {
     throw new Error("Insufficient permissions")
@@ -130,8 +108,9 @@ export async function checkPermission(
     throw new Error("Authentication required")
   }
 
-  // For now, super admins have all permissions
-  const hasPermission = auth.roles.includes("super_admin") || auth.permissions.includes(permission)
+  // For now, implement basic permission checking
+  // You can enhance this with actual permission queries from the database
+  const hasPermission = false // Implement actual permission logic here
 
   return { auth, hasPermission }
 }
@@ -161,4 +140,59 @@ export function createAuthResponse(user: AuthUser | null, response?: NextRespons
   }
 
   return res
+}
+
+// Create session and set cookie
+export async function createAuthSession(
+  userId: number,
+  origin: string,
+  userAgent?: string,
+  ipAddress?: string,
+): Promise<{ token: string; user: AuthUser }> {
+  const deviceInfo = getDeviceInfo(userAgent || "")
+
+  const { token } = await SessionManager.createSession({
+    user_id: userId,
+    origin_domain: origin,
+    user_agent: userAgent,
+    ip_address: ipAddress,
+    device_info: deviceInfo,
+  })
+
+  const user = await getUserFromToken(token)
+  if (!user) {
+    throw new Error("Failed to create session")
+  }
+
+  return { token, user }
+}
+
+// Helper function to get device info
+function getDeviceInfo(userAgent: string): string {
+  const ua = userAgent.toLowerCase()
+  let device = "Desktop"
+  let browser = "Unknown"
+  let os = "Unknown"
+
+  // Detect device
+  if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
+    device = "Mobile"
+  } else if (ua.includes("tablet") || ua.includes("ipad")) {
+    device = "Tablet"
+  }
+
+  // Detect browser
+  if (ua.includes("chrome")) browser = "Chrome"
+  else if (ua.includes("firefox")) browser = "Firefox"
+  else if (ua.includes("safari")) browser = "Safari"
+  else if (ua.includes("edge")) browser = "Edge"
+
+  // Detect OS
+  if (ua.includes("windows")) os = "Windows"
+  else if (ua.includes("mac")) os = "macOS"
+  else if (ua.includes("linux")) os = "Linux"
+  else if (ua.includes("android")) os = "Android"
+  else if (ua.includes("ios")) os = "iOS"
+
+  return `${device} - ${browser} on ${os}`
 }

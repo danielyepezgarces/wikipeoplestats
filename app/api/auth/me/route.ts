@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { JWTManager } from "@/lib/jwt"
-import { Database } from "@/lib/database"
+import { SessionManager } from "@/lib/session-manager"
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,21 +27,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Verify JWT token
-    const payload = JWTManager.verifyToken(token)
-    if (!payload || typeof payload === "string") {
-      return NextResponse.json(
-        { authenticated: false, user: null },
-        {
-          status: 200,
-          headers: response.headers,
-        },
-      )
-    }
-
-    // Get user from database
-    const user = await Database.getUserById(payload.userId)
-    if (!user || !user.is_active) {
+    // Validate session
+    const userSession = await SessionManager.validateSession(token)
+    if (!userSession) {
       return NextResponse.json(
         { authenticated: false, user: null },
         {
@@ -57,11 +44,11 @@ export async function GET(request: NextRequest) {
       {
         authenticated: true,
         user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          avatar_url: user.avatar_url,
-          is_claimed: user.is_claimed,
+          id: userSession.id,
+          username: userSession.username,
+          email: userSession.email,
+          avatar_url: userSession.avatar_url,
+          is_claimed: userSession.is_claimed,
         },
       },
       {

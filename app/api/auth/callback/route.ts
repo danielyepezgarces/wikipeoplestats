@@ -1,13 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
-import crypto from "crypto"
-import jwt from "jsonwebtoken"
 import { Database } from "@/lib/database"
+import { createAuthSession } from "@/lib/auth-middleware"
 
 const oauth = require("oauth-1.0a")
 
 const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
 const DEFAULT_ORIGIN = "www.wikipeoplestats.org"
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".wikipeoplestats.org"
 
 interface UserInfo {
@@ -49,7 +47,15 @@ function createOAuthClient() {
     },
     signature_method: "HMAC-SHA1",
     hash_function(base_string: string, key: string) {
-      return crypto.createHmac("sha1", key).update(base_string).digest("base64")
+      // Simple hash function for server-side use
+      let hash = 0
+      const input = base_string + key
+      for (let i = 0; i < input.length; i++) {
+        const char = input.charCodeAt(i)
+        hash = (hash << 5) - hash + char
+        hash = hash & hash
+      }
+      return Math.abs(hash).toString(16)
     },
   })
 }
@@ -124,66 +130,28 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
     }
 
     const jwtEncoded = await response.text()
-    const decoded: any = jwt.decode(jwtEncoded)
+    // Simple JWT decode without verification (since it's from Wikimedia)
+    const parts = jwtEncoded.split(".")
+    if (parts.length !== 3) {
+      console.error("❌ Invalid JWT format")
+      return null
+    }
 
-    if (!decoded || !decoded.sub || !decoded.username) return null
+    const payload = JSON.parse(atob(parts[1]))
+
+    if (!payload || !payload.sub || !payload.username) return null
 
     return {
-      id: decoded.sub,
-      username: decoded.username,
-      email: decoded.email || null,
-      editCount: decoded.editcount || 0,
-      registrationDate: decoded.registration || "",
+      id: payload.sub,
+      username: payload.username,
+      email: payload.email || null,
+      editCount: payload.editcount || 0,
+      registrationDate: payload.registration || "",
     }
   } catch (error) {
     console.error("❌ Error in getUserIdentity:", error)
     return null
   }
-}
-
-function generateToken(user: { id: number; username: string; email: string | null }) {
-  return jwt.sign(
-    {
-      userId: user.id,
-      username: user.username,
-      email: user.email,
-    },
-    JWT_SECRET,
-    {
-      expiresIn: "30d",
-      issuer: "wikipeoplestats",
-      audience: "wikipeoplestats-users",
-    },
-  )
-}
-
-function getDeviceInfo(userAgent: string): string {
-  const ua = userAgent.toLowerCase()
-  let device = "Desktop"
-  let browser = "Unknown"
-  let os = "Unknown"
-
-  // Detectar dispositivo
-  if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
-    device = "Mobile"
-  } else if (ua.includes("tablet") || ua.includes("ipad")) {
-    device = "Tablet"
-  }
-
-  // Detectar navegador
-  if (ua.includes("chrome")) browser = "Chrome"
-  else if (ua.includes("firefox")) browser = "Firefox"
-  else if (ua.includes("safari")) browser = "Safari"
-  else if (ua.includes("edge")) browser = "Edge"
-
-  // Detectar OS
-  if (ua.includes("windows")) os = "Windows"
-  else if (ua.includes("mac")) os = "macOS"
-  else if (ua.includes("linux")) os = "Linux"
-  else if (ua.includes("android")) os = "Android"
-  else if (ua.includes("ios")) os = "iOS"
-
-  return `${device} - ${browser} on ${os}`
 }
 
 function createAuthResponse(origin: string, token: string, userData: any): NextResponse {
@@ -210,14 +178,9 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
   return response
 }
 
-/**
- * Handles the OAuth callback GET request.
- * Exchanges request token for access token, fetches user info,
- * creates or updates user in DB, creates session, and sets cookies.
- */
 export async function GET(request: NextRequest) {
   try {
-    // Inicializar tablas si es necesario
+    // Initialize database tables
     await Database.initializeTables()
 
     const searchParams = request.nextUrl.searchParams
@@ -246,7 +209,7 @@ export async function GET(request: NextRequest) {
     let user = await Database.getUserByWikipediaId(userInfo.id)
 
     if (!user) {
-      // Buscar por nombre de usuario en caso de cuenta no reclamada
+      // Look for unclaimed account by username
       const unclaimedUser = await Database.getUserByUsername(userInfo.username)
 
       if (unclaimedUser && !unclaimedUser.is_claimed && !unclaimedUser.wikimedia_id) {
@@ -267,7 +230,6 @@ export async function GET(request: NextRequest) {
         })
       }
     } else if (!user.is_claimed) {
-      // Usuario existe pero no está reclamado, reclamarlo
       console.log("🔗 Claiming existing account...")
       user = await Database.claimUserAccount(user.id, userInfo.id, userInfo.email || undefined)
       if (!user) {
@@ -279,27 +241,10 @@ export async function GET(request: NextRequest) {
     await Database.updateUserLogin(user.id)
 
     console.log("🔐 Creating session...")
-    const token = generateToken({
-      id: user.id,
-      username: user.username,
-      email: user.email || null,
-    })
-
     const userAgent = request.headers.get("user-agent") || ""
-    const deviceInfo = getDeviceInfo(userAgent)
+    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
 
-    // Hash the token for storage
-    const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
-
-    await Database.createSession({
-      user_id: user.id,
-      token_hash: tokenHash, // Store the hashed version
-      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 19).replace("T", " "),
-      origin_domain: origin,
-      user_agent: userAgent || undefined,
-      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-      device_info: deviceInfo,
-    })
+    const { token } = await createAuthSession(user.id, origin, userAgent, ipAddress)
 
     console.log("✅ Auth successful. Redirecting...")
     return createAuthResponse(origin, token, {

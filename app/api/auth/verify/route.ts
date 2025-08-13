@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { Database } from "@/lib/database"
-import { JWTManager } from "@/lib/jwt"
+import { SessionManager } from "@/lib/session-manager"
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,9 +27,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Verify JWT token
-    const decoded = JWTManager.verifyToken(token)
-    if (!decoded) {
+    // Validate session
+    const userSession = await SessionManager.validateSession(token)
+    if (!userSession) {
       const res = NextResponse.json(
         { authenticated: false, user: null },
         {
@@ -40,56 +39,17 @@ export async function GET(request: NextRequest) {
       )
       res.cookies.delete("auth_token")
       return res
-    }
-
-    // Check if token is blacklisted
-    const isBlacklisted = await Database.isTokenBlacklisted(token)
-    if (isBlacklisted) {
-      const res = NextResponse.json(
-        {
-          authenticated: false,
-          user: null,
-          error: "Token has been revoked",
-        },
-        {
-          status: 200,
-          headers: response.headers,
-        },
-      )
-      res.cookies.delete("auth_token")
-      return res
-    }
-
-    // Get user from database to ensure they still exist and are active
-    const user = await Database.getUserById(decoded.userId)
-    if (!user || !user.is_active) {
-      const res = NextResponse.json(
-        { authenticated: false, user: null },
-        {
-          status: 200,
-          headers: response.headers,
-        },
-      )
-      res.cookies.delete("auth_token")
-      return res
-    }
-
-    // Update session last used time
-    const tokenHash = JWTManager.hashToken(token)
-    const session = await Database.getSessionByTokenHash(tokenHash)
-    if (session) {
-      await Database.updateSessionLastUsed(session.id)
     }
 
     return NextResponse.json(
       {
         authenticated: true,
         user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          avatar_url: user.avatar_url,
-          is_claimed: user.is_claimed,
+          id: userSession.id,
+          username: userSession.username,
+          email: userSession.email,
+          avatar_url: userSession.avatar_url,
+          is_claimed: userSession.is_claimed,
         },
       },
       {

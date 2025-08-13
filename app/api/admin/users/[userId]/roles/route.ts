@@ -1,65 +1,63 @@
 // app/api/admin/users/[userId]/roles/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { requireAuth, checkPermission } from "@/lib/auth-middleware"
+import { requireAnyRole } from "@/lib/auth-middleware"
 import { RoleManager } from "@/lib/role-manager"
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: { userId: string } }) {
   try {
-    // Add CORS headers
-    const origin = request.headers.get("origin")
-    const response = new NextResponse()
+    await requireAnyRole(request, ["super_admin", "admin"])
 
-    // Allow requests from wikipeoplestats.org subdomains
-    if (origin && origin.includes("wikipeoplestats.org")) {
-      response.headers.set("Access-Control-Allow-Origin", origin)
-      response.headers.set("Access-Control-Allow-Credentials", "true")
-      response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-      response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    }
-
-    const { userId } = await params
-    const targetUserId = Number.parseInt(userId)
-
-    if (isNaN(targetUserId)) {
-      return NextResponse.json({ error: "Invalid user ID" }, { status: 400, headers: response.headers })
-    }
-
-    // Verificar autenticación
-    const { userId: currentUserId } = await requireAuth(request)
-
-    // Solo super admins y chapter admins pueden ver roles de otros usuarios
-    // Los usuarios pueden ver sus propios roles
-    if (currentUserId !== targetUserId) {
-      const { hasPermission } = await checkPermission(request, "manage_users")
-      if (!hasPermission) {
-        return NextResponse.json({ error: "Insufficient permissions" }, { status: 403, headers: response.headers })
-      }
+    const userId = Number.parseInt(params.userId)
+    if (isNaN(userId)) {
+      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 })
     }
 
     // Obtener roles del usuario
-    const roles = await RoleManager.getUserRoles(targetUserId)
+    const roles = await RoleManager.getUserRoles(userId)
 
-    return NextResponse.json(
-      {
-        userId: targetUserId,
-        roles: roles,
-      },
-      {
-        status: 200,
-        headers: response.headers,
-      },
-    )
+    return NextResponse.json({
+      user_id: userId,
+      roles: roles,
+    })
   } catch (error) {
-    console.error("Error fetching user roles:", error)
+    console.error("Error getting user roles:", error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Authentication required" },
+      { status: 401 },
+    )
+  }
+}
 
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message.includes("permissions") || error.message.includes("Authentication") ? 403 : 500 },
-      )
+export async function POST(request: NextRequest, { params }: { params: { userId: string } }) {
+  try {
+    await requireAnyRole(request, ["super_admin", "admin"])
+
+    const userId = Number.parseInt(params.userId)
+    if (isNaN(userId)) {
+      return NextResponse.json({ error: "Invalid user ID" }, { status: 400 })
     }
 
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    const { role, chapter_id } = await request.json()
+
+    if (!role) {
+      return NextResponse.json({ error: "Role is required" }, { status: 400 })
+    }
+
+    // Asignar roles al usuario
+    await RoleManager.assignUserRole(userId, role, chapter_id)
+
+    return NextResponse.json({
+      message: "Role assigned successfully",
+      user_id: userId,
+      role,
+      chapter_id,
+    })
+  } catch (error) {
+    console.error("Error assigning role:", error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Authentication required" },
+      { status: 401 },
+    )
   }
 }
 
