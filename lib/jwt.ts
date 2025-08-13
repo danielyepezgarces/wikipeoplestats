@@ -1,179 +1,119 @@
 import jwt from "jsonwebtoken"
 import { randomBytes } from "crypto"
 
-const JWT_SECRET = process.env.JWT_SECRET
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m"
-const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d"
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production"
+const ACCESS_TOKEN_EXPIRES_IN = "15m" // 15 minutes
+const REFRESH_TOKEN_EXPIRES_IN = "7d" // 7 days
 
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required")
-}
-
-// Validar fortaleza del JWT_SECRET en producción
-if (process.env.NODE_ENV === "production" && JWT_SECRET.length < 32) {
-  throw new Error("JWT_SECRET must be at least 32 characters long in production")
-}
-
-export interface JWTPayload {
+export interface TokenPayload {
   userId: number
   username: string
-  email?: string
-  roles?: string[]
+  email: string | null
+  roles: string[]
   jti: string
-  iat: number
-  exp: number
   type: "access" | "refresh"
 }
 
 export interface TokenPair {
   accessToken: string
   refreshToken: string
-  accessTokenExpiry: number
+  expiresIn: number
   refreshTokenExpiry: number
 }
 
-/**
- * Genera un identificador único para el token (JTI)
- */
-export function generateJTI(): string {
+function generateJTI(): string {
   return randomBytes(16).toString("hex")
 }
 
-/**
- * Crea un access token JWT
- */
-export function createAccessToken(payload: {
+export function createTokenPair(userData: {
   userId: number
   username: string
-  email?: string
-  roles?: string[]
-}): { token: string; jti: string; expiresAt: number } {
-  const jti = generateJTI()
-  const expiresAt = Math.floor(Date.now() / 1000) + 15 * 60 // 15 minutos
+  email: string | null
+  roles: string[]
+}): TokenPair {
+  const now = Math.floor(Date.now() / 1000)
+  const accessTokenExpiry = now + 15 * 60 // 15 minutes
+  const refreshTokenExpiry = now + 7 * 24 * 60 * 60 // 7 days
 
-  const tokenPayload: Omit<JWTPayload, "iat" | "exp"> = {
-    userId: payload.userId,
-    username: payload.username,
-    email: payload.email,
-    roles: payload.roles || [],
-    jti,
+  const accessTokenPayload: TokenPayload = {
+    userId: userData.userId,
+    username: userData.username,
+    email: userData.email,
+    roles: userData.roles,
+    jti: generateJTI(),
     type: "access",
   }
 
-  const token = jwt.sign(tokenPayload, JWT_SECRET!, {
-    expiresIn: JWT_EXPIRES_IN,
+  const refreshTokenPayload: TokenPayload = {
+    userId: userData.userId,
+    username: userData.username,
+    email: userData.email,
+    roles: userData.roles,
+    jti: generateJTI(),
+    type: "refresh",
+  }
+
+  const accessToken = jwt.sign(accessTokenPayload, JWT_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     issuer: "wikipeoplestats",
     audience: "wikipeoplestats-users",
   })
 
-  return { token, jti, expiresAt }
-}
-
-/**
- * Crea un refresh token JWT
- */
-export function createRefreshToken(payload: {
-  userId: number
-  username: string
-}): { token: string; jti: string; expiresAt: number } {
-  const jti = generateJTI()
-  const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 // 7 días
-
-  const tokenPayload: Omit<JWTPayload, "iat" | "exp"> = {
-    userId: payload.userId,
-    username: payload.username,
-    jti,
-    type: "refresh",
-  }
-
-  const token = jwt.sign(tokenPayload, JWT_SECRET!, {
+  const refreshToken = jwt.sign(refreshTokenPayload, JWT_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
     issuer: "wikipeoplestats",
     audience: "wikipeoplestats-users",
   })
 
-  return { token, jti, expiresAt }
-}
-
-/**
- * Crea un par de tokens (access + refresh)
- */
-export function createTokenPair(payload: {
-  userId: number
-  username: string
-  email?: string
-  roles?: string[]
-}): TokenPair {
-  const accessTokenData = createAccessToken(payload)
-  const refreshTokenData = createRefreshToken({
-    userId: payload.userId,
-    username: payload.username,
-  })
-
   return {
-    accessToken: accessTokenData.token,
-    refreshToken: refreshTokenData.token,
-    accessTokenExpiry: accessTokenData.expiresAt,
-    refreshTokenExpiry: refreshTokenData.expiresAt,
+    accessToken,
+    refreshToken,
+    expiresIn: 15 * 60, // 15 minutes in seconds
+    refreshTokenExpiry,
   }
 }
 
-/**
- * Verifica y decodifica un JWT
- */
-export function verifyToken(token: string): JWTPayload | null {
+export function verifyToken(token: string): TokenPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET!, {
+    const decoded = jwt.verify(token, JWT_SECRET, {
       issuer: "wikipeoplestats",
       audience: "wikipeoplestats-users",
-    }) as JWTPayload
+    }) as TokenPayload
 
     return decoded
   } catch (error) {
-    console.error("JWT verification failed:", error)
+    console.error("Token verification failed:", error)
     return null
   }
 }
 
-/**
- * Decodifica un JWT sin verificar (útil para obtener información expirada)
- */
-export function decodeToken(token: string): JWTPayload | null {
+export function decodeToken(token: string): TokenPayload | null {
   try {
-    const decoded = jwt.decode(token) as JWTPayload
+    const decoded = jwt.decode(token) as TokenPayload
     return decoded
   } catch (error) {
-    console.error("JWT decode failed:", error)
+    console.error("Token decode failed:", error)
     return null
   }
 }
 
-/**
- * Verifica si un token está expirado
- */
 export function isTokenExpired(token: string): boolean {
-  const decoded = decodeToken(token)
-  if (!decoded) return true
+  try {
+    const decoded = jwt.decode(token) as any
+    if (!decoded || !decoded.exp) return true
 
-  const now = Math.floor(Date.now() / 1000)
-  return decoded.exp < now
+    const now = Math.floor(Date.now() / 1000)
+    return decoded.exp < now
+  } catch (error) {
+    return true
+  }
 }
 
-/**
- * Obtiene el tiempo restante de un token en segundos
- */
-export function getTokenTimeRemaining(token: string): number {
-  const decoded = decodeToken(token)
-  if (!decoded) return 0
-
-  const now = Math.floor(Date.now() / 1000)
-  return Math.max(0, decoded.exp - now)
-}
-
-/**
- * Verifica si un token necesita ser renovado (menos de 5 minutos restantes)
- */
-export function shouldRefreshToken(token: string): boolean {
-  const timeRemaining = getTokenTimeRemaining(token)
-  return timeRemaining < 300 // 5 minutos
+export function getTokenExpiry(token: string): number | null {
+  try {
+    const decoded = jwt.decode(token) as any
+    return decoded?.exp || null
+  } catch (error) {
+    return null
+  }
 }
