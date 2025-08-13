@@ -10,7 +10,7 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const accessToken = cookieStore.get("access_token")?.value
     const refreshToken = cookieStore.get("refresh_token")?.value
 
