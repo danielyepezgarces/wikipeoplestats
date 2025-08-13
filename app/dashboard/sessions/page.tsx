@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import SessionManager from "@/components/dashboard/session-manager"
+import { SessionManager } from "@/components/dashboard/session-manager"
 
 export const metadata: Metadata = {
   title: "Gestión de Sesiones - WikiPeopleStats",
