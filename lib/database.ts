@@ -419,3 +419,8 @@ export class Database {
 export async function getConnection(): Promise<mysql.PoolConnection> {
   return await Database.getConnection()
 }
+
+// Export getDatabase function for auth middleware compatibility
+export async function getDatabase(): Promise<mysql.PoolConnection> {
+  return await Database.getConnection()
+}

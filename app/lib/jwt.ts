@@ -1,36 +1,36 @@
-// lib/jwt.ts
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
-import type { User } from "./database"
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d"
 
 export interface JWTPayload {
   userId: number
   username: string
   email?: string
-  iat: number
-  exp: number
+  sessionId?: number
+  iat?: number
+  exp?: number
 }
 
 export class JWTManager {
-  private static secret = process.env.JWT_SECRET || "your-secret-key"
-
-  static generateToken(user: User): string {
-    const payload: Omit<JWTPayload, "iat" | "exp"> = {
-      userId: user.id,
-      username: user.username,
-      email: user.email,
-    }
-
-    return jwt.sign(payload, this.secret, {
-      expiresIn: "30d",
+  static generateToken(payload: Omit<JWTPayload, "iat" | "exp">): string {
+    return jwt.sign(payload, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
+      issuer: "wikipeoplestats",
+      audience: "wikipeoplestats-users",
     })
   }
 
   static verifyToken(token: string): JWTPayload | null {
     try {
-      return jwt.verify(token, this.secret) as JWTPayload
+      const decoded = jwt.verify(token, JWT_SECRET, {
+        issuer: "wikipeoplestats",
+        audience: "wikipeoplestats-users",
+      }) as JWTPayload
+      return decoded
     } catch (error) {
-      console.error("JWT verification error:", error)
+      console.error("JWT verification failed:", error)
       return null
     }
   }
@@ -39,7 +39,42 @@ export class JWTManager {
     return crypto.createHash("sha256").update(token).digest("hex")
   }
 
-  static generateSecureToken(): string {
-    return crypto.randomBytes(32).toString("hex")
+  static getTokenExpiration(token: string): Date | null {
+    try {
+      const decoded = jwt.decode(token) as JWTPayload
+      if (decoded && decoded.exp) {
+        return new Date(decoded.exp * 1000)
+      }
+      return null
+    } catch (error) {
+      return null
+    }
   }
+
+  static isTokenExpired(token: string): boolean {
+    const expiration = this.getTokenExpiration(token)
+    if (!expiration) return true
+    return expiration < new Date()
+  }
+}
+
+// Export individual functions for backward compatibility
+export function generateToken(payload: Omit<JWTPayload, "iat" | "exp">): string {
+  return JWTManager.generateToken(payload)
+}
+
+export function verifyToken(token: string): JWTPayload | null {
+  return JWTManager.verifyToken(token)
+}
+
+export function hashToken(token: string): string {
+  return JWTManager.hashToken(token)
+}
+
+export function getTokenExpiration(token: string): Date | null {
+  return JWTManager.getTokenExpiration(token)
+}
+
+export function isTokenExpired(token: string): boolean {
+  return JWTManager.isTokenExpired(token)
 }
