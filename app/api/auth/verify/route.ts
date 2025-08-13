@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { Database } from "@/lib/database"
 import { verifyToken, isTokenExpired, shouldRefreshToken, createTokenPair } from "@/lib/jwt"
+import { setCorsHeaders, handleCorsOptions } from "@/lib/cors"
+
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsOptions(request)
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,7 +15,8 @@ export async function GET(request: NextRequest) {
     const refreshToken = cookieStore.get("refresh_token")?.value
 
     if (!accessToken) {
-      return NextResponse.json({ authenticated: false, error: "No access token" }, { status: 401 })
+      const response = NextResponse.json({ authenticated: false, error: "No access token" }, { status: 401 })
+      return setCorsHeaders(response, request.headers.get("origin"))
     }
 
     // Verify access token
@@ -20,13 +26,15 @@ export async function GET(request: NextRequest) {
       if (refreshToken && !isTokenExpired(refreshToken)) {
         return await refreshTokens(refreshToken, request)
       }
-      return NextResponse.json({ authenticated: false, error: "Invalid access token" }, { status: 401 })
+      const response = NextResponse.json({ authenticated: false, error: "Invalid access token" }, { status: 401 })
+      return setCorsHeaders(response, request.headers.get("origin"))
     }
 
     // Check if token is blacklisted
     const isBlacklisted = await Database.isTokenBlacklisted(decoded.jti)
     if (isBlacklisted) {
-      return NextResponse.json({ authenticated: false, error: "Token revoked" }, { status: 401 })
+      const response = NextResponse.json({ authenticated: false, error: "Token revoked" }, { status: 401 })
+      return setCorsHeaders(response, request.headers.get("origin"))
     }
 
     // Check if we should refresh the token (less than 5 minutes remaining)
@@ -37,10 +45,11 @@ export async function GET(request: NextRequest) {
     // Get user from database
     const user = await Database.getUserById(decoded.userId)
     if (!user) {
-      return NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
+      const response = NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
+      return setCorsHeaders(response, request.headers.get("origin"))
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       authenticated: true,
       user: {
         id: user.id,
@@ -49,9 +58,12 @@ export async function GET(request: NextRequest) {
         roles: decoded.roles,
       },
     })
+
+    return setCorsHeaders(response, request.headers.get("origin"))
   } catch (error) {
     console.error("Token verification error:", error)
-    return NextResponse.json({ authenticated: false, error: "Verification failed" }, { status: 500 })
+    const response = NextResponse.json({ authenticated: false, error: "Verification failed" }, { status: 500 })
+    return setCorsHeaders(response, request.headers.get("origin"))
   }
 }
 
@@ -60,19 +72,22 @@ async function refreshTokens(refreshToken: string, request: NextRequest) {
     // Verify refresh token
     const decoded = verifyToken(refreshToken)
     if (!decoded || decoded.type !== "refresh") {
-      return NextResponse.json({ authenticated: false, error: "Invalid refresh token" }, { status: 401 })
+      const response = NextResponse.json({ authenticated: false, error: "Invalid refresh token" }, { status: 401 })
+      return setCorsHeaders(response, request.headers.get("origin"))
     }
 
     // Check if refresh token is blacklisted
     const isBlacklisted = await Database.isTokenBlacklisted(decoded.jti)
     if (isBlacklisted) {
-      return NextResponse.json({ authenticated: false, error: "Refresh token revoked" }, { status: 401 })
+      const response = NextResponse.json({ authenticated: false, error: "Refresh token revoked" }, { status: 401 })
+      return setCorsHeaders(response, request.headers.get("origin"))
     }
 
     // Get user from database
     const user = await Database.getUserById(decoded.userId)
     if (!user) {
-      return NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
+      const response = NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
+      return setCorsHeaders(response, request.headers.get("origin"))
     }
 
     // Create new token pair
@@ -125,9 +140,10 @@ async function refreshTokens(refreshToken: string, request: NextRequest) {
       domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
-    return response
+    return setCorsHeaders(response, request.headers.get("origin"))
   } catch (error) {
     console.error("Token refresh error:", error)
-    return NextResponse.json({ authenticated: false, error: "Refresh failed" }, { status: 500 })
+    const response = NextResponse.json({ authenticated: false, error: "Refresh failed" }, { status: 500 })
+    return setCorsHeaders(response, request.headers.get("origin"))
   }
 }
