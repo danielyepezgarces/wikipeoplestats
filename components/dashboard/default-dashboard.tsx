@@ -9,7 +9,7 @@ import { User, BarChart3, Settings, Shield } from "lucide-react"
 
 interface UserType {
   id: number
-  name: string
+  username: string
   email: string
   role: string
 }
@@ -27,7 +27,7 @@ export function DefaultDashboard({ user }: DefaultDashboardProps) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground mt-2">Welcome back, {user.name}</p>
+            <p className="text-muted-foreground mt-2">Welcome back, {user.username}</p>
           </div>
           <Badge variant="default" className="text-sm">
             <User className="h-4 w-4 mr-1" />
