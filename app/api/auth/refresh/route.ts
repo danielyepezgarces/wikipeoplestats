@@ -1,18 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { JWTManager } from "@/lib/jwt"
 import { Database } from "@/lib/database"
+import { createAccessToken, decodeToken } from "@/lib/jwt"
+import { cookies } from "next/headers"
 
 export async function POST(request: NextRequest) {
   try {
-    const { refreshToken } = await request.json()
+    const cookieStore = await cookies()
+    const refreshToken = cookieStore.get("refresh_token")?.value
 
     if (!refreshToken) {
-      return NextResponse.json({ error: "Refresh token is required" }, { status: 400 })
+      return NextResponse.json({ error: "Refresh token not provided" }, { status: 401 })
     }
 
     // Verificar el refresh token
-    const decoded = JWTManager.verifyToken(refreshToken, "refresh")
-    if (!decoded) {
+    const decoded = decodeToken(refreshToken)
+    if (!decoded || decoded.type !== "refresh") {
       return NextResponse.json({ error: "Invalid refresh token" }, { status: 401 })
     }
 
@@ -28,23 +30,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Refresh token not found" }, { status: 401 })
     }
 
+    // Obtener información actualizada del usuario
+    const user = await Database.getUserById(decoded.userId)
+    if (!user || !user.is_active) {
+      return NextResponse.json({ error: "User not found or inactive" }, { status: 401 })
+    }
+
     // Actualizar el último uso del refresh token
     await Database.updateRefreshTokenLastUsed(decoded.jti)
 
     // Generar nuevo access token
-    const newAccessToken = JWTManager.refreshAccessToken(refreshToken)
-    if (!newAccessToken) {
-      return NextResponse.json({ error: "Failed to generate new access token" }, { status: 500 })
-    }
-
-    // Calcular tiempo de expiración
-    const expiresIn = 15 * 60 // 15 minutos en segundos
-
-    return NextResponse.json({
-      accessToken: newAccessToken,
-      expiresIn,
-      tokenType: "Bearer",
+    const { token: newAccessToken, expiresAt } = createAccessToken({
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      roles: [], // TODO: Obtener roles del usuario
     })
+
+    // Configurar cookie del access token
+    const response = NextResponse.json({
+      success: true,
+      accessToken: newAccessToken,
+      expiresAt,
+    })
+
+    response.cookies.set("access_token", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60, // 15 minutos
+      path: "/",
+    })
+
+    return response
   } catch (error) {
     console.error("❌ Error refreshing token:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
