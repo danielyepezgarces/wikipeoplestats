@@ -2,11 +2,11 @@ import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
 import { createTokenPair } from "@/lib/jwt"
 import crypto from "crypto"
+import jwt from "jsonwebtoken"
 
 const oauth = require("oauth-1.0a")
 
 const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
-const WIKIMEDIA_API_URL = "https://meta.wikimedia.org/w/api.php"
 
 function createOAuthClient() {
   return oauth({
@@ -24,6 +24,9 @@ function createOAuthClient() {
 export async function GET(request: NextRequest) {
   try {
     console.log("🔄 Processing OAuth callback...")
+
+    // Inicializar tablas si es necesario
+    await Database.initializeTables()
 
     const searchParams = request.nextUrl.searchParams
     const oauthToken = searchParams.get("oauth_token")
@@ -95,10 +98,10 @@ export async function GET(request: NextRequest) {
 
     console.log("✅ Final OAuth tokens obtained")
 
-    // Obtener información del usuario usando identify
+    // Obtener información del usuario usando el endpoint identify
     const identifyData = {
-      url: `${WIKIMEDIA_API_URL}?action=query&meta=userinfo&uiprop=id|name|email|realname|registrationdate&format=json`,
-      method: "GET",
+      url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/identify`,
+      method: "POST",
     }
 
     const finalToken = {
@@ -108,10 +111,10 @@ export async function GET(request: NextRequest) {
 
     const identifyAuthHeader = oauthClient.toHeader(oauthClient.authorize(identifyData, finalToken))
 
-    console.log("👤 Getting user information...")
+    console.log("👤 Getting user information using identify endpoint...")
 
     const userResponse = await fetch(identifyData.url, {
-      method: "GET",
+      method: "POST",
       headers: {
         ...identifyAuthHeader,
         "User-Agent": "WikiPeopleStats/1.0",
@@ -124,38 +127,46 @@ export async function GET(request: NextRequest) {
       throw new Error(`User info request failed: ${userResponse.status}`)
     }
 
-    const userData = await userResponse.json()
-    console.log("📊 User data received:", JSON.stringify(userData, null, 2))
+    // La respuesta del endpoint identify es un JWT
+    const jwtToken = await userResponse.text()
+    console.log("🔐 Received JWT token from identify endpoint")
 
-    if (!userData.query || !userData.query.userinfo) {
-      throw new Error("Invalid user data response")
+    // Decodificar el JWT (no verificar la firma ya que viene de Wikipedia)
+    const userInfo = jwt.decode(jwtToken) as any
+
+    if (!userInfo || !userInfo.sub || !userInfo.username) {
+      console.error("❌ Invalid JWT payload:", userInfo)
+      throw new Error("Invalid user information received from Wikipedia")
     }
 
-    const userInfo = userData.query.userinfo
-
-    console.log("👤 User info obtained:", userInfo.name)
+    console.log("👤 User info decoded:", {
+      id: userInfo.sub,
+      username: userInfo.username,
+      email: userInfo.email || null,
+    })
 
     // Buscar o crear usuario en la base de datos
-    let user = await Database.getUserByWikipediaId(userInfo.id.toString())
+    let user = await Database.getUserByWikipediaId(userInfo.sub.toString())
 
     if (!user) {
       console.log("👤 Creating new user...")
       // Crear nuevo usuario
       user = await Database.createUser({
-        wikimedia_id: userInfo.id.toString(),
-        username: userInfo.name,
+        wikimedia_id: userInfo.sub.toString(),
+        username: userInfo.username,
         email: userInfo.email,
-        registration_date: userInfo.registrationdate,
+        registration_date: userInfo.registered,
         is_claimed: true,
       })
 
-      // Asignar rol por defecto
-      await Database.assignDefaultRole(user.id)
+      if (user) {
+        await Database.assignDefaultRole(user.id)
+      }
     } else {
       console.log("👤 User found, updating...")
       // Actualizar información del usuario existente
       if (!user.is_claimed) {
-        user = await Database.claimUserAccount(user.id, userInfo.id.toString(), userInfo.email)
+        user = await Database.claimUserAccount(user.id, userInfo.sub.toString(), userInfo.email)
       }
     }
 
