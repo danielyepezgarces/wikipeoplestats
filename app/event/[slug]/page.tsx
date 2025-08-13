@@ -12,7 +12,7 @@ import { StatsCard } from "@/components/stats-card"
 import { SkeletonCard } from "@/components/skeleton-card"
 import { useI18n } from "@/hooks/use-i18n"
 import { useDomainContext } from "@/hooks/use-domain-context"
-import { getProject } from "@/lib/languages"
+import { getEventBySlug } from "@/lib/events-data"
 
 interface EventPageProps {
   params: Promise<{
@@ -68,123 +68,66 @@ export default function EventPage({ params }: EventPageProps) {
   const [timeLeft, setTimeLeft] = useState<string>("")
 
   useEffect(() => {
-    const fetchEventData = async () => {
+    const loadEventData = async () => {
       try {
         setLoading(true)
         setError(null)
 
-        const host = window.location.host
-        const project = getProject(host)
-
-        const eventResponse = await fetch(
-          `https://api.wikipeoplestats.org/v1/events/${project}/${resolvedParams.slug}`,
-          {
-            headers: {
-              "User-Agent": "WikiPeopleStats/1.0",
-            },
-            cache: "no-cache",
-          },
-        )
-
-        let eventData: Event | null = null
-
-        if (eventResponse.ok) {
-          eventData = await eventResponse.json()
-        } else {
-          const mockEvents: Record<string, Event> = {
-            "women-in-red-2024": {
-              id: "women-in-red-2024",
-              slug: "women-in-red-2024",
-              name: "Women in Red Wikipedia 2024",
-              description:
-                "Editatón global para crear y mejorar artículos sobre mujeres notables en Wikipedia. Este evento busca reducir la brecha de género en Wikipedia creando contenido sobre mujeres destacadas en diversos campos.",
-              start_date: "2024-03-08T00:00:00Z",
-              end_date: "2024-03-31T23:59:59Z",
-              location: "Virtual/Global",
-              url: "https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Women_in_Red",
-              event_image: "/women-in-red-wikipedia.png",
-              wiki_project: project,
-              status: "active",
-              organizer: "WikiProject Women in Red",
-              participants_count: 156,
-            },
-            "art-feminism-2024": {
-              id: "art-feminism-2024",
-              slug: "art-feminism-2024",
-              name: "Art+Feminism Editathon 2024",
-              description:
-                "Editatón anual para mejorar la cobertura de arte feminista y mujeres artistas en Wikipedia. Evento colaborativo que busca visibilizar el trabajo de artistas mujeres y temas relacionados con el feminismo en el arte.",
-              start_date: "2024-02-01T00:00:00Z",
-              end_date: "2024-02-29T23:59:59Z",
-              location: "Multiple locations worldwide",
-              url: "https://en.wikipedia.org/wiki/Wikipedia:Meetup/ArtAndFeminism",
-              event_image: "/art-feminism-editathon.png",
-              wiki_project: project,
-              status: "past",
-              organizer: "Art+Feminism",
-              participants_count: 89,
-            },
-          }
-
-          eventData = mockEvents[resolvedParams.slug] || null
-        }
+        const eventData = getEventBySlug(resolvedParams.slug)
 
         if (!eventData) {
           notFound()
           return
         }
 
-        setEvent(eventData)
+        const currentDate = new Date()
+        const startDate = new Date(eventData.start_date)
+        const endDate = new Date(eventData.end_date)
 
-        const [statsResponse, participantsResponse] = await Promise.all([
-          fetch(`https://api.wikipeoplestats.org/v1/events/${project}/${resolvedParams.slug}/stats`, {
-            headers: { "User-Agent": "WikiPeopleStats/1.0" },
-          }).catch(() => null),
-          fetch(`https://api.wikipeoplestats.org/v1/events/${project}/${resolvedParams.slug}/participants`, {
-            headers: { "User-Agent": "WikiPeopleStats/1.0" },
-          }).catch(() => null),
-        ])
-
-        // Handle stats
-        if (statsResponse?.ok) {
-          const statsData = await statsResponse.json()
-          setStats(statsData)
-        } else {
-          // Mock stats based on event
-          const mockStats: EventStats = {
-            total_edits: eventData.slug === "women-in-red-2024" ? 1247 : 892,
-            total_articles: eventData.slug === "women-in-red-2024" ? 234 : 156,
-            total_bytes_added: eventData.slug === "women-in-red-2024" ? 456789 : 234567,
-            total_participants: eventData.participants_count || 0,
-            new_articles: eventData.slug === "women-in-red-2024" ? 89 : 67,
-            improved_articles: eventData.slug === "women-in-red-2024" ? 145 : 89,
-            last_updated: new Date().toISOString(),
-          }
-          setStats(mockStats)
+        let status: "active" | "past" | "upcoming" = "upcoming"
+        if (currentDate >= startDate && currentDate <= endDate) {
+          status = "active"
+        } else if (currentDate > endDate) {
+          status = "past"
         }
 
-        // Handle participants
-        if (participantsResponse?.ok) {
-          const participantsData = await participantsResponse.json()
-          setParticipants(participantsData)
-        } else {
-          // Mock participants
-          const mockParticipants: Participant[] = [
-            { username: "WikiEditor1", edits: 45, articles_created: 3, articles_improved: 12, bytes_added: 15678 },
-            { username: "WikiEditor2", edits: 32, articles_created: 2, articles_improved: 8, bytes_added: 12345 },
-            { username: "WikiEditor3", edits: 28, articles_created: 1, articles_improved: 15, bytes_added: 9876 },
-          ]
-          setParticipants(mockParticipants)
+        const enrichedEvent = {
+          ...eventData,
+          status,
+          organizer: "Wikimedia Community",
+          participants_count: Math.floor(Math.random() * 200) + 50,
         }
+
+        setEvent(enrichedEvent)
+
+        const mockStats: EventStats = {
+          total_edits: Math.floor(Math.random() * 1000) + 500,
+          total_articles: Math.floor(Math.random() * 200) + 100,
+          total_bytes_added: Math.floor(Math.random() * 500000) + 200000,
+          total_participants: enrichedEvent.participants_count,
+          new_articles: Math.floor(Math.random() * 100) + 50,
+          improved_articles: Math.floor(Math.random() * 150) + 75,
+          last_updated: new Date().toISOString(),
+        }
+        setStats(mockStats)
+
+        const mockParticipants: Participant[] = Array.from({ length: 10 }, (_, i) => ({
+          username: `WikiEditor${i + 1}`,
+          edits: Math.floor(Math.random() * 50) + 10,
+          articles_created: Math.floor(Math.random() * 5) + 1,
+          articles_improved: Math.floor(Math.random() * 15) + 5,
+          bytes_added: Math.floor(Math.random() * 20000) + 5000,
+        }))
+        setParticipants(mockParticipants)
       } catch (err) {
-        console.error("Error fetching event data:", err)
+        console.error("Error loading event data:", err)
         setError(err instanceof Error ? err.message : "Failed to load event data")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchEventData()
+    loadEventData()
   }, [resolvedParams.slug])
 
   useEffect(() => {
