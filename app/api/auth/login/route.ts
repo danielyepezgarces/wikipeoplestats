@@ -1,103 +1,148 @@
-import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
+import { type NextRequest, NextResponse } from "next/server"
+import { OAuthManager } from "@/lib/oauth"
+import { Database } from "@/lib/database"
+import { JWTManager } from "@/lib/jwt"
 
-const oauth = require('oauth-1.0a')
-
-export async function GET(request: NextRequest) {
-  console.log('🔍 Starting Wikimedia OAuth login...')
+export async function POST(request: NextRequest) {
+  console.log("🔍 Procesando login...")
 
   try {
-    // Verify environment variables first
-    if (!process.env.WIKIPEDIA_CLIENT_ID || !process.env.WIKIPEDIA_CLIENT_SECRET) {
-      throw new Error('Missing Wikipedia OAuth credentials in environment variables')
+    const { code, state } = await request.json()
+
+    if (!code) {
+      return NextResponse.json({ error: "Código de autorización requerido" }, { status: 400 })
     }
 
-    const searchParams = request.nextUrl.searchParams
-    const origin = searchParams.get('origin') || request.headers.get('referer') || 'www.wikipeoplestats.org'
-    const realCallback = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN || 'https://auth.wikipeoplestats.org'}/api/auth/callback?origin=${encodeURIComponent(origin)}`
+    // Intercambiar código por token de acceso
+    const tokenData = await OAuthManager.exchangeCodeForToken(code)
+    if (!tokenData) {
+      return NextResponse.json({ error: "Error obteniendo token de acceso" }, { status: 400 })
+    }
 
-    // Configure OAuth 1.0a client
-    const oauthClient = oauth({
-      consumer: {
-        key: process.env.WIKIPEDIA_CLIENT_ID,
-        secret: process.env.WIKIPEDIA_CLIENT_SECRET,
+    // Obtener información del usuario
+    const userInfo = await OAuthManager.getUserInfo(tokenData.access_token)
+    if (!userInfo) {
+      return NextResponse.json({ error: "Error obteniendo información del usuario" }, { status: 400 })
+    }
+
+    console.log("👤 Usuario obtenido:", userInfo.username)
+
+    // Buscar o crear usuario
+    let user = await Database.getUserByWikipediaId(userInfo.sub.toString())
+
+    if (!user) {
+      // Buscar por username para usuarios no reclamados
+      const existingUser = await Database.getUserByUsername(userInfo.username)
+
+      if (existingUser && !existingUser.is_claimed) {
+        // Reclamar cuenta existente
+        user = await Database.claimUserAccount(existingUser.id, userInfo.sub.toString(), userInfo.email)
+        console.log("✅ Cuenta reclamada para:", userInfo.username)
+      } else {
+        // Crear nuevo usuario
+        user = await Database.createUser({
+          wikimedia_id: userInfo.sub.toString(),
+          username: userInfo.username,
+          email: userInfo.email,
+          avatar_url: userInfo.avatar_url,
+          registration_date: userInfo.registered,
+          is_claimed: true,
+        })
+
+        // Asignar rol por defecto
+        await Database.assignDefaultRole(user.id)
+        console.log("✅ Usuario creado:", userInfo.username)
+      }
+    }
+
+    if (!user) {
+      return NextResponse.json({ error: "Error procesando usuario" }, { status: 500 })
+    }
+
+    // Actualizar último login
+    await Database.updateUserLogin(user.id)
+
+    // Generar tokens JWT
+    const tokenPair = JWTManager.generateTokenPair({
+      userId: user.id.toString(),
+      username: user.username,
+      role: "user", // Aquí podrías obtener el rol real del usuario
+    })
+
+    // Almacenar refresh token en la base de datos
+    const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 días
+    const refreshTokenJti = JWTManager.getTokenId(tokenPair.refreshToken)
+
+    if (refreshTokenJti) {
+      await Database.storeRefreshToken({
+        user_id: user.id,
+        token_jti: refreshTokenJti,
+        expires_at: refreshTokenExpiry.toISOString(),
+        user_agent: request.headers.get("user-agent") || undefined,
+        ip_address:
+          request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || request.ip || undefined,
+      })
+    }
+
+    const domain = process.env.NEXT_PUBLIC_DOMAIN || ".wikipeoplestats.org"
+
+    const response = NextResponse.json({
+      message: "Login exitoso",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar_url: user.avatar_url,
+        is_claimed: user.is_claimed,
       },
-      signature_method: 'HMAC-SHA1',
-      hash_function: (base_string: string, key: string) => {
-        return crypto.createHmac('sha1', key).update(base_string).digest('base64')
+      tokens: {
+        accessToken: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        expiresIn: tokenPair.expiresIn,
+        tokenType: "Bearer",
       },
     })
 
-    const requestData = {
-      url: 'https://meta.wikimedia.org/w/index.php?title=Special:OAuth/initiate',
-      method: 'POST',
-      data: { oauth_callback: 'oob' } // Wikimedia requires 'oob'
-    }
-
-    // Generate authorization header
-    const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData))
-
-    // Add important headers
-    const headers = {
-      ...authHeader,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': 'WikiPeopleStats/1.0',
-      Accept: 'application/json',
-    }
-
-    console.log('📋 Request headers:', headers)
-
-    // Make the request using fetch instead of axios for better control
-    const response = await fetch(requestData.url, {
-      method: 'POST',
-      headers,
-      body: new URLSearchParams(requestData.data)
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`OAuth request failed with status ${response.status}: ${errorText}`)
-    }
-
-    const responseText = await response.text()
-    console.log('🔧 Raw response:', responseText)
-
-    // Parse the response
-    const responseParams = new URLSearchParams(responseText)
-    const oauthToken = responseParams.get('oauth_token')
-    const oauthSecret = responseParams.get('oauth_token_secret')
-    const callbackConfirmed = responseParams.get('oauth_callback_confirmed')
-
-    if (!oauthToken || !oauthSecret || callbackConfirmed !== 'true') {
-      throw new Error(`Invalid OAuth response: ${responseText}`)
-    }
-
-    console.log('✅ Tokens obtained successfully')
-
-    // Build authorization URL with our real callback as a parameter
-    const authUrl = new URL('https://meta.wikimedia.org/wiki/Special:OAuth/authorize')
-    authUrl.searchParams.set('oauth_token', oauthToken)
-    authUrl.searchParams.set('wikipeoplestats_callback', realCallback)
-
-    const redirectResponse = NextResponse.redirect(authUrl.toString())
-
-    // Store the secret securely
-    redirectResponse.cookies.set('oauth_token_secret', oauthSecret, {
+    // Configurar cookies seguras
+    response.cookies.set("auth_token", tokenPair.accessToken, {
+      domain: domain,
+      path: "/",
       httpOnly: true,
       secure: true,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 300, // 5 minutes
+      sameSite: "lax",
+      maxAge: tokenPair.expiresIn,
     })
 
-    return redirectResponse
+    response.cookies.set("refresh_token", tokenPair.refreshToken, {
+      domain: domain,
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 días
+    })
 
+    response.cookies.set(
+      "user_info",
+      JSON.stringify({
+        id: user.id,
+        username: user.username,
+        avatar_url: user.avatar_url,
+      }),
+      {
+        domain: domain,
+        path: "/",
+        secure: true,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60, // 7 días
+      },
+    )
+
+    console.log("✅ Login completado para:", user.username)
+
+    return response
   } catch (error) {
-    console.error('❌ OAuth Error:', error)
-    return NextResponse.json({
-      error: 'OAuth initialization failed',
-      details: error instanceof Error ? error.message : String(error),
-      suggestion: 'Please verify your OAuth consumer key and secret, and ensure your server clock is synchronized'
-    }, { status: 500 })
+    console.error("❌ Error en login:", error)
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 })
   }
 }

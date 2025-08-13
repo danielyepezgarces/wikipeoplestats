@@ -34,32 +34,26 @@ export interface UserRole {
   created_at: string
 }
 
-export interface Session {
-  id: number
-  user_id: number
-  token_hash: string
-  expires_at: string
-  origin_domain: string
-  user_agent?: string
-  ip_address?: string
-  device_info?: string
-  is_active: boolean
-  created_at: string
-  last_used: string
-}
-
-export interface SessionWithUser extends Session {
-  username: string
-  avatar_url?: string
-}
-
 export interface TokenBlacklist {
   id: number
-  token_hash: string
+  token_jti: string
   user_id: number
   revoked_at: string
   expires_at: string
   reason: string
+  token_type: "access" | "refresh"
+}
+
+export interface RefreshToken {
+  id: number
+  user_id: number
+  token_jti: string
+  expires_at: string
+  is_active: boolean
+  created_at: string
+  last_used: string
+  user_agent?: string
+  ip_address?: string
 }
 
 export class Database {
@@ -70,7 +64,7 @@ export class Database {
   static async initializeTables(): Promise<void> {
     const conn = await this.getConnection()
     try {
-      // Actualizar tabla de usuarios para incluir is_claimed
+      // Actualizar tabla de usuarios
       await conn.execute(`
         ALTER TABLE users 
         ADD COLUMN IF NOT EXISTS is_claimed BOOLEAN DEFAULT FALSE,
@@ -78,33 +72,44 @@ export class Database {
         MODIFY COLUMN wikimedia_id VARCHAR(255) NULL
       `)
 
-      // Actualizar tabla de sesiones
+      // Crear tabla de refresh tokens
       await conn.execute(`
-        ALTER TABLE sessions 
-        ADD COLUMN IF NOT EXISTS device_info TEXT NULL,
-        ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE,
-        ADD INDEX IF NOT EXISTS idx_user_active (user_id, is_active),
-        ADD INDEX IF NOT EXISTS idx_expires_active (expires_at, is_active),
-        ADD INDEX IF NOT EXISTS idx_token_hash (token_hash),
-        ADD INDEX IF NOT EXISTS idx_user_expires (user_id, expires_at),
-        ADD INDEX IF NOT EXISTS idx_active_expires (is_active, expires_at)
+        CREATE TABLE IF NOT EXISTS refresh_tokens (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          user_id INT NOT NULL,
+          token_jti VARCHAR(255) NOT NULL UNIQUE,
+          expires_at TIMESTAMP NOT NULL,
+          is_active BOOLEAN DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          last_used TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          user_agent TEXT NULL,
+          ip_address VARCHAR(45) NULL,
+          INDEX idx_user_id (user_id),
+          INDEX idx_token_jti (token_jti),
+          INDEX idx_expires_active (expires_at, is_active),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
       `)
 
-      // Crear tabla de blacklist de tokens
+      // Actualizar tabla de blacklist de tokens para usar JTI
       await conn.execute(`
         CREATE TABLE IF NOT EXISTS token_blacklist (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          token_hash VARCHAR(255) NOT NULL,
+          token_jti VARCHAR(255) NOT NULL,
           user_id INT NOT NULL,
           revoked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           expires_at TIMESTAMP NOT NULL,
           reason VARCHAR(255) DEFAULT 'manual_revocation',
-          INDEX idx_token_hash (token_hash),
+          token_type ENUM('access', 'refresh') DEFAULT 'access',
+          INDEX idx_token_jti (token_jti),
           INDEX idx_user_id (user_id),
           INDEX idx_expires_at (expires_at),
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
       `)
+
+      // Eliminar tabla de sesiones antigua si existe
+      await conn.execute(`DROP TABLE IF EXISTS sessions`)
     } finally {
       conn.release()
     }
@@ -213,114 +218,74 @@ export class Database {
     }
   }
 
-  static async createSession(data: {
+  // Refresh Token Methods
+  static async storeRefreshToken(data: {
     user_id: number
-    token_hash: string
+    token_jti: string
     expires_at: string
-    origin_domain: string
     user_agent?: string
     ip_address?: string
-    device_info?: string
-  }): Promise<Session> {
+  }): Promise<RefreshToken> {
     const conn = await this.getConnection()
     try {
       const userAgent = data.user_agent || null
       const ipAddress = data.ip_address || null
-      const deviceInfo = data.device_info || null
 
       const [result] = await conn.execute(
-        `INSERT INTO sessions (user_id, token_hash, expires_at, origin_domain, user_agent, ip_address, device_info, is_active, created_at, last_used)
-         VALUES (?, ?, ?, ?, ?, ?, ?, TRUE, NOW(), NOW())`,
-        [data.user_id, data.token_hash, data.expires_at, data.origin_domain, userAgent, ipAddress, deviceInfo],
+        `INSERT INTO refresh_tokens (user_id, token_jti, expires_at, user_agent, ip_address, is_active, created_at, last_used)
+         VALUES (?, ?, ?, ?, ?, TRUE, NOW(), NOW())`,
+        [data.user_id, data.token_jti, data.expires_at, userAgent, ipAddress],
       )
       const insertResult = result as mysql.ResultSetHeader
-      const session = await this.getSessionById(insertResult.insertId)
-      if (!session) {
-        throw new Error("Session creation failed")
+      const refreshToken = await this.getRefreshTokenById(insertResult.insertId)
+      if (!refreshToken) {
+        throw new Error("Refresh token creation failed")
       }
-      return session
+      return refreshToken
     } finally {
       conn.release()
     }
   }
 
-  static async getSessionById(id: number): Promise<Session | null> {
+  static async getRefreshTokenById(id: number): Promise<RefreshToken | null> {
     const conn = await this.getConnection()
     try {
-      const [rows] = await conn.execute("SELECT * FROM sessions WHERE id = ?", [id])
-      const sessions = rows as Session[]
-      return sessions[0] || null
+      const [rows] = await conn.execute("SELECT * FROM refresh_tokens WHERE id = ?", [id])
+      const tokens = rows as RefreshToken[]
+      return tokens[0] || null
     } finally {
       conn.release()
     }
   }
 
-  static async getSessionByTokenHash(tokenHash: string): Promise<Session | null> {
+  static async getRefreshTokenByJti(jti: string): Promise<RefreshToken | null> {
     const conn = await this.getConnection()
     try {
       const [rows] = await conn.execute(
-        "SELECT * FROM sessions WHERE token_hash = ? AND is_active = TRUE AND expires_at > NOW()",
-        [tokenHash],
+        "SELECT * FROM refresh_tokens WHERE token_jti = ? AND is_active = TRUE AND expires_at > NOW()",
+        [jti],
       )
-      const sessions = rows as Session[]
-      return sessions[0] || null
+      const tokens = rows as RefreshToken[]
+      return tokens[0] || null
     } finally {
       conn.release()
     }
   }
 
-  static async getUserActiveSessions(userId: number): Promise<SessionWithUser[]> {
+  static async updateRefreshTokenLastUsed(jti: string): Promise<void> {
     const conn = await this.getConnection()
     try {
-      const [rows] = await conn.execute(
-        `SELECT s.*, u.username, u.avatar_url
-         FROM sessions s
-         JOIN users u ON s.user_id = u.id
-         WHERE s.user_id = ? AND s.is_active = TRUE AND s.expires_at > NOW()
-         ORDER BY s.last_used DESC`,
-        [userId],
-      )
-      return rows as SessionWithUser[]
+      await conn.execute("UPDATE refresh_tokens SET last_used = NOW() WHERE token_jti = ?", [jti])
     } finally {
       conn.release()
     }
   }
 
-  static async getUserActiveSessionsExcept(userId: number, exceptSessionId: number | null): Promise<Session[]> {
+  static async revokeRefreshToken(jti: string, userId?: number): Promise<boolean> {
     const conn = await this.getConnection()
     try {
-      let query = `SELECT * FROM sessions 
-                   WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()`
-      const params: any[] = [userId]
-
-      if (exceptSessionId) {
-        query += " AND id != ?"
-        params.push(exceptSessionId)
-      }
-
-      query += " ORDER BY last_used DESC"
-
-      const [rows] = await conn.execute(query, params)
-      return rows as Session[]
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async updateSessionLastUsed(sessionId: number): Promise<void> {
-    const conn = await this.getConnection()
-    try {
-      await conn.execute("UPDATE sessions SET last_used = NOW() WHERE id = ?", [sessionId])
-    } finally {
-      conn.release()
-    }
-  }
-
-  static async revokeSession(sessionId: number, userId?: number): Promise<boolean> {
-    const conn = await this.getConnection()
-    try {
-      let query = "UPDATE sessions SET is_active = FALSE WHERE id = ?"
-      const params: any[] = [sessionId]
+      let query = "UPDATE refresh_tokens SET is_active = FALSE WHERE token_jti = ?"
+      const params: any[] = [jti]
 
       if (userId) {
         query += " AND user_id = ?"
@@ -335,18 +300,10 @@ export class Database {
     }
   }
 
-  static async revokeAllUserSessions(userId: number, exceptSessionId?: number): Promise<number> {
+  static async revokeAllUserRefreshTokens(userId: number): Promise<number> {
     const conn = await this.getConnection()
     try {
-      let query = "UPDATE sessions SET is_active = FALSE WHERE user_id = ?"
-      const params: any[] = [userId]
-
-      if (exceptSessionId) {
-        query += " AND id != ?"
-        params.push(exceptSessionId)
-      }
-
-      const [result] = await conn.execute(query, params)
+      const [result] = await conn.execute("UPDATE refresh_tokens SET is_active = FALSE WHERE user_id = ?", [userId])
       const updateResult = result as mysql.ResultSetHeader
       return updateResult.affectedRows
     } finally {
@@ -354,79 +311,60 @@ export class Database {
     }
   }
 
-  static async deleteExpiredSessions(): Promise<void> {
+  static async getUserActiveRefreshTokens(userId: number): Promise<RefreshToken[]> {
     const conn = await this.getConnection()
     try {
-      await conn.execute("DELETE FROM sessions WHERE expires_at < NOW()")
+      const [rows] = await conn.execute(
+        `SELECT * FROM refresh_tokens 
+         WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()
+         ORDER BY last_used DESC`,
+        [userId],
+      )
+      return rows as RefreshToken[]
     } finally {
       conn.release()
     }
   }
 
-  static async getSessionStats(userId: number): Promise<{
-    total_sessions: number
-    active_sessions: number
-    devices: string[]
-    last_login_ip: string | null
-  }> {
+  static async cleanupExpiredRefreshTokens(): Promise<void> {
     const conn = await this.getConnection()
     try {
-      const [totalRows] = await conn.execute("SELECT COUNT(*) as count FROM sessions WHERE user_id = ?", [userId])
-      const [activeRows] = await conn.execute(
-        "SELECT COUNT(*) as count FROM sessions WHERE user_id = ? AND is_active = TRUE AND expires_at > NOW()",
-        [userId],
-      )
-      const [deviceRows] = await conn.execute(
-        "SELECT DISTINCT device_info FROM sessions WHERE user_id = ? AND device_info IS NOT NULL",
-        [userId],
-      )
-      const [lastIpRows] = await conn.execute(
-        "SELECT ip_address FROM sessions WHERE user_id = ? ORDER BY last_used DESC LIMIT 1",
-        [userId],
-      )
-
-      const total = (totalRows as any)[0].count
-      const active = (activeRows as any)[0].count
-      const devices = (deviceRows as any[]).map((row) => row.device_info).filter(Boolean)
-      const lastIp = (lastIpRows as any)[0]?.ip_address || null
-
-      return {
-        total_sessions: total,
-        active_sessions: active,
-        devices,
-        last_login_ip: lastIp,
-      }
+      await conn.execute("DELETE FROM refresh_tokens WHERE expires_at < NOW()")
     } finally {
       conn.release()
     }
   }
 
-  // Token Blacklist Methods
-  static async blacklistToken(tokenHash: string, userId: number, reason = "manual_revocation"): Promise<void> {
+  // Token Blacklist Methods (updated for JTI)
+  static async blacklistToken(
+    tokenJti: string,
+    userId: number,
+    tokenType: "access" | "refresh" = "access",
+    reason = "manual_revocation",
+  ): Promise<void> {
     const conn = await this.getConnection()
     try {
-      // Calcular la fecha de expiración basada en el token original
-      const expiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días por defecto
+      // Calcular la fecha de expiración basada en el tipo de token
+      const expiry =
+        tokenType === "access"
+          ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 horas para access tokens
+          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días para refresh tokens
 
       await conn.execute(
-        `INSERT INTO token_blacklist (token_hash, user_id, expires_at, reason)
-         VALUES (?, ?, ?, ?)`,
-        [tokenHash, userId, expiry, reason],
+        `INSERT INTO token_blacklist (token_jti, user_id, expires_at, reason, token_type)
+         VALUES (?, ?, ?, ?, ?)`,
+        [tokenJti, userId, expiry, reason, tokenType],
       )
     } finally {
       conn.release()
     }
   }
 
-  static async isTokenBlacklisted(token: string): Promise<boolean> {
+  static async isTokenBlacklisted(tokenJti: string): Promise<boolean> {
     const conn = await this.getConnection()
     try {
-      // Hash the token to compare with stored hashes
-      const crypto = require("crypto")
-      const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
-
-      const [rows] = await conn.execute("SELECT id FROM token_blacklist WHERE token_hash = ? AND expires_at > NOW()", [
-        tokenHash,
+      const [rows] = await conn.execute("SELECT id FROM token_blacklist WHERE token_jti = ? AND expires_at > NOW()", [
+        tokenJti,
       ])
       const results = rows as any[]
       return results.length > 0

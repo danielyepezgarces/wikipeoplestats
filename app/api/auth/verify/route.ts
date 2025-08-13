@@ -1,97 +1,90 @@
-import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
-import mysql from 'mysql2/promise'
-
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: 'wikipeoplestats',
-})
+import { type NextRequest, NextResponse } from "next/server"
+import { JWTManager } from "@/lib/jwt"
+import { Database } from "@/lib/database"
 
 export async function GET(request: NextRequest) {
-  const origin = request.headers.get('origin')
-  const response = new NextResponse()
-
-  const isDev = process.env.NODE_ENV === 'development'
-  const isLocal = origin?.includes('localhost') || origin?.includes('127.0.0.1')
-  const isAllowed = origin?.includes('wikipeoplestats.org')
-
-  if ((isDev && isLocal) || isAllowed) {
-    response.headers.set('Access-Control-Allow-Origin', origin!)
-    response.headers.set('Access-Control-Allow-Credentials', 'true')
-    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  }
-
   try {
-    const authHeader = request.headers.get('authorization')
-    const token = authHeader?.replace('Bearer ', '') || request.cookies.get('auth_token')?.value
+    const accessToken = request.cookies.get("auth_token")?.value
+    const refreshToken = request.cookies.get("refresh_token")?.value
 
-    if (!token) {
-      return NextResponse.json({ error: 'Token no proporcionado' }, { status: 401, headers: response.headers })
+    if (!accessToken) {
+      return NextResponse.json({ error: "No access token provided" }, { status: 401 })
     }
 
-    let payload: any
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET!)
-    } catch (err) {
-      return NextResponse.json({ error: 'Token inválido' }, { status: 401, headers: response.headers })
+    // Verificar access token
+    let decoded = JWTManager.verifyToken(accessToken, "access")
+    let newAccessToken = null
+
+    // Si el access token ha expirado, intentar renovarlo con el refresh token
+    if (!decoded && refreshToken) {
+      const refreshDecoded = JWTManager.verifyToken(refreshToken, "refresh")
+
+      if (refreshDecoded) {
+        // Verificar si el refresh token está en la blacklist
+        const isBlacklisted = await Database.isTokenBlacklisted(refreshDecoded.jti)
+        if (!isBlacklisted) {
+          // Verificar si el refresh token existe en la base de datos
+          const storedToken = await Database.getRefreshTokenByJti(refreshDecoded.jti)
+          if (storedToken) {
+            // Generar nuevo access token
+            newAccessToken = JWTManager.refreshAccessToken(refreshToken)
+            if (newAccessToken) {
+              decoded = JWTManager.verifyToken(newAccessToken, "access")
+              await Database.updateRefreshTokenLastUsed(refreshDecoded.jti)
+            }
+          }
+        }
+      }
     }
 
-    const userId = payload.userId
-    const [userRows] = await db.query(
-      'SELECT id, username, email, last_login FROM users WHERE id = ? LIMIT 1',
-      [userId]
-    )
-    const user = (userRows as any)[0]
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 401, headers: response.headers })
+    if (!decoded) {
+      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
     }
 
-    const [roleRows] = await db.query(
-      `SELECT r.name FROM roles r
-       INNER JOIN user_roles ur ON ur.role_id = r.id
-       WHERE ur.user_id = ?`,
-      [userId]
-    )
+    // Verificar si el token está en la blacklist
+    const isBlacklisted = await Database.isTokenBlacklisted(decoded.jti)
+    if (isBlacklisted) {
+      return NextResponse.json({ error: "Token has been revoked" }, { status: 401 })
+    }
 
-    // ✅ Eliminar duplicados usando Set
-    const roles = Array.from(new Set((roleRows as any[]).map(r => r.name)))
-    const role = roles[0] || 'user'
+    // Obtener información del usuario
+    const user = await Database.getUserById(Number.parseInt(decoded.userId))
+    if (!user || !user.is_active) {
+      return NextResponse.json({ error: "User not found or inactive" }, { status: 401 })
+    }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: {
         id: user.id,
-        name: user.username,
+        username: user.username,
         email: user.email,
-        role,
-        roles,
-        wikipediaUsername: user.username,
-        lastLogin: user.last_login,
-        avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=random&rounded=true`
-      }
-    }, { headers: response.headers })
-  } catch (e) {
-    console.error('Error interno:', e)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500, headers: response.headers })
+        avatar_url: user.avatar_url,
+        is_claimed: user.is_claimed,
+        last_login: user.last_login,
+      },
+      token: {
+        jti: decoded.jti,
+        exp: decoded.exp,
+        iat: decoded.iat,
+      },
+    })
+
+    // Si se generó un nuevo access token, actualizar la cookie
+    if (newAccessToken) {
+      const domain = process.env.NEXT_PUBLIC_DOMAIN || ".wikipeoplestats.org"
+      response.cookies.set("auth_token", newAccessToken, {
+        domain: domain,
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        maxAge: 15 * 60, // 15 minutos
+      })
+    }
+
+    return response
+  } catch (error) {
+    console.error("❌ Error verifying token:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
-
-export async function OPTIONS(request: NextRequest) {
-  const origin = request.headers.get('origin')
-  const response = new NextResponse(null, { status: 200 })
-
-  const isDev = process.env.NODE_ENV === 'development'
-  const isLocal = origin?.includes('localhost') || origin?.includes('127.0.0.1')
-  const isAllowed = origin?.includes('wikipeoplestats.org')
-
-  if ((isDev && isLocal) || isAllowed) {
-    response.headers.set('Access-Control-Allow-Origin', origin!)
-    response.headers.set('Access-Control-Allow-Credentials', 'true')
-    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  }
-
-  return response
 }
