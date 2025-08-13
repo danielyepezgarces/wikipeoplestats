@@ -2,10 +2,12 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { JWTManager } from "@/lib/jwt"
 import { Database } from "@/lib/database"
+import { getAuthContext } from "./lib/auth-middleware"
 
 export async function middleware(request: NextRequest) {
   const origin = request.headers.get("origin")
   const hostname = request.nextUrl.hostname
+  const { pathname } = request.nextUrl
 
   // Allow CORS for localhost during development and wikipeoplestats.org subdomains
   const isDevelopment = process.env.NODE_ENV === "development"
@@ -20,6 +22,18 @@ export async function middleware(request: NextRequest) {
     response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
     return response
+  }
+
+  // Skip middleware for static files and API routes that don't need auth
+  if (
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/api/auth/login") ||
+    pathname.startsWith("/api/auth/callback") ||
+    pathname.startsWith("/api/auth/verify") ||
+    pathname.includes(".") ||
+    pathname === "/login"
+  ) {
+    return NextResponse.next()
   }
 
   // Solo proteger rutas específicas del dashboard y API
@@ -90,6 +104,36 @@ export async function middleware(request: NextRequest) {
 
       // Actualizar última actividad de la sesión
       await Database.updateSessionLastUsed(session.id)
+
+      // Protected routes that require authentication
+      const protectedRoutes = ["/dashboard", "/admin"]
+      const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+
+      if (isProtectedRoute) {
+        try {
+          const auth = await getAuthContext(request)
+
+          if (!auth) {
+            // Redirect to login if not authenticated
+            const loginUrl = new URL("/login", request.url)
+            loginUrl.searchParams.set("redirect", pathname)
+            return NextResponse.redirect(loginUrl)
+          }
+
+          // Add auth context to headers for API routes
+          const response = NextResponse.next()
+          response.headers.set("x-user-id", auth.userId.toString())
+          response.headers.set("x-username", auth.username)
+          response.headers.set("x-session-id", auth.sessionId.toString())
+
+          return response
+        } catch (error) {
+          console.error("Middleware auth error:", error)
+          const loginUrl = new URL("/login", request.url)
+          loginUrl.searchParams.set("redirect", pathname)
+          return NextResponse.redirect(loginUrl)
+        }
+      }
     } catch (error) {
       console.error("Middleware error:", error)
 
@@ -109,11 +153,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/api/admin/:path*",
-    "/api/auth/sessions/:path*",
-    "/api/auth/me/:path*",
-    "/api/auth/verify/:path*",
-    "/api/auth/logout/:path*",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 }

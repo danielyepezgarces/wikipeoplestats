@@ -1,58 +1,144 @@
+// lib/security-logger.ts
 import { Database } from "./database"
 
 export interface SecurityEvent {
-  userId?: number
+  user_id?: number
   action: string
   details?: any
-  ipAddress?: string
-  userAgent?: string
+  ip_address?: string
+  user_agent?: string
+  severity?: "low" | "medium" | "high" | "critical"
 }
 
 export class SecurityLogger {
-  static async logSecurityEvent(event: SecurityEvent): Promise<void> {
-    const conn = await Database.getConnection()
+  static async log(event: SecurityEvent): Promise<void> {
     try {
-      await conn.execute(
-        `INSERT INTO security_logs (user_id, action, details, ip_address, user_agent, created_at)
-         VALUES (?, ?, ?, ?, ?, NOW())`,
-        [
-          event.userId || null,
-          event.action,
-          event.details ? JSON.stringify(event.details) : null,
-          event.ipAddress || null,
-          event.userAgent || null,
-        ],
-      )
+      await Database.logSecurityEvent(event)
     } catch (error) {
       console.error("Failed to log security event:", error)
       // Don't throw error to avoid breaking the main flow
-    } finally {
-      conn.release()
     }
   }
 
-  static async getSecurityLogs(userId?: number, limit = 100): Promise<any[]> {
-    const conn = await Database.getConnection()
-    try {
-      let query = `
-        SELECT sl.*, u.username 
-        FROM security_logs sl
-        LEFT JOIN users u ON sl.user_id = u.id
-      `
-      const params: any[] = []
+  static async logLoginAttempt(data: {
+    user_id?: number
+    username?: string
+    success: boolean
+    ip_address?: string
+    user_agent?: string
+    reason?: string
+  }): Promise<void> {
+    await this.log({
+      user_id: data.user_id,
+      action: data.success ? "login_success" : "login_failed",
+      details: {
+        username: data.username,
+        reason: data.reason,
+      },
+      ip_address: data.ip_address,
+      user_agent: data.user_agent,
+      severity: data.success ? "low" : "medium",
+    })
+  }
 
-      if (userId) {
-        query += " WHERE sl.user_id = ?"
-        params.push(userId)
-      }
+  static async logLogout(data: {
+    user_id: number
+    session_id?: number
+    ip_address?: string
+    user_agent?: string
+    reason?: string
+  }): Promise<void> {
+    await this.log({
+      user_id: data.user_id,
+      action: "logout",
+      details: {
+        session_id: data.session_id,
+        reason: data.reason,
+      },
+      ip_address: data.ip_address,
+      user_agent: data.user_agent,
+      severity: "low",
+    })
+  }
 
-      query += " ORDER BY sl.created_at DESC LIMIT ?"
-      params.push(limit)
+  static async logSessionRevoked(data: {
+    user_id: number
+    session_id: number
+    revoked_by?: number
+    ip_address?: string
+    user_agent?: string
+    reason?: string
+  }): Promise<void> {
+    await this.log({
+      user_id: data.user_id,
+      action: "session_revoked",
+      details: {
+        session_id: data.session_id,
+        revoked_by: data.revoked_by,
+        reason: data.reason,
+      },
+      ip_address: data.ip_address,
+      user_agent: data.user_agent,
+      severity: "medium",
+    })
+  }
 
-      const [rows] = await conn.execute(query, params)
-      return rows as any[]
-    } finally {
-      conn.release()
-    }
+  static async logSuspiciousActivity(data: {
+    user_id?: number
+    action: string
+    details?: any
+    ip_address?: string
+    user_agent?: string
+    severity?: "medium" | "high" | "critical"
+  }): Promise<void> {
+    await this.log({
+      user_id: data.user_id,
+      action: `suspicious_${data.action}`,
+      details: data.details,
+      ip_address: data.ip_address,
+      user_agent: data.user_agent,
+      severity: data.severity || "high",
+    })
+  }
+
+  static async logPermissionDenied(data: {
+    user_id?: number
+    action: string
+    resource?: string
+    ip_address?: string
+    user_agent?: string
+  }): Promise<void> {
+    await this.log({
+      user_id: data.user_id,
+      action: "permission_denied",
+      details: {
+        attempted_action: data.action,
+        resource: data.resource,
+      },
+      ip_address: data.ip_address,
+      user_agent: data.user_agent,
+      severity: "medium",
+    })
+  }
+
+  static async logRoleChange(data: {
+    user_id: number
+    target_user_id: number
+    action: "role_added" | "role_removed" | "role_updated"
+    role_details: any
+    ip_address?: string
+    user_agent?: string
+  }): Promise<void> {
+    await this.log({
+      user_id: data.user_id,
+      action: data.action,
+      details: {
+        target_user_id: data.target_user_id,
+        role_details: data.role_details,
+      },
+      ip_address: data.ip_address,
+      user_agent: data.user_agent,
+      severity: "medium",
+    })
   }
 }
