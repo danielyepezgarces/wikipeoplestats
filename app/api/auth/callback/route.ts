@@ -8,29 +8,6 @@ const oauth = require("oauth-1.0a")
 
 const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
 const DEFAULT_ORIGIN = "www.wikipeoplestats.org"
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
-const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".wikipeoplestats.org"
-
-interface UserInfo {
-  id: string
-  username: string
-  email: string | null
-  editCount: number
-  registrationDate: string
-}
-
-interface AccessToken {
-  oauth_token: string
-  oauth_token_secret: string
-}
-
-function redirectToErrorPage(origin: string, errorType: string, errorMessage: string): NextResponse {
-  const errorUrl = new URL(`https://${origin}/login`)
-  errorUrl.searchParams.set("error", errorType)
-  errorUrl.searchParams.set("message", errorMessage)
-
-  return NextResponse.redirect(errorUrl.toString())
-}
 
 function createOAuthClient() {
   return oauth({
@@ -49,7 +26,7 @@ async function getAccessToken(
   oauth_token: string,
   oauth_token_secret: string,
   oauth_verifier: string,
-): Promise<AccessToken | null> {
+): Promise<{ oauth_token: string; oauth_token_secret: string } | null> {
   const oauthClient = createOAuthClient()
   const requestData = {
     url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/token`,
@@ -119,40 +96,17 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
 
     if (!decoded || !decoded.sub || !decoded.username) return null
 
-    return decoded
+    return {
+      id: decoded.sub,
+      username: decoded.username,
+      email: decoded.email || null,
+      editCount: decoded.editcount || 0,
+      registrationDate: decoded.registration || "",
+    }
   } catch (error) {
     console.error("❌ Error in getUserIdentity:", error)
     return null
   }
-}
-
-function getDeviceInfo(userAgent: string): string {
-  const ua = userAgent.toLowerCase()
-  let device = "Desktop"
-  let browser = "Unknown"
-  let os = "Unknown"
-
-  // Detectar dispositivo
-  if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
-    device = "Mobile"
-  } else if (ua.includes("tablet") || ua.includes("ipad")) {
-    device = "Tablet"
-  }
-
-  // Detectar navegador
-  if (ua.includes("chrome")) browser = "Chrome"
-  else if (ua.includes("firefox")) browser = "Firefox"
-  else if (ua.includes("safari")) browser = "Safari"
-  else if (ua.includes("edge")) browser = "Edge"
-
-  // Detectar OS
-  if (ua.includes("windows")) os = "Windows"
-  else if (ua.includes("mac")) os = "macOS"
-  else if (ua.includes("linux")) os = "Linux"
-  else if (ua.includes("android")) os = "Android"
-  else if (ua.includes("ios")) os = "iOS"
-
-  return `${device} - ${browser} on ${os}`
 }
 
 /**
@@ -163,138 +117,81 @@ function getDeviceInfo(userAgent: string): string {
 export async function GET(request: NextRequest) {
   console.log("🔄 Processing OAuth callback...")
 
+  const searchParams = request.nextUrl.searchParams
+  const oauth_token = searchParams.get("oauth_token")
+  const oauth_verifier = searchParams.get("oauth_verifier")
+  const origin = searchParams.get("origin") || DEFAULT_ORIGIN
+
   try {
     // Inicializar tablas si es necesario
-    const searchParams = request.nextUrl.searchParams
-    const oauthToken = searchParams.get("oauth_token")
-    const oauthVerifier = searchParams.get("oauth_verifier")
-    const origin = searchParams.get("origin") || DEFAULT_ORIGIN
+    await Database.initializeTables()
 
-    if (!oauthToken || !oauthVerifier) {
-      throw new Error("Missing OAuth parameters")
+    if (!oauth_token || !oauth_verifier) {
+      throw new Error("Missing required parameters")
     }
 
-    // Get the stored secret from cookies
-    const oauthSecret = request.cookies.get("oauth_token_secret")?.value
-    if (!oauthSecret) {
-      throw new Error("OAuth secret not found in cookies")
+    const oauth_token_secret = request.cookies.get("oauth_token_secret")?.value
+    if (!oauth_token_secret) {
+      throw new Error("Session expired, please try again")
     }
 
-    // Configure OAuth client
-    const oauthClient = createOAuthClient()
+    console.log("🔑 Getting access token...")
+    const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
+    if (!accessToken) throw new Error("Failed to authenticate with Wikipedia")
 
-    // Exchange for access token
-    const requestData = {
-      url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/token`,
-      method: "POST",
-      data: { oauth_token: oauthToken, oauth_verifier: oauthVerifier },
-    }
+    console.log("👤 Getting user info...")
+    const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
+    if (!userInfo) throw new Error("Failed to get user info from Wikipedia")
 
-    const token = {
-      key: oauthToken,
-      secret: oauthSecret,
-    }
-
-    const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData, token))
-
-    const response = await fetch(requestData.url, {
-      method: "POST",
-      headers: {
-        ...authHeader,
-        "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "WikiPeopleStats/1.0",
-      },
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Token exchange failed: ${errorText}`)
-    }
-
-    const responseText = await response.text()
-    const responseParams = new URLSearchParams(responseText)
-    const accessToken = responseParams.get("oauth_token")
-    const accessSecret = responseParams.get("oauth_token_secret")
-
-    if (!accessToken || !accessSecret) {
-      throw new Error("Failed to get access tokens")
-    }
-
-    // Get user info from Wikimedia
-    const userInfoData = {
-      url: "https://meta.wikimedia.org/w/api.php",
-      method: "GET",
-      data: {
-        action: "query",
-        meta: "userinfo",
-        uiprop: "email|realname|registrationdate",
-        format: "json",
-      },
-    }
-
-    const userToken = {
-      key: accessToken,
-      secret: accessSecret,
-    }
-
-    const userAuthHeader = oauthClient.toHeader(oauthClient.authorize(userInfoData, userToken))
-
-    const userResponse = await fetch(`${userInfoData.url}?${new URLSearchParams(userInfoData.data)}`, {
-      headers: {
-        ...userAuthHeader,
-        "User-Agent": "WikiPeopleStats/1.0",
-      },
-    })
-
-    if (!userResponse.ok) {
-      throw new Error("Failed to get user info")
-    }
-
-    const userData = await userResponse.json()
-    const userInfo = userData.query.userinfo
-
-    console.log("👤 User info obtained:", userInfo.name)
-
-    // Find or create user in database
-    let user = await Database.getUserByWikipediaId(userInfo.id.toString())
+    console.log("🔍 Looking for existing user...")
+    let user = await Database.getUserByWikipediaId(userInfo.id)
 
     if (!user) {
-      // Check if user exists by username (unclaimed account)
-      const existingUser = await Database.getUserByUsername(userInfo.name)
+      // Buscar por nombre de usuario en caso de cuenta no reclamada
+      const unclaimedUser = await Database.getUserByUsername(userInfo.username)
 
-      if (existingUser && !existingUser.is_claimed) {
-        // Claim existing account
-        user = await Database.claimUserAccount(existingUser.id, userInfo.id.toString(), userInfo.email)
-        console.log("✅ Account claimed for:", userInfo.name)
+      if (unclaimedUser && !unclaimedUser.is_claimed && !unclaimedUser.wikimedia_id) {
+        console.log("🔗 Claiming existing unclaimed account...")
+        user = await Database.claimUserAccount(unclaimedUser.id, userInfo.id, userInfo.email || undefined)
+        if (!user) {
+          throw new Error("Failed to claim account")
+        }
       } else {
-        // Create new user
+        console.log("🆕 Creating new user...")
         user = await Database.createUser({
-          wikimedia_id: userInfo.id.toString(),
-          username: userInfo.name,
-          email: userInfo.email,
-          registration_date: userInfo.registrationdate,
+          wikimedia_id: userInfo.id,
+          username: userInfo.username,
+          email: userInfo.email || undefined,
+          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`,
+          registration_date: userInfo.registrationDate || undefined,
           is_claimed: true,
         })
 
         if (user) {
           await Database.assignDefaultRole(user.id)
-          console.log("✅ New user created:", userInfo.name)
         }
+      }
+    } else if (!user.is_claimed) {
+      // Usuario existe pero no está reclamado, reclamarlo
+      console.log("🔗 Claiming existing account...")
+      user = await Database.claimUserAccount(user.id, userInfo.id, userInfo.email || undefined)
+      if (!user) {
+        throw new Error("Failed to claim account")
       }
     }
 
     if (!user) {
-      throw new Error("Failed to process user")
+      throw new Error("Failed to create or update user")
     }
 
-    // Update last login
+    console.log("🕓 Updating last login...")
     await Database.updateUserLogin(user.id)
 
-    // Create token pair
+    console.log("🔐 Creating token pair...")
     const tokenPair = createTokenPair({
       userId: user.id,
       username: user.username,
-      email: user.email,
+      email: user.email || null,
       roles: [], // TODO: Get user roles
     })
 
@@ -310,12 +207,11 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Redirect to origin with success
-    const redirectUrl = new URL(`https://${origin}/dashboard`)
-    const response_redirect = NextResponse.redirect(redirectUrl.toString())
+    console.log("✅ Auth successful. Redirecting...")
+    const response = NextResponse.redirect(`https://${origin}/dashboard`)
 
     // Set secure cookies
-    response_redirect.cookies.set("access_token", tokenPair.accessToken, {
+    response.cookies.set("access_token", tokenPair.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -324,7 +220,7 @@ export async function GET(request: NextRequest) {
       domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
-    response_redirect.cookies.set("refresh_token", tokenPair.refreshToken, {
+    response.cookies.set("refresh_token", tokenPair.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -334,16 +230,14 @@ export async function GET(request: NextRequest) {
     })
 
     // Clear OAuth secret cookie
-    response_redirect.cookies.delete("oauth_token_secret")
+    response.cookies.delete("oauth_token_secret")
 
-    console.log("✅ Login completed for:", user.username)
-
-    return response_redirect
-  } catch (error) {
-    console.error("❌ Callback error:", error)
+    return response
+  } catch (error: unknown) {
+    console.error("🔥 Unhandled error in auth callback:", error)
 
     const errorUrl = new URL(`https://${origin}/login`)
-    errorUrl.searchParams.set("error", "oauth_failed")
+    errorUrl.searchParams.set("error", "authentication_failed")
     errorUrl.searchParams.set("message", error instanceof Error ? error.message : "Unknown error")
 
     return NextResponse.redirect(errorUrl.toString())
