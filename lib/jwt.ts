@@ -34,7 +34,7 @@ function generateJTI(): string {
   return crypto.randomBytes(16).toString("hex")
 }
 
-export function createAccessToken(userData: UserTokenData): { token: string; expiresAt: number } {
+export function createAccessToken(userData: UserTokenData): { token: string; expiresAt: number; jti: string } {
   const jti = generateJTI()
   const expiresAt = Math.floor(Date.now() / 1000) + 15 * 60 // 15 minutes
 
@@ -52,7 +52,7 @@ export function createAccessToken(userData: UserTokenData): { token: string; exp
     jwtid: jti,
   })
 
-  return { token, expiresAt }
+  return { token, expiresAt, jti }
 }
 
 export function createRefreshToken(userData: UserTokenData): { token: string; expiresAt: number; jti: string } {
@@ -76,7 +76,7 @@ export function createRefreshToken(userData: UserTokenData): { token: string; ex
   return { token, expiresAt, jti }
 }
 
-export function createTokenPair(userData: UserTokenData): TokenPair {
+export function createTokenPair(userData: UserTokenData): TokenPair & { accessJti: string; refreshJti: string } {
   const accessToken = createAccessToken(userData)
   const refreshToken = createRefreshToken(userData)
 
@@ -85,6 +85,8 @@ export function createTokenPair(userData: UserTokenData): TokenPair {
     refreshToken: refreshToken.token,
     expiresIn: 15 * 60, // 15 minutes in seconds
     refreshTokenExpiry: refreshToken.expiresAt,
+    accessJti: accessToken.jti,
+    refreshJti: refreshToken.jti,
   }
 }
 
@@ -113,6 +115,17 @@ export function isTokenExpired(token: string): boolean {
     const decoded = jwt.decode(token) as TokenPayload
     if (!decoded || !decoded.exp) return true
     return decoded.exp < Math.floor(Date.now() / 1000)
+  } catch (error) {
+    return true
+  }
+}
+
+export function shouldRefreshToken(token: string): boolean {
+  try {
+    const decoded = jwt.decode(token) as TokenPayload
+    if (!decoded || !decoded.exp) return true
+    const timeRemaining = decoded.exp - Math.floor(Date.now() / 1000)
+    return timeRemaining < 300 // Less than 5 minutes
   } catch (error) {
     return true
   }

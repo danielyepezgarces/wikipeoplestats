@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { Database } from "@/lib/database"
-import { verifyToken, createTokenPair, decodeToken } from "@/lib/jwt"
+import { verifyToken, createTokenPair } from "@/lib/jwt"
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,19 +46,16 @@ export async function POST(request: NextRequest) {
     await Database.revokeRefreshToken(decoded.jti)
 
     // Almacenar el nuevo refresh token
-    const newRefreshTokenDecoded = decodeToken(tokenPair.refreshToken)
-    if (newRefreshTokenDecoded && newRefreshTokenDecoded.exp) {
-      await Database.storeRefreshToken({
-        user_id: user.id,
-        token_jti: newRefreshTokenDecoded.jti,
-        expires_at: newRefreshTokenDecoded.exp, // Pasar como timestamp Unix
-        user_agent: request.headers.get("user-agent") || undefined,
-        ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-      })
-    }
+    await Database.storeRefreshToken({
+      user_id: user.id,
+      token_jti: tokenPair.refreshJti,
+      expires_at: tokenPair.refreshTokenExpiry,
+      user_agent: request.headers.get("user-agent") || undefined,
+      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
+    })
 
     // Actualizar última renovación de token
-    await Database.updateUserLogin(user.id)
+    await Database.updateUserTokenRefresh(user.id)
 
     const response = NextResponse.json({
       message: "Tokens refreshed successfully",

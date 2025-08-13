@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
-import crypto from "crypto"
 import { Database } from "@/lib/database"
-import { createTokenPair, decodeToken } from "@/lib/jwt"
+import { createTokenPair } from "@/lib/jwt"
+import crypto from "crypto"
 
 const oauth = require("oauth-1.0a")
 
 const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
-const DEFAULT_ORIGIN = "www.wikipeoplestats.org"
+const WIKIMEDIA_API_URL = "https://meta.wikimedia.org/w/api.php"
 
 function createOAuthClient() {
   return oauth({
@@ -22,27 +22,26 @@ function createOAuthClient() {
 }
 
 export async function GET(request: NextRequest) {
-  console.log("🔄 Processing OAuth callback...")
-
   try {
+    console.log("🔄 Processing OAuth callback...")
+
     const searchParams = request.nextUrl.searchParams
     const oauthToken = searchParams.get("oauth_token")
     const oauthVerifier = searchParams.get("oauth_verifier")
     const origin = request.cookies.get("oauth_origin")?.value || "www.wikipeoplestats.org"
 
-    console.log("📥 Callback params:")
+    console.log("📋 Callback params:")
     console.log("  - oauth_token:", oauthToken?.substring(0, 8) + "...")
     console.log("  - oauth_verifier:", oauthVerifier?.substring(0, 8) + "...")
     console.log("  - origin:", origin)
 
     if (!oauthToken || !oauthVerifier) {
-      throw new Error("Missing OAuth parameters in callback")
+      throw new Error("Missing OAuth parameters")
     }
 
-    // Obtener el token secret de las cookies
     const oauthTokenSecret = request.cookies.get("oauth_token_secret")?.value
     if (!oauthTokenSecret) {
-      throw new Error("OAuth token secret not found in cookies")
+      throw new Error("Missing OAuth token secret")
     }
 
     console.log("🔐 Token secret found in cookies")
@@ -63,9 +62,9 @@ export async function GET(request: NextRequest) {
       secret: oauthTokenSecret,
     }
 
-    console.log("📤 Requesting access token...")
-
     const authHeader = oauthClient.toHeader(oauthClient.authorize(accessTokenData, token))
+
+    console.log("📤 Requesting access token...")
 
     const accessTokenResponse = await fetch(accessTokenData.url, {
       method: "POST",
@@ -86,31 +85,30 @@ export async function GET(request: NextRequest) {
     const accessTokenText = await accessTokenResponse.text()
     console.log("📄 Access token response:", accessTokenText)
 
-    const accessParams = new URLSearchParams(accessTokenText)
-    const accessToken = accessParams.get("oauth_token")
-    const accessTokenSecret = accessParams.get("oauth_token_secret")
+    const accessTokenParams = new URLSearchParams(accessTokenText)
+    const finalOauthToken = accessTokenParams.get("oauth_token")
+    const finalOauthTokenSecret = accessTokenParams.get("oauth_token_secret")
 
-    if (!accessToken || !accessTokenSecret) {
-      throw new Error("Failed to get access token from response")
+    if (!finalOauthToken || !finalOauthTokenSecret) {
+      throw new Error("Failed to get final OAuth tokens")
     }
 
-    console.log("✅ Access token obtained")
+    console.log("✅ Final OAuth tokens obtained")
 
-    // Obtener información del usuario usando el método identify
+    // Obtener información del usuario usando identify
     const identifyData = {
-      url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/identify`,
+      url: `${WIKIMEDIA_API_URL}?action=query&meta=userinfo&uiprop=id|name|email|realname|registrationdate&format=json`,
       method: "GET",
-      data: {},
     }
 
-    const userToken = {
-      key: accessToken,
-      secret: accessTokenSecret,
+    const finalToken = {
+      key: finalOauthToken,
+      secret: finalOauthTokenSecret,
     }
 
-    console.log("👤 Requesting user information...")
+    const identifyAuthHeader = oauthClient.toHeader(oauthClient.authorize(identifyData, finalToken))
 
-    const identifyAuthHeader = oauthClient.toHeader(oauthClient.authorize(identifyData, userToken))
+    console.log("👤 Getting user information...")
 
     const userResponse = await fetch(identifyData.url, {
       method: "GET",
@@ -127,30 +125,37 @@ export async function GET(request: NextRequest) {
     }
 
     const userData = await userResponse.json()
-    console.log("👤 User info obtained:", userData.username)
+    console.log("📊 User data received:", JSON.stringify(userData, null, 2))
+
+    if (!userData.query || !userData.query.userinfo) {
+      throw new Error("Invalid user data response")
+    }
+
+    const userInfo = userData.query.userinfo
+
+    console.log("👤 User info obtained:", userInfo.name)
 
     // Buscar o crear usuario en la base de datos
-    let user = await Database.getUserByWikipediaId(userData.sub.toString())
+    let user = await Database.getUserByWikipediaId(userInfo.id.toString())
 
     if (!user) {
+      console.log("👤 Creating new user...")
       // Crear nuevo usuario
-      console.log("👤 Creating new user:", userData.username)
       user = await Database.createUser({
-        wikimedia_id: userData.sub.toString(),
-        username: userData.username,
-        email: userData.email,
-        registration_date: userData.registered,
+        wikimedia_id: userInfo.id.toString(),
+        username: userInfo.name,
+        email: userInfo.email,
+        registration_date: userInfo.registrationdate,
         is_claimed: true,
       })
 
-      if (user) {
-        await Database.assignDefaultRole(user.id)
-      }
+      // Asignar rol por defecto
+      await Database.assignDefaultRole(user.id)
     } else {
+      console.log("👤 User found, updating...")
       // Actualizar información del usuario existente
-      console.log("👤 Updating existing user:", user.username)
       if (!user.is_claimed) {
-        user = await Database.claimUserAccount(user.id, userData.sub.toString(), userData.email)
+        user = await Database.claimUserAccount(user.id, userInfo.id.toString(), userInfo.email)
       }
     }
 
@@ -170,25 +175,25 @@ export async function GET(request: NextRequest) {
     })
 
     // Almacenar refresh token en la base de datos
-    const refreshTokenDecoded = decodeToken(tokenPair.refreshToken)
-    if (refreshTokenDecoded && refreshTokenDecoded.exp) {
-      await Database.storeRefreshToken({
-        user_id: user.id,
-        token_jti: refreshTokenDecoded.jti,
-        expires_at: refreshTokenDecoded.exp, // Pasar como timestamp Unix
-        user_agent: request.headers.get("user-agent") || undefined,
-        ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-      })
-    }
+    const userAgent = request.headers.get("user-agent") || undefined
+    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
+
+    await Database.storeRefreshToken({
+      user_id: user.id,
+      token_jti: tokenPair.refreshJti,
+      expires_at: tokenPair.refreshTokenExpiry,
+      user_agent: userAgent,
+      ip_address: ipAddress,
+    })
 
     console.log("✅ Login completed for:", user.username)
 
-    // Crear respuesta de redirección al dashboard
-    const dashboardUrl = new URL(`https://${origin}/dashboard`)
-    const response = NextResponse.redirect(dashboardUrl.toString())
+    // Crear URL de redirección
+    const redirectUrl = new URL(`https://${origin}/dashboard`)
+    const redirectResponse = NextResponse.redirect(redirectUrl.toString())
 
-    // Configurar cookies de autenticación
-    response.cookies.set("access_token", tokenPair.accessToken, {
+    // Configurar cookies
+    redirectResponse.cookies.set("access_token", tokenPair.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -197,7 +202,7 @@ export async function GET(request: NextRequest) {
       domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
-    response.cookies.set("refresh_token", tokenPair.refreshToken, {
+    redirectResponse.cookies.set("refresh_token", tokenPair.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -206,11 +211,11 @@ export async function GET(request: NextRequest) {
       domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
-    // Limpiar cookies temporales de OAuth
-    response.cookies.delete("oauth_token_secret")
-    response.cookies.delete("oauth_origin")
+    // Limpiar cookies temporales
+    redirectResponse.cookies.delete("oauth_token_secret")
+    redirectResponse.cookies.delete("oauth_origin")
 
-    return response
+    return redirectResponse
   } catch (error) {
     console.error("❌ Callback error:", error)
 
