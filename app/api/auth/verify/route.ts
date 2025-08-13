@@ -1,66 +1,92 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { JWTManager } from "@/lib/jwt"
 import { Database } from "@/lib/database"
+import { verifyToken, shouldRefreshToken, createAccessToken } from "@/lib/jwt"
+import { cookies } from "next/headers"
 
 export async function GET(request: NextRequest) {
   try {
-    const accessToken = request.cookies.get("auth_token")?.value
-    const refreshToken = request.cookies.get("refresh_token")?.value
+    const cookieStore = await cookies()
+    const accessToken = cookieStore.get("access_token")?.value
+    const refreshToken = cookieStore.get("refresh_token")?.value
 
-    if (!accessToken) {
-      return NextResponse.json({ error: "No access token provided" }, { status: 401 })
+    if (!accessToken && !refreshToken) {
+      return NextResponse.json({ error: "No tokens provided" }, { status: 401 })
     }
 
-    // Verificar access token
-    let decoded = JWTManager.verifyToken(accessToken, "access")
-    let newAccessToken = null
+    let currentToken = accessToken
+    let shouldSetNewCookie = false
 
-    // Si el access token ha expirado, intentar renovarlo con el refresh token
-    if (!decoded && refreshToken) {
-      const refreshDecoded = JWTManager.verifyToken(refreshToken, "refresh")
-
-      if (refreshDecoded) {
-        // Verificar si el refresh token está en la blacklist
-        const isBlacklisted = await Database.isTokenBlacklisted(refreshDecoded.jti)
-        if (!isBlacklisted) {
-          // Verificar si el refresh token existe en la base de datos
-          const storedToken = await Database.getRefreshTokenByJti(refreshDecoded.jti)
-          if (storedToken) {
-            // Generar nuevo access token
-            newAccessToken = JWTManager.refreshAccessToken(refreshToken)
-            if (newAccessToken) {
-              decoded = JWTManager.verifyToken(newAccessToken, "access")
-              await Database.updateRefreshTokenLastUsed(refreshDecoded.jti)
-            }
-          }
-        }
+    // Si no hay access token o está expirado, intentar usar refresh token
+    if (!accessToken || shouldRefreshToken(accessToken)) {
+      if (!refreshToken) {
+        return NextResponse.json({ error: "Access token expired and no refresh token available" }, { status: 401 })
       }
+
+      // Verificar refresh token
+      const refreshDecoded = verifyToken(refreshToken)
+      if (!refreshDecoded || refreshDecoded.type !== "refresh") {
+        return NextResponse.json({ error: "Invalid refresh token" }, { status: 401 })
+      }
+
+      // Verificar que el refresh token no esté blacklisted
+      const isBlacklisted = await Database.isTokenBlacklisted(refreshDecoded.jti)
+      if (isBlacklisted) {
+        return NextResponse.json({ error: "Refresh token has been revoked" }, { status: 401 })
+      }
+
+      // Verificar que el refresh token existe en la base de datos
+      const storedToken = await Database.getRefreshTokenByJti(refreshDecoded.jti)
+      if (!storedToken) {
+        return NextResponse.json({ error: "Refresh token not found" }, { status: 401 })
+      }
+
+      // Obtener información del usuario
+      const user = await Database.getUserById(refreshDecoded.userId)
+      if (!user || !user.is_active) {
+        return NextResponse.json({ error: "User not found or inactive" }, { status: 401 })
+      }
+
+      // Crear nuevo access token
+      const { token: newAccessToken } = createAccessToken({
+        userId: user.id,
+        username: user.username,
+        email: user.email,
+        roles: [], // TODO: Obtener roles del usuario
+      })
+
+      currentToken = newAccessToken
+      shouldSetNewCookie = true
+
+      // Actualizar último uso del refresh token
+      await Database.updateRefreshTokenLastUsed(refreshDecoded.jti)
     }
 
-    if (!decoded) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
+    // Verificar el access token actual
+    const decoded = verifyToken(currentToken!)
+    if (!decoded || decoded.type !== "access") {
+      return NextResponse.json({ error: "Invalid access token" }, { status: 401 })
     }
 
-    // Verificar si el token está en la blacklist
+    // Verificar que el token no esté blacklisted
     const isBlacklisted = await Database.isTokenBlacklisted(decoded.jti)
     if (isBlacklisted) {
-      return NextResponse.json({ error: "Token has been revoked" }, { status: 401 })
+      return NextResponse.json({ error: "Access token has been revoked" }, { status: 401 })
     }
 
-    // Obtener información del usuario
-    const user = await Database.getUserById(Number.parseInt(decoded.userId))
+    // Obtener información actualizada del usuario
+    const user = await Database.getUserById(decoded.userId)
     if (!user || !user.is_active) {
       return NextResponse.json({ error: "User not found or inactive" }, { status: 401 })
     }
 
     const response = NextResponse.json({
+      success: true,
       user: {
         id: user.id,
         username: user.username,
         email: user.email,
         avatar_url: user.avatar_url,
         is_claimed: user.is_claimed,
-        last_login: user.last_login,
       },
       token: {
         jti: decoded.jti,
@@ -69,22 +95,20 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // Si se generó un nuevo access token, actualizar la cookie
-    if (newAccessToken) {
-      const domain = process.env.NEXT_PUBLIC_DOMAIN || ".wikipeoplestats.org"
-      response.cookies.set("auth_token", newAccessToken, {
-        domain: domain,
-        path: "/",
+    // Si se generó un nuevo access token, configurar la cookie
+    if (shouldSetNewCookie) {
+      response.cookies.set("access_token", currentToken!, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         maxAge: 15 * 60, // 15 minutos
+        path: "/",
       })
     }
 
     return response
   } catch (error) {
-    console.error("❌ Error verifying token:", error)
+    console.error("Token verification error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
