@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 
 interface UserRole {
@@ -25,16 +25,70 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const isRefreshingRef = useRef(false)
 
-  useEffect(() => {
-    verifyAuth()
+  const refreshToken = useCallback(async () => {
+    if (isRefreshingRef.current) return false
+
+    try {
+      isRefreshingRef.current = true
+      const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || "https://auth.wikipeoplestats.org"
+
+      const response = await fetch(`${authDomain}/api/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log("🔄 Token refreshed successfully")
+
+        // Verify auth after refresh to get updated user data
+        await verifyAuth()
+        return true
+      } else {
+        console.log("❌ Token refresh failed:", response.status)
+        setUser(null)
+        return false
+      }
+    } catch (error) {
+      console.error("Error refreshing token:", error)
+      setUser(null)
+      return false
+    } finally {
+      isRefreshingRef.current = false
+    }
   }, [])
+
+  const setupAutoRefresh = useCallback(() => {
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current)
+    }
+
+    // Refresh token every 14 minutes (before 15-minute expiry)
+    refreshIntervalRef.current = setInterval(
+      async () => {
+        if (user) {
+          console.log("🔄 Auto-refreshing token...")
+          const success = await refreshToken()
+          if (!success) {
+            console.log("❌ Auto-refresh failed, redirecting to login")
+            router.push("/")
+          }
+        }
+      },
+      14 * 60 * 1000,
+    ) // 14 minutes
+  }, [user, refreshToken, router])
 
   const verifyAuth = async () => {
     try {
       setIsLoading(true)
 
-      // Intentar verificar con el dominio de auth
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || "https://auth.wikipeoplestats.org"
 
       const response = await fetch(`${authDomain}/api/auth/verify`, {
@@ -47,6 +101,16 @@ export function useAuth() {
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
+        if (data.user) {
+          setupAutoRefresh()
+        }
+      } else if (response.status === 401) {
+        // Try to refresh token if verification fails
+        console.log("🔄 Access token expired, attempting refresh...")
+        const refreshSuccess = await refreshToken()
+        if (!refreshSuccess) {
+          setUser(null)
+        }
       } else {
         setUser(null)
       }
@@ -57,6 +121,18 @@ export function useAuth() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    verifyAuth()
+  }, [])
 
   const login = (redirectUrl?: string) => {
     const currentDomain = window.location.hostname
@@ -71,6 +147,11 @@ export function useAuth() {
 
   const logout = async () => {
     try {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current)
+        refreshIntervalRef.current = null
+      }
+
       const authDomain = process.env.NEXT_PUBLIC_AUTH_DOMAIN || "https://auth.wikipeoplestats.org"
 
       await fetch(`${authDomain}/api/auth/logout`, {
@@ -127,13 +208,13 @@ export function useAuth() {
 
     switch (highestRole) {
       case "super_admin":
-        return "/admin"
+        return "/dashboard/super-admin"
       case "chapter_admin":
-        return "/chapter-admin"
+        return "/dashboard/chapter-admin"
       case "chapter_moderator":
-        return "/moderator"
+        return "/dashboard/moderator"
       case "chapter_partner":
-        return "/partner"
+        return "/dashboard/partner"
       default:
         return "/dashboard"
     }
@@ -175,5 +256,6 @@ export function useAuth() {
     getUserChapters,
     hasRoleInChapter,
     refetch: verifyAuth,
+    refreshToken, // Expose manual refresh function
   }
 }
