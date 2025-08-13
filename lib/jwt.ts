@@ -1,85 +1,86 @@
 import jwt from "jsonwebtoken"
-import crypto from "crypto"
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d"
 
 export interface JWTPayload {
   userId: number
   username: string
-  sessionId: number
+  email?: string
+  sessionId?: number
   iat?: number
   exp?: number
 }
 
 export class JWTManager {
-  private static readonly SECRET = process.env.JWT_SECRET || "your-secret-key"
-  private static readonly EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d"
-
   static generateToken(payload: Omit<JWTPayload, "iat" | "exp">): string {
-    return jwt.sign(payload, this.SECRET, {
-      expiresIn: this.EXPIRES_IN,
+    return jwt.sign(payload, JWT_SECRET, {
+      expiresIn: JWT_EXPIRES_IN,
       issuer: "wikipeoplestats",
       audience: "wikipeoplestats-users",
     })
   }
 
-  static verifyToken(token: string): JWTPayload {
+  static verifyToken(token: string): JWTPayload | null {
     try {
-      const decoded = jwt.verify(token, this.SECRET, {
+      const decoded = jwt.verify(token, JWT_SECRET, {
         issuer: "wikipeoplestats",
         audience: "wikipeoplestats-users",
       }) as JWTPayload
-
       return decoded
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new Error("Token expired")
-      } else if (error instanceof jwt.JsonWebTokenError) {
-        throw new Error("Invalid token")
-      } else {
-        throw new Error("Token verification failed")
-      }
+      console.error("JWT verification failed:", error)
+      return null
     }
   }
 
   static hashToken(token: string): string {
-    return crypto.createHash("sha256").update(token).digest("hex")
+    // Use a simple hash for Edge Runtime compatibility
+    let hash = 0
+    for (let i = 0; i < token.length; i++) {
+      const char = token.charCodeAt(i)
+      hash = (hash << 5) - hash + char
+      hash = hash & hash // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(16)
   }
 
-  static getTokenExpiration(): Date {
-    const expiresIn = this.EXPIRES_IN
-    const now = new Date()
-
-    // Parse the expires in string (e.g., '7d', '24h', '60m')
-    if (expiresIn.endsWith("d")) {
-      const days = Number.parseInt(expiresIn.slice(0, -1))
-      return new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
-    } else if (expiresIn.endsWith("h")) {
-      const hours = Number.parseInt(expiresIn.slice(0, -1))
-      return new Date(now.getTime() + hours * 60 * 60 * 1000)
-    } else if (expiresIn.endsWith("m")) {
-      const minutes = Number.parseInt(expiresIn.slice(0, -1))
-      return new Date(now.getTime() + minutes * 60 * 1000)
-    } else {
-      // Default to 7 days if format is not recognized
-      return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+  static getTokenExpiration(token: string): Date | null {
+    try {
+      const decoded = jwt.decode(token) as JWTPayload
+      if (decoded && decoded.exp) {
+        return new Date(decoded.exp * 1000)
+      }
+      return null
+    } catch (error) {
+      return null
     }
   }
 
   static isTokenExpired(token: string): boolean {
-    try {
-      const decoded = jwt.decode(token) as JWTPayload
-      if (!decoded || !decoded.exp) return true
-
-      return Date.now() >= decoded.exp * 1000
-    } catch {
-      return true
-    }
+    const expiration = this.getTokenExpiration(token)
+    if (!expiration) return true
+    return expiration < new Date()
   }
+}
 
-  static getTokenPayload(token: string): JWTPayload | null {
-    try {
-      return jwt.decode(token) as JWTPayload
-    } catch {
-      return null
-    }
-  }
+// Export individual functions for backward compatibility
+export function generateToken(payload: Omit<JWTPayload, "iat" | "exp">): string {
+  return JWTManager.generateToken(payload)
+}
+
+export function verifyToken(token: string): JWTPayload | null {
+  return JWTManager.verifyToken(token)
+}
+
+export function hashToken(token: string): string {
+  return JWTManager.hashToken(token)
+}
+
+export function getTokenExpiration(token: string): Date | null {
+  return JWTManager.getTokenExpiration(token)
+}
+
+export function isTokenExpired(token: string): boolean {
+  return JWTManager.isTokenExpired(token)
 }

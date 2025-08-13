@@ -1,5 +1,4 @@
 import mysql from "mysql2/promise"
-import crypto from "crypto"
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
@@ -57,6 +56,17 @@ export interface SessionWithUser extends Session {
 export class Database {
   static async getConnection(): Promise<mysql.PoolConnection> {
     return await pool.getConnection()
+  }
+
+  // Simple hash function for Edge Runtime compatibility
+  static hashToken(token: string): string {
+    let hash = 0
+    for (let i = 0; i < token.length; i++) {
+      const char = token.charCodeAt(i)
+      hash = (hash << 5) - hash + char
+      hash = hash & hash // Convert to 32bit integer
+    }
+    return Math.abs(hash).toString(16)
   }
 
   static async initializeTables(): Promise<void> {
@@ -444,11 +454,6 @@ export class Database {
     } finally {
       conn.release()
     }
-  }
-
-  // Helper method to hash tokens consistently
-  static hashToken(token: string): string {
-    return crypto.createHash("sha256").update(token).digest("hex")
   }
 
   // Log security events
