@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import jwt from "jsonwebtoken"
+import crypto from "crypto"
 import { Database } from "@/lib/database"
 import { createAuthSession } from "@/lib/auth-middleware"
 
@@ -48,15 +49,7 @@ function createOAuthClient() {
     },
     signature_method: "HMAC-SHA1",
     hash_function(base_string: string, key: string) {
-      // Simple hash function for server-side use
-      let hash = 0
-      const input = base_string + key
-      for (let i = 0; i < input.length; i++) {
-        const char = input.charCodeAt(i)
-        hash = (hash << 5) - hash + char
-        hash = hash & hash
-      }
-      return Math.abs(hash).toString(16)
+      return crypto.createHmac("sha1", key).update(base_string).digest("base64")
     },
   })
 }
@@ -117,6 +110,7 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
   )
 
   try {
+    console.log("🔍 Making request to Wikipedia identify endpoint...")
     const response = await fetch(requestData.url, {
       method: "POST",
       headers: {
@@ -126,23 +120,34 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
     })
 
     if (!response.ok) {
-      console.error("❌ Failed to get user identity:", await response.text())
+      const errorText = await response.text()
+      console.error("❌ Failed to get user identity:", response.status, errorText)
       return null
     }
 
     const jwtEncoded = await response.text()
+    console.log("🔍 Received JWT from Wikipedia:", jwtEncoded.substring(0, 100) + "...")
 
-    // Usar jsonwebtoken SOLO para decodificar la respuesta de Wikipedia (sin verificar)
-    const decoded: any = jwt.decode(jwtEncoded)
+    try {
+      // Usar jsonwebtoken SOLO para decodificar la respuesta de Wikipedia (sin verificar)
+      const decoded: any = jwt.decode(jwtEncoded)
+      console.log("🔍 Decoded JWT payload:", decoded)
 
-    if (!decoded || !decoded.sub || !decoded.username) return null
+      if (!decoded || !decoded.sub || !decoded.username) {
+        console.error("❌ Missing required fields in JWT payload")
+        return null
+      }
 
-    return {
-      id: decoded.sub,
-      username: decoded.username,
-      email: decoded.email || null,
-      editCount: decoded.editcount || 0,
-      registrationDate: decoded.registration || "",
+      return {
+        id: decoded.sub,
+        username: decoded.username,
+        email: decoded.email || null,
+        editCount: decoded.editcount || 0,
+        registrationDate: decoded.registration || "",
+      }
+    } catch (decodeError) {
+      console.error("❌ Error decoding JWT:", decodeError)
+      return null
     }
   } catch (error) {
     console.error("❌ Error in getUserIdentity:", error)
@@ -176,6 +181,8 @@ function createAuthResponse(origin: string, token: string, userData: any): NextR
 
 export async function GET(request: NextRequest) {
   try {
+    console.log("🚀 Starting OAuth callback process...")
+
     // Initialize database tables
     await Database.initializeTables()
 
@@ -184,22 +191,34 @@ export async function GET(request: NextRequest) {
     const oauth_verifier = searchParams.get("oauth_verifier")
     const origin = searchParams.get("origin") || DEFAULT_ORIGIN
 
+    console.log("🔍 OAuth parameters:", { oauth_token, oauth_verifier, origin })
+
     if (!oauth_token || !oauth_verifier) {
+      console.error("❌ Missing OAuth parameters")
       return redirectToErrorPage(origin, "missing_parameters")
     }
 
     const oauth_token_secret = request.cookies.get("oauth_token_secret")?.value
     if (!oauth_token_secret) {
+      console.error("❌ Missing OAuth token secret from cookies")
       return redirectToErrorPage(origin, "session_expired")
     }
 
     console.log("🔑 Getting access token...")
     const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
-    if (!accessToken) return redirectToErrorPage(origin, "token_exchange_failed")
+    if (!accessToken) {
+      console.error("❌ Failed to get access token")
+      return redirectToErrorPage(origin, "token_exchange_failed")
+    }
 
     console.log("👤 Getting user info...")
     const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
-    if (!userInfo) return redirectToErrorPage(origin, "user_info_failed")
+    if (!userInfo) {
+      console.error("❌ Failed to get user info")
+      return redirectToErrorPage(origin, "user_info_failed")
+    }
+
+    console.log("✅ User info obtained:", { id: userInfo.id, username: userInfo.username })
 
     console.log("🔍 Looking for existing user...")
     let user = await Database.getUserByWikipediaId(userInfo.id)
