@@ -1,92 +1,26 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { Database } from "@/lib/database"
-import { verifyToken, shouldRefreshToken, createTokenPair } from "@/lib/jwt"
+import { verifyToken, isTokenExpired, shouldRefreshToken, createTokenPair } from "@/lib/jwt"
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("🔍 Verifying authentication...")
-
-    // Obtener access token de las cookies
-    const accessToken = request.cookies.get("access_token")?.value
-    const refreshToken = request.cookies.get("refresh_token")?.value
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get("access_token")?.value
+    const refreshToken = cookieStore.get("refresh_token")?.value
 
     if (!accessToken) {
       return NextResponse.json({ authenticated: false, error: "No access token" }, { status: 401 })
     }
 
-    // Verificar si el access token es válido
+    // Verify access token
     const decoded = verifyToken(accessToken)
-
     if (!decoded) {
-      // Access token is invalid, try to refresh
-      if (!refreshToken) {
-        return NextResponse.json({ authenticated: false, error: "Invalid access token" }, { status: 401 })
+      // Try to refresh if we have a refresh token
+      if (refreshToken && !isTokenExpired(refreshToken)) {
+        return await refreshTokens(refreshToken, request)
       }
-
-      const refreshDecoded = verifyToken(refreshToken)
-      if (!refreshDecoded || refreshDecoded.type !== "refresh") {
-        return NextResponse.json({ authenticated: false, error: "Invalid refresh token" }, { status: 401 })
-      }
-
-      // Check if refresh token is blacklisted
-      const isBlacklisted = await Database.isTokenBlacklisted(refreshDecoded.jti)
-      if (isBlacklisted) {
-        return NextResponse.json({ authenticated: false, error: "Token revoked" }, { status: 401 })
-      }
-
-      // Get user and create new tokens
-      const user = await Database.getUserById(refreshDecoded.userId)
-      if (!user) {
-        return NextResponse.json({ authenticated: false, error: "User not found" }, { status: 401 })
-      }
-
-      const tokenPair = createTokenPair({
-        userId: user.id,
-        username: user.username,
-        email: user.email || null,
-        roles: [], // TODO: Get user roles
-      })
-
-      // Revoke old refresh token and store new one
-      await Database.revokeRefreshToken(refreshDecoded.jti)
-      await Database.storeRefreshToken({
-        user_id: user.id,
-        token_jti: tokenPair.refreshJti,
-        expires_at: tokenPair.refreshTokenExpiry,
-        user_agent: request.headers.get("user-agent") || undefined,
-        ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-      })
-
-      const response = NextResponse.json({
-        authenticated: true,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-        },
-        refreshed: true,
-      })
-
-      // Set new cookies
-      response.cookies.set("access_token", tokenPair.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 15 * 60,
-        path: "/",
-        domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
-      })
-
-      response.cookies.set("refresh_token", tokenPair.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60,
-        path: "/",
-        domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
-      })
-
-      return response
+      return NextResponse.json({ authenticated: false, error: "Invalid access token" }, { status: 401 })
     }
 
     // Check if token is blacklisted
@@ -95,62 +29,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ authenticated: false, error: "Token revoked" }, { status: 401 })
     }
 
-    // Get user data
-    const user = await Database.getUserById(decoded.userId)
-    if (!user) {
-      return NextResponse.json({ authenticated: false, error: "User not found" }, { status: 401 })
+    // Check if we should refresh the token (less than 5 minutes remaining)
+    if (shouldRefreshToken(accessToken) && refreshToken) {
+      return await refreshTokens(refreshToken, request)
     }
 
-    // Check if we should refresh the token proactively
-    if (shouldRefreshToken(accessToken) && refreshToken) {
-      const refreshDecoded = verifyToken(refreshToken)
-      if (refreshDecoded && refreshDecoded.type === "refresh") {
-        const tokenPair = createTokenPair({
-          userId: user.id,
-          username: user.username,
-          email: user.email || null,
-          roles: [], // TODO: Get user roles
-        })
-
-        await Database.revokeRefreshToken(refreshDecoded.jti)
-        await Database.storeRefreshToken({
-          user_id: user.id,
-          token_jti: tokenPair.refreshJti,
-          expires_at: tokenPair.refreshTokenExpiry,
-          user_agent: request.headers.get("user-agent") || undefined,
-          ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-        })
-
-        const response = NextResponse.json({
-          authenticated: true,
-          user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-          },
-          refreshed: true,
-        })
-
-        response.cookies.set("access_token", tokenPair.accessToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 15 * 60,
-          path: "/",
-          domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
-        })
-
-        response.cookies.set("refresh_token", tokenPair.refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 7 * 24 * 60 * 60,
-          path: "/",
-          domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
-        })
-
-        return response
-      }
+    // Get user from database
+    const user = await Database.getUserById(decoded.userId)
+    if (!user) {
+      return NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -159,10 +46,84 @@ export async function GET(request: NextRequest) {
         id: user.id,
         username: user.username,
         email: user.email,
+        roles: decoded.roles,
       },
     })
   } catch (error) {
-    console.error("❌ Auth verification error:", error)
+    console.error("Token verification error:", error)
     return NextResponse.json({ authenticated: false, error: "Verification failed" }, { status: 500 })
+  }
+}
+
+async function refreshTokens(refreshToken: string, request: NextRequest) {
+  try {
+    // Verify refresh token
+    const decoded = verifyToken(refreshToken)
+    if (!decoded || decoded.type !== "refresh") {
+      return NextResponse.json({ authenticated: false, error: "Invalid refresh token" }, { status: 401 })
+    }
+
+    // Check if refresh token is blacklisted
+    const isBlacklisted = await Database.isTokenBlacklisted(decoded.jti)
+    if (isBlacklisted) {
+      return NextResponse.json({ authenticated: false, error: "Refresh token revoked" }, { status: 401 })
+    }
+
+    // Get user from database
+    const user = await Database.getUserById(decoded.userId)
+    if (!user) {
+      return NextResponse.json({ authenticated: false, error: "User not found" }, { status: 404 })
+    }
+
+    // Create new token pair
+    const tokens = createTokenPair({
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      roles: decoded.roles,
+    })
+
+    // Store new refresh token
+    await Database.storeRefreshToken({
+      user_id: user.id,
+      token_jti: tokens.refreshJti,
+      expires_at: tokens.refreshTokenExpiry,
+      user_agent: request.headers.get("user-agent") || undefined,
+      ip_address: request.ip || undefined,
+    })
+
+    // Revoke old refresh token
+    await Database.revokeRefreshToken(decoded.jti)
+
+    // Create response with new tokens
+    const response = NextResponse.json({
+      authenticated: true,
+      refreshed: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        roles: decoded.roles,
+      },
+    })
+
+    response.cookies.set("access_token", tokens.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60, // 15 minutes
+    })
+
+    response.cookies.set("refresh_token", tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    })
+
+    return response
+  } catch (error) {
+    console.error("Token refresh error:", error)
+    return NextResponse.json({ authenticated: false, error: "Refresh failed" }, { status: 500 })
   }
 }

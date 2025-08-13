@@ -1,241 +1,261 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
+import crypto from "crypto"
 import { Database } from "@/lib/database"
 import { createTokenPair } from "@/lib/jwt"
-import crypto from "crypto"
-import jwt from "jsonwebtoken"
 
-const oauth = require("oauth-1.0a")
+const WIKIPEDIA_CLIENT_ID = process.env.WIKIPEDIA_CLIENT_ID
+const WIKIPEDIA_CLIENT_SECRET = process.env.WIKIPEDIA_CLIENT_SECRET
 
-const WIKIMEDIA_OAUTH_URL = "https://meta.wikimedia.org/w/index.php"
+function generateOAuthSignature(
+  method: string,
+  url: string,
+  params: Record<string, string>,
+  consumerSecret: string,
+  tokenSecret = "",
+) {
+  // Sort parameters
+  const sortedParams = Object.keys(params)
+    .sort()
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+    .join("&")
 
-function createOAuthClient() {
-  return oauth({
-    consumer: {
-      key: process.env.WIKIPEDIA_CLIENT_ID || "",
-      secret: process.env.WIKIPEDIA_CLIENT_SECRET || "",
-    },
-    signature_method: "HMAC-SHA1",
-    hash_function(base_string: string, key: string) {
-      return crypto.createHmac("sha1", key).update(base_string).digest("base64")
-    },
-  })
+  // Create signature base string
+  const baseString = `${method.toUpperCase()}&${encodeURIComponent(url)}&${encodeURIComponent(sortedParams)}`
+
+  // Create signing key
+  const signingKey = `${encodeURIComponent(consumerSecret)}&${encodeURIComponent(tokenSecret)}`
+
+  // Generate signature
+  const signature = crypto.createHmac("sha1", signingKey).update(baseString).digest("base64")
+
+  return signature
 }
 
 export async function GET(request: NextRequest) {
   try {
     console.log("🔄 Processing OAuth callback...")
 
-    // Inicializar tablas si es necesario
-    await Database.initializeTables()
-
-    const searchParams = request.nextUrl.searchParams
+    const { searchParams } = new URL(request.url)
     const oauthToken = searchParams.get("oauth_token")
     const oauthVerifier = searchParams.get("oauth_verifier")
-    const origin = request.cookies.get("oauth_origin")?.value || "www.wikipeoplestats.org"
-
-    console.log("📋 Callback params:")
-    console.log("  - oauth_token:", oauthToken?.substring(0, 8) + "...")
-    console.log("  - oauth_verifier:", oauthVerifier?.substring(0, 8) + "...")
-    console.log("  - origin:", origin)
 
     if (!oauthToken || !oauthVerifier) {
       throw new Error("Missing OAuth parameters")
     }
 
-    const oauthTokenSecret = request.cookies.get("oauth_token_secret")?.value
+    // Get stored token secret
+    const cookieStore = cookies()
+    const oauthTokenSecret = cookieStore.get("oauth_token_secret")?.value
+    const origin = cookieStore.get("origin")?.value || "/dashboard"
+
     if (!oauthTokenSecret) {
       throw new Error("Missing OAuth token secret")
     }
 
     console.log("🔐 Token secret found in cookies")
 
-    const oauthClient = createOAuthClient()
+    // Exchange for access token
+    const accessTokenUrl = "https://meta.wikimedia.org/w/index.php?title=Special:OAuth/token"
 
-    // Intercambiar por access token
-    const accessTokenData = {
-      url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/token`,
-      method: "POST",
-      data: {
-        oauth_verifier: oauthVerifier,
-      },
+    const oauthParams = {
+      oauth_consumer_key: WIKIPEDIA_CLIENT_ID!,
+      oauth_nonce: crypto.randomBytes(16).toString("hex"),
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+      oauth_token: oauthToken,
+      oauth_verifier: oauthVerifier,
+      oauth_version: "1.0",
     }
 
-    const token = {
-      key: oauthToken,
-      secret: oauthTokenSecret,
-    }
+    // Generate signature
+    const signature = generateOAuthSignature(
+      "POST",
+      accessTokenUrl,
+      oauthParams,
+      WIKIPEDIA_CLIENT_SECRET!,
+      oauthTokenSecret,
+    )
+    oauthParams.oauth_signature = signature
 
-    const authHeader = oauthClient.toHeader(oauthClient.authorize(accessTokenData, token))
+    // Create authorization header
+    const authHeader = `OAuth ${Object.entries(oauthParams)
+      .map(([key, value]) => `${key}="${encodeURIComponent(value)}"`)
+      .join(", ")}`
 
     console.log("📤 Requesting access token...")
 
-    const accessTokenResponse = await fetch(accessTokenData.url, {
+    // Request access token
+    const tokenResponse = await fetch(accessTokenUrl, {
       method: "POST",
       headers: {
-        ...authHeader,
+        Authorization: authHeader,
         "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "WikiPeopleStats/1.0",
       },
-      body: new URLSearchParams(accessTokenData.data),
     })
 
-    if (!accessTokenResponse.ok) {
-      const errorText = await accessTokenResponse.text()
-      console.error("❌ Access token request failed:", errorText)
-      throw new Error(`Access token request failed: ${accessTokenResponse.status}`)
+    const tokenResponseText = await tokenResponse.text()
+    console.log("📄 Access token response:", tokenResponseText)
+
+    if (!tokenResponse.ok) {
+      throw new Error(`Failed to get access token: ${tokenResponseText}`)
     }
 
-    const accessTokenText = await accessTokenResponse.text()
-    console.log("📄 Access token response:", accessTokenText)
+    // Parse access token response
+    const tokenParams = new URLSearchParams(tokenResponseText)
+    const accessToken = tokenParams.get("oauth_token")
+    const accessTokenSecret = tokenParams.get("oauth_token_secret")
 
-    const accessTokenParams = new URLSearchParams(accessTokenText)
-    const finalOauthToken = accessTokenParams.get("oauth_token")
-    const finalOauthTokenSecret = accessTokenParams.get("oauth_token_secret")
-
-    if (!finalOauthToken || !finalOauthTokenSecret) {
-      throw new Error("Failed to get final OAuth tokens")
+    if (!accessToken || !accessTokenSecret) {
+      throw new Error("Failed to get OAuth tokens from response")
     }
 
     console.log("✅ Final OAuth tokens obtained")
 
-    // Obtener información del usuario usando el endpoint identify
-    const identifyData = {
-      url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/identify`,
-      method: "POST",
+    // Get user information using identify endpoint
+    console.log("👤 Getting user information...")
+    const identifyUrl = "https://meta.wikimedia.org/w/index.php?title=Special:OAuth/identify"
+
+    const identifyParams = {
+      oauth_consumer_key: WIKIPEDIA_CLIENT_ID!,
+      oauth_nonce: crypto.randomBytes(16).toString("hex"),
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+      oauth_token: accessToken,
+      oauth_version: "1.0",
     }
 
-    const finalToken = {
-      key: finalOauthToken,
-      secret: finalOauthTokenSecret,
-    }
+    // Generate signature for identify request
+    const identifySignature = generateOAuthSignature(
+      "GET",
+      identifyUrl,
+      identifyParams,
+      WIKIPEDIA_CLIENT_SECRET!,
+      accessTokenSecret,
+    )
+    identifyParams.oauth_signature = identifySignature
 
-    const identifyAuthHeader = oauthClient.toHeader(oauthClient.authorize(identifyData, finalToken))
+    // Create authorization header for identify
+    const identifyAuthHeader = `OAuth ${Object.entries(identifyParams)
+      .map(([key, value]) => `${key}="${encodeURIComponent(value)}"`)
+      .join(", ")}`
 
-    console.log("👤 Getting user information using identify endpoint...")
-
-    const userResponse = await fetch(identifyData.url, {
-      method: "POST",
+    // Make identify request
+    const userResponse = await fetch(identifyUrl, {
+      method: "GET",
       headers: {
-        ...identifyAuthHeader,
-        "User-Agent": "WikiPeopleStats/1.0",
+        Authorization: identifyAuthHeader,
       },
     })
 
     if (!userResponse.ok) {
-      const errorText = await userResponse.text()
-      console.error("❌ User info request failed:", errorText)
-      throw new Error(`User info request failed: ${userResponse.status}`)
+      throw new Error(`Failed to get user info: ${userResponse.status} ${userResponse.statusText}`)
     }
 
-    // La respuesta del endpoint identify es un JWT
-    const jwtToken = await userResponse.text()
-    console.log("🔐 Received JWT token from identify endpoint")
+    // The identify endpoint returns a JWT, not JSON
+    const userJWT = await userResponse.text()
+    console.log("📊 User JWT received:", userJWT.substring(0, 50) + "...")
 
-    // Decodificar el JWT (no verificar la firma ya que viene de Wikipedia)
-    const userInfo = jwt.decode(jwtToken) as any
-
-    if (!userInfo || !userInfo.sub || !userInfo.username) {
-      console.error("❌ Invalid JWT payload:", userInfo)
-      throw new Error("Invalid user information received from Wikipedia")
+    // Decode the JWT (it's not signed by us, so we just decode it)
+    const jwtParts = userJWT.split(".")
+    if (jwtParts.length !== 3) {
+      throw new Error("Invalid JWT format from identify endpoint")
     }
 
-    console.log("👤 User info decoded:", {
-      id: userInfo.sub,
-      username: userInfo.username,
-      email: userInfo.email || null,
-    })
+    const payload = JSON.parse(Buffer.from(jwtParts[1], "base64").toString())
+    console.log("👤 User info decoded:", payload)
 
-    // Buscar o crear usuario en la base de datos
-    let user = await Database.getUserByWikipediaId(userInfo.sub.toString())
+    if (!payload.sub || !payload.username) {
+      throw new Error("Invalid user data in JWT")
+    }
 
-    if (!user) {
+    const wikimediaId = payload.sub.toString()
+    const username = payload.username
+    const email = payload.email || null
+
+    // Check if user exists
+    let user = await Database.getUserByWikipediaId(wikimediaId)
+
+    if (user) {
+      console.log("👤 User found, updating...")
+      // Update user login time
+      await Database.updateUserLogin(user.id)
+    } else {
       console.log("👤 Creating new user...")
-      // Crear nuevo usuario
+      // Create new user
       user = await Database.createUser({
-        wikimedia_id: userInfo.sub.toString(),
-        username: userInfo.username,
-        email: userInfo.email,
-        avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`,
-        registration_date: userInfo.registered,
+        wikimedia_id: wikimediaId,
+        username: username,
+        email: email,
+        registration_date: payload.registered || null,
         is_claimed: true,
       })
 
       if (user) {
         await Database.assignDefaultRole(user.id)
       }
-    } else {
-      console.log("👤 User found, updating...")
-      // Actualizar información del usuario existente
-      if (!user.is_claimed) {
-        user = await Database.claimUserAccount(user.id, userInfo.sub.toString(), userInfo.email)
-      }
     }
 
     if (!user) {
-      throw new Error("Failed to create or update user")
+      throw new Error("Failed to create or retrieve user")
     }
 
-    // Actualizar último login
-    await Database.updateUserLogin(user.id)
-
-    // Crear par de tokens JWT
-    const tokenPair = createTokenPair({
+    // Create JWT tokens
+    const tokens = createTokenPair({
       userId: user.id,
       username: user.username,
-      email: user.email || null,
-      roles: [], // TODO: Obtener roles del usuario
+      email: user.email,
+      roles: ["user"], // Get from database in real implementation
     })
 
-    // Almacenar refresh token en la base de datos
-    const userAgent = request.headers.get("user-agent") || undefined
-    const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
-
+    // Store refresh token
     await Database.storeRefreshToken({
       user_id: user.id,
-      token_jti: tokenPair.refreshJti,
-      expires_at: tokenPair.refreshTokenExpiry,
-      user_agent: userAgent,
-      ip_address: ipAddress,
+      token_jti: tokens.refreshJti,
+      expires_at: tokens.refreshTokenExpiry,
+      user_agent: request.headers.get("user-agent") || undefined,
+      ip_address: request.ip || undefined,
     })
 
-    console.log("✅ Login completed for:", user.username)
+    console.log("✅ Login successful for user:", user.username)
 
-    // Crear URL de redirección
-    const redirectUrl = new URL(`https://${origin}/dashboard`)
-    const redirectResponse = NextResponse.redirect(redirectUrl.toString())
+    // Redirect to dashboard with tokens
+    const redirectResponse = NextResponse.redirect(new URL(origin, request.url))
 
-    // Configurar cookies
-    redirectResponse.cookies.set("access_token", tokenPair.accessToken, {
+    // Set secure cookies
+    redirectResponse.cookies.set("access_token", tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 15 * 60, // 15 minutos
-      path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
+      maxAge: 15 * 60, // 15 minutes
     })
 
-    redirectResponse.cookies.set("refresh_token", tokenPair.refreshToken, {
+    redirectResponse.cookies.set("refresh_token", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 días
-      path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
+      maxAge: 7 * 24 * 60 * 60, // 7 days
     })
 
-    // Limpiar cookies temporales
+    // Clean up temporary cookies
     redirectResponse.cookies.delete("oauth_token_secret")
-    redirectResponse.cookies.delete("oauth_origin")
+    redirectResponse.cookies.delete("origin")
 
     return redirectResponse
   } catch (error) {
     console.error("❌ Callback error:", error)
 
-    const origin = request.cookies.get("oauth_origin")?.value || "www.wikipeoplestats.org"
-    const errorUrl = new URL(`https://${origin}/login`)
+    const cookieStore = cookies()
+    const origin = cookieStore.get("origin")?.value || "/login"
+
+    const errorUrl = new URL(origin, request.url)
     errorUrl.searchParams.set("error", "oauth_failed")
     errorUrl.searchParams.set("message", error instanceof Error ? error.message : "Unknown error")
 
-    return NextResponse.redirect(errorUrl.toString())
+    const response = NextResponse.redirect(errorUrl.toString())
+    response.cookies.delete("oauth_token_secret")
+    response.cookies.delete("origin")
+
+    return response
   }
 }

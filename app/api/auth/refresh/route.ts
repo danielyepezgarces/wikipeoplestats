@@ -1,10 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { Database } from "@/lib/database"
-import { verifyToken, createTokenPair } from "@/lib/jwt"
+import { createTokenPair, verifyToken } from "@/lib/jwt"
 
 export async function POST(request: NextRequest) {
   try {
-    const refreshToken = request.cookies.get("refresh_token")?.value
+    const cookieStore = cookies()
+    const refreshToken = cookieStore.get("refresh_token")?.value
 
     if (!refreshToken) {
       return NextResponse.json({ error: "No refresh token provided" }, { status: 401 })
@@ -22,60 +24,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Token has been revoked" }, { status: 401 })
     }
 
-    // Check if refresh token exists in database
-    const storedToken = await Database.getRefreshToken(decoded.jti)
-    if (!storedToken) {
-      return NextResponse.json({ error: "Refresh token not found" }, { status: 401 })
-    }
-
-    // Get user data
+    // Get user from database
     const user = await Database.getUserById(decoded.userId)
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 401 })
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Create new token pair
-    const tokenPair = createTokenPair({
+    const tokens = createTokenPair({
       userId: user.id,
       username: user.username,
-      email: user.email || null,
-      roles: [], // TODO: Get user roles
+      email: user.email,
+      roles: ["user"], // Get from database in real implementation
+    })
+
+    // Store new refresh token
+    await Database.storeRefreshToken({
+      user_id: user.id,
+      token_jti: tokens.refreshJti,
+      expires_at: tokens.refreshTokenExpiry,
+      user_agent: request.headers.get("user-agent") || undefined,
+      ip_address: request.ip || undefined,
     })
 
     // Revoke old refresh token
     await Database.revokeRefreshToken(decoded.jti)
 
-    // Store new refresh token
-    await Database.storeRefreshToken({
-      user_id: user.id,
-      token_jti: tokenPair.refreshJti,
-      expires_at: tokenPair.refreshTokenExpiry,
-      user_agent: request.headers.get("user-agent") || undefined,
-      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-    })
-
+    // Set new cookies
     const response = NextResponse.json({
       success: true,
-      expiresIn: 15 * 60, // 15 minutes
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
     })
 
-    // Set new cookies
-    response.cookies.set("access_token", tokenPair.accessToken, {
+    response.cookies.set("access_token", tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 15 * 60, // 15 minutes
-      path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
-    response.cookies.set("refresh_token", tokenPair.refreshToken, {
+    response.cookies.set("refresh_token", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
     return response

@@ -1,38 +1,46 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { cookies } from "next/headers"
 import { Database } from "@/lib/database"
 import { verifyToken } from "@/lib/jwt"
 
 export async function POST(request: NextRequest) {
   try {
-    const accessToken = request.cookies.get("access_token")?.value
-    const refreshToken = request.cookies.get("refresh_token")?.value
+    const cookieStore = cookies()
+    const accessToken = cookieStore.get("access_token")?.value
+    const refreshToken = cookieStore.get("refresh_token")?.value
 
-    // Blacklist access token if present
+    // If we have tokens, revoke them
     if (accessToken) {
       const decoded = verifyToken(accessToken)
       if (decoded) {
-        await Database.blacklistToken(decoded.jti, "access", decoded.userId)
+        // Blacklist access token
+        await Database.blacklistToken(decoded.jti, decoded.userId, "User logout")
       }
     }
 
-    // Revoke refresh token if present
     if (refreshToken) {
       const decoded = verifyToken(refreshToken)
       if (decoded) {
+        // Revoke refresh token
         await Database.revokeRefreshToken(decoded.jti)
-        await Database.blacklistToken(decoded.jti, "refresh", decoded.userId)
       }
     }
 
-    const response = NextResponse.json({ message: "Logged out successfully" })
+    // Create response and clear cookies
+    const response = NextResponse.json({ success: true, message: "Logged out successfully" })
 
-    // Clear cookies
     response.cookies.delete("access_token")
     response.cookies.delete("refresh_token")
 
     return response
   } catch (error) {
     console.error("Logout error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+
+    // Even if there's an error, clear the cookies
+    const response = NextResponse.json({ success: true, message: "Logged out" })
+    response.cookies.delete("access_token")
+    response.cookies.delete("refresh_token")
+
+    return response
   }
 }
