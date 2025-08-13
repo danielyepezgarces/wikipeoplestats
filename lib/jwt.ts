@@ -1,17 +1,26 @@
 import jwt from "jsonwebtoken"
-import { randomBytes } from "crypto"
+import crypto from "crypto"
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production"
-const ACCESS_TOKEN_EXPIRES_IN = "15m" // 15 minutes
-const REFRESH_TOKEN_EXPIRES_IN = "7d" // 7 days
+const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-change-this-in-production"
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m"
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d"
 
 export interface TokenPayload {
   userId: number
   username: string
-  email: string | null
+  email?: string
   roles: string[]
-  jti: string
   type: "access" | "refresh"
+  jti: string
+  iat?: number
+  exp?: number
+}
+
+export interface UserTokenData {
+  userId: number
+  username: string
+  email?: string
+  roles: string[]
 }
 
 export interface TokenPair {
@@ -22,64 +31,66 @@ export interface TokenPair {
 }
 
 function generateJTI(): string {
-  return randomBytes(16).toString("hex")
+  return crypto.randomBytes(16).toString("hex")
 }
 
-export function createTokenPair(userData: {
-  userId: number
-  username: string
-  email: string | null
-  roles: string[]
-}): TokenPair {
-  const now = Math.floor(Date.now() / 1000)
-  const accessTokenExpiry = now + 15 * 60 // 15 minutes
-  const refreshTokenExpiry = now + 7 * 24 * 60 * 60 // 7 days
+export function createAccessToken(userData: UserTokenData): { token: string; expiresAt: number } {
+  const jti = generateJTI()
+  const expiresAt = Math.floor(Date.now() / 1000) + 15 * 60 // 15 minutes
 
-  const accessTokenPayload: TokenPayload = {
+  const payload: TokenPayload = {
     userId: userData.userId,
     username: userData.username,
     email: userData.email,
     roles: userData.roles,
-    jti: generateJTI(),
     type: "access",
+    jti,
   }
 
-  const refreshTokenPayload: TokenPayload = {
+  const token = jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+    jwtid: jti,
+  })
+
+  return { token, expiresAt }
+}
+
+export function createRefreshToken(userData: UserTokenData): { token: string; expiresAt: number; jti: string } {
+  const jti = generateJTI()
+  const expiresAt = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 // 7 days
+
+  const payload: TokenPayload = {
     userId: userData.userId,
     username: userData.username,
     email: userData.email,
     roles: userData.roles,
-    jti: generateJTI(),
     type: "refresh",
+    jti,
   }
 
-  const accessToken = jwt.sign(accessTokenPayload, JWT_SECRET, {
-    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-    issuer: "wikipeoplestats",
-    audience: "wikipeoplestats-users",
+  const token = jwt.sign(payload, JWT_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+    jwtid: jti,
   })
 
-  const refreshToken = jwt.sign(refreshTokenPayload, JWT_SECRET, {
-    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-    issuer: "wikipeoplestats",
-    audience: "wikipeoplestats-users",
-  })
+  return { token, expiresAt, jti }
+}
+
+export function createTokenPair(userData: UserTokenData): TokenPair {
+  const accessToken = createAccessToken(userData)
+  const refreshToken = createRefreshToken(userData)
 
   return {
-    accessToken,
-    refreshToken,
+    accessToken: accessToken.token,
+    refreshToken: refreshToken.token,
     expiresIn: 15 * 60, // 15 minutes in seconds
-    refreshTokenExpiry,
+    refreshTokenExpiry: refreshToken.expiresAt,
   }
 }
 
 export function verifyToken(token: string): TokenPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, {
-      issuer: "wikipeoplestats",
-      audience: "wikipeoplestats-users",
-    }) as TokenPayload
-
+    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload
     return decoded
   } catch (error) {
     console.error("Token verification failed:", error)
@@ -99,21 +110,10 @@ export function decodeToken(token: string): TokenPayload | null {
 
 export function isTokenExpired(token: string): boolean {
   try {
-    const decoded = jwt.decode(token) as any
+    const decoded = jwt.decode(token) as TokenPayload
     if (!decoded || !decoded.exp) return true
-
-    const now = Math.floor(Date.now() / 1000)
-    return decoded.exp < now
+    return decoded.exp < Math.floor(Date.now() / 1000)
   } catch (error) {
     return true
-  }
-}
-
-export function getTokenExpiry(token: string): number | null {
-  try {
-    const decoded = jwt.decode(token) as any
-    return decoded?.exp || null
-  } catch (error) {
-    return null
   }
 }
