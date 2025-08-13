@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 import jwt from "jsonwebtoken"
 import { Database } from "@/lib/database"
+import { createTokenPair, decodeToken } from "@/lib/jwt"
 
 const oauth = require("oauth-1.0a")
 
@@ -23,20 +24,10 @@ interface AccessToken {
   oauth_token_secret: string
 }
 
-function redirectToErrorPage(origin: string, errorType: string): NextResponse {
-  const errorMessages: Record<string, string> = {
-    missing_parameters: "Missing required parameters",
-    session_expired: "Session expired, please try again",
-    token_exchange_failed: "Failed to authenticate with Wikipedia",
-    user_info_failed: "Failed to get user info from Wikipedia",
-    session_creation_failed: "Failed to create session",
-    authentication_failed: "Authentication error",
-    account_claim_failed: "Failed to claim account",
-  }
-
+function redirectToErrorPage(origin: string, errorType: string, errorMessage: string): NextResponse {
   const errorUrl = new URL(`https://${origin}/login`)
   errorUrl.searchParams.set("error", errorType)
-  errorUrl.searchParams.set("message", errorMessages[errorType] || "An error occurred")
+  errorUrl.searchParams.set("message", errorMessage)
 
   return NextResponse.redirect(errorUrl.toString())
 }
@@ -98,7 +89,7 @@ async function getAccessToken(
   }
 }
 
-async function getUserIdentity(oauth_token: string, oauth_token_secret: string): Promise<UserInfo | null> {
+async function getUserIdentity(oauth_token: string, oauth_token_secret: string): Promise<any | null> {
   const oauthClient = createOAuthClient()
   const requestData = {
     url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/identify`,
@@ -128,21 +119,11 @@ async function getUserIdentity(oauth_token: string, oauth_token_secret: string):
 
     if (!decoded || !decoded.sub || !decoded.username) return null
 
-    return {
-      id: decoded.sub,
-      username: decoded.username,
-      email: decoded.email || null,
-      editCount: decoded.editcount || 0,
-      registrationDate: decoded.registration || "",
-    }
+    return decoded
   } catch (error) {
     console.error("❌ Error in getUserIdentity:", error)
     return null
   }
-}
-
-function generateToken(user: { id: number; username: string; email: string | null }) {
-  return jwt.sign({ userId: user.id, username: user.username, email: user.email }, JWT_SECRET, { expiresIn: "30d" })
 }
 
 function getDeviceInfo(userAgent: string): string {
@@ -174,128 +155,199 @@ function getDeviceInfo(userAgent: string): string {
   return `${device} - ${browser} on ${os}`
 }
 
-function createAuthResponse(origin: string, token: string, userData: any): NextResponse {
-  const maxAge = 30 * 24 * 60 * 60
-  const response = NextResponse.redirect(`https://${origin}/dashboard`)
-
-  response.cookies.set("auth_token", token, {
-    domain: COOKIE_DOMAIN,
-    path: "/",
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge,
-  })
-
-  response.cookies.set("user_info", JSON.stringify(userData), {
-    domain: COOKIE_DOMAIN,
-    path: "/",
-    secure: true,
-    sameSite: "lax",
-    maxAge,
-  })
-
-  return response
-}
-
 /**
  * Handles the OAuth callback GET request.
  * Exchanges request token for access token, fetches user info,
  * creates or updates user in DB, creates session, and sets cookies.
  */
 export async function GET(request: NextRequest) {
+  console.log("🔄 Processing OAuth callback...")
+
   try {
     // Inicializar tablas si es necesario
     await Database.initializeTables()
 
     const searchParams = request.nextUrl.searchParams
-    const oauth_token = searchParams.get("oauth_token")
-    const oauth_verifier = searchParams.get("oauth_verifier")
+    const oauthToken = searchParams.get("oauth_token")
+    const oauthVerifier = searchParams.get("oauth_verifier")
     const origin = searchParams.get("origin") || DEFAULT_ORIGIN
 
-    if (!oauth_token || !oauth_verifier) {
-      return redirectToErrorPage(origin, "missing_parameters")
+    if (!oauthToken || !oauthVerifier) {
+      throw new Error("Missing OAuth parameters")
     }
 
-    const oauth_token_secret = request.cookies.get("oauth_token_secret")?.value
-    if (!oauth_token_secret) {
-      return redirectToErrorPage(origin, "session_expired")
+    // Get the stored secret from cookies
+    const oauthSecret = request.cookies.get("oauth_token_secret")?.value
+    if (!oauthSecret) {
+      throw new Error("OAuth secret not found in cookies")
     }
 
-    console.log("🔑 Getting access token...")
-    const accessToken = await getAccessToken(oauth_token, oauth_token_secret, oauth_verifier)
-    if (!accessToken) return redirectToErrorPage(origin, "token_exchange_failed")
+    // Configure OAuth client
+    const oauthClient = createOAuthClient()
 
-    console.log("👤 Getting user info...")
-    const userInfo = await getUserIdentity(accessToken.oauth_token, accessToken.oauth_token_secret)
-    if (!userInfo) return redirectToErrorPage(origin, "user_info_failed")
+    // Exchange for access token
+    const requestData = {
+      url: `${WIKIMEDIA_OAUTH_URL}?title=Special:OAuth/token`,
+      method: "POST",
+      data: { oauth_token: oauthToken, oauth_verifier: oauthVerifier },
+    }
 
-    console.log("🔍 Looking for existing user...")
-    let user = await Database.getUserByWikipediaId(userInfo.id)
+    const token = {
+      key: oauthToken,
+      secret: oauthSecret,
+    }
+
+    const authHeader = oauthClient.toHeader(oauthClient.authorize(requestData, token))
+
+    const response = await fetch(requestData.url, {
+      method: "POST",
+      headers: {
+        ...authHeader,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "WikiPeopleStats/1.0",
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Token exchange failed: ${errorText}`)
+    }
+
+    const responseText = await response.text()
+    const responseParams = new URLSearchParams(responseText)
+    const accessToken = responseParams.get("oauth_token")
+    const accessSecret = responseParams.get("oauth_token_secret")
+
+    if (!accessToken || !accessSecret) {
+      throw new Error("Failed to get access tokens")
+    }
+
+    // Get user info from Wikimedia
+    const userInfoData = {
+      url: "https://meta.wikimedia.org/w/api.php",
+      method: "GET",
+      data: {
+        action: "query",
+        meta: "userinfo",
+        uiprop: "email|realname|registrationdate",
+        format: "json",
+      },
+    }
+
+    const userToken = {
+      key: accessToken,
+      secret: accessSecret,
+    }
+
+    const userAuthHeader = oauthClient.toHeader(oauthClient.authorize(userInfoData, userToken))
+
+    const userResponse = await fetch(`${userInfoData.url}?${new URLSearchParams(userInfoData.data)}`, {
+      headers: {
+        ...userAuthHeader,
+        "User-Agent": "WikiPeopleStats/1.0",
+      },
+    })
+
+    if (!userResponse.ok) {
+      throw new Error("Failed to get user info")
+    }
+
+    const userData = await userResponse.json()
+    const userInfo = userData.query.userinfo
+
+    console.log("👤 User info obtained:", userInfo.name)
+
+    // Find or create user in database
+    let user = await Database.getUserByWikipediaId(userInfo.id.toString())
 
     if (!user) {
-      // Buscar por nombre de usuario en caso de cuenta no reclamada
-      const unclaimedUser = await Database.getUserByUsername(userInfo.username)
+      // Check if user exists by username (unclaimed account)
+      const existingUser = await Database.getUserByUsername(userInfo.name)
 
-      if (unclaimedUser && !unclaimedUser.is_claimed && !unclaimedUser.wikimedia_id) {
-        console.log("🔗 Claiming existing unclaimed account...")
-        user = await Database.claimUserAccount(unclaimedUser.id, userInfo.id, userInfo.email || undefined)
-        if (!user) {
-          return redirectToErrorPage(origin, "account_claim_failed")
-        }
+      if (existingUser && !existingUser.is_claimed) {
+        // Claim existing account
+        user = await Database.claimUserAccount(existingUser.id, userInfo.id.toString(), userInfo.email)
+        console.log("✅ Account claimed for:", userInfo.name)
       } else {
-        console.log("🆕 Creating new user...")
+        // Create new user
         user = await Database.createUser({
-          wikimedia_id: userInfo.id,
-          username: userInfo.username,
-          email: userInfo.email || undefined,
-          avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username)}&background=random&color=fff&rounded=true&size=150`,
-          registration_date: userInfo.registrationDate || undefined,
+          wikimedia_id: userInfo.id.toString(),
+          username: userInfo.name,
+          email: userInfo.email,
+          registration_date: userInfo.registrationdate,
           is_claimed: true,
         })
-      }
-    } else if (!user.is_claimed) {
-      // Usuario existe pero no está reclamado, reclamarlo
-      console.log("🔗 Claiming existing account...")
-      user = await Database.claimUserAccount(user.id, userInfo.id, userInfo.email || undefined)
-      if (!user) {
-        return redirectToErrorPage(origin, "account_claim_failed")
+
+        if (user) {
+          await Database.assignDefaultRole(user.id)
+          console.log("✅ New user created:", userInfo.name)
+        }
       }
     }
 
-    console.log("🕓 Updating last login...")
+    if (!user) {
+      throw new Error("Failed to process user")
+    }
+
+    // Update last login
     await Database.updateUserLogin(user.id)
 
-    console.log("🔐 Creating session...")
-    const token = generateToken({
-      id: user.id,
-      username: user.username,
-      email: user.email || null,
-    })
-
-    const userAgent = request.headers.get("user-agent") || ""
-    const deviceInfo = getDeviceInfo(userAgent)
-
-    await Database.createSession({
-      user_id: user.id,
-      token_hash: token,
-      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 19).replace("T", " "),
-      origin_domain: origin,
-      user_agent: userAgent || undefined,
-      ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
-      device_info: deviceInfo,
-    })
-
-    console.log("✅ Auth successful. Redirecting...")
-    return createAuthResponse(origin, token, {
-      id: user.id,
+    // Create token pair
+    const tokenPair = createTokenPair({
+      userId: user.id,
       username: user.username,
       email: user.email,
-      is_claimed: user.is_claimed,
+      roles: [], // TODO: Get user roles
     })
-  } catch (error: unknown) {
-    console.error("🔥 Unhandled error in auth callback:", error)
-    const message = error instanceof Error ? error.message : String(error)
-    return new NextResponse(`Internal Server Error: ${message}`, { status: 500 })
+
+    // Store refresh token
+    const refreshTokenDecoded = decodeToken(tokenPair.refreshToken)
+    if (refreshTokenDecoded) {
+      await Database.storeRefreshToken({
+        user_id: user.id,
+        token_jti: refreshTokenDecoded.jti,
+        expires_at: new Date(refreshTokenDecoded.exp * 1000).toISOString(),
+        user_agent: request.headers.get("user-agent") || undefined,
+        ip_address: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined,
+      })
+    }
+
+    // Redirect to origin with success
+    const redirectUrl = new URL(`https://${origin}/dashboard`)
+    const response_redirect = NextResponse.redirect(redirectUrl.toString())
+
+    // Set secure cookies
+    response_redirect.cookies.set("access_token", tokenPair.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60, // 15 minutes
+      path: "/",
+      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
+    })
+
+    response_redirect.cookies.set("refresh_token", tokenPair.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: "/",
+      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
+    })
+
+    // Clear OAuth secret cookie
+    response_redirect.cookies.delete("oauth_token_secret")
+
+    console.log("✅ Login completed for:", user.username)
+
+    return response_redirect
+  } catch (error) {
+    console.error("❌ Callback error:", error)
+
+    const errorUrl = new URL(`https://${origin}/login`)
+    errorUrl.searchParams.set("error", "oauth_failed")
+    errorUrl.searchParams.set("message", error instanceof Error ? error.message : "Unknown error")
+
+    return NextResponse.redirect(errorUrl.toString())
   }
 }
