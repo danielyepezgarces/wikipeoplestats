@@ -233,17 +233,26 @@ export class Database {
     const connection = await getPool().getConnection()
 
     try {
+      // Convertir timestamp de string a Date para MySQL
+      const expiresAtDate = new Date(parseInt(tokenData.expires_at) * 1000)
+      
       await connection.execute(
         `INSERT INTO refresh_tokens (user_id, token_jti, expires_at, user_agent, ip_address)
-   VALUES (?, ?, FROM_UNIXTIME(?), ?, ?)`,
+         VALUES (?, ?, ?, ?, ?)`,
         [
           tokenData.user_id,
           tokenData.token_jti,
-          tokenData.expires_at, // número en segundos
+          expiresAtDate, // Date object
           tokenData.user_agent || null,
           tokenData.ip_address || null,
         ],
       )
+      
+      console.log("✅ Refresh token stored in database:", {
+        user_id: tokenData.user_id,
+        token_jti: tokenData.token_jti.substring(0, 8) + "...",
+        expires_at: expiresAtDate.toISOString()
+      })
     } finally {
       connection.release()
     }

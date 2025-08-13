@@ -65,6 +65,8 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 15 * 60, // 15 minutes
+      path: "/",
+      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
     response.cookies.set("refresh_token", tokens.refreshToken, {
@@ -72,6 +74,8 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: "/",
+      domain: process.env.NODE_ENV === "production" ? ".wikipeoplestats.org" : undefined,
     })
 
     return response
