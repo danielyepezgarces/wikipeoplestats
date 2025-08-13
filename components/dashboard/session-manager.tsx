@@ -46,7 +46,7 @@ interface SessionData {
   current_session_id: number | null
 }
 
-export default function SessionManager() {
+export function SessionManager() {
   const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [revoking, setRevoking] = useState<number | string | null>(null)

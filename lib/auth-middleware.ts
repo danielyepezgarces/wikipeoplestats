@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { JWTManager } from "./jwt"
 import { Database } from "./database"
 
@@ -12,7 +12,7 @@ export interface AuthUser {
 export async function verifyAuth(request: NextRequest): Promise<AuthUser | null> {
   try {
     const token = request.cookies.get("auth_token")?.value
-    
+
     if (!token) {
       return null
     }
@@ -46,7 +46,7 @@ export async function verifyAuth(request: NextRequest): Promise<AuthUser | null>
       id: user.id,
       username: user.username,
       email: user.email,
-      roles: [] // This would be populated from user roles query
+      roles: [], // This would be populated from user roles query
     }
   } catch (error) {
     console.error("Auth verification error:", error)
@@ -56,11 +56,41 @@ export async function verifyAuth(request: NextRequest): Promise<AuthUser | null>
 
 export function createAuthResponse(user: AuthUser | null, response?: NextResponse): NextResponse {
   const res = response || NextResponse.json({ user })
-  
+
   if (!user) {
     // Clear auth cookie if user is not authenticated
     res.cookies.delete("auth_token")
   }
-  
+
   return res
+}
+
+export async function requireAuth(request: NextRequest): Promise<AuthUser> {
+  const user = await verifyAuth(request)
+  if (!user) {
+    throw new Error("Authentication required")
+  }
+  return user
+}
+
+export async function requireAnyRole(request: NextRequest, roles: string[], chapterId?: number): Promise<AuthUser> {
+  const user = await requireAuth(request)
+
+  // For now, return the user - role checking logic would go here
+  // This is a placeholder implementation
+  return user
+}
+
+export async function checkPermission(
+  request: NextRequest,
+  permission: string,
+  chapterId?: number,
+): Promise<{ auth: AuthUser; hasPermission: boolean }> {
+  const auth = await requireAuth(request)
+
+  // For now, return true for all permissions - actual permission logic would go here
+  // This is a placeholder implementation
+  const hasPermission = true
+
+  return { auth, hasPermission }
 }
