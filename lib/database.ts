@@ -233,17 +233,46 @@ export class Database {
     const connection = await getPool().getConnection()
 
     try {
+      let expiresAtDate: Date
+
+      // Handle both string and number timestamps
+      if (typeof tokenData.expires_at === "string") {
+        // If it's a string, try to parse as number first, then as ISO string
+        const timestamp = Number.parseInt(tokenData.expires_at)
+        if (!isNaN(timestamp)) {
+          expiresAtDate = new Date(timestamp * 1000) // Convert Unix timestamp to Date
+        } else {
+          expiresAtDate = new Date(tokenData.expires_at) // Parse as ISO string
+        }
+      } else {
+        expiresAtDate = new Date(tokenData.expires_at * 1000) // Assume it's a Unix timestamp
+      }
+
+      console.log("💾 Storing refresh token:", {
+        user_id: tokenData.user_id,
+        token_jti: tokenData.token_jti.substring(0, 8) + "...",
+        expires_at_input: tokenData.expires_at,
+        expires_at_parsed: expiresAtDate.toISOString(),
+        user_agent: tokenData.user_agent?.substring(0, 50) + "..." || "none",
+        ip_address: tokenData.ip_address || "none",
+      })
+
       await connection.execute(
         `INSERT INTO refresh_tokens (user_id, token_jti, expires_at, user_agent, ip_address)
-   VALUES (?, ?, FROM_UNIXTIME(?), ?, ?)`,
+         VALUES (?, ?, ?, ?, ?)`,
         [
           tokenData.user_id,
           tokenData.token_jti,
-          tokenData.expires_at, // número en segundos
+          expiresAtDate, // Use properly formatted Date object
           tokenData.user_agent || null,
           tokenData.ip_address || null,
         ],
       )
+
+      console.log("✅ Refresh token stored successfully in database")
+    } catch (error) {
+      console.error("❌ Error storing refresh token:", error)
+      throw error // Re-throw to handle in calling code
     } finally {
       connection.release()
     }
