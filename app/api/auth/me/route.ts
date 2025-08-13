@@ -1,19 +1,40 @@
-// pages/api/auth/me.ts
-import { NextApiRequest, NextApiResponse } from 'next'
-import jwt from 'jsonwebtoken'
+import { type NextRequest, NextResponse } from "next/server"
+import { verifyToken } from "@/lib/jwt"
+import { Database } from "@/lib/database"
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
-
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const token = req.cookies['auth_token']
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-
+export async function GET(request: NextRequest) {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any
-    res.status(200).json({ user: { id: decoded.userId, username: decoded.username, email: decoded.email } })
-  } catch {
-    res.status(401).json({ error: 'Invalid token' })
+    const token = request.cookies.get("auth_token")?.value
+
+    if (!token) {
+      return NextResponse.json({ authenticated: false, user: null })
+    }
+
+    // Verify JWT token
+    const payload = verifyToken(token)
+    if (!payload || typeof payload === "string") {
+      return NextResponse.json({ authenticated: false, user: null })
+    }
+
+    // Get user from database
+    const user = await Database.getUserById(payload.userId)
+    if (!user || !user.is_active) {
+      return NextResponse.json({ authenticated: false, user: null })
+    }
+
+    // Return user info
+    return NextResponse.json({
+      authenticated: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar_url: user.avatar_url,
+        is_claimed: user.is_claimed,
+      },
+    })
+  } catch (error) {
+    console.error("Auth verification error:", error)
+    return NextResponse.json({ authenticated: false, user: null })
   }
 }
