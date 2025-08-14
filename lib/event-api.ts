@@ -1,4 +1,27 @@
-import type { EventStats, Participant } from "@/types/events"
+import type { EventStats, Participant, ApiEventResponse } from "@/types/events"
+
+export async function fetchEventData(eventId: number): Promise<ApiEventResponse | null> {
+  try {
+    const response = await fetch(`https://api.wikipeoplestats.org/v1/events/${eventId}`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "WikiPeopleStats/1.0",
+      },
+      next: { revalidate: 1800 }, // Cache for 30 minutes
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error("Error fetching event data:", error)
+    return null
+  }
+}
 
 export async function fetchEventStats(wikiproject: string, eventId: number): Promise<EventStats | null> {
   try {
