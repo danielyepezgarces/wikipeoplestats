@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Added Driver.js styles import */
+@import "driver.js/dist/driver.css";
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -87,4 +94,56 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom Driver.js theme styles for better integration */
+.driver-popover {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--card-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: calc(var(--radius) + 2px) !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+}
+
+.driver-popover-title {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 600 !important;
+  font-size: 1.125rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.driver-popover-description {
+  color: hsl(var(--muted-foreground)) !important;
+  line-height: 1.5 !important;
+}
+
+.driver-popover-next-btn,
+.driver-popover-prev-btn,
+.driver-popover-close-btn {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: none !important;
+  border-radius: var(--radius) !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.driver-popover-next-btn:hover,
+.driver-popover-prev-btn:hover {
+  background: hsl(var(--primary) / 0.9) !important;
+}
+
+.driver-popover-close-btn {
+  background: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.driver-popover-close-btn:hover {
+  background: hsl(var(--secondary) / 0.8) !important;
+}
+
+.driver-overlay {
+  background: rgb(0 0 0 / 0.5) !important;
+  backdrop-filter: blur(2px) !important;
 }

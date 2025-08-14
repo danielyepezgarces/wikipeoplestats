@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { StatsCard } from "@/components/stats-card"
 import { SkeletonCard } from "@/components/skeleton-card"
+import { TourTrigger } from "@/components/tour-trigger"
 import { useI18n } from "@/hooks/use-i18n"
 import { useDomainContext } from "@/hooks/use-domain-context"
 import { getEventBySlug } from "@/lib/events-data"
+import { fetchRealEventData } from "@/lib/event-api"
 
 interface EventPageProps {
   params: Promise<{
@@ -84,50 +86,39 @@ export default function EventPage({ params }: EventPageProps) {
         }
 
         try {
-          const apiResponse = await fetch(`https://api.wikipeoplestats.org/v1/events/${eventData.id}`, {
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-          })
+          const apiData = await fetchRealEventData(eventData.id, "eswiki")
 
-          if (apiResponse.ok) {
-            const apiData = await apiResponse.json()
-
-            const enrichedEvent = {
-              ...eventData,
-              status: apiData.event.status === "open" ? ("active" as const) : ("past" as const),
-              organizer: "Wikimedia Community",
-              participants_count: apiData.totalPeople,
-              wikis: apiData.event.wikis,
-              topics: apiData.event.topics,
-            }
-
-            setEvent(enrichedEvent)
-
-            const realStats: EventStats = {
-              total_edits: apiData.totalContributions,
-              total_articles: Math.floor(apiData.totalContributions * 0.3), // Estimate
-              total_bytes_added: Math.floor(apiData.totalContributions * 2000), // Estimate
-              total_participants: apiData.totalPeople,
-              new_articles: Math.floor(apiData.totalContributions * 0.2), // Estimate
-              improved_articles: Math.floor(apiData.totalContributions * 0.8), // Estimate
-              last_updated: new Date().toISOString(),
-            }
-            setStats(realStats)
-
-            const realParticipants: Participant[] = apiData.participants.map((p: any) => ({
-              username: p.user_name,
-              edits: Math.floor(Math.random() * 50) + 10, // API doesn't provide individual stats
-              articles_created: Math.floor(Math.random() * 5) + 1,
-              articles_improved: Math.floor(Math.random() * 15) + 5,
-              bytes_added: Math.floor(Math.random() * 20000) + 5000,
-              user_page: p.user_page,
-            }))
-            setParticipants(realParticipants)
-          } else {
-            throw new Error("API request failed")
+          const enrichedEvent = {
+            ...eventData,
+            status: apiData.event.status === "open" ? ("active" as const) : ("past" as const),
+            organizer: "Wikimedia Community",
+            participants_count: apiData.totalPeople,
+            wikis: apiData.event.wikis,
+            topics: apiData.event.topics,
           }
+
+          setEvent(enrichedEvent)
+
+          const realStats: EventStats = {
+            total_edits: apiData.totalContributions,
+            total_articles: Math.floor(apiData.totalContributions * 0.3), // Estimate
+            total_bytes_added: Math.floor(apiData.totalContributions * 2000), // Estimate
+            total_participants: apiData.totalPeople,
+            new_articles: Math.floor(apiData.totalContributions * 0.2), // Estimate
+            improved_articles: Math.floor(apiData.totalContributions * 0.8), // Estimate
+            last_updated: new Date().toISOString(),
+          }
+          setStats(realStats)
+
+          const realParticipants: Participant[] = apiData.participants.map((p: any) => ({
+            username: p.user_name,
+            edits: Math.floor(Math.random() * 50) + 10, // API doesn't provide individual stats
+            articles_created: Math.floor(Math.random() * 5) + 1,
+            articles_improved: Math.floor(Math.random() * 15) + 5,
+            bytes_added: Math.floor(Math.random() * 20000) + 5000,
+            user_page: p.user_page,
+          }))
+          setParticipants(realParticipants)
         } catch (apiError) {
           console.warn("API request failed, using fallback data:", apiError)
 
@@ -254,7 +245,7 @@ export default function EventPage({ params }: EventPageProps) {
       <Header currentLang={domainContext.currentLang} onLanguageChange={() => {}} />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-10 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-10 overflow-hidden" data-tour="event-header">
           {event.event_image && (
             <div
               className="relative h-80 sm:h-64 w-full bg-cover bg-center"
@@ -305,7 +296,7 @@ export default function EventPage({ params }: EventPageProps) {
               )}
 
               {event.status === "active" && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" data-tour="countdown">
                   <Clock className="h-5 w-5 text-orange-500" />
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{t("time_left") || "Tiempo restante"}</p>
@@ -323,7 +314,7 @@ export default function EventPage({ params }: EventPageProps) {
                 </a>
               </Button>
               {participants.length > 0 && (
-                <Button variant="outline" onClick={() => setShowParticipants(true)}>
+                <Button variant="outline" onClick={() => setShowParticipants(true)} data-tour="participants-button">
                   <Users className="h-4 w-4 mr-2" />
                   {t("view_participants") || "Ver participantes"} ({participants.length})
                 </Button>
@@ -333,7 +324,7 @@ export default function EventPage({ params }: EventPageProps) {
         </div>
 
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8" data-tour="event-stats">
             <StatsCard
               icon={<Edit3 />}
               title={t("total_edits") || "Ediciones totales"}
@@ -428,6 +419,8 @@ export default function EventPage({ params }: EventPageProps) {
       </main>
 
       <Footer currentLang={domainContext.currentLang} onLanguageChange={() => {}} />
+
+      <TourTrigger page="event-detail" />
     </div>
   )
 }
