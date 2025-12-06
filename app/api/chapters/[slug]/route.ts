@@ -4,8 +4,8 @@ import { getCurrentUser } from "@/lib/auth"
 import { getChapterIdBySlug } from "@/lib/db/chapters"
 
 // Get chapter by slug
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
-  const chapterSlug = params.slug
+export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug: chapterSlug } = await params
   const chapterId = await getChapterIdBySlug(chapterSlug)
 
   if (!chapterId) {
@@ -44,8 +44,8 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 }
 
 // Update chapter by slug
-export async function PUT(req: NextRequest, { params }: { params: { slug: string } }) {
-  const chapterSlug = params.slug
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug: chapterSlug } = await params
   const chapterId = await getChapterIdBySlug(chapterSlug)
 
   if (!chapterId) {
@@ -108,8 +108,8 @@ export async function PUT(req: NextRequest, { params }: { params: { slug: string
 }
 
 // Delete chapter by slug
-export async function DELETE(req: NextRequest, { params }: { params: { slug: string } }) {
-  const chapterSlug = params.slug
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug: chapterSlug } = await params
   const chapterId = await getChapterIdBySlug(chapterSlug)
 
   if (!chapterId) {

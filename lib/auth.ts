@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 
 export async function getCurrentUser() {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const cookie = cookieStore.getAll()
     .map((c) => `${c.name}=${c.value}`)
     .join('; ')

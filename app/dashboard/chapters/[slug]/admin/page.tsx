@@ -3,9 +3,10 @@ import { redirect, notFound } from 'next/navigation'
 import { getChapterById, getChapterIdBySlug } from '@/lib/db/chapters'
 import { ChapterAdminClient } from '../../[id]/admin/client'
 
-export default async function ChapterAdminPage({ params }: { params: { slug: string } }) {
+export default async function ChapterAdminPage({ params }: { params: Promise<{ slug: string }> }) {
   const user = await getCurrentUser()
-  const chapterId = await getChapterIdBySlug(params.slug)
+  const { slug } = await params
+  const chapterId = await getChapterIdBySlug(slug)
 
   if (!chapterId) {
     return notFound()
@@ -26,7 +27,7 @@ export default async function ChapterAdminPage({ params }: { params: { slug: str
       user={user}
       chapter={chapter}
       chapterId={chapterId}
-      slug={params.slug} // ← Pasamos el slug aquí
+      slug={slug} // ← Pasamos el slug aquí
     />
   )
 }
