@@ -4,8 +4,8 @@ import { getCurrentUser } from "@/lib/auth"
 import { getChapterIdBySlug } from "@/lib/db/chapters"
 
 // Obtener miembros del capítulo
-export async function GET(req: NextRequest, { params }: { params: { slug: string } }) {
-  const chapterSlug = params.slug
+export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug: chapterSlug } = await params
   const chapterId = await getChapterIdBySlug(chapterSlug)
 
   if (!chapterId) {
@@ -49,8 +49,8 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 }
 
 // Añadir miembro al capítulo
-export async function POST(req: NextRequest, { params }: { params: { slug: string } }) {
-  const chapterSlug = params.slug
+export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug: chapterSlug } = await params
   const chapterId = await getChapterIdBySlug(chapterSlug)
 
   if (!chapterId) {
@@ -184,8 +184,8 @@ export async function POST(req: NextRequest, { params }: { params: { slug: strin
 }
 
 // Eliminar miembro del capítulo
-export async function DELETE(req: NextRequest, { params }: { params: { slug: string } }) {
-  const chapterSlug = params.slug
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
+  const { slug: chapterSlug } = await params
   const chapterId = await getChapterIdBySlug(chapterSlug)
 
   if (!chapterId) {

@@ -5,7 +5,7 @@ import { verifyToken } from "@/lib/jwt"
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const accessToken = cookieStore.get("access_token")?.value
     const refreshToken = cookieStore.get("refresh_token")?.value
 
